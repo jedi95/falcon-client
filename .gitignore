@@ -1,0 +1,14 @@
+*.suo
+*.sdf
+*.ncb
+*.filters
+*.user
+*.opensdf
+*.ipch
+*.VC.db
+*.opendb
+Mods/Falcon/Bin32/*
+Mods/Falcon/Bin64/*
+Mods/Falcon/BinTemp/*
+Mods/Falcon/Code/.vs/*
+Mods/Falcon/Code/gitparams.h
