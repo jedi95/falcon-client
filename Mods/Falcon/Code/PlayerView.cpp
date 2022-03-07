@@ -79,7 +79,7 @@ void CPlayerView::ViewPreProcess(const CPlayer &rPlayer,SViewParams &viewParams,
 	{
 		m_in.lastPos=viewParams.position;
 		m_in.lastQuat=viewParams.rotation;
-		m_in.defaultFov= g_pGameCVars->cl_fov;
+		m_in.defaultFov= g_pGameCVars->fn_fov;
 		
 		m_in.frameTime=min(gEnv->pTimer->GetFrameTime(),0.1f);
 		

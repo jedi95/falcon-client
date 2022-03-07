@@ -5,9 +5,6 @@
 	Name="GameDll"
 	ProjectGUID="{2EB52047-0A81-4343-B703-DF221CA5CC2A}"
 	RootNamespace="GameDll"
-	SccProjectName="Perforce Project"
-	SccLocalPath="."
-	SccProvider="MSSCCI:Perforce SCM"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -200,13 +197,14 @@
 		<Configuration
 			Name="Profile|Win32"
 			OutputDirectory="$(SolutionDir)..\Bin32"
-			IntermediateDirectory="$(SolutionDir)..\..\..\BinTemp\$(PlatformName)\$(ConfigurationName)\$(ProjectName)\"
+			IntermediateDirectory="$(SolutionDir)..\BinTemp\$(PlatformName)\$(ConfigurationName)\$(ProjectName)\"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="echo | set /p dummyName=#define GIT_CUR_COMMIT &gt; gitparams.h&#x0D;&#x0A;git rev-parse --short HEAD &gt;&gt; gitparams.h&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -222,25 +220,27 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
+				Optimization="2"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
+				FavorSizeOrSpeed="0"
+				OmitFramePointers="true"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories=".\;..\..\..\Code\CryEngine\CryCommon;..\..\..\Code\CryEngine\CryAction"
 				PreprocessorDefinitions="GAMEDLL_EXPORTS"
 				StringPooling="true"
-				ExceptionHandling="0"
+				ExceptionHandling="1"
 				RuntimeLibrary="2"
-				BufferSecurityCheck="false"
-				EnableEnhancedInstructionSet="1"
-				FloatingPointModel="2"
+				BufferSecurityCheck="true"
+				EnableEnhancedInstructionSet="2"
+				FloatingPointModel="0"
 				ForceConformanceInForLoopScope="true"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="StdAfx.h"
+				ProgramDataBaseFileName="$(IntDir)\Falcon.pdb"
 				WarningLevel="3"
-				WarnAsError="true"
+				WarnAsError="false"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
@@ -255,11 +255,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/CrysisWarsMod.dll"
+				OutputFile="$(OutDir)/Falcon.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/CryGame.pdb"
+				ProgramDatabaseFile="$(OutDir)/Falcon.pdb"
 				LargeAddressAware="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -294,13 +295,14 @@
 		<Configuration
 			Name="Profile|x64"
 			OutputDirectory="$(SolutionDir)..\Bin64"
-			IntermediateDirectory="$(SolutionDir)..\..\..\BinTemp\$(PlatformName)\$(ConfigurationName)\$(ProjectName)\"
+			IntermediateDirectory="$(SolutionDir)..\BinTemp\$(PlatformName)\$(ConfigurationName)\$(ProjectName)\"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="echo | set /p dummyName=#define GIT_CUR_COMMIT &gt;  gitparams.h&#x0D;&#x0A;git rev-parse --short HEAD &gt;&gt;  gitparams.h&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -320,19 +322,21 @@
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="0"
 				OmitFramePointers="true"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories=".\;..\..\..\Code\CryEngine\CryCommon;..\..\..\Code\CryEngine\CryAction"
 				PreprocessorDefinitions="GAMEDLL_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="2"
-				BufferSecurityCheck="false"
-				EnableFunctionLevelLinking="false"
-				EnableEnhancedInstructionSet="0"
+				BufferSecurityCheck="true"
+				EnableEnhancedInstructionSet="2"
 				ForceConformanceInForLoopScope="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="StdAfx.h"
+				ProgramDataBaseFileName="$(IntDir)\Falcon.pdb"
 				WarningLevel="3"
-				WarnAsError="true"
+				WarnAsError="false"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
@@ -347,11 +351,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/CrysisWarsMod.dll"
+				OutputFile="$(OutDir)/Falcon.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/CryGame.pdb"
+				ProgramDatabaseFile="$(OutDir)/Falcon.pdb"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				BaseAddress="0x39000000"
@@ -532,27 +537,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Xbox 360"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugPS3|Xbox 360"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="ProfilePS3|Xbox 360"
 						>
 						<Tool
 							Name="VCCustomBuildTool"
@@ -1209,14 +1193,6 @@
 					<File
 						RelativePath=".\Single.cpp"
 						>
-						<FileConfiguration
-							Name="Profile|Xbox 360"
-							>
-							<Tool
-								Name="VCCLX360CompilerTool"
-								ShowIncludes="false"
-							/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\Single.h"
@@ -1484,14 +1460,6 @@
 		<Filter
 			Name="Utility"
 			>
-			<File
-				RelativePath=".\LaptopUtil.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LaptopUtil.h"
-				>
-			</File>
 			<File
 				RelativePath=".\NetInputChainDebug.cpp"
 				>
@@ -2031,22 +1999,6 @@
 			<File
 				RelativePath=".\GameDll.rc"
 				>
-				<FileConfiguration
-					Name="Release|Xbox 360"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCResourceCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Profile|Xbox 360"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCResourceCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<Filter
 				Name="G15"
@@ -2282,6 +2234,34 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Falcon.h"
+			>
+		</File>
+		<File
+			RelativePath=".\FalconVersion.h"
+			>
+		</File>
+		<File
+			RelativePath=".\ILauncher.h"
+			>
+		</File>
+		<File
+			RelativePath=".\ModCursor.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ModCursor.h"
+			>
+		</File>
+		<File
+			RelativePath=".\RemoteControlSystem.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\RemoteControlSystem.h"
+			>
+		</File>
+		<File
 			RelativePath=".\StdAfx.cpp"
 			>
 			<FileConfiguration
@@ -2313,54 +2293,6 @@
 				>
 				<Tool
 					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="1"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="CRYSIS_BETA|x64"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="1"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Debug|Xbox 360"
-				>
-				<Tool
-					Name="VCCLX360CompilerTool"
-					UsePrecompiledHeader="1"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Xbox 360"
-				>
-				<Tool
-					Name="VCCLX360CompilerTool"
-					UsePrecompiledHeader="1"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Profile|Xbox 360"
-				>
-				<Tool
-					Name="VCCLX360CompilerTool"
-					UsePrecompiledHeader="1"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DebugPS3|Xbox 360"
-				>
-				<Tool
-					Name="VCCLX360CompilerTool"
-					UsePrecompiledHeader="1"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="ProfilePS3|Xbox 360"
-				>
-				<Tool
-					Name="VCCLX360CompilerTool"
 					UsePrecompiledHeader="1"
 				/>
 			</FileConfiguration>

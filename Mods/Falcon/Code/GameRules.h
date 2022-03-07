@@ -8,7 +8,7 @@
 
 	-------------------------------------------------------------------------
 	History:
-	- 7:2:2006   15:38 : Created by Márcio Martins
+	- 7:2:2006   15:38 : Created by Marcio Martins
 
 *************************************************************************/
 #ifndef __GAMERULES_H__
@@ -40,6 +40,7 @@ class CBattleDust;
 class CMPTutorial;
 
 class CShotValidator;
+
 
 //-----------------------------------------------------------------------------------------------
 //
@@ -1232,6 +1233,19 @@ protected:
 	// when players are placed at the same location, some may end up underground
 	typedef std::map< EntityId, float > TSpawnPointUseTime;
 	TSpawnPointUseTime m_SpawnPointUseTime;
+
+
+// Falcon
+protected:
+	bool m_falconVersionSent;
+
+public:
+	CPlayer *FindPlayer(const char * szPartialName);
+
+	// Crafty #CustomCharacters
+	virtual void ReviveInPlaceInVehicle(CActor* pActor);
+	// Crafty
+	virtual void RenameEntity(IEntity *pEntity, const char *name);
 };
 
 #endif //__GAMERULES_H__

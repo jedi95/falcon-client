@@ -844,6 +844,11 @@ public:
 	virtual Vec3 GetViewAngleOffset() { return Vec3(0, 0, 0); };
 
 	//------------------------------------------------------------------------
+
+	// Crafty #CustomCharacters
+	virtual void ReviveInPlace(Vec3 pos, Ang3 angles);
+	virtual void NetReviveInPlaceInVehicle();
+
 	virtual void Revive( bool fromInit = false );
   virtual void Reset(bool toGame) {};
 	//physicalization
@@ -874,7 +879,7 @@ public:
 	//
 	virtual void Freeze(bool freeze) {};
 	virtual void Fall(Vec3 hitPos = Vec3(0,0,0), bool forceFall = false, float time = 0.0f);
-	//throw away the actors helmet (if available) [Jan M¸ller]
+	//throw away the actors helmet (if available) [Jan MÅEler]
 	virtual bool LooseHelmet(Vec3 hitDir = Vec3(0,0,0), Vec3 hitPos = Vec3(0,0,0), bool simulate = false);
 	virtual void GoLimp();
 	virtual void StandUp();

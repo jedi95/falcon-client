@@ -1299,8 +1299,12 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 		}
 	}
 
-	//be sure desired velocity is flat to the ground
-	desiredVel -= desiredVel * baseMtxZ;
+	if (g_pGameCVars->fn_circleJump == 0)
+	{
+		//be sure desired velocity is flat to the ground
+		Vec3 vz = desiredVel * baseMtxZ;
+		desiredVel -= vz;
+	}
 	
 	Vec3 modifiedSlopeNormal = m_stats.groundNormal;
 	if (m_player.IsPlayer())
@@ -1331,12 +1335,13 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 		float alignment = modifiedSlopeNormal * desiredVel;
 		alignment = min(0.0f, alignment);
 
+		// VADER: No..... Just no.......
 		// Also affect air control (but not as much), to prevent jumping up against steep slopes.
-		if (m_stats.onGround == 0.0f)
-		{
-			float noControlBlend = 1.0f - CLAMP(modifiedSlopeNormal.z / 0.01f, 0.0f, 1.0f);
-			alignment *= LERP(0.7f, 1.0f, noControlBlend);
-		}
+		//if (m_stats.onGround == 0.0f)
+		//{
+			//float noControlBlend = 1.0f - CLAMP(modifiedSlopeNormal.z / 0.01f, 0.0f, 1.0f);
+			//alignment *= LERP(0.7f, 1.0f, noControlBlend);
+		//}
 
 		desiredVel -= modifiedSlopeNormal * alignment;
 

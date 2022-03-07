@@ -209,6 +209,9 @@ CPlayer::CPlayer()
 	m_bVoiceSoundRecursionFlag = false;
 
 	m_vehicleViewDir.Set(0,1,0);
+
+	// Crafty #CustomCharacters
+	m_bSupportsSuitMats = true;
 }
 
 CPlayer::~CPlayer()
@@ -279,7 +282,7 @@ void CPlayer::PostInit( IGameObject * pGameObject )
 
 	if (gEnv->bMultiplayer && !gEnv->bServer)
 	{
-		GetGameObject()->SetUpdateSlotEnableCondition( this, 0, eUEC_VisibleOrInRange );
+		GetGameObject()->SetUpdateSlotEnableCondition(this, 0, eUEC_WithoutAI); //CryMP: Ghost Bug Fix #3
 		//GetGameObject()->ForceUpdateExtension(this, 0);
 	}
 }
@@ -595,10 +598,14 @@ void CPlayer::UpdateFirstPersonEffects(float frameTime)
 
 	//===========================Stop firing weapon while sprinting/prone moving==============
 
-	if(IItem *pItem = GetCurrentItem())
+	// From CryMP   : Fix for StopFire RMI flooding caused by missing IsFiring()
+	//				  This should possibly be moved somewhere else than OnUpdate..
+
+	if (EntityId weaponId = GetCurrentItemId())
 	{
-		if(pItem->GetIWeapon() && !CanFire())
-			pItem->GetIWeapon()->StopFire();
+		CWeapon* pWeapon = GetWeapon(weaponId);
+		if (pWeapon && pWeapon->IsFiring() && !CanFire())
+			pWeapon->StopFire();
 	}
 
 	//========================================================================================
@@ -800,6 +807,8 @@ void CPlayer::Update(SEntityUpdateContext& ctx, int updateSlot)
 		adpm = eADPM_Never;
 	else if (client || (gEnv->bMultiplayer && gEnv->bServer))
 		adpm = eADPM_Never;
+	else if (gEnv->bMultiplayer)
+		adpm = eADPM_Never;  //From CryMP: Ghost Bug Fix #1: never disable physics for players in multiplayer
 	else if (IsPlayer())
 		adpm = eADPM_WhenInvisibleAndFarAway;
 	else
@@ -1072,13 +1081,15 @@ void CPlayer::UpdateSounds(float fFrameTime)
 
 void CPlayer::UpdateParachute(float frameTime)
 {
-	//FIXME:check if the player has the parachute
 	if (m_parachuteEnabled && (m_stats.inFreefall.Value()==1) && (m_actions&ACTION_JUMP))
 	{
-		ChangeParachuteState(3);
-		if (IsClient())
+		if (!g_pGameCVars->fn_disableFreefall)
 		{
-			GetGameObject()->InvokeRMI(CPlayer::SvRequestParachute(), CPlayer::NoParams(), eRMI_ToServer);
+			ChangeParachuteState(3);
+			if (IsClient())
+			{
+				GetGameObject()->InvokeRMI(CPlayer::SvRequestParachute(), CPlayer::NoParams(), eRMI_ToServer);
+			}
 		}
 	}
 	else if (m_stats.inFreefall.Value()==2)
@@ -1295,9 +1306,9 @@ void CPlayer::PrePhysicsUpdate()
 
 	}*/
 
-	if (m_pMovementController)
+	if (m_pMovementController && !gEnv->bMultiplayer) //CryMP: Ghost Bug Fix #2, disable this in mp for now
 	{
-		if (g_pGame->GetCVars()->g_enableIdleCheck)
+		if (g_pGame->GetCVars()->g_enableIdleCheck == 1)
 		{
 			// if (gEnv->pGame->GetIGameFramework()->IsEditing() == false || pVar->GetIVal() == 2410)
 			{
@@ -2468,8 +2479,10 @@ void CPlayer::UpdateStats(float frameTime)
 		/*if (m_stats.inWater>0.1f)
 			m_stats.firstPersonBody = 0;//disable first person body when swimming
 		else*/
-			m_stats.firstPersonBody = (uint8)g_pGameCVars->cl_fpBody;
-	}	
+
+		// Crafty: Custom character change
+		m_stats.firstPersonBody = (uint8)g_pGameCVars->fn_fpBody;
+	}
 
 	IAnimationGraphState* pAGState = GetAnimationGraphState();
 
@@ -2799,7 +2812,8 @@ void CPlayer::UpdateStats(float frameTime)
 				if(playerHeight > terrainHeight + 2.5f)
 				{
 					//CryLogAlways("%f %f %f", terrainHeight, playerHeight, playerHeight-terrainHeight);
-					ChangeParachuteState(1);
+					if (!g_pGameCVars->fn_disableFreefall)
+						ChangeParachuteState(1);
 				}
 			}
 
@@ -3157,6 +3171,14 @@ int CPlayer::IsGod()
 			return (godMode==2?1:0);
 	}
 	return 0;
+}
+
+void CPlayer::ForceFreeFall()
+{
+	if (!g_pGameCVars->fn_disableFreefall)
+	{
+		m_stats.inFreefall = 1;
+	}
 }
 
 bool CPlayer::IsThirdPerson() const
@@ -3984,12 +4006,15 @@ float CPlayer::GetMassFactor() const
 	EntityId itemId = GetInventory()->GetCurrentItem();
 	if (itemId)
 	{
+		//Vader mod mass multiplier
+		float massMulti = g_pGameCVars->fn_weaponMassMultiplier;
+
 		float mass = 0;
 		if(CWeapon* weap = GetWeapon(itemId))
 			mass = weap->GetParams().mass;
 		else if(CItem* item = GetItem(itemId))
 			mass = item->GetParams().mass;
-		float massFactor = 1.0f - (mass / (m_params.maxGrabMass*GetActorStrength()*1.75f));
+		float massFactor = 1.0f - ((mass * massMulti) / (m_params.maxGrabMass*GetActorStrength()*1.75f));
 		if (m_stats.inZeroG)
 			massFactor += (1.0f - massFactor) * 0.5f;
 		return massFactor;
@@ -6518,6 +6543,12 @@ IMPLEMENT_RMI(CPlayer, ClJump)
 //------------------------------------------------------------------------
 IMPLEMENT_RMI(CPlayer, SvRequestJump)
 {
+	int cidInvoker = g_pGame->GetIGameFramework()->GetGameChannelId(pNetChannel);
+	if (cidInvoker != GetChannelId())
+	{
+		return true;
+	}
+
 	GetGameObject()->InvokeRMI(ClJump(), params, eRMI_ToOtherClients|eRMI_NoLocalCalls, m_pGameFramework->GetGameChannelId(pNetChannel));
 	GetGameObject()->Pulse('bang');
 

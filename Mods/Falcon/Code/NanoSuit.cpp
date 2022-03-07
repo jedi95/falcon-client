@@ -1004,6 +1004,12 @@ void CNanoSuit::SelectSuitMaterial()
 	if(m_currentMode == NANOMODE_CLOAK && m_cloak.GetType() != CLOAKMODE_CHAMELEON)
 		return;
 
+	// Crafty #CustomCharacters
+	// Not all characters support nanosuit materials so
+	// if necessary prevent applying them (except cloak which doesn't matter)
+	if (!m_pOwner->SupportsSuitMats() && m_currentMode != NANOMODE_CLOAK)
+		return;
+
 	IEntity* pEntity = m_pOwner->GetEntity();
 	if (pEntity == 0)
 		return;

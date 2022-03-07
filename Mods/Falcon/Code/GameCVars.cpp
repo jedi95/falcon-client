@@ -7,13 +7,18 @@
   
  -------------------------------------------------------------------------
   History:
-  - 11:8:2004   10:50 : Created by Márcio Martins
+  - 11:8:2004   10:50 : Created by Marcio Martins
 
 *************************************************************************/
 #include "StdAfx.h"
+#include "Game.h"
+#include "HUD/HUDInstantAction.h"
+
 #include "GameCVars.h"
 #include "GameRules.h"
 #include "ItemSharedParams.h"
+#include "Actor.h"
+#include "Player.h"
 
 #include <INetwork.h>
 #include <IGameObject.h>
@@ -30,6 +35,10 @@
 #include "Menus/FlashMenuObject.h"
 #include "Menus/MPHub.h"
 #include "INetworkService.h"
+
+#include "Falcon.h"
+#include "ILauncher.h"
+#include "RemoteControlSystem.h"
 
 static void BroadcastChangeSafeMode( ICVar * )
 {
@@ -93,12 +102,118 @@ void CmdListInvisiblePlayers(IConsoleCmdArgs* cmdArgs)
 	}
 }
 
+// FOV
+void OnFOVUpdated(ICVar* cvar)
+{
+	float newValue = cvar->GetFVal();
+	if (newValue > 75.0f) {
+		CryLogAlways("Maximum FOV is 75");
+		cvar->Set(75);
+	}
+	else if (newValue < 50.0f) {
+		CryLogAlways("Maximum FOV is 50");
+		cvar->Set(50);
+	}
+}
+
+// Max FPS callback
+void OnMaxFpsUpdated(ICVar* cvar)
+{
+	ILauncher * pLauncher = g_pGame->GetLauncher();
+	if (pLauncher)
+	{
+		pLauncher->SetFPSCap(cvar->GetIVal());
+	}
+	else
+	{
+		CryLogAlways("sys_MaxFPS is not supported by your current Crysis.exe!");
+		CryLogAlways("This feature requires CW-Launcher version 2.5 or later");
+	}
+}
+
+// Custom character callbacks
+void OnFpBodyUpdated(ICVar* cvar)
+{
+	//CryLogAlways("OnFpBodyUpdated: %d", cvar->GetIVal());
+	if (!gEnv->bClient || !gEnv->bMultiplayer)
+		return;
+
+	IActor* pActor = g_pGame->GetIGameFramework()->GetClientActor();
+	if (pActor)
+	{
+		CPlayer* pPlayer = static_cast<CPlayer*>(pActor);
+		if (pPlayer && pPlayer->GetHealth() > 0)
+		{
+			IScriptTable* pScriptTable = pPlayer->GetEntity()->GetScriptTable();
+			if (pScriptTable)
+			{
+				Script::CallMethod(pScriptTable, "OnFpBodyUpdated", cvar->GetIVal());
+			}
+		}
+	}
+}
+
+//Vader mod CVAR callbacks
+static void fnHudFix(ICVar* cvar)
+{
+	if (gEnv->bMultiplayer)
+	{
+		CHUDInstantAction *pIAHud = g_pGame->GetHUD()->m_pHUDInstantAction;
+		if (pIAHud)
+		{
+			int value = cvar->GetIVal();
+			if (value > 0)
+				pIAHud->Show(false);
+			else
+				pIAHud->Show(true);
+		}
+	}
+}
+
 // game related cvars must start with an g_
 // game server related cvars must start with sv_
 // game client related cvars must start with cl_
 // no other types of cvars are allowed to be defined here!
 void SCVars::InitCVars(IConsole *pConsole)
 {
+	// Falcon cvars
+	pConsole->Register("fn_fixHUD", &fn_fixHUD, 0, VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE, "Removes unnessesary items from the HUD.");
+	fn_version = pConsole->RegisterString("fn_version", Falcon::GetVersion(), VF_READONLY | VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE);
+	fn_build = pConsole->RegisterString("fn_build", Falcon::GetBuildVersion(), VF_READONLY | VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE);
+	pConsole->Register("fn_svFalcon", &fn_svFalcon, 0, VF_READONLY);
+
+	// rcon
+	fn_rconClientConsoleLineFormat = pConsole->RegisterString("fn_rconClientConsoleLineFormat", "  %0", VF_NOT_NET_SYNCED, "");
+
+	// misc
+	pConsole->Register("fn_wallJumpMultiplier", &fn_wallJumpMultiplier, 0.0f, VF_RESTRICTEDMODE, "Enables the Crysis 1 walljump bug");
+	pConsole->Register("fn_circleJump", &fn_circleJump, 0, VF_RESTRICTEDMODE, "Enables the Crysis 1 circle jump bug (WIP)");
+	pConsole->Register("fn_fastWeaponSwitch", &fn_fastWeaponSwitch, 0, VF_RESTRICTEDMODE, "Makes switching weapons faster");
+	pConsole->Register("fn_disableFreefall", &fn_disableFreefall, 0, VF_RESTRICTEDMODE, "Disables the freefall animation.");
+	pConsole->Register("fn_c4ThrowVelocityMultiplier", &fn_c4ThrowVelocityMultiplier, 0, VF_RESTRICTEDMODE, "Set a multiplier for the launch velocity of thrown C4");
+	pConsole->Register("fn_fastWeaponMenu", &fn_fastWeaponMenu, 0, VF_RESTRICTEDMODE, "Enables instant weapon customization menu.");
+    pConsole->Register("fn_weaponMassMultiplier", &fn_weaponMassMultiplier, 1.0f, VF_RESTRICTEDMODE, "Weapon mass multiplier.");
+	pConsole->Register("fn_playerLeaning", &fn_playerLeaning, 0, VF_RESTRICTEDMODE, "Enables Crysis 1 player leaning while prone, crouching or standing");
+
+	// Crafty
+	pConsole->Register("fn_radarclearondeath", &fn_radarclearondeath, 0, VF_RESTRICTEDMODE, "Prevent players from persisting on minimap between spawns");
+
+	// Custom characters
+	pConsole->Register("fn_enableFPBody", &fn_enableFpBody, 0, VF_NOT_NET_SYNCED, "Enable first person body on custom characters");
+	pConsole->Register("fn_fpBody", &fn_fpBody, 0, VF_NOT_NET_SYNCED, "Enable first person body on custom characters");
+	gEnv->pConsole->GetCVar("fn_enableFPBody")->SetOnChangeCallback(OnFpBodyUpdated);
+
+	//client only
+	pConsole->Register("fn_fov", &fn_fov, 60.0f, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "Client-controlled field of view");
+	pConsole->Register("fn_disableShootZoom", &fn_disableShootZoom, 0, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "Disables the zoom in effect when shooting");
+	pConsole->Register("fn_constantMouseSensitivity", &fn_constantMouseSensitivity, 0, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "gets rid of mass effect of mouse sensitivity");
+	pConsole->Register("fn_fixExplosivePlant", &fn_fixExplosivePlant, 1, VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE, "Fix planting mines and claymores with high FPS");
+	pConsole->Register("sys_MaxFps", &sys_MaxFps, 0, VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE, "Sets the maximum FPS limit");
+
+	//Callback for updates
+	gEnv->pConsole->GetCVar("sys_MaxFps")->SetOnChangeCallback(OnMaxFpsUpdated);
+	gEnv->pConsole->GetCVar("fn_fov")->SetOnChangeCallback(OnFOVUpdated);
+
 	//client cvars
 	pConsole->Register("cl_hud",&cl_hud,1,0,"Show/Hide the HUD", CHUDCommon::HUD);
 	pConsole->Register("cl_fov", &cl_fov, 60.0f, 0, "field of view.");
@@ -110,7 +225,7 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("cl_nearPlane", &cl_nearPlane, 0, 0, "overrides the near clipping plane if != 0, just for testing.");
 	pConsole->Register("cl_sprintShake", &cl_sprintShake, 0.0f, 0, "sprint shake");
 	pConsole->Register("cl_sensitivityZeroG", &cl_sensitivityZeroG, 70.0f, VF_DUMPTODISK, "Set mouse sensitivity in ZeroG!");
-	pConsole->Register("cl_sensitivity", &cl_sensitivity, 45.0f, VF_DUMPTODISK, "Set mouse sensitivity!");
+	pConsole->Register("cl_sensitivity", &cl_sensitivity, 45.0f, VF_DUMPTODISK | VF_RESTRICTEDMODE, "Set mouse sensitivity!");
 	pConsole->Register("cl_controllersensitivity", &cl_controllersensitivity, 45.0f, VF_DUMPTODISK, "Set controller sensitivity!");
 	pConsole->Register("cl_invertMouse", &cl_invertMouse, 0, VF_DUMPTODISK, "mouse invert?");
 	pConsole->Register("cl_invertController", &cl_invertController, 0, VF_DUMPTODISK, "Controller Look Up-Down invert");
@@ -119,15 +234,14 @@ void SCVars::InitCVars(IConsole *pConsole)
 	//FIXME:just for testing
 	pConsole->Register("cl_strengthscale", &cl_strengthscale, 1.0f, 0, "nanosuit strength scale");
 
-	/*
 	// GOC
-	pConsole->Register("goc_enable", &goc_enable, 0, VF_CHEAT, "gears of crysis");
-	pConsole->Register("goc_tpcrosshair", &goc_tpcrosshair, 0, VF_CHEAT, "keep crosshair in third person");
-	pConsole->Register("goc_targetx", &goc_targetx, 0.5f, VF_CHEAT, "target position of camera");
-	pConsole->Register("goc_targety", &goc_targety, -2.5f, VF_CHEAT, "target position of camera");
-	pConsole->Register("goc_targetz", &goc_targetz, 0.2f, VF_CHEAT, "target position of camera");
-	pConsole->AddCommand("GOCMode", CmdGOCMode, VF_CHEAT, "Enable GOC mode");
-	
+	pConsole->Register("goc_enable", &goc_enable, 0, 0, "gears of crysis");
+	pConsole->Register("goc_tpcrosshair", &goc_tpcrosshair, 0, VF_NOT_NET_SYNCED, "keep crosshair in third person");
+	pConsole->Register("goc_targetx", &goc_targetx, 0.5f, VF_NOT_NET_SYNCED, "target position of camera");
+	pConsole->Register("goc_targety", &goc_targety, -2.5f, VF_NOT_NET_SYNCED, "target position of camera");
+	pConsole->Register("goc_targetz", &goc_targetz, 0.2f, VF_NOT_NET_SYNCED, "target position of camera");
+	//pConsole->AddCommand("GOCMode", CmdGOCMode, 0, "Enable GOC mode");
+
 	// BulletTime
 	pConsole->Register("bt_speed", &bt_speed, 0, VF_CHEAT, "bullet-time when in speed mode");
 	pConsole->Register("bt_ironsight", &bt_ironsight, 0, VF_CHEAT, "bullet-time when in ironsight");
@@ -140,7 +254,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("bt_energy_decay", &bt_energy_decay, 2.5f, VF_CHEAT, "bullet time energy decay rate");
 	pConsole->Register("bt_energy_regen", &bt_energy_regen, 0.5f, VF_CHEAT, "bullet time energy regeneration rate");
 	pConsole->AddCommand("bulletTimeMode", CmdBulletTimeMode, VF_CHEAT, "Enable bullet time mode");
-	*/
 
 	pConsole->Register("dt_enable", &dt_enable, 0, 0, "suit actions activated by double-tapping");
 	pConsole->Register("dt_time", &dt_time, 0.25f, 0, "time in seconds between double taps");
@@ -167,7 +280,7 @@ void SCVars::InitCVars(IConsole *pConsole)
 
 	pConsole->RegisterInt("cl_righthand", 1, 0, "Select right-handed weapon!");
 	pConsole->RegisterInt("cl_screeneffects", 1, 0, "Enable player screen effects (depth-of-field, motion blur, ...).");
-	
+
 	pConsole->Register("cl_debugSwimming", &cl_debugSwimming, 0, VF_CHEAT, "enable swimming debugging");
 	pConsole->Register("cl_g15lcdEnable", &cl_g15lcdEnable, 1, VF_DUMPTODISK, "enable support for Logitech G15 LCD");
 	pConsole->Register("cl_g15lcdTick", &cl_g15lcdTick, 250, VF_DUMPTODISK, "milliseconds between lcd updates");
@@ -229,7 +342,7 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_suitSpeedEnergyConsumption", &g_suitSpeedEnergyConsumption, 110.0f, 0, "Energy reduction in speed mode per second.");
 	pConsole->Register("g_suitSpeedEnergyConsumptionMultiplayer", &g_suitSpeedEnergyConsumptionMultiplayer, 50.0f, 0, "Energy reduction in speed mode per second in multiplayer.");
 	pConsole->Register("g_suitCloakEnergyDrainAdjuster", &g_suitCloakEnergyDrainAdjuster, 1.0f, 0, "Multiplier for energy reduction in cloak mode.");
-	pConsole->Register("g_mpSpeedRechargeDelay", &g_mpSpeedRechargeDelay, 1, VF_CHEAT, "Toggles delay when sprinting below 20% energy.");
+	pConsole->Register("g_mpSpeedRechargeDelay", &g_mpSpeedRechargeDelay, 1, 0, "Toggles delay when sprinting below 20% energy.");
 	pConsole->Register("g_AiSuitEnergyRechargeTime", &g_AiSuitEnergyRechargeTime, 10.0f, VF_CHEAT, "Modify suit energy recharge for AI.");
 	pConsole->Register("g_AiSuitStrengthMeleeMult", &g_AiSuitStrengthMeleeMult, 0.4f, VF_CHEAT, "Modify AI strength mode melee damage relative to player damage.");
 	pConsole->Register("g_AiSuitHealthRegenTime", &g_AiSuitHealthRegenTime, 33.3f, VF_CHEAT, "Modify suit health recharge for AI.");
@@ -614,13 +727,45 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_painSoundGap", &g_painSoundGap, 0.1f, 0, "Minimum time gap between local player pain sounds");
 	pConsole->Register("g_explosionScreenShakeMultiplier", &g_explosionScreenShakeMultiplier, 0.25f, 0, "Multiplier for explosion screenshake");
 
-  NetInputChainInitCVars();
+	NetInputChainInitCVars();
+
+	//Vader mod
+	gEnv->pConsole->GetCVar("fn_fixHUD")->SetOnChangeCallback(fnHudFix);
+
 }
 
 //------------------------------------------------------------------------
 void SCVars::ReleaseCVars()
 {
 	IConsole* pConsole = gEnv->pConsole;
+
+	// Begin Falcon cvars
+	pConsole->UnregisterVariable("fn_fixHUD", true);
+	pConsole->UnregisterVariable("fn_version", true);
+	pConsole->UnregisterVariable("fn_svFalcon", true);
+
+	pConsole->UnregisterVariable("fn_rconClientConsoleLineFormat", true);
+
+	pConsole->UnregisterVariable("fn_fov", true);
+	pConsole->UnregisterVariable("fn_disableShootZoom", true);
+	pConsole->UnregisterVariable("fn_circleJump", true);
+	pConsole->UnregisterVariable("fn_wallJumpMultiplier", true);
+	pConsole->UnregisterVariable("fn_fastWeaponSwitch", true);
+	pConsole->UnregisterVariable("fn_randomSpawnFactor", true);
+	pConsole->UnregisterVariable("fn_disableFreefall", true);
+	pConsole->UnregisterVariable("fn_c4ThrowVelocityMultiplier", true);
+	pConsole->UnregisterVariable("fn_constantMouseSensitivity", true);
+	pConsole->UnregisterVariable("fn_fixExplosivePlant", true);
+	pConsole->UnregisterVariable("fn_fastWeaponMenu", true);
+	pConsole->UnregisterVariable("fn_weaponMassMultiplier", true);
+	pConsole->UnregisterVariable("fn_playerLeaning", true);
+	pConsole->UnregisterVariable("fn_radarclearondeath", true);
+	pConsole->UnregisterVariable("sys_MaxFps", true);
+
+	// Custom characters
+	pConsole->UnregisterVariable("fn_enableFPBody", true);
+	pConsole->UnregisterVariable("fn_fpBody", true);
+	// End Falcon cvars
 
 	pConsole->UnregisterVariable("cl_fov", true);
 	pConsole->UnregisterVariable("cl_bob", true);
@@ -1014,6 +1159,15 @@ void CGame::RegisterConsoleCommands()
 	m_pConsole->AddCommand("register", CmdRegisterNick, VF_CHEAT, "Register nickname with email, nickname and password");
 	m_pConsole->AddCommand("connect_crynet",CmdCryNetConnect,0,"Connect to online game server");
 	m_pConsole->AddCommand("preloadforstats","PreloadForStats()",VF_CHEAT,"Preload multiplayer assets for memory statistics.");
+
+	//Falcon
+	m_pConsole->AddCommand("sc", CmdRconSc, VF_RESTRICTEDMODE, "execute rcon command");
+	m_pConsole->AddCommand("scl", CmdRconScl, VF_RESTRICTEDMODE, "request server console lines");
+	m_pConsole->AddCommand("chat", CmdChat, VF_RESTRICTEDMODE, "send chat message");
+	m_pConsole->AddCommand("chatt", CmdChatTeam, VF_RESTRICTEDMODE, "send chat message to team");
+
+	//Vader mod
+	m_pConsole->AddCommand("fn_thirdPerson", CmdFnThirdPerson, VF_RESTRICTEDMODE, "Toggles 3rd person view on/off. Warning: This has some bugs!");
 }
 
 //------------------------------------------------------------------------
@@ -1054,6 +1208,199 @@ void CGame::UnregisterConsoleCommands()
 
 	// variables from CHUDCommon
 	m_pConsole->RemoveCommand("ShowGODMode");
+
+	m_pConsole->RemoveCommand("sc");
+	m_pConsole->RemoveCommand("scl");
+	m_pConsole->RemoveCommand("chat");
+	m_pConsole->RemoveCommand("chatt");
+	m_pConsole->RemoveCommand("fn_thirdPerson");
+}
+
+CPlayer *GetPlayerByPartialName(const char * szPartialName)
+{
+	string partialName(szPartialName);
+	partialName.MakeUpper();
+
+	CPlayer* pPlayerFound = 0;
+
+	IActorIteratorPtr it = g_pGame->GetIGameFramework()->GetIActorSystem()->CreateActorIterator();
+	while (IActor* pActor = it->Next())
+	{
+		if (pActor->IsPlayer())
+		{
+			IEntity *pActorEntity = pActor->GetEntity();
+			string name(pActorEntity->GetName());
+			name.MakeUpper();
+			if (name == partialName)
+			{
+				pPlayerFound = static_cast<CPlayer *>(pActor);
+				break;
+			}
+
+			string::size_type idx = name.find(partialName.c_str());
+			if (idx != string::npos)
+			{
+				if (pPlayerFound)
+				{
+					pPlayerFound = 0;
+					break;
+				}
+				else
+				{
+					pPlayerFound = static_cast<CPlayer *>(pActor);
+					// continue searching for duplicates
+				}
+			}
+		}
+	}
+	return pPlayerFound;
+}
+
+
+void CGame::CmdFnThirdPerson(IConsoleCmdArgs *pArgs)
+{
+	if (!gEnv->bClient || !gEnv->bMultiplayer)
+	{
+		return;
+	}
+
+	IActor *pActor = g_pGame->GetIGameFramework()->GetClientActor();
+	if (!pActor)
+	{
+		return;
+	}
+
+	if (CPlayer *pPlayer=static_cast<CPlayer *>(pActor))
+	{
+		pPlayer->ToggleThirdPerson();
+	}
+}
+
+
+//------------------------------------------------------------------------
+void CGame::CmdChat(IConsoleCmdArgs *pArgs)
+{
+	IActor *pActor = g_pGame->GetIGameFramework()->GetClientActor();
+	if (!pActor)
+	{
+		return;
+	}
+
+	CGameRules *pGameRules = g_pGame->GetGameRules();
+	if (!pGameRules)
+	{
+		return;
+	}
+
+	int numArgs = pArgs->GetArgCount();
+	string msg(pArgs->GetArg(1));
+	int i;
+	for (i=2; i<numArgs; i++) {
+		msg += string(" ") + pArgs->GetArg(i);
+	}
+
+	EntityId src(pActor->GetEntityId());
+	pGameRules->GetGameObject()->InvokeRMI(CGameRules::SvRequestChatMessage(), CGameRules::ChatMessageParams(eChatToAll, src, 0, msg, false), eRMI_ToServer);
+}
+
+void CGame::CmdChatTeam(IConsoleCmdArgs *pArgs)
+{
+	IActor *pActor = g_pGame->GetIGameFramework()->GetClientActor();
+	if (!pActor)
+	{
+		return;
+	}
+
+	CGameRules *pGameRules = g_pGame->GetGameRules();
+	if (!pGameRules)
+	{
+		return;
+	}
+
+	int numArgs = pArgs->GetArgCount();
+	string msg(pArgs->GetArg(1));
+	int i;
+	for (i=2; i<numArgs; i++) {
+		msg += string(" ") + pArgs->GetArg(i);
+	}
+
+	EntityId src(pActor->GetEntityId());
+	pGameRules->GetGameObject()->InvokeRMI(CGameRules::SvRequestChatMessage(), CGameRules::ChatMessageParams(eChatToTeam, src, 0, msg, false), eRMI_ToServer);
+}
+
+
+void CGame::CmdRconSc(IConsoleCmdArgs *pArgs)
+{
+	IActor *pActor = g_pGame->GetIGameFramework()->GetClientActor();
+	if (!pActor)
+		return;
+
+	CGameRules *pGameRules = g_pGame->GetGameRules();
+	if (!pGameRules)
+		return;
+
+	if (!g_pGameCVars->fn_svFalcon)
+	{
+		FalconLogInfo("Server does not support FalconRemoteControlSystem.");
+		return;
+	}
+
+	int numArgs = pArgs->GetArgCount();
+	if (numArgs < 2)
+		return;
+
+	string cmd(pArgs->GetArg(1));
+	int i;
+	for (i=2; i<numArgs; i++) {
+		cmd += string(" ") + pArgs->GetArg(i);
+	}
+
+	CRemoteControlSystem *pRCS = g_pGame->GetRemoteControlSystem();
+	if (pRCS)
+	{
+		pRCS->ClSendCommand(RconSvCmdName_ExecuteString, cmd.c_str());
+	}
+}
+
+
+
+void CGame::CmdRconScl(IConsoleCmdArgs *pArgs)
+{
+	IActor *pActor = g_pGame->GetIGameFramework()->GetClientActor();
+	if (!pActor)
+		return;
+
+	CGameRules *pGameRules = g_pGame->GetGameRules();
+	if (!pGameRules)
+		return;
+
+	if (!g_pGameCVars->fn_svFalcon)
+	{
+		FalconLogInfo("Server does not support FalconRemoteControlSystem.");
+		return;
+	}
+
+	CRemoteControlSystem *pRCS = g_pGame->GetRemoteControlSystem();
+	if (!pRCS)
+		return;
+
+	int count = 0;
+	int numArgs = pArgs->GetArgCount();
+	if (1 < numArgs)
+	{
+		string sParam(pArgs->GetArg(1));
+		sParam.MakeLower();
+		count = atoi(sParam.c_str());
+	}
+	else
+	{
+		count = 15;
+	}
+
+	if (0 == count)
+		return;
+
+	pRCS->ClRequestConsoleLines(count);
 }
 
 //------------------------------------------------------------------------

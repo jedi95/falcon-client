@@ -27,6 +27,7 @@
 #include "ClientSynchedStorage.h"
 #include "ServerSynchedStorage.h"
 #include "Cry_Camera.h"
+#include "ILauncher.h"
 
 #define GAME_NAME				"Crysis Wars"
 #define GAME_LONGNAME		"Crysis Wars"
@@ -60,9 +61,11 @@ struct SItemStrings;
 class CItemSharedParamsList;
 class CSPAnalyst;
 class CSoundMoods;
-class CLaptopUtil;
 class CLCDWrapper;
 class CDownloadTask;
+
+class CRemoteControlSystem;
+
 
 // when you add stuff here, also update in CGame::RegisterGameObjectEvents
 enum ECryGameEvent
@@ -106,12 +109,12 @@ static const int GLOBAL_SERVER_IP_KEY						=	1000;
 static const int GLOBAL_SERVER_PUBLIC_PORT_KEY	= 1001;
 static const int GLOBAL_SERVER_NAME_KEY					=	1002;
 
+
 class CGame :
   public IGame, public IGameFrameworkListener
 {
 public:
   typedef bool (*BlockingConditionFunction)();
-public:
 	CGame();
 	virtual ~CGame();
 
@@ -156,6 +159,7 @@ public:
 	virtual CScriptBind_Weapon *GetWeaponScriptBind() { return m_pScriptBindWeapon; }
 	virtual CScriptBind_GameRules *GetGameRulesScriptBind() { return m_pScriptBindGameRules; }
 	virtual CScriptBind_HUD *GetHUDScriptBind() { return m_pScriptBindHUD; }
+
 	virtual CWeaponSystem *GetWeaponSystem() { return m_pWeaponSystem; };
 	virtual CItemSharedParamsList *GetItemSharedParamsList() { return m_pItemSharedParamsList; };
 
@@ -164,7 +168,6 @@ public:
 	CGameRules *GetGameRules() const;
 	CBulletTime *GetBulletTime() const;
 	CSoundMoods *GetSoundMoods() const;
-	CLaptopUtil *GetLaptopUtil() const;
 	CHUD *GetHUD() const;
 	CFlashMenuObject *GetMenu() const;
 	COptionsManager *GetOptions() const;
@@ -191,6 +194,9 @@ public:
 	static void DumpMemInfo(const char* format, ...) PRINTF_PARAMS(1, 2);
 
 	CDownloadTask* GetDownloadTask() const { return m_pDownloadTask; }
+
+	virtual void SetDX10Fix(bool state);
+	virtual bool GetDX10Fix();
 
 protected:
 	virtual void LoadActionMaps(const char* filename = "libs/config/defaultProfile.xml");
@@ -241,12 +247,21 @@ protected:
 	static void CmdRegisterNick(IConsoleCmdArgs* pArgs);
   static void CmdCryNetConnect(IConsoleCmdArgs* pArgs);
 
+  static void CmdOnCustomCCommandExecuted(IConsoleCmdArgs* pArgs);
+	static void CmdChat(IConsoleCmdArgs* pArgs);
+	static void CmdChatTeam(IConsoleCmdArgs* pArgs);
+	static void CmdRconSc(IConsoleCmdArgs* pArgs);
+	static void CmdRconScl(IConsoleCmdArgs* pArgs);
+	//vader mod
+	static void CmdFnThirdPerson(IConsoleCmdArgs* pArgs);
+
 	IGameFramework			*m_pFramework;
 	IConsole						*m_pConsole;
 
 	CWeaponSystem				*m_pWeaponSystem;
 
 	bool								m_bReload;
+	bool m_dx10Fix;
 
 	// script binds
 	CScriptBind_Actor		*m_pScriptBindActor;
@@ -282,13 +297,20 @@ protected:
 
 	CBulletTime						*m_pBulletTime;
 	CSoundMoods						*m_pSoundMoods;
-	CLaptopUtil						*m_pLaptopUtil;
 	ILCD									*m_pLCD;
 
 	typedef std::map<string, string, stl::less_stricmp<string> > TLevelMapMap;
 	TLevelMapMap m_mapNames;
 
 	CDownloadTask					*m_pDownloadTask;
+
+	ILauncher* m_pLauncher;
+	CRemoteControlSystem *m_pRemoteControlSystem;
+
+public:
+	//  IGame.h
+	CRemoteControlSystem *GetRemoteControlSystem() const { return m_pRemoteControlSystem; }
+	ILauncher* GetLauncher() const { return m_pLauncher; }
 };
 
 extern CGame *g_pGame;
@@ -308,12 +330,6 @@ extern CGame *g_pGame;
 
 #define SAFE_HUD_FUNC_RET(func)\
 	((g_pGame && g_pGame->GetHUD()) ? g_pGame->GetHUD()->func : 0)
-
-#define SAFE_LAPTOPUTIL_FUNC(func)\
-	{	if(g_pGame && g_pGame->GetLaptopUtil()) g_pGame->GetLaptopUtil()->func; }
-
-#define SAFE_LAPTOPUTIL_FUNC_RET(func)\
-	((g_pGame && g_pGame->GetLaptopUtil()) ? g_pGame->GetLaptopUtil()->func : 0)
 
 #define SAFE_SOUNDMOODS_FUNC(func)\
 	{	if(g_pGame && g_pGame->GetSoundMoods()) g_pGame->GetSoundMoods()->func; }

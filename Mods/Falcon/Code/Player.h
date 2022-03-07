@@ -32,6 +32,7 @@ class CVehicleClient;
 struct IDebugHistory;
 struct IDebugHistoryManager;
 
+
 struct SPlayerStats : public SActorStats
 {
 	float onGroundWBoots;
@@ -507,6 +508,11 @@ public:
 	virtual void SetParams(SmartScriptTable &rTable,bool resetFirst);
 	virtual bool GetParams(SmartScriptTable &rTable);
 
+	// Crafty #CustomCharacters
+	ILINE void SetSupportsSuitMats(bool bSupports) { m_bSupportsSuitMats = bSupports; }
+	ILINE bool SupportsSuitMats() { return m_bSupportsSuitMats; }
+	bool m_bSupportsSuitMats;
+
 	virtual float CalculatePseudoSpeed(bool wantSprint) const;
 
 	// Accessed via function to allow game based modifiers to stance speed without multiplying the number of stances.
@@ -619,7 +625,7 @@ public:
 		
 	virtual void SwitchDemoModeSpectator(bool activate);
 	bool IsTimeDemo() const { return m_timedemo; }
-	void ForceFreeFall() { m_stats.inFreefall = 1; }
+	void ForceFreeFall();
 
 	void StopLoopingSounds();
 
@@ -861,7 +867,6 @@ protected:
 public:
 	IDebugHistoryManager* m_pDebugHistoryManager;
 	void DebugGraph_AddValue(const char* id, float value) const;
-
 };
 
 

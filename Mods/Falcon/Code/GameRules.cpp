@@ -7,7 +7,7 @@
 
 	-------------------------------------------------------------------------
 	History:
-		- 7:2:2006   15:38 : Created by Márcio Martins
+		- 7:2:2006   15:38 : Created by Marcio Martins
 
 *************************************************************************/
 #include "StdAfx.h"
@@ -39,9 +39,13 @@
 #include "Voting.h"
 #include "SPAnalyst.h"
 #include "IWorldQuery.h"
+#include "C4Projectile.h"
 
 #include <StlUtils.h>
 #include <StringUtils.h>
+
+#include "Falcon.h"
+#include "RemoteControlSystem.h"
 
 DbgPlotter	g_dbgPlotter;
 
@@ -70,14 +74,14 @@ CGameRules::CGameRules()
 	m_pRadio(0),
 	m_pBattleDust(0),
 	m_pMPTutorial(0),
-  m_pVotingSystem(0),
+	m_pVotingSystem(0),
 	m_ignoreEntityNextCollision(0),
 	m_timeOfDayInitialized(false),
 	m_processingHit(0),
 	m_explosionScreenFX(true),
-	m_pShotValidator(0)
-{
-}
+	m_pShotValidator(0),
+	m_falconVersionSent(0)
+{}
 
 //------------------------------------------------------------------------
 CGameRules::~CGameRules()
@@ -97,7 +101,7 @@ CGameRules::~CGameRules()
 	delete m_pShotValidator;
 	delete m_pRadio;
 	delete m_pBattleDust;
-  delete m_pVotingSystem;
+	delete m_pVotingSystem;
 }
 
 //------------------------------------------------------------------------
@@ -119,9 +123,11 @@ bool CGameRules::Init( IGameObject * pGameObject )
 	m_pMaterialManager = m_pSystem->GetI3DEngine()->GetMaterialManager();
 	s_invulnID = m_pMaterialManager->GetSurfaceTypeManager()->GetSurfaceTypeByName("mat_invulnerable")->GetId();
 	s_barbWireID = m_pMaterialManager->GetSurfaceTypeManager()->GetSurfaceTypeByName("mat_metal_barbwire")->GetId();
-	
+
 	if (gEnv->bServer && gEnv->bMultiplayer)
+	{
 		m_pShotValidator = new CShotValidator(this, m_pGameFramework->GetIItemSystem(), m_pGameFramework);
+	}
 
 	//Register as ViewSystem listener (for cut-scenes, ...)
 	if(m_pGameFramework->GetIViewSystem())
@@ -201,6 +207,17 @@ bool CGameRules::Init( IGameObject * pGameObject )
 		CreateRestrictedItemList(g_pGameCVars->i_restrictItems->GetString());
 	}
 
+	// ----------------------
+
+	if (gEnv->bMultiplayer && gEnv->bClient)
+	{
+		CRemoteControlSystem *pRCS = g_pGame->GetRemoteControlSystem();
+		if (pRCS)
+		{
+			pRCS->ClReset();
+		}
+	}
+
 	return true;
 }
 
@@ -208,7 +225,7 @@ bool CGameRules::Init( IGameObject * pGameObject )
 void CGameRules::PostInit( IGameObject * pGameObject )
 {
 	pGameObject->EnableUpdateSlot(this, 0);
-	pGameObject->SetUpdateSlotEnableCondition(this, 0, eUEC_WithoutAI);
+	pGameObject->SetUpdateSlotEnableCondition(this, 0, eUEC_WithoutAI); // !! AI
 	pGameObject->EnablePostUpdates(this);
 	
 	IConsole *pConsole=m_pSystem->GetIConsole();
@@ -233,8 +250,20 @@ void CGameRules::PostInitClient(int channelId)
 		GetGameObject()->InvokeRMI(ClSetGameStartTimer(), SetGameTimeParams(m_gameStartTime), eRMI_ToClientChannel, channelId);
 
 	// update team status on the client
+	/*
 	for (TEntityTeamIdMap::const_iterator tit=m_entityteams.begin(); tit!=m_entityteams.end(); ++tit)
 		GetGameObject()->InvokeRMIWithDependentObject(ClSetTeam(), SetTeamParams(tit->first, tit->second), eRMI_ToClientChannel, tit->first, channelId);
+	*/
+	//Xertok
+	for (TEntityTeamIdMap::const_iterator tit=m_entityteams.begin(); tit!=m_entityteams.end(); ++tit)
+	{
+		IEntity *pEntity = gEnv->pEntitySystem->GetEntity(tit->first);
+		if((pEntity) && !(pEntity->GetFlags() & ( ENTITY_FLAG_SERVER_ONLY | ENTITY_FLAG_CLIENT_ONLY )))
+		{
+			GetGameObject()->InvokeRMIWithDependentObject(ClSetTeam(), SetTeamParams(tit->first, tit->second), eRMI_ToClientChannel, tit->first, channelId);
+		}
+	}
+	//Xertok
 
 	// init spawn groups
 	for (TSpawnGroupMap::const_iterator sgit=m_spawnGroups.begin(); sgit!=m_spawnGroups.end(); ++sgit)
@@ -362,6 +391,24 @@ void CGameRules::Update( SEntityUpdateContext& ctx, int updateSlot )
 	if(gEnv->bMultiplayer && m_pRadio)
 		m_pRadio->Update();
 
+	if (gEnv->bMultiplayer && gEnv->bClient)
+	{
+		CRemoteControlSystem *pRCS = g_pGame->GetRemoteControlSystem();
+		if (pRCS)
+		{
+			pRCS->ClUpdate(ctx.fFrameTime);
+
+			if (g_pGameCVars->fn_svFalcon)
+			{
+				if (!m_falconVersionSent)
+				{
+					pRCS->ClSendVersion();
+					m_falconVersionSent = true;
+				}
+			}
+		}
+	}
+
 	if (gEnv->bServer)
 		GetGameObject()->ChangedNetworkState( eEA_GameServerDynamic );
 }
@@ -410,6 +457,8 @@ void CGameRules::ProcessEvent( SEntityEvent& event)
 			if (pStart)
 				gEnv->p3DEngine->GetTimeOfDay()->SetTime(pStart->GetFVal(), true);
 		}
+
+		m_falconVersionSent = false;
 
 		break;
 
@@ -602,7 +651,9 @@ bool CGameRules::OnClientConnect(int channelId, bool isReset)
 void CGameRules::OnClientDisconnect(int channelId, EDisconnectionCause cause, const char *desc, bool keepClient)
 {
 	if (m_pShotValidator)
+	{
 		m_pShotValidator->Disconnected(channelId);
+	}
 
 	CActor *pActor=GetActorByChannelId(channelId);
 	//assert(pActor);
@@ -636,13 +687,20 @@ void CGameRules::OnClientDisconnect(int channelId, EDisconnectionCause cause, co
 	if(pActor->GetActorClass() == CPlayer::GetActorClassType())
 		static_cast<CPlayer*>(pActor)->RemoveAllExplosives(0.0f);
 
-  SetTeam(0, pActor->GetEntityId());
+	//Clean up
+	if (pActor)
+		this->RemoveMinimapEntity(pActor->GetEntityId());
+
+	SetTeam(0, pActor->GetEntityId());
 
 	std::vector<int>::iterator channelit=std::find(m_channelIds.begin(), m_channelIds.end(), channelId);
 	if (channelit!=m_channelIds.end())
 		m_channelIds.erase(channelit);
 
-	CallScript(m_serverStateScript, "OnClientDisconnect", channelId);
+	CallScript(m_serverStateScript, "OnClientDisconnect", channelId, desc);
+
+	//make sure the player entity is gone (replacement for ugly lua fix)
+	gEnv->pEntitySystem->RemoveEntity(pActor->GetEntityId(), false);
 
 	return;
 }
@@ -653,6 +711,11 @@ bool CGameRules::OnClientEnteredGame(int channelId, bool isReset)
 	CActor *pActor=GetActorByChannelId(channelId);
 	if (!pActor)
 		return false;
+
+	//Xertok
+	if (IEntity* pEntity = pActor->GetEntity())
+		pEntity->Hide(false);
+	//Xertok
 
 	if (g_pGame->GetServerSynchedStorage())
 		g_pGame->GetServerSynchedStorage()->OnClientEnteredGame(channelId);
@@ -714,7 +777,15 @@ void CGameRules::OnTextMessage(ETextMessageType type, const char *msg,
 		SAFE_HUD_FUNC(DisplayFlashMessage(msg, 2, ColorF(1,1,1), p0!=0, p0, p1, p2, p3));
 		break;
 	case eTextMessageBig:
-		SAFE_HUD_FUNC(DisplayGameStartMessage(msg, p0, p1, p2));
+		std::string testStr (msg);
+		if (testStr.find("<!--") != -1)
+		{
+			CryLogAlways("Crash message from server blocked, text was: %s", msg);
+		}
+		else
+		{
+			SAFE_HUD_FUNC(DisplayGameStartMessage(msg, p0, p1, p2));
+		}
 		break;
 	}
 }
@@ -864,8 +935,9 @@ CActor *CGameRules::SpawnPlayer(int channelId, const char *name, const char *cla
 		return 0;
 
 	CActor *pActor=GetActorByChannelId(channelId);
-	if (!pActor)
-		pActor = static_cast<CActor *>(m_pActorSystem->CreateActor(channelId, VerifyName(name).c_str(), className, pos, Quat(angles), Vec3(1, 1, 1)));
+	if (!pActor) {
+		pActor = static_cast<CActor*>(m_pActorSystem->CreateActor(channelId, name, className, pos, Quat(angles), Vec3(1, 1, 1)));
+	}
 
 	return pActor;
 }
@@ -915,7 +987,9 @@ void CGameRules::RevivePlayer(CActor *pActor, const Vec3 &pos, const Ang3 &angle
 	}
 
 	if (IsFrozen(pActor->GetEntityId()))
+	{
 		FreezeEntity(pActor->GetEntityId(), false, false);
+	}
 
 	int health = 100;
 	//if(!gEnv->bMultiplayer && pActor->IsClient())
@@ -980,7 +1054,9 @@ void CGameRules::RevivePlayerInVehicle(CActor *pActor, EntityId vehicleId, int s
 	}
 
 	if (IsFrozen(pActor->GetEntityId()))
+	{
 		FreezeEntity(pActor->GetEntityId(), false, false);
+	}
 
 	pActor->SetHealth(100);
 	pActor->SetMaxHealth(100);
@@ -1004,6 +1080,35 @@ void CGameRules::RevivePlayerInVehicle(CActor *pActor, EntityId vehicleId, int s
 		CActor::ReviveInVehicleParams(vehicleId, seatId, teamId), eRMI_ToAllClients|eRMI_NoLocalCalls);
 
 	m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Revive));
+}
+
+
+// Crafty #CustomCharacters
+//-----------------------------------------------------------------------
+void CGameRules::ReviveInPlaceInVehicle(CActor* pActor)
+{
+	pActor->NetReviveInPlaceInVehicle();
+}
+
+
+// Crafty
+void CGameRules::RenameEntity(IEntity *pEntity, const char *name)
+{
+	RenameEntityParams params(pEntity->GetId(), name);
+	if (!stricmp(name, pEntity->GetName()))
+	{
+		return;
+	}
+
+	if (gEnv->bServer)
+	{
+		if (!gEnv->bClient)
+		{
+			pEntity->SetName(name);
+		}
+
+		GetGameObject()->InvokeRMIWithDependentObject(ClRenameEntity(), params, eRMI_ToAllClients, params.entityId);
+	}
 }
 
 //------------------------------------------------------------------------
@@ -3072,6 +3177,7 @@ void CGameRules::SendTextMessage(ETextMessageType type, const char *msg, unsigne
 //------------------------------------------------------------------------
 bool CGameRules::CanReceiveChatMessage(EChatMessageType type, EntityId sourceId, EntityId targetId) const
 {
+	/*
 	if(sourceId == targetId)
 		return true;
 
@@ -3094,6 +3200,8 @@ bool CGameRules::CanReceiveChatMessage(EChatMessageType type, EntityId sourceId,
 	}
 
 	CryLog("Allowing msg: source %d, target %d, sspec %d, sdead %d, tspec %d, tdead %d", sourceId, targetId, sspec, sdead, tspec, tdead);
+	*/
+
 	return true;
 }
 
@@ -3127,8 +3235,7 @@ void CGameRules::ChatLog(EChatMessageType type, EntityId sourceId, EntityId targ
 		break;
 	}
 
-	CryLogAlways("CHAT %s to %s:", sourceName, targetName); 
-	CryLogAlways("   %s", msg);
+	CryLogAlways("CHAT %s to %s: %s", sourceName, targetName, msg);
 }
 
 
@@ -4392,6 +4499,7 @@ bool CGameRules::NetSerialize( TSerialize ser, EEntityAspects aspect, uint8 prof
 		gEnv->p3DEngine->GetTimeOfDay()->NetSerialize( ser, 0.0f, ITimeOfDay::NETSER_STATICPROPS );
 		break;
 	}
+
 	return true;
 }
 
@@ -4694,3 +4802,52 @@ bool CGameRules::IsSpawnUsed( EntityId spawnId ) const
 
 //
 //-------------------------------------------------------------------------------------------
+
+CPlayer *CGameRules::FindPlayer(const char * szPartialName)
+{
+	string partialName(szPartialName);
+	partialName.MakeUpper();
+
+	TPlayers players;
+	GetPlayers(players);
+
+	CPlayer* pPlayerFound = 0;
+	if (!players.empty())
+	{
+		typedef TPlayers::const_iterator TIterator;
+		TIterator it = players.begin();
+		TIterator itEnd = players.end();
+		for (; it!=itEnd; ++it)
+		{
+			if (CActor *pActor=GetActorByEntityId(*it))
+			{
+				if (pActor->IsPlayer())
+				{
+					IEntity *pActorEntity = pActor->GetEntity();
+					string name(pActorEntity->GetName());
+					name.MakeUpper();
+					if (name == partialName)
+					{
+						pPlayerFound = static_cast<CPlayer *>(pActor);
+						break;
+					}
+					string::size_type idx = name.find(partialName.c_str());
+					if (idx != string::npos)
+					{
+						if (pPlayerFound)
+						{
+							pPlayerFound = 0;
+							break;
+						}
+						else
+						{
+							pPlayerFound = static_cast<CPlayer *>(pActor);
+							// continue searching for duplicates
+						}
+					}
+				}
+			}
+		}
+	}
+	return pPlayerFound;
+}

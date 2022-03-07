@@ -123,7 +123,13 @@ IMPLEMENT_RMI(CItem, SvRequestLeaveModify)
 //------------------------------------------------------------------------
 IMPLEMENT_RMI(CItem, ClEnterModify)
 {
-	PlayAction(g_pItemStrings->enter_modify, 0, false, eIPAF_Default | eIPAF_RepeatLastFrame);
+	//Vader mod weapon menu animation speed
+	float animSpeed = -1.0f;
+	if (ICVar *pVar = gEnv->pConsole->GetCVar("fn_fastWeaponMenu"))
+		if (pVar->GetIVal() >= 1)
+			animSpeed = 50.0f;
+
+	PlayAction(g_pItemStrings->enter_modify, 0, false, eIPAF_Default | eIPAF_RepeatLastFrame, animSpeed);
 
 	return true;
 }
@@ -131,7 +137,13 @@ IMPLEMENT_RMI(CItem, ClEnterModify)
 //------------------------------------------------------------------------
 IMPLEMENT_RMI(CItem, ClLeaveModify)
 {
-	PlayAction(g_pItemStrings->leave_modify, 0);
+	//Vader mod weapon menu animation speed
+	float animSpeed = -1.0f;
+	if (ICVar *pVar = gEnv->pConsole->GetCVar("fn_fastWeaponMenu"))
+		if (pVar->GetIVal() >= 1)
+			animSpeed = 50.0f;
+
+	PlayAction(g_pItemStrings->leave_modify, 0, false, eIPAF_Default, animSpeed);
 
 	return true;
 }

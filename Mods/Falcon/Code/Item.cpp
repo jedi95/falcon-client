@@ -1156,8 +1156,14 @@ void CItem::Select(bool select)
 			if(pPlayer->GetNanoSuit())
 			{
 				ENanoMode curMode = pPlayer->GetNanoSuit()->GetMode();
-				if (curMode == NANOMODE_SPEED)
+				if (g_pGameCVars->fn_fastWeaponSwitch > 0)
+				{
+					speedOverride = 2.50f;
+				}
+				else if (curMode == NANOMODE_SPEED)
+				{
 					speedOverride = 1.75f;
+				}
 			}
 		}
 
@@ -1168,7 +1174,6 @@ void CItem::Select(bool select)
 			select_animation = g_pItemStrings->first_select;
 		else
 			select_animation = g_pItemStrings->select;
-
 
 		if (speedOverride > 0.0f)
 			PlayAction(select_animation, 0, false, eIPAF_Default|eIPAF_NoBlend, speedOverride);
@@ -1273,7 +1278,7 @@ void CItem::Drop(float impulseScale, bool selectNext, bool byDeath)
 		
 	CActor *pOwner = GetOwnerActor();
 	IInventory * pInventory = pOwner?pOwner->GetInventory():NULL;
-	
+
 	if (isDWMaster)
 	{
 		IItem *pSlave=GetDualWieldSlave();

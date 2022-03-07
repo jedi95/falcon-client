@@ -12,7 +12,37 @@ enum EExplosiveType
 };
 
 struct SCVars
-{	
+{
+
+	// Falcon cvars
+	ICVar* fn_version;
+	ICVar* fn_build;
+	ICVar* fn_rconClientConsoleLineFormat;
+	int fn_svFalcon;
+	int fn_fixHUD;
+
+	// misc
+	float fn_fov;
+	int   fn_disableShootZoom;
+	float fn_wallJumpMultiplier;
+	int	  fn_circleJump;
+	int fn_fastWeaponSwitch;
+	int fn_disableFreefall;
+	int fn_c4ThrowVelocityMultiplier;
+	int fn_constantMouseSensitivity;
+	int fn_fixExplosivePlant;
+	int fn_fastWeaponMenu;
+	float fn_weaponMassMultiplier;
+	int fn_playerLeaning;
+	int sys_MaxFps;
+
+	// Crafty
+	int fn_radarclearondeath;
+
+	// Custom characters
+	int fn_enableFpBody;
+	int fn_fpBody;
+
 	static const float v_altitudeLimitDefault()
 	{
 		return 600.0f;
@@ -485,6 +515,7 @@ struct SCVars
 
 protected:
 	static void RestrictedItemsChanged( ICVar* var );
+	static void SetupCVarsToUnlock(ICVar *pVar);
 };
 
 #endif //__GAMECVARS_H__

@@ -67,8 +67,8 @@ CPlayerInput::CPlayerInput( CPlayer * pPlayer ) :
 		//ADD_HANDLER(zerogbrake, OnActionZeroGBrake);
 		ADD_HANDLER(gyroscope, OnActionGyroscope);
 		ADD_HANDLER(gboots, OnActionGBoots);
-		//ADD_HANDLER(leanleft, OnActionLeanLeft);
-		//ADD_HANDLER(leanright, OnActionLeanRight);
+		ADD_HANDLER(leanleft, OnActionLeanLeft);
+		ADD_HANDLER(leanright, OnActionLeanRight);
 		//ADD_HANDLER(holsteritem, OnActionHolsterItem);
 		ADD_HANDLER(use, OnActionUse);
 
@@ -630,13 +630,22 @@ void CPlayerInput::PreUpdate()
 	mouseSensitivity *= gf_PI / 180.0f;//doesnt make much sense, but after all helps to keep reasonable values for the sensitivity cvars
 	//these 2 could be moved to CPlayerRotation
 	mouseSensitivity *= m_pPlayer->m_params.viewSensitivity;
-	mouseSensitivity *= m_pPlayer->GetMassFactor();
+	if (!g_pGameCVars->fn_constantMouseSensitivity)
+	{
+		mouseSensitivity *= m_pPlayer->GetMassFactor();
+	}
 
 	controllerSensitivity *= gf_PI / 180.0f;//doesnt make much sense, but after all helps to keep reasonable values for the sensitivity cvars
 	//these 2 could be moved to CPlayerRotation
 	controllerSensitivity *= m_pPlayer->m_params.viewSensitivity;
-	controllerSensitivity *= m_pPlayer->GetMassFactor();
+	if (!g_pGameCVars->fn_constantMouseSensitivity)
+	{
+		controllerSensitivity *= m_pPlayer->GetMassFactor();
+	}
+
 	
+	//VADER MOD: sensitivity should be static at all times!
+	/*
 	COffHand * pOffHand=static_cast<COffHand*>(m_pPlayer->GetWeaponByClass(CItem::sOffHandClass));
 	if(pOffHand && (pOffHand->GetOffHandState()&eOHS_HOLDING_NPC))
 	{
@@ -659,6 +668,7 @@ void CPlayerInput::PreUpdate()
 			controllerSensitivity /= 2.0f;
 		}
 	}
+	*/
 
 	if(m_binocularsTime>0.0f)
 	{
@@ -1101,7 +1111,7 @@ bool CPlayerInput::OnActionRotatePitch(EntityId entityId, const ActionId& action
 	{
 	SPlayerStats *stats = static_cast<SPlayerStats*> (m_pPlayer->GetActorStats());
 	float absAngle = fabsf(acos_tpl(stats->upVector.Dot(stats->zeroGUp)));
-	if(absAngle > 1.57f) //90°
+	if(absAngle > 1.57f) //90
 	{
 	if(value > 0)
 	m_deltaRotation.x -= value;

@@ -369,7 +369,7 @@ public:
 	{
 		if (m_storedFOV > 0.0f)
 		{
-			ICVar* pCVar = (gEnv && gEnv->pConsole) ? gEnv->pConsole->GetCVar("cl_fov") : 0;
+			ICVar* pCVar = (gEnv && gEnv->pConsole) ? gEnv->pConsole->GetCVar("fn_fov") : 0;
 			if (pCVar)
 				pCVar->Set(m_storedFOV);
 		}
@@ -403,7 +403,7 @@ public:
 
 	void Serialize(SActivationInfo* pActInfo, TSerialize ser)
 	{
-		ICVar* pCVar = gEnv->pConsole->GetCVar("cl_fov");
+		ICVar* pCVar = gEnv->pConsole->GetCVar("fn_fov");
 
 		if (ser.IsWriting())
 		{
@@ -439,7 +439,7 @@ public:
 
 	void ProcessEvent( EFlowEvent event, SActivationInfo *pActInfo )
 	{
-		ICVar* pCVar = gEnv->pConsole->GetCVar("cl_fov");
+		ICVar* pCVar = gEnv->pConsole->GetCVar("fn_fov");
 		if (pCVar == 0)
 			return;
 

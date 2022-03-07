@@ -28,6 +28,7 @@ History:
 #include <IMaterialEffects.h>
 #include "GameRules.h"
 #include <Cry_GeoDistance.h>
+#include "IPlayerInput.h"
 
 #include "IronSight.h"
 
@@ -145,7 +146,7 @@ void CSingle::Update(float frameTime, uint frameId)
 		keepUpdating=true;
 	}
 
-	if (m_zoomtimeout > 0.0f && m_fireparams.autozoom)
+	if (m_zoomtimeout > 0.0f && m_fireparams.autozoom && !g_pGameCVars->fn_disableShootZoom)
 	{
 		m_zoomtimeout -= frameTime;
 		if (m_zoomtimeout < 0.0f)
@@ -725,6 +726,7 @@ void CSingle::Activate(bool activate)
 	m_fired = m_firing = m_reloading = m_emptyclip = m_cocking = false;
 	m_spinUpTime = 0.0f;
 	m_next_shot = 0.0f;
+
 	if (m_fireparams.rate > 0.0f)
 		m_next_shot_dt = 60.0f/m_fireparams.rate;
 	else
@@ -1542,6 +1544,7 @@ bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool 
     pActor->ExtendCombat();
     // Only start a zoom in if we're not zooming in or out
     if (m_fireparams.autozoom &&
+	  !g_pGameCVars->fn_disableShootZoom &&
       pActor->GetScreenEffects() != 0 &&
       !pActor->GetScreenEffects()->HasJobs(pActor->m_autoZoomInID) &&
       !pActor->GetScreenEffects()->HasJobs(pActor->m_autoZoomOutID))
@@ -2463,7 +2466,7 @@ float CSingle::GetRecoilScale() const
 	if (!pZoomMode)
 		return 1.0f*m_recoilMultiplier*stanceScale;
 
-	return pZoomMode->GetRecoilScale()*m_recoilMultiplier*stanceScale; 
+	return pZoomMode->GetRecoilScale()*m_recoilMultiplier*stanceScale;
 }
 
 //------------------------------------------------------------------------
@@ -2524,7 +2527,7 @@ float CSingle::GetSpread() const
 		rotationSpread=dyn.w.len()*m_spreadparams.rotation_m;
 		rotationSpread = CLAMP(rotationSpread,0.0f,3.0f);
 	}
-	
+
 	IZoomMode *pZoomMode= m_pWeapon->GetZoomMode(m_pWeapon->GetCurrentZoomMode());
 	if (!pZoomMode)
 		return (speedSpread+rotationSpread+m_spread)*stanceScale;
@@ -2796,6 +2799,9 @@ void CSingle::UpdateRecoil(float frameTime)
 					pOwner->SetViewAngleOffset(Vec3(m_recoil_offset.x, 0.0f, m_recoil_offset.y));
 
 				m_pWeapon->RequireUpdate(eIUS_FireMode);
+				//From CryMP: let server know about any recoil changes..
+				if (gEnv->bMultiplayer && pActor && pActor->IsClient())
+					pActor->GetGameObject()->ChangedNetworkState(IPlayerInput::INPUT_ASPECT);
 			}
 			else
 				ResetRecoil(false);

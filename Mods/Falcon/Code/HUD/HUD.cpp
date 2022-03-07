@@ -498,13 +498,12 @@ bool CHUD::Init()
 	m_animWarningMessages.Load("Libs/UI/HUD_ErrorMessages.gfx", eFD_Center, eFAF_ThisHandler|eFAF_ManualRender);
 	m_animOverlayMessages.Load("Libs/UI/HUD_OverlayMessage.gfx", eFD_Center, eFAF_ThisHandler|eFAF_ManualRender);
 	m_animBigOverlayMessages.Load("Libs/UI/HUD_OverlayMessageFading.gfx", eFD_Center, eFAF_ThisHandler|eFAF_ManualRender);
-	m_animHUDCornerLeft.Load("Libs/UI/HUD_Corner_Left.gfx", eFD_Left, eFAF_Visible);
-	m_animHUDCornerRight.Load("Libs/UI/HUD_Corner_Right.gfx", eFD_Right, eFAF_Visible);
 
 	//load the map
 	m_animWeaponSelection.Load("Libs/UI/HUD_WeaponSelection.gfx", eFD_Right, eFAF_Visible);
 	m_animPDA.Load("Libs/UI/HUD_PDA_Map.gfx", eFD_Right, eFAF_ThisHandler);
 	m_animDownloadEntities.Load("Libs/UI/HUD_DownloadEntities.gfx");
+
 	m_animHitIndicator.Load("Libs/UI/HUD_HitIndicator.gfx", eFD_Center, eFAF_Visible);
 
 	// these are delay-loaded elsewhere!!!
@@ -3237,6 +3236,7 @@ void CHUD::OnPostUpdate(float frameTime)
 		if (INetChannel *pNetChannel=g_pGame->GetIGameFramework()->GetClientChannel())
 			highLatency=pNetChannel->IsSufferingHighLatency(gEnv->pTimer->GetAsyncTime());
 
+
 		if ((noConnectivity || highLatency) && !m_animNetworkConnection.GetVisible())
 		{
 			m_animNetworkConnection.SetVisible(true);
@@ -3708,6 +3708,16 @@ void CHUD::OnPostUpdate(float frameTime)
 				m_animBuyMenu.GetFlashPlayer()->Advance(frameTime);
 				m_animBuyMenu.GetFlashPlayer()->Render();
 			}
+			if (m_animBattleLog.GetVisible()) //CryMP: battlelog in spectatemode
+			{
+				m_animBattleLog.GetFlashPlayer()->Advance(frameTime);
+				m_animBattleLog.GetFlashPlayer()->Render();
+			}
+			if (m_animMissionObjective.GetVisible()) //CryMP: for names in mp spectatemode, update mission objective!
+			{
+				m_animMissionObjective.GetFlashPlayer()->Advance(frameTime);
+				m_animMissionObjective.GetFlashPlayer()->Render();
+			}
 		}
 		else
 		{
@@ -4034,9 +4044,6 @@ void CHUD::UpdateHealth()
 		{
 			m_animPlayerStats.Invoke("setHealth", (int)fHealth);
 		}
-
-		if(m_bFirstFrame)
-			m_fHealth = fHealth;
 
 		m_fHealth = fHealth;
 	}

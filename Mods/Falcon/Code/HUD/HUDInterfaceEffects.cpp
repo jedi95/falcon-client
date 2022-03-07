@@ -760,7 +760,9 @@ void CHUD::IndicateHit(bool enemyIndicator,IEntity *pEntity, bool explosionFeedb
 	if(explosionFeedback && g_pGameCVars->g_useHitSoundFeedback)
 		PlaySound(ESound_SpecialHitFeedback);
 
-	m_animHitIndicator.Invoke("indicateHit");
+	//Vader mod HUD fix
+	if (!g_pGameCVars->fn_fixHUD)
+		m_animHitIndicator.Invoke("indicateHit");
 
 	if(pPlayer->GetLinkedVehicle())
 	{
@@ -937,6 +939,20 @@ void CHUD::Targetting(EntityId pTargetEntity, bool bStatic)
 							pEntity=0;
 						}
 					}
+					//Check if entity is a player
+					else
+					{
+						CActor* pActor = pGameRules->GetActorByEntityId(mEntity.entityId);
+						if (pActor)
+						{
+							icon = pActor->GetEntityId();
+							if (pActor->GetEntityId() == g_pGame->GetIGameFramework()->GetClientActorId())
+							{
+								SetTACWeapon(true);
+								pEntity = 0;
+							}
+						}
+					}
 				}
 			}
 
@@ -945,6 +961,13 @@ void CHUD::Targetting(EntityId pTargetEntity, bool bStatic)
 			float fX(0.0f), fY(0.0f);
 
 			int friendly = m_pHUDRadar->FriendOrFoe(gEnv->bMultiplayer,  team, pEntity, pGameRules);
+
+			//If you're not with me, then you're my enemy...
+			if (type == ENuclearWeapon && friendly == ENeutral)
+			{
+				friendly = EEnemy;
+			}
+
 			if(vehicle)
 				UpdateMissionObjectiveIcon(icon,friendly,eOS_TACTank, true, Vec3(0, 0, 0), false, true);
 			else

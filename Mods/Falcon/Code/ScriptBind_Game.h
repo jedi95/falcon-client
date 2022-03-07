@@ -39,6 +39,7 @@ protected:
 	//!	Queries battle status, range from 0 (quiet) to 1 (full combat)
 	int	QueryBattleStatus(IFunctionHandler *pH);
 	int GetNumLightsActivated(IFunctionHandler *pH);
+	int GetRootFolder(IFunctionHandler* pH);
 
 private:
 	void RegisterGlobals();

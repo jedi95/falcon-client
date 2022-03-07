@@ -363,12 +363,14 @@ bool CMPHub::HandleFSCommand(const char* pCmd, const char* pArgs)
 				break;
 			}
 			CheckTSPIPs();
+			//VADER MOD: don't bother checking for patches
+			/*
 			IPatchCheck* pc = serv->GetPatchCheck();
 			if(pc->IsUpdateAvailable())
 			{
 				ShowYesNoDialog("@ui_patch_warning","patch");
 				break;
-			}
+			}*/
     }
 		if(!m_profile.get() || !m_profile->IsLoggedIn())
     {
@@ -817,6 +819,42 @@ void CMPHub::DisconnectError(EDisconnectionCause dc, bool connecting, const char
 			ShowLargeYesNoDialog(L"@ui_menu_disconnect_editCDKey", "cd_key_check_failed");
 		}
 		break;
+	case eDC_Kicked:
+	{
+		if (strlen(serverMsg) > 21 && strncmp(serverMsg + 21, "None", 4) != 0)
+		{
+			ILocalizationManager* pLoc = gEnv->pSystem->GetLocalizationManager();
+			if (pLoc)
+			{
+				wstring final;
+				wstring localised, tmp;
+				ExpandToWChar(serverMsg + 21, tmp);
+				pLoc->LocalizeLabel(msg, localised);
+				wstring newstring = L"%1\nReason: %2";
+				pLoc->FormatStringMessage(final, newstring, localised, tmp);
+				ShowErrorText(final);
+				break;
+			}
+		}
+	}
+	case eDC_Banned:
+	{
+		if (strlen(serverMsg) > 21 && strncmp(serverMsg + 21, "None", 4) != 0)
+		{
+			ILocalizationManager* pLoc = gEnv->pSystem->GetLocalizationManager();
+			if (pLoc)
+			{
+				wstring final;
+				wstring localised, tmp;
+				ExpandToWChar(serverMsg + 21, tmp);
+				pLoc->LocalizeLabel(msg, localised);
+				wstring newstring = L"%1\nReason: %2";
+				pLoc->FormatStringMessage(final, newstring, localised, tmp);
+				ShowErrorText(final);
+				break;
+			}
+		}
+	}
 	case eDC_AuthenticationFailed:
 		ShowError(msg, true, 1);
 		break;
@@ -1125,6 +1163,8 @@ void CMPHub::OnMenuOpened()
 	{
 		if(gs->GetState() == eNSS_Initializing)
 			g_pGame->BlockingProcess(&GameSpyCheck);
+		//VADER MOD: Don't bother checking for updates, crytek abandoned this game a long time ago!
+		/*
 		if(gs->GetState() == eNSS_Ok)
 		{
 			IPatchCheck* pc = gs->GetPatchCheck();
@@ -1135,7 +1175,7 @@ void CMPHub::OnMenuOpened()
 				m_trustedDownload.reset(new STSPDownload());
 				m_trustedDownload->StartDownload();
 			}
-		}
+		}*/
 	}
 
 	m_menuOpened = true;

@@ -8,21 +8,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CryCommon", "..\..\..\Code\CryEngine\CryCommon\CryCommon.vcproj", "{AEB958D4-45CA-478B-BA8E-D0E897CE974B}"
 EndProject
 Global
-	GlobalSection(SourceCodeControl) = preSolution
-		SccNumberOfProjects = 3
-		SccProjectUniqueName0 = GameDll.vcproj
-		SccProjectName0 = Perforce\u0020Project
-		SccLocalPath0 = .
-		SccProvider0 = MSSCCI:Perforce\u0020SCM
-		SccProjectUniqueName1 = ..\\..\\..\\Code\\CryEngine\\CryAction\\CryActionInterfaces.vcproj
-		SccProjectName1 = Perforce\u0020Project
-		SccLocalPath1 = ..\\..\\..\\Code\\CryEngine\\CryAction
-		SccProvider1 = MSSCCI:Perforce\u0020SCM
-		SccProjectUniqueName2 = ..\\..\\..\\Code\\CryEngine\\CryCommon\\CryCommon.vcproj
-		SccProjectName2 = Perforce\u0020Project
-		SccLocalPath2 = ..\\..\\..\\Code\\CryEngine\\CryCommon
-		SccProvider2 = MSSCCI:Perforce\u0020SCM
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
 		Debug|x64 = Debug|x64

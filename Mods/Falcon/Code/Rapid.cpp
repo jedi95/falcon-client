@@ -119,7 +119,8 @@ void CRapid::Update(float frameTime, uint frameId)
 		float dt = 1.0f;
 		if (cry_fabsf(m_speed)>0.001f && cry_fabsf(m_rapidparams.max_speed>0.001f))
 			dt=m_speed/m_rapidparams.max_speed;
-		m_next_shot_dt = 60.0f/(m_fireparams.rate*dt);
+
+		m_next_shot_dt = 60.0f/(m_fireparams.rate *dt);
 
 		bool canShoot = CanFire(false);
 

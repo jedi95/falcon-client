@@ -152,24 +152,24 @@ void CPlayerRotation::GetStanceAngleLimits(float & minAngle,float & maxAngle)
 	default:
 	case STANCE_CROUCH:
 	case STANCE_STAND:
-		minAngle = -80.0f;
-		maxAngle = 80.0f;
+		minAngle = -89.0f;
+		maxAngle = 89.0f;
 		break;
 	case STANCE_PRONE:
-		minAngle = -35.0f;
-		maxAngle = 45.0f;
+		minAngle = -55.0f;
+		maxAngle = 70.0f;
 		break;
 	}
 
 	//Limit camera rotation on ladders(to prevent clipping)
 	if(m_player.m_stats.isOnLadder)
 	{
-		minAngle = -40.0f;
-		maxAngle = 80.0f;
+		minAngle = -55.0f;
+		maxAngle = 89.0f;
 	}
 	if(m_stats.grabbedHeavyEntity!=0)
 	{
-		minAngle = -35.0f;  //Limit angle to prevent clipping, throw objects at feet, etc...
+		minAngle = -40.0f;  //Limit angle to prevent clipping, throw objects at feet, etc...
 	}
 
 	// SNH: additional restriction based on weapon type if prone.
@@ -605,7 +605,7 @@ void CPlayerRotation::ProcessNormal()
 
 void CPlayerRotation::ProcessLean()
 {
-	if(gEnv->bMultiplayer)
+	if (!g_pGameCVars->fn_playerLeaning >= 1)
 		return;
 
 	float leanAmt(0.0f);

@@ -567,10 +567,18 @@ void CHUDRadar::Update(float fDeltaTime)
 		{
 			if(IActor *tempActor = m_pActorSystem->GetActor(pEntity->GetId()))
 			{
-				if(tempActor->GetHealth() <= 0)
+				if (tempActor->GetHealth() <= 0)
+				{
+					if (g_pGameCVars->fn_radarclearondeath > 0)
+					{
+						m_tempEntitiesOnRadar.erase(m_tempEntitiesOnRadar.begin() + t);
+					}
 					continue;
-				if(tempActor==g_pGame->GetIGameFramework()->GetClientActor())
+				}
+				if (tempActor == g_pGame->GetIGameFramework()->GetClientActor())
+				{
 					continue;
+				}
 			}
 
 			Vec3 vTransformed = pEntity->GetWorldPos();
@@ -1113,7 +1121,7 @@ void CHUDRadar::UpdateCompassStealth(CActor *pActor, float fDeltaTime)
 		m_fLastCompassRot = fCompass;
 	}
 
-	float fFov = g_pGameCVars->cl_fov * pActor->GetActorParams()->viewFoVScale;
+	float fFov = g_pGameCVars->fn_fov * pActor->GetActorParams()->viewFoVScale;
 	if(m_fLastFov != fFov)
 	{
 		m_flashRadar->Invoke("setFOV", fFov*0.5f);
@@ -1935,14 +1943,33 @@ void CHUDRadar::RenderMapOverlay()
 			if(GetPosOnMap(pEntity, fX, fY))
 			{
 				int friendly = FriendOrFoe(isMultiplayer, team, pEntity, pGameRules);
-				if(friendly == EFriend || friendly == ENeutral)
+				//If you're not with me, then you're my enemy...
+				if (type == ENuclearWeapon && friendly == ENeutral)
+				{
+					friendly = EEnemy;
+				}
+				if(friendly == EFriend || friendly == ENeutral || type == ENuclearWeapon)
 				{
 					if(type == EAmmoTruck && stl::find_in_map(drawnVehicles, mEntity.entityId, false))
 					{
 						numOfValues += FillUpDoubleArray(&entityValues, pEntity->GetId(), EBarracks, fX, fY, 270.0f-RAD2DEG(pEntity->GetWorldAngles().z), friendly, 100, 100, iOnScreenObjective==mEntity.entityId, iCurrentSpawnPoint==mEntity.entityId);
 					}
 					else
-						numOfValues += FillUpDoubleArray(&entityValues, pEntity->GetId(), type, fX, fY, 270.0f-RAD2DEG(pEntity->GetWorldAngles().z), friendly, 100, 100, iOnScreenObjective==mEntity.entityId, iCurrentSpawnPoint==mEntity.entityId);
+					{
+						bool show = true;
+						if (friendly == EEnemy)
+						{
+							CPlayer *pShooter = static_cast<CPlayer *>(g_pGame->GetIGameFramework()->GetIActorSystem()->GetActor(mEntity.entityId));
+							if (pShooter)
+							{
+								show = !pShooter->IsCloaked();
+							}
+						}
+						if (show)
+						{
+							numOfValues += FillUpDoubleArray(&entityValues, pEntity->GetId(), type, fX, fY, 270.0f - RAD2DEG(pEntity->GetWorldAngles().z), friendly, 100, 100, iOnScreenObjective == mEntity.entityId, iCurrentSpawnPoint == mEntity.entityId);
+						}
+					}
 				}
 			}
 		}

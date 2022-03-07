@@ -7,7 +7,7 @@ $DateTime$
 
 -------------------------------------------------------------------------
 History:
-- 27:10:2004   11:29 : Created by Márcio Martins
+- 27:10:2004   11:29 : Created by Marcio Martins
 
 *************************************************************************/
 #include "StdAfx.h"
@@ -89,6 +89,13 @@ void CScriptBind_GameRules::RegisterMethods()
 
 	SCRIPT_REG_TEMPLFUNC(SpawnPlayer, "channelId, name, className, pos, angles");
 	SCRIPT_REG_TEMPLFUNC(ChangePlayerClass, "channelId, className, pos, angles");
+
+	// Crafty #CustomCharacters
+	SCRIPT_REG_TEMPLFUNC(ReviveInPlace, "playerId, pos, angles");
+	SCRIPT_REG_TEMPLFUNC(ReviveInPlaceInVehicle, "playerId");
+	SCRIPT_REG_TEMPLFUNC(SetPersistentCharResources, "persistent");
+	SCRIPT_REG_TEMPLFUNC(CacheCharacter, "character");
+
 	SCRIPT_REG_TEMPLFUNC(RevivePlayer, "playerId, pos, angles, teamId, clearInventory");
 	SCRIPT_REG_TEMPLFUNC(RevivePlayerInVehicle, "playerId, vehicleId, seatId, teamId, clearInventory");
 	SCRIPT_REG_TEMPLFUNC(RenamePlayer, "playerId, name");
@@ -331,7 +338,15 @@ int CScriptBind_GameRules::SpawnPlayer(IFunctionHandler *pH, int channelId, cons
 	if (!pGameRules)
 		return pH->EndFunction();
 
-	CActor *pActor = pGameRules->SpawnPlayer(channelId, name, className, pos, Ang3(angles));
+	string playerName;
+	if (INetChannel* pNetChannel = g_pGame->GetIGameFramework()->GetNetChannel(channelId))
+	{
+		playerName = pNetChannel->GetNickname();
+		if (playerName.empty()) {
+			playerName = "Nomad";
+		}
+	}
+	CActor *pActor = pGameRules->SpawnPlayer(channelId, playerName.c_str(), className, pos, Ang3(angles));
 
 	if (pActor)
 		return pH->EndFunction(pActor->GetEntity()->GetScriptTable());
@@ -2499,4 +2514,75 @@ int CScriptBind_GameRules::IsItemAllowed(IFunctionHandler* pH, const char* itemN
 	}
 
 	return pH->EndFunction(false);
+}
+
+// Crafty #CustomCharacters
+//------------------------------------------------------------------------
+int CScriptBind_GameRules::ReviveInPlace(IFunctionHandler* pH, ScriptHandle playerId, Vec3 pos, Vec3 angles)
+{
+	CGameRules* pGameRules = GetGameRules(pH);
+	if (!pGameRules)
+		return pH->EndFunction();
+
+	CActor* pActor = GetActor((EntityId)playerId.n);
+	if (pActor)
+		pActor->ReviveInPlace(pos, Ang3(angles));
+
+	return pH->EndFunction();
+}
+
+//------------------------------------------------------------------------
+int CScriptBind_GameRules::ReviveInPlaceInVehicle(IFunctionHandler* pH, ScriptHandle playerId)
+{
+	CGameRules* pGameRules = GetGameRules(pH);
+	if (!pGameRules)
+		return pH->EndFunction();
+
+	CActor* pActor = GetActor((EntityId)playerId.n);
+	if (pActor)
+		pGameRules->ReviveInPlaceInVehicle(pActor);
+
+	return pH->EndFunction();
+}
+
+//------------------------------------------------------------------------
+int CScriptBind_GameRules::SetPersistentCharResources(IFunctionHandler* pH, bool bPersistent)
+{
+	CGameRules* pGameRules = GetGameRules(pH);
+	if (!pGameRules)
+		return pH->EndFunction();
+
+	ICharacterManager* charMan = gEnv->pCharacterManager;
+	if (charMan)
+	{
+		//CryLogAlways("%s persistent character resources.", bPersistent ? "Enabling" : "Disabling");
+		if (bPersistent)
+		{
+			charMan->LockResources();
+		}
+		else
+		{
+			charMan->UnlockResources();
+		}
+	}
+
+	return pH->EndFunction();
+}
+
+//------------------------------------------------------------------------
+int CScriptBind_GameRules::CacheCharacter(IFunctionHandler* pH, const char* character)
+{
+	CGameRules* pGameRules = GetGameRules(pH);
+	if (!pGameRules)
+		return pH->EndFunction();
+
+	ICharacterManager* charMan = gEnv->pCharacterManager;
+	if (charMan)
+	{
+		charMan->LockResources();
+		ICharacterInstance* pCharInst = charMan->CreateInstance(character);
+		//CryLogAlways("Created character instance for %s", character);
+	}
+
+	return pH->EndFunction();
 }

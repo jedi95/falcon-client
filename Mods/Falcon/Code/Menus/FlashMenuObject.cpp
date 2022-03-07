@@ -41,7 +41,6 @@ History:
 #include "IActionMapManager.h"
 #include "GameActions.h"
 #include "IViewSystem.h"
-#include "LaptopUtil.h"
 #include "GameNetworkProfile.h"
 #include "SPAnalyst.h"
 
@@ -79,7 +78,6 @@ CFlashMenuObject::CFlashMenuObject()
 
 	m_pCurrentFlashMenuScreen	= NULL;
 	m_pSubtitleScreen = NULL;
-	m_pAnimLaptopScreen = NULL;
 	m_pPlayerProfileManager = NULL;
 	m_bControllerConnected = false;
 	m_iGamepadsConnected = 0;
@@ -170,21 +168,6 @@ CFlashMenuObject::CFlashMenuObject()
 		SAFE_DELETE(m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]);
 	}
 
-	// Laptop Gaming TDK returns -1 when functions failed
-	m_ulBatteryLifeTime		= -1;
-	m_iBatteryLifePercent	= -1;
-	m_iWLanSignalStrength	= -1;
-	m_fLaptopUpdateTime = gEnv->pTimer->GetAsyncTime().GetSeconds();
-	m_bForceLaptopUpdate = true;
-
-	if(SAFE_LAPTOPUTIL_FUNC_RET(IsLaptop()))
-	{
-		m_pAnimLaptopScreen = new CFlashMenuScreen;
-		m_pAnimLaptopScreen->Load("Libs/UI/HUD_Battery.gfx");
-		m_pAnimLaptopScreen->SetDock(eFD_Right);
-		m_pAnimLaptopScreen->RepositionFlashAnimation();
-	}
-
 	m_pMusicSystem = gEnv->pSystem->GetIMusicSystem();
 
 	m_multiplayerMenu = new CMPHub();
@@ -213,7 +196,6 @@ CFlashMenuObject::~CFlashMenuObject()
 	SAFE_RELEASE(m_pVideoPlayer);
 	SAFE_DELETE(m_pMovieMgr);
 	SAFE_DELETE(m_pSubtitleScreen);
-	SAFE_DELETE(m_pAnimLaptopScreen);
 
 	if(gEnv->pSystem->IsEditor() || gEnv->pSystem->IsDedicated()) return;
 
@@ -280,11 +262,6 @@ void CFlashMenuObject::UpdateRatio()
 		{
 			m_apFlashMenuScreens[i]->UpdateRatio();
 		}
-	}
-
-	if(m_pAnimLaptopScreen)
-	{
-		m_pAnimLaptopScreen->RepositionFlashAnimation();
 	}
 
 	StopVideo();
@@ -2997,11 +2974,11 @@ void CFlashMenuObject::InitStartMenu()
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Invoke("set64Bit",true);
 #endif
 
-		SModInfo info;
-		if(g_pGame->GetIGameFramework()->GetModInfo(&info))
-		{
-			m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Invoke("addLoadedModText",info.m_name);
-		}
+		//SModInfo info;
+		//if(g_pGame->GetIGameFramework()->GetModInfo(&info))
+		//{
+			m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Invoke("addLoadedModText","Falcon");
+		//}
 
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Invoke("Directx10", (gEnv->pRenderer->GetRenderType() == eRT_DX10)?true:false);
 		time_t today = time(NULL);
@@ -3093,11 +3070,11 @@ void CFlashMenuObject::InitIngameMenu()
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Invoke("set64Bit",true);
 #endif
 
-		SModInfo info;
-		if(g_pGame->GetIGameFramework()->GetModInfo(&info))
-		{
-			m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Invoke("addLoadedModText",info.m_name);
-		}
+		//SModInfo info;
+		//if(g_pGame->GetIGameFramework()->GetModInfo(&info))
+		//{
+			m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Invoke("addLoadedModText","Falcon");
+		//}
 
 		if(m_pPlayerProfileManager)
 		{
@@ -3299,6 +3276,15 @@ void CFlashMenuObject::OnPostUpdate(float fDeltaTime)
 			if (!gEnv->pSoundSystem->IsPaused())
 				PlaySound(ESound_MenuAmbience);
 		}
+
+		if (g_pGame->GetDX10Fix())
+		{
+			if (ICVar *pVar=gEnv->pConsole->GetCVar("r_DisplayInfo"))
+			{
+				pVar->Set(0);
+			}
+			g_pGame->SetDX10Fix(false);
+		}
 	}
 
 #ifdef SP_DEMO
@@ -3430,12 +3416,6 @@ void CFlashMenuObject::OnPostUpdate(float fDeltaTime)
 			m_nBlackGraceFrames = 0;
 	}
 
-	if(NULL == m_pCurrentFlashMenuScreen || !m_pCurrentFlashMenuScreen->IsLoaded())
-	{
-		UpdateLaptop(fDeltaTime);
-		return;
-	}
-
 	if(m_pMusicSystem && m_fMusicFirstTime != -1.0f)
 	{
 		if(gEnv->pTimer->GetAsyncTime().GetSeconds() >= m_fMusicFirstTime+78.0f)
@@ -3502,7 +3482,6 @@ void CFlashMenuObject::OnPostUpdate(float fDeltaTime)
 		m_pFlashPlayer->Render();
 	}
 
-	UpdateLaptop(fDeltaTime);
 	UpdateNetwork(fDeltaTime);
 
 	// When we quit the game for the main menu or we load a game while we are already playing, there is a
@@ -4151,61 +4130,6 @@ void CFlashMenuObject::CloseWaitingScreen()
 	m_bLoadingDone = false;
 	m_bUpdate = false;
 	m_nBlackGraceFrames = gEnv->pRenderer->GetFrameID(false) + BLACK_FRAMES;
-}
-
-//-----------------------------------------------------------------------------------------------------
-
-void CFlashMenuObject::UpdateLaptop(float fDeltaTime)
-{
-	if(m_pAnimLaptopScreen)
-	{
-		float fTime = gEnv->pTimer->GetAsyncTime().GetSeconds();
-		if(fTime >= m_fLaptopUpdateTime+1.0f || m_bForceLaptopUpdate)
-		{
-			SAFE_LAPTOPUTIL_FUNC(Update());
-			m_fLaptopUpdateTime = fTime;
-		}
-		unsigned long ulBatteryLifeTime = SAFE_LAPTOPUTIL_FUNC_RET(GetBattteryLifeTime());
-		int iBatteryLifePercent = SAFE_LAPTOPUTIL_FUNC_RET(GetBatteryLife());
-		int iWLanSignalStrength = -1;
-		if(SAFE_LAPTOPUTIL_FUNC_RET(IsWLan()))
-		{
-			iWLanSignalStrength = SAFE_LAPTOPUTIL_FUNC_RET(GetWLanSignalStrength());
-		}
-		// Update only when necessary
-		if(	m_ulBatteryLifeTime		!= ulBatteryLifeTime		||
-				m_iBatteryLifePercent != iBatteryLifePercent	||
-				m_iWLanSignalStrength != iWLanSignalStrength	||
-				m_bForceLaptopUpdate)
-		{
-			char szBatteryLifeTime[256];
-			char szBatteryLifePercent[256];
-			char szWLanSignalStrength[256];
-			if(-1 == m_ulBatteryLifeTime)
-			{
-				// Remaining seconds is unknown
-				sprintf(szBatteryLifeTime,"N/A");
-			}
-			else
-			{
-				uint uiBatteryLifeTimeHours	= ulBatteryLifeTime / 3600;
-				uint uiBatteryLifeTimeMinutes = (ulBatteryLifeTime % 3600) / 60;
-				uint uiBatteryLifeTimeSeconds = (ulBatteryLifeTime % 3600) % 60;
-				sprintf(szBatteryLifeTime,"%2d:%2d:%2d",uiBatteryLifeTimeHours,uiBatteryLifeTimeMinutes,uiBatteryLifeTimeSeconds);
-			}
-			sprintf(szBatteryLifePercent,"%d",iBatteryLifePercent);
-			sprintf(szWLanSignalStrength,"%d",iWLanSignalStrength);
-			SFlashVarValue args[3] = {szBatteryLifeTime,szBatteryLifePercent,szWLanSignalStrength};
-			m_pAnimLaptopScreen->CheckedInvoke("setNotebookStatus",args,3);
-			m_ulBatteryLifeTime		= ulBatteryLifeTime;
-			m_iBatteryLifePercent = iBatteryLifePercent;
-			m_iWLanSignalStrength = iWLanSignalStrength;
-			m_bForceLaptopUpdate = false;
-		}
-
-		m_pAnimLaptopScreen->GetFlashPlayer()->Advance(fDeltaTime);
-		m_pAnimLaptopScreen->GetFlashPlayer()->Render();
-	}
 }
 
 //-----------------------------------------------------------------------------------------------------

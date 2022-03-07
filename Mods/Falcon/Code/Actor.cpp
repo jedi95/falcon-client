@@ -371,6 +371,7 @@ bool CActor::Init( IGameObject * pGameObject )
 	return true;
 }
 
+
 void CActor::PostInit( IGameObject * pGameObject )
 {
 	pGameObject->EnableUpdateSlot( this, 0 );	
@@ -398,6 +399,17 @@ void CActor::PostInit( IGameObject * pGameObject )
 	}
 
 	InitActorAttachments();
+
+	//CryMP: Fix Ghost #4
+	if (IsPlayer())
+	{
+		IEntityRenderProxy* pProxy = static_cast<IEntityRenderProxy*>(GetEntity()->GetProxy(ENTITY_PROXY_RENDER));
+		if (pProxy && pProxy->GetRenderNode())
+		{
+			pProxy->GetRenderNode()->SetViewDistUnlimited();
+			pProxy->GetRenderNode()->SetLodRatio(255);
+		}
+	}
 }
 
 //----------------------------------------------------------------------
@@ -428,6 +440,137 @@ void CActor::InitClient(int channelId)
 {
 	if (GetHealth()<=0 && !GetSpectatorMode())
 		GetGameObject()->InvokeRMI(ClSimpleKill(), NoParams(), eRMI_ToClientChannel, channelId);
+}
+
+// Crafty #CustomCharacters
+//------------------------------------------------------------------------
+void CActor::ReviveInPlace(Vec3 pos, Ang3 angles)
+{
+	Quat rot(Quat::CreateRotationXYZ(angles));
+	GetEntity()->SetWorldTM(Matrix34::Create(Vec3(1, 1, 1), rot, pos));
+
+	m_reviveNoReactionTime = .1f;
+	//m_dropWpnPendingId = 0;
+	//m_dropWpnWaitTime = 0.f;
+	//m_suicideDelay = -1.f;
+	//ClearExtensionCache();
+
+	//set the actor game parameters
+	SmartScriptTable gameParams;
+	if (GetEntity()->GetScriptTable() && GetEntity()->GetScriptTable()->GetValue("gameParams", gameParams))
+		SetParams(gameParams, true);
+
+	EntityId currentItemId = GetCurrentItemId(false);
+
+	SetActorModel(); // set the model before physicalizing
+
+	if (currentItemId && gEnv->bClient && !gEnv->bServer)
+	{
+		//		CryLogAlways("GAME: Item selected before model updated!!1");
+		m_pItemSystem->SetActorItem(this, (EntityId)0, false);
+		SelectItem(currentItemId, false);
+	}
+
+	m_stance = STANCE_NULL;
+	m_desiredStance = STANCE_NULL;
+	m_previousStance = STANCE_NULL;
+
+	Physicalize();
+	if (gEnv->bServer)
+		GetGameObject()->SetAspectProfile(eEA_Physics, eAP_Alive);
+
+	Freeze(false);
+
+	if (IPhysicalEntity* pPhysics = GetEntity()->GetPhysics())
+	{
+		pe_action_move actionMove;
+		actionMove.dir.zero();
+		actionMove.iJump = 1;
+
+		pe_action_set_velocity actionVel;
+		actionVel.v.zero();
+		actionVel.w.zero();
+
+		pPhysics->Action(&actionMove);
+		pPhysics->Action(&actionVel);
+	}
+
+	m_zoomSpeedMultiplier = 1.0f;
+
+	memset(m_boneIDs, -1, sizeof(m_boneIDs));
+
+	if (m_pAnimatedCharacter)
+		m_pAnimatedCharacter->ResetState();
+	if (m_pMovementController)
+		m_pMovementController->Reset();
+	if (m_pGrabHandler)
+		m_pGrabHandler->Reset();
+
+	m_sleepTimer = 0.0f;
+
+	m_linkStats = SLinkStats();
+
+	m_inCombat = false;
+	m_enterCombat = false;
+	m_combatTimer = 0.0f;
+	//	m_lastFootStepPos = ZERO;
+	m_rightFoot = true;
+	m_pReplacementMaterial = 0;
+
+	m_frozenAmount = 0.0f;
+
+	if (m_screenEffects)
+		m_screenEffects->ClearAllBlendGroups(true);
+
+	if (IsClient())
+		gEnv->p3DEngine->ResetPostEffects();
+
+	//reset some AG inputs
+	if (m_pAnimatedCharacter)
+	{
+		UpdateAnimGraph(m_pAnimatedCharacter->GetAnimationGraphState());
+		m_pAnimatedCharacter->GetAnimationGraphState()->SetInput("Action", "idle");
+		m_pAnimatedCharacter->GetAnimationGraphState()->SetInput("waterLevel", 0);
+		m_pAnimatedCharacter->SetParams(m_pAnimatedCharacter->GetParams().ModifyFlags(eACF_EnableMovementProcessing, 0));
+		m_pAnimatedCharacter->GetAnimationGraphState()->SetInput(m_inputHealth, GetMaxHealth());
+	}
+
+	if (ICharacterInstance* pCharacter = GetEntity()->GetCharacter(0))
+		pCharacter->EnableProceduralFacialAnimation(GetMaxHealth() > 0);
+
+	if (IEntityPhysicalProxy* pPProxy = (IEntityPhysicalProxy*)GetEntity()->GetProxy(ENTITY_PROXY_PHYSICS))
+		pPProxy->EnableRestrictedRagdoll(false);
+}
+
+//------------------------------------------------------------------------
+void CActor::NetReviveInPlaceInVehicle()
+{
+	// fix our physicalization, since it's need for some vehicle stuff, and it will be set correctly before the end of the frame
+	// make sure we are alive, for when we transition from ragdoll to linked...
+	if (!GetEntity()->GetPhysics() || GetEntity()->GetPhysics()->GetType() != PE_LIVING)
+		Physicalize();
+
+	IVehicle* pVehicle = GetLinkedVehicle();
+	assert(pVehicle);
+	if (pVehicle)
+	{
+		IVehicleSeat* pSeat = pVehicle->GetSeatForPassenger(GetEntityId());
+		if (pSeat && (!pSeat->GetPassenger() || pSeat->GetPassenger() == GetEntityId()))
+		{
+			pSeat->UnlinkPassenger(false);
+			pSeat->Exit(false, true, GetEntity()->GetPos());
+			pSeat->ForceFinishExiting();
+			ReviveInPlace(GetEntity()->GetPos(), GetEntity()->GetWorldAngles());
+			bool bSuccess = pSeat->Enter(GetEntityId(), false);
+		}
+	}
+
+	if (IsClient())
+	{
+		SupressViewBlending(); // no view bleding when respawning // CActor::Revive resets it.
+		if (g_pGame->GetHUD())
+			g_pGame->GetHUD()->GetRadar()->Reset();
+	}
 }
 
 //------------------------------------------------------------------------
@@ -2321,6 +2464,7 @@ void CActor::UpdateAnimGraph( IAnimationGraphState * pState )
 			// NOTE: freefall & parachute was moved to ChangeParachuteState() in Player.cpp.
 		}
 	}
+
 	//state.pHealth = &m_health;
 
 	//const char * p = GetStanceInfo(m_stance)->name;
@@ -3311,7 +3455,7 @@ IMPLEMENT_RMI(CActor, SvRequestPickUpItem)
 	if (!pItem)
 	{
 		// this may occur if the item has been deleted but the client has not yet been informed
-		GameWarning("[gamenet] Failed to pickup item. Item not found!");
+		//GameWarning("[gamenet] Failed to pickup item. Item not found!");
 		return true;
 	}
 

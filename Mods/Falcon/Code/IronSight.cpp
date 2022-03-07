@@ -16,6 +16,7 @@ History:
 #include "GameCVars.h"
 #include "Single.h"
 #include "BulletTime.h"
+#include "IPlayerInput.h"
 
 #define PHYS_FOREIGN_ID_DOF_QUERY PHYS_FOREIGN_ID_USER+3
 
@@ -464,7 +465,10 @@ void CIronSight::EnterZoom(float time, const char *zoom_layer, bool smooth, int 
 		m_pWeapon->SetActionSuffix(m_zoomparams.suffix_FC.c_str());
 	else
 		m_pWeapon->SetActionSuffix(m_zoomparams.suffix.c_str());
-	m_pWeapon->PlayAction(m_actions.zoom_in, 0, false, CItem::eIPAF_Default);
+
+	float zoomSpeedMult = 2.0f;
+
+	m_pWeapon->PlayAction(m_actions.zoom_in, 0, false, CItem::eIPAF_Default, zoomSpeedMult);
 }
 
 void CIronSight::LeaveZoom(float time, bool smooth)
@@ -495,7 +499,10 @@ void CIronSight::LeaveZoom(float time, bool smooth)
 	if(playAnim)
 	{
 		m_pWeapon->StopLayer(m_zoomparams.layer, CItem::eIPAF_Default|CItem::eIPAF_NoBlend);
-		m_pWeapon->PlayAction(m_actions.zoom_out, 0, false, CItem::eIPAF_Default);
+
+		float zoomSpeedMult = 2.0f;
+
+		m_pWeapon->PlayAction(m_actions.zoom_out, 0, false, CItem::eIPAF_Default, zoomSpeedMult);
 	}
 	
 	m_pWeapon->SetActionSuffix("");
@@ -543,6 +550,9 @@ struct CIronSight::EnableTurnOffAction
 
 void CIronSight::TurnOff(bool enable, bool smooth, bool anim)
 {
+	float zoomSpeedMult = 1.0f;
+	float zoomAnimSpeedMult = 2.0f;
+
 	if (!enable && (m_savedFoVScale > 0.0f))
 	{
 		OnEnterZoom();
@@ -552,7 +562,7 @@ void CIronSight::TurnOff(bool enable, bool smooth, bool anim)
 
 		SetActorSpeedScale(0.35f);
 
-		ZoomIn(m_zoomparams.zoom_out_time, oFoV, tFoV, smooth);
+		ZoomIn(m_zoomparams.zoom_out_time / zoomSpeedMult, oFoV, tFoV, smooth);
 
 		if (anim)
 		{
@@ -560,10 +570,12 @@ void CIronSight::TurnOff(bool enable, bool smooth, bool anim)
 				m_pWeapon->SetActionSuffix(m_zoomparams.suffix_FC.c_str());
 			else
 				m_pWeapon->SetActionSuffix(m_zoomparams.suffix.c_str());
-			m_pWeapon->PlayAction(m_actions.zoom_in);
+			m_pWeapon->PlayAction(m_actions.zoom_in, 0, false, CItem::eIPAF_Default, zoomAnimSpeedMult);
 		}
 
-		m_pWeapon->GetScheduler()->TimerAction((uint)(m_zoomparams.zoom_out_time*1000), CSchedulerAction<DisableTurnOffAction>::Create(this), false);
+		//Possibly revert this if problems occur
+		//m_pWeapon->GetScheduler()->TimerAction((uint)(m_zoomparams.zoom_out_time*1000), CSchedulerAction<DisableTurnOffAction>::Create(this), false);
+		m_pWeapon->GetScheduler()->TimerAction((uint)((m_zoomparams.zoom_out_time / zoomSpeedMult)*1000), CSchedulerAction<DisableTurnOffAction>::Create(this), false);
 		m_savedFoVScale = 0.0f;
 	}
 	else if (m_zoomed && enable)
@@ -577,18 +589,20 @@ void CIronSight::TurnOff(bool enable, bool smooth, bool anim)
 		float tFoV = m_savedFoVScale;
 
 		SetActorSpeedScale(1);
-		ZoomOut(m_zoomparams.zoom_out_time, tFoV, oFoV, smooth);
+		ZoomOut(m_zoomparams.zoom_out_time / zoomSpeedMult, tFoV, oFoV, smooth);
 
 		m_pWeapon->StopLayer(m_zoomparams.layer, CItem::eIPAF_Default|CItem::eIPAF_NoBlend);
 		m_pWeapon->SetDefaultIdleAnimation(CItem::eIGS_FirstPerson, g_pItemStrings->idle);
 
 		if (anim)
 		{
-			m_pWeapon->PlayAction(m_actions.zoom_out);
+			m_pWeapon->PlayAction(m_actions.zoom_out, 0, false, CItem::eIPAF_Default, zoomAnimSpeedMult);
 			m_pWeapon->SetActionSuffix("");
 		}
 
-		m_pWeapon->GetScheduler()->TimerAction((uint)(m_zoomparams.zoom_out_time*1000), CSchedulerAction<EnableTurnOffAction>::Create(this), false);
+		//Possibly revert this if problems occur
+		//m_pWeapon->GetScheduler()->TimerAction((uint)(m_zoomparams.zoom_out_time*1000), CSchedulerAction<EnableTurnOffAction>::Create(this), false);
+		m_pWeapon->GetScheduler()->TimerAction((uint)((m_zoomparams.zoom_out_time / zoomSpeedMult)*1000), CSchedulerAction<EnableTurnOffAction>::Create(this), false);
 	}
 }
 
@@ -1156,6 +1170,9 @@ void CIronSight::ZoomSway(float time, float &x, float&y)
 			stanceScale = m_zoomsway.crouchScale;
 		else if(pPlayer->GetStance()==STANCE_PRONE)
 			stanceScale = m_zoomsway.proneScale;
+
+		//CryMP: let server know about zoom sway
+		pPlayer->GetGameObject()->ChangedNetworkState(IPlayerInput::INPUT_ASPECT);
 	}
 
 	//Time factor

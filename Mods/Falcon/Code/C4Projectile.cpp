@@ -64,7 +64,11 @@ void CC4Projectile::HandleEvent(const SGameObjectEvent &event)
 //-------------------------------------------
 void CC4Projectile::Launch(const Vec3 &pos, const Vec3 &dir, const Vec3 &velocity, float speedScale)
 {
-	CProjectile::Launch(pos, dir, velocity, speedScale);
+	float speedScaleMod = speedScale;
+	if (g_pGameCVars->fn_c4ThrowVelocityMultiplier != 0)
+		speedScaleMod *= g_pGameCVars->fn_c4ThrowVelocityMultiplier;
+
+	CProjectile::Launch(pos, dir, velocity, speedScaleMod);
 
 	if(gEnv->bMultiplayer && gEnv->bServer)
 	{

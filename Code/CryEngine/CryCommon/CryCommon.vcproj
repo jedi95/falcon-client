@@ -5,9 +5,6 @@
 	Name="CryCommon"
 	ProjectGUID="{AEB958D4-45CA-478B-BA8E-D0E897CE974B}"
 	RootNamespace="CryCommon"
-	SccProjectName="Perforce Project"
-	SccLocalPath="."
-	SccProvider="MSSCCI:Perforce SCM"
 	Keyword="MakeFileProj"
 	>
 	<Platforms>
@@ -68,8 +65,8 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory="$(SolutionDir)..\..\BinTemp\$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(SolutionDir)..\..\BinTemp\$(PlatformName)\$(ConfigurationName)\$(ProjectName)\"
+			OutputDirectory="$(SolutionDir)..\Bin32\"
+			IntermediateDirectory="$(SolutionDir)..\BinTemp\$(PlatformName)\$(ConfigurationName)\$(ProjectName)\"
 			ConfigurationType="10"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
@@ -89,8 +86,8 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|x64"
-			OutputDirectory="$(SolutionDir)..\..\Bin64"
-			IntermediateDirectory="$(SolutionDir)..\..\BinTemp\$(PlatformName)\$(ConfigurationName)\$(ProjectName)\"
+			OutputDirectory="$(SolutionDir)..\Bin64"
+			IntermediateDirectory="$(SolutionDir)..\BinTemp\$(PlatformName)\$(ConfigurationName)\$(ProjectName)\"
 			ConfigurationType="10"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"

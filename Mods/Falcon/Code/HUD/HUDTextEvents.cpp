@@ -339,6 +339,13 @@ void CHUD::DisplayKillMessage(const char* name, int times, bool teamkill, bool f
 	if(g_pGameCVars->hud_showKillMessages==0)
 		return;
 
+	std::string testStr (name);
+	if (testStr.find("<!--") != -1)
+	{
+		CryLogAlways("Prevented crash from bad player name: %s", name);
+		return;
+	}
+
 	CryFixedStringT<128> message("");
 	bool showname = true;
 	

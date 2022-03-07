@@ -337,7 +337,7 @@ void CFists::RaiseWeapon(bool raise, bool faster /*= false*/)
 					pMC->GetMovementState(state);
 
 					Vec3 impulseDir = -state.eyeDirection*600.0f;
-					impulseDir.z = 0.0f;
+					impulseDir.z = impulseDir.z * g_pGameCVars->fn_wallJumpMultiplier;
 					
 					pe_action_impulse impulse;
 					impulse.iApplyTime = 1;

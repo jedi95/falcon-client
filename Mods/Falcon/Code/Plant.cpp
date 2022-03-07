@@ -236,7 +236,6 @@ bool CPlant::GetPlantingParameters(Vec3& pos, Vec3& dir, Vec3& vel) const
 			return false;
 		else
 		{
-			// check surface normal - must be close to up
 			if(hit.n.z < 0.8f)
 				return false;
 
@@ -315,7 +314,12 @@ struct CPlant::StartPlantAction
 		}
 		else
 		{
-			pPlant->m_pWeapon->PlayAction(g_pItemStrings->select.c_str(),0,false,CItem::eIPAF_Default|CItem::eIPAF_NoBlend|CItem::eIPAF_CleanBlending);
+			//Plant speed multiplier
+			float aniSpeedMultiplier = -1.0f;
+            if (g_pGameCVars->fn_fixExplosivePlant) {
+                aniSpeedMultiplier = 2.0f;
+            }
+			pPlant->m_pWeapon->PlayAction(g_pItemStrings->select.c_str(),0,false,CItem::eIPAF_Default|CItem::eIPAF_NoBlend|CItem::eIPAF_CleanBlending, aniSpeedMultiplier);
 			pPlant->m_pWeapon->HideItem(false);
 		}
 	}
@@ -337,9 +341,18 @@ void CPlant::StartFire()
 	{
 		m_planting = true;
 		m_pWeapon->SetBusy(true);
-		m_pWeapon->PlayAction(m_plantactions.plant.c_str());
 
-		m_plantTimer = m_plantparams.delay;
+		//Plant speed multiplier
+		float plantSpeedMult = 1.0f;
+		float aniSpeedMultiplier = -1.0f;
+        if (g_pGameCVars->fn_fixExplosivePlant) {
+            plantSpeedMult = 0.5f;
+            aniSpeedMultiplier = 2.0f;
+        }
+
+		m_pWeapon->PlayAction(m_plantactions.plant.c_str(),0,false,CItem::eIPAF_Default, aniSpeedMultiplier);
+
+		m_plantTimer = m_plantparams.delay * plantSpeedMult;
 
 		m_pWeapon->GetScheduler()->TimerAction(m_pWeapon->GetCurrentAnimationTime(CItem::eIGS_FirstPerson), CSchedulerAction<StartPlantAction>::Create(this), false);
 	}
@@ -478,11 +491,11 @@ bool CPlant::PlayerStanceOK() const
 	if(m_plantparams.need_to_crouch && m_pWeapon->GetOwnerActor())
 	{
 		CActor* pActor = (CActor*)m_pWeapon->GetOwnerActor();
+
 		ok = (pActor->GetStance() == STANCE_CROUCH);
 		if(ok)
 		{
 			ok &= (pActor->GetActorStats()->velocity.GetLengthSquared() < 0.1f);
-
 			if(ok)
 			{
 				// also fire a ray forwards to check the placement position is nearby

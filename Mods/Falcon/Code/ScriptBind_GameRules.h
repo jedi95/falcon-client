@@ -44,6 +44,13 @@ public:
 
 	int SpawnPlayer(IFunctionHandler *pH, int channelId, const char *name, const char *className, Vec3 pos, Vec3 angles);
 	int ChangePlayerClass(IFunctionHandler *pH, int channelId, const char *className);
+
+	// Crafty #CustomCharacters
+	int ReviveInPlace(IFunctionHandler* pH, ScriptHandle playerId, Vec3 pos, Vec3 angles);
+	int ReviveInPlaceInVehicle(IFunctionHandler* pH, ScriptHandle playerId);
+	int SetPersistentCharResources(IFunctionHandler* pH, bool bPersistent);
+	int CacheCharacter(IFunctionHandler* pH, const char* character);
+
 	int RevivePlayer(IFunctionHandler *pH, ScriptHandle playerId, Vec3 pos, Vec3 angles, int teamId, bool clearInventory);
 	int RevivePlayerInVehicle(IFunctionHandler *pH, ScriptHandle playerId, ScriptHandle vehicleId, int seatId, int teamId, bool clearInventory);
 	int RenamePlayer(IFunctionHandler *pH, ScriptHandle playerId, const char *name);

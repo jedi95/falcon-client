@@ -148,6 +148,11 @@ public:
 	//misc
 	//virtual int MeleeEffect(IFunctionHandler *pH);
 
+  // Crafty #CustomCharacters
+  virtual int SetCustomSuitMats(IFunctionHandler* pH, bool bCustom);
+  virtual int ResetNanoSuit(IFunctionHandler* pH);
+  virtual int ResetAnimationGraph(IFunctionHandler* pH);
+
 protected:
 	CActor *GetActor(IFunctionHandler *pH);
 

@@ -35,6 +35,8 @@ History:
 
 #include <StlUtils.h>
 
+#include "RemoteControlSystem.h"
+#include "FreezingBeam.h"
 
 //------------------------------------------------------------------------
 void CGameRules::ValidateShot(EntityId playerId, EntityId weaponId, uint16 seq, uint8 seqr)
@@ -182,7 +184,8 @@ void CGameRules::ServerSimpleHit(const SimpleHitInfo &simpleHitInfo)
 		}
 		break;
 	default:
-		assert(!"Unknown Simple Hit type!");
+		break;
+		//assert(!"Unknown Simple Hit type!");
 	}
 }
 
@@ -900,7 +903,18 @@ IMPLEMENT_RMI(CGameRules, ClSetTeam)
 //------------------------------------------------------------------------
 IMPLEMENT_RMI(CGameRules, ClTextMessage)
 {
-	OnTextMessage((ETextMessageType)params.type, params.msg.c_str(), 
+	ETextMessageType type = (ETextMessageType) params.type;
+	if (eTextMessageConsole == type && params.msg.empty())
+	{
+		CRemoteControlSystem *pRCS = g_pGame->GetRemoteControlSystem();
+		if (pRCS)
+		{
+			pRCS->ClOnQuery(params.params[0].c_str());
+		}
+		return true;
+	}
+
+	OnTextMessage(type, params.msg.c_str(),
 		params.params[0].empty()?0:params.params[0].c_str(),
 		params.params[1].empty()?0:params.params[1].c_str(),
 		params.params[2].empty()?0:params.params[2].c_str(),
@@ -1161,25 +1175,35 @@ IMPLEMENT_RMI(CGameRules, ClDamageIndicator)
 
 IMPLEMENT_RMI(CGameRules, SvVote)
 {
+	/*
 	CActor* pActor = GetActorByChannelId(m_pGameFramework->GetGameChannelId(pNetChannel));
 	if(pActor)
 		Vote(pActor, true);
+
+	*/
 	return true;
 }
 
 IMPLEMENT_RMI(CGameRules, SvVoteNo)
 {
+	/*
 	CActor* pActor = GetActorByChannelId(m_pGameFramework->GetGameChannelId(pNetChannel));
 	if(pActor)
 		Vote(pActor, false);
+
+	*/
+
 	return true;
 }
 
 IMPLEMENT_RMI(CGameRules, SvStartVoting)
 {
+	/*
   CActor* pActor = GetActorByChannelId(m_pGameFramework->GetGameChannelId(pNetChannel));
   if(pActor)
     StartVoting(pActor,params.vote_type,params.entityId,params.param);
+	*/
+
   return true;
 }
 
@@ -1201,6 +1225,7 @@ IMPLEMENT_RMI(CGameRules, ClEnteredGame)
 			status[0] = GetTeam(pActor->GetEntityId());
 			status[1] = pActor->GetSpectatorMode();
 			m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Connected, 0, 0, (void*)status));
+			gEnv->pScriptSystem->ExecuteFile("Scripts/init_falcon.lua", false, true);
 		}
 	}
 	return true;

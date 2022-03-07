@@ -492,10 +492,16 @@ bool CWeapon::OnActionModify(EntityId actorId, const ActionId& actionId, int act
 		if(m_weaponRaised)
 			RaiseWeapon(false,true);
 
+		//Vader mod weapon menu animation speed
+		float animSpeed = -1.0f;
+		if (g_pGameCVars->fn_fastWeaponMenu)
+			animSpeed = 50.0f;
+
 		if (m_modifying && !m_transitioning)
 		{
 			StopLayer(g_pItemStrings->modify_layer, eIPAF_Default, false);
-			PlayAction(g_pItemStrings->leave_modify, 0);
+
+			PlayAction(g_pItemStrings->leave_modify, 0, false, eIPAF_Default, animSpeed);
 			m_dofSpeed = -1.0f/((float)GetCurrentAnimationTime(eIGS_FirstPerson)/1000.0f);
 			m_dofValue = 1.0f;
 			m_focusValue = -1.0f;
@@ -517,7 +523,7 @@ bool CWeapon::OnActionModify(EntityId actorId, const ActionId& actionId, int act
 			gEnv->p3DEngine->SetPostEffectParam("Dof_FocusLimit", 20.0f);
 			gEnv->p3DEngine->SetPostEffectParam("Dof_UseMask", 0.0f);
 
-			PlayAction(g_pItemStrings->enter_modify, 0, false, eIPAF_Default | eIPAF_RepeatLastFrame);
+			PlayAction(g_pItemStrings->enter_modify, 0, false, eIPAF_Default | eIPAF_RepeatLastFrame, animSpeed);
 			m_dofSpeed = 1.0f/((float)GetCurrentAnimationTime(eIGS_FirstPerson)/1000.0f);
 			m_dofValue = 0.0f;
 			m_transitioning = true;

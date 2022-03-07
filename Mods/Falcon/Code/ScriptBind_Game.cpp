@@ -53,6 +53,7 @@ void CScriptBind_Game::RegisterMethods()
 	SCRIPT_REG_TEMPLFUNC(PlayVideo, "");
 	SCRIPT_REG_TEMPLFUNC(QueryBattleStatus, "");
 	SCRIPT_REG_TEMPLFUNC(GetNumLightsActivated,"");
+	SCRIPT_REG_TEMPLFUNC(GetRootFolder, "");
 
 #undef SCRIPT_REG_CLASSNAME
 }
@@ -154,4 +155,10 @@ int CScriptBind_Game::QueryBattleStatus(IFunctionHandler *pH)
 int CScriptBind_Game::GetNumLightsActivated(IFunctionHandler *pH)
 {		
 	return pH->EndFunction(CLam::GetNumLightsActivated());
+}
+
+//////////////////////////////////////////////////////////////////////////
+int CScriptBind_Game::GetRootFolder(IFunctionHandler* pH)
+{
+	return pH->EndFunction(gEnv->pSystem->GetRootFolder());
 }

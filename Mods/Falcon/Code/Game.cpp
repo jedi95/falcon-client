@@ -39,8 +39,8 @@
 #include "ScriptBind_Weapon.h"
 #include "ScriptBind_GameRules.h"
 #include "ScriptBind_Game.h"
+
 #include "HUD/ScriptBind_HUD.h"
-#include "LaptopUtil.h"
 #include "LCD/LCDWrapper.h"
 
 #include "GameFactory.h"
@@ -57,7 +57,17 @@
 #include "ISaveGame.h"
 #include "ILoadGame.h"
 
+#include "Falcon.h"
+#include "RemoteControlSystem.h"
+
 #include "DownloadTask.h"
+#include "ModCursor.h"
+CModCursor *m_pCursor = 0;
+
+#include "ILauncher.h"
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
 #define GAME_DEBUG_MEM  // debug memory usage
 #undef  GAME_DEBUG_MEM
@@ -77,7 +87,6 @@ int OnImpulse( const EventPhys *pEvent )
 	return 0;
 }
 
-//
 
 // Needed for the Game02 specific flow node
 CG2AutoRegFlowNodeBase *CG2AutoRegFlowNodeBase::m_pFirst=0;
@@ -103,8 +112,10 @@ CGame::CGame()
 	m_pClientSynchedStorage(0),
 	m_uiPlayerID(-1),
 	m_pSPAnalyst(0),
-	m_pLaptopUtil(0),
-	m_pDownloadTask(0)
+	m_pDownloadTask(0),
+	m_pLauncher(0),
+	m_dx10Fix(false),
+	m_pRemoteControlSystem(0)
 {
 	m_pCVars = new SCVars();
 	g_pGameCVars = m_pCVars;
@@ -118,6 +129,7 @@ CGame::CGame()
 	m_pDefaultAM = 0;
 	m_pMultiplayerAM = 0;
 
+	m_pCursor = new CModCursor();
 	GetISystem()->SetIGame( this );
 }
 
@@ -125,11 +137,11 @@ CGame::~CGame()
 {
   m_pFramework->EndGameContext();
   m_pFramework->UnregisterListener(this);
+
   ReleaseScriptBinds();
 	ReleaseActionMaps();
 	SAFE_DELETE(m_pFlashMenuObject);
 	SAFE_DELETE(m_pOptionsManager);
-	SAFE_DELETE(m_pLaptopUtil);
 	SAFE_DELETE(m_pBulletTime);
 	SAFE_DELETE(m_pSoundMoods);
 	SAFE_DELETE(m_pHUD);
@@ -142,7 +154,12 @@ CGame::~CGame()
 	g_pGameCVars = 0;
 	g_pGameActions = 0;
 	SAFE_DELETE(m_pDownloadTask);
+	SAFE_DELETE(m_pCursor);
+	SAFE_DELETE(m_pLauncher);
+	SAFE_DELETE(m_pRemoteControlSystem);
 }
+
+
 
 bool CGame::Init(IGameFramework *pFramework)
 {
@@ -312,10 +329,6 @@ bool CGame::Init(IGameFramework *pFramework)
 
 	m_pOptionsManager->SetProfileManager(m_pPlayerProfileManager);
 
-	// CLaptopUtil must be created before CFlashMenuObject as this one relies on it
-	if(!m_pLaptopUtil)
-		m_pLaptopUtil = new CLaptopUtil;
-
 	if (!m_pLCD)
 	{
 #ifdef USE_G15_LCD
@@ -339,25 +352,21 @@ bool CGame::Init(IGameFramework *pFramework)
 		m_pFlashMenuObject->Load();
 	}
 
-	if (bIsFirstTime)
+	if (m_pOptionsManager->IsFirstStart() || bResetProfile)
 	{
-		if (m_pOptionsManager->IsFirstStart() || bResetProfile)
-		{
-			CryLogAlways("[GameProfiles]: PlayerProfileManager reported first-time login. Running AutoDetectSpec.");
-			// run autodetectspec
-			gEnv->pSystem->AutoDetectSpec();
-			m_pOptionsManager->SystemConfigChanged(true);
-		}
-		else
-		{
-			CryLogAlways("[GameProfiles]: PlayerProfileManager reported first-time login. AutoDetectSpec NOT running because g_startFirstTime=0.");
-		}
+		CryLogAlways("[GameProfiles]: Running AutoDetectSpec.");
+		// run autodetectspec
+		gEnv->pSystem->AutoDetectSpec();
+		m_pOptionsManager->SystemConfigChanged(true);
 	}
-
+	else
+	{
+		CryLogAlways("[GameProfiles]: AutoDetectSpec NOT running because g_startFirstTime = 0.");
+	}
 
 	if (!m_pServerSynchedStorage)
 		m_pServerSynchedStorage = new CServerSynchedStorage(GetIGameFramework());
-
+	
 	if (!m_pBulletTime)
 	{
 		m_pBulletTime = new CBulletTime();
@@ -377,7 +386,46 @@ bool CGame::Init(IGameFramework *pFramework)
 	if(!gEnv->pSystem->IsDedicated())
 		m_pDownloadTask = new CDownloadTask;
 
+	// ---------
+	if (!m_pRemoteControlSystem)
+	{
+		m_pRemoteControlSystem = new CRemoteControlSystem();
+	}
+
+	if (!m_pLauncher)
+	{
+		HMODULE hExe = GetModuleHandleA(NULL);
+		ILauncher::TGetFunc pGetILauncher = (ILauncher::TGetFunc) GetProcAddress(hExe, "GetILauncher");
+		if (pGetILauncher)
+		{
+			m_pLauncher = pGetILauncher();
+		}
+	}
+	
+	FalconLogInfo("Loaded Falcon Client version %s", Falcon::GetBuildVersion());
+	if (gEnv->pRenderer->GetRenderType() == eRT_DX10)
+	{
+		if (ICVar *pVar=gEnv->pConsole->GetCVar("r_DisplayInfo"))
+		{
+			if (pVar->GetIVal() == 0)
+			{
+				pVar->Set(1);
+				m_dx10Fix = true;
+			}
+		}
+	}
+
+	// ---------
 	return true;
+}
+
+void CGame::SetDX10Fix(bool state)
+{
+	m_dx10Fix = state;
+}
+bool CGame::GetDX10Fix()
+{
+	return m_dx10Fix;
 }
 
 bool CGame::CompleteInit()
@@ -428,7 +476,9 @@ int CGame::Update(bool haveFocus, unsigned int updateFlags)
 		m_pLCD->Update(frameTime);
 
 	if(m_pDownloadTask)
+	{
 		m_pDownloadTask->Update();
+	}
 
 	return bRun ? 1 : 0;
 }
@@ -472,7 +522,7 @@ void CGame::PlayerIdSet(EntityId playerId)
 	{
 		//this is NEVER allowed to come directly from a flash callback, if it is - change the callback
 		GetMenu()->DestroyIngameMenu();	//else the memory pool gets too big
-    GetMenu()->DestroyStartMenu();	//else the memory pool gets too big
+	GetMenu()->DestroyStartMenu();	//else the memory pool gets too big
 		if (m_pHUD == 0)
 		{
 			m_pHUD = new CHUD();
@@ -643,8 +693,8 @@ void CGame::OnActionEvent(const SActionEvent& event)
 	switch(event.m_event)
   {
   case  eAE_channelDestroyed:
-    GameChannelDestroyed(event.m_value == 1);
-    break;
+	GameChannelDestroyed(event.m_value == 1);
+	break;
 	case eAE_serverIp:
 		if(gEnv->bServer && GetServerSynchedStorage())
 		{
@@ -654,7 +704,14 @@ void CGame::OnActionEvent(const SActionEvent& event)
 		break;
 	case eAE_serverName:
 		if(gEnv->bServer && GetServerSynchedStorage())
+		{
 			GetServerSynchedStorage()->SetGlobalValue(GLOBAL_SERVER_NAME_KEY,CONST_TEMP_STRING(event.m_description));
+		}
+
+		break;
+	case eAE_channelCreated:
+		
+
 		break;
   }
 }
@@ -663,10 +720,10 @@ void CGame::GameChannelDestroyed(bool isServer)
 {
   if (!isServer)
   {
-    delete m_pClientSynchedStorage;
-    m_pClientSynchedStorage=0;
-    if(m_pHUD)
-      m_pHUD->PlayerIdSet(0);
+	delete m_pClientSynchedStorage;
+	m_pClientSynchedStorage=0;
+	if(m_pHUD)
+	  m_pHUD->PlayerIdSet(0);
 
 		if (!gEnv->pSystem->IsSerializingFile())
 		{
@@ -674,11 +731,11 @@ void CGame::GameChannelDestroyed(bool isServer)
 			buf.FormatFast("%g", g_pGameCVars->v_altitudeLimitDefault());
 			g_pGameCVars->pAltitudeLimitCVar->ForceSet(buf.c_str());
 		}
-    //the hud continues existing when the player got diconnected - it's part of the game
-    /*if(!gEnv->pSystem->IsEditor())
-    {
-    SAFE_DELETE(m_pHUD);
-    }*/
+	//the hud continues existing when the player got diconnected - it's part of the game
+	/*if(!gEnv->pSystem->IsEditor())
+	{
+	SAFE_DELETE(m_pHUD);
+	}*/
   }
 }
 
@@ -698,10 +755,10 @@ void CGame::BlockingProcess(BlockingConditionFunction f)
 
   while (!ok)
   {
-    pNetwork->SyncWithGame(eNGS_FrameStart);
-    pNetwork->SyncWithGame(eNGS_FrameEnd);
-    gEnv->pTimer->UpdateOnFrameStart();
-    ok |= (*f)();
+	pNetwork->SyncWithGame(eNGS_FrameStart);
+	pNetwork->SyncWithGame(eNGS_FrameEnd);
+	gEnv->pTimer->UpdateOnFrameStart();
+	ok |= (*f)();
   }
 }
 
@@ -718,11 +775,6 @@ CBulletTime *CGame::GetBulletTime() const
 CSoundMoods *CGame::GetSoundMoods() const
 {
 	return m_pSoundMoods;
-}
-
-CLaptopUtil *CGame::GetLaptopUtil() const
-{
-	return m_pLaptopUtil;
 }
 
 CHUD *CGame::GetHUD() const
@@ -1048,6 +1100,7 @@ const char* CGame::CreateSaveGameName()
 
 	return m_newSaveGame.c_str();
 }
+
 
 const char* CGame::GetMappedLevelName(const char *levelName) const
 { 

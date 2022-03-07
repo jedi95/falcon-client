@@ -553,6 +553,9 @@ public:
 	// marcok: I know it's bad to even have this in the HUD, but the way gamerulessystem is currently used I don't want to duplicate this elsewhere
 	EHUDGAMERULES GetCurrentGameRules()	{	return m_currentGameRules;	}
 
+	//Vader mod hud fix
+	CHUDInstantAction			*m_pHUDInstantAction;
+
 private:
 
 	//some Update functions
@@ -608,7 +611,6 @@ private:
 	CHUDVehicleInterface	*m_pHUDVehicleInterface;
 	CHUDPowerStruggle			*m_pHUDPowerStruggle;
 	CHUDTeamInstantAction	*m_pHUDTeamInstantAction;
-	CHUDInstantAction			*m_pHUDInstantAction;
 	CHUDScopes						*m_pHUDScopes;
 	CHUDCrosshair					*m_pHUDCrosshair;
 	CHUDTagNames					*m_pHUDTagNames;
@@ -752,8 +754,6 @@ private:
 	CGameFlashAnimation m_animDataUpload;
 	CGameFlashAnimation m_animSpectate;
 	CGameFlashAnimation m_animNightVisionBattery;
-	CGameFlashAnimation m_animHUDCornerLeft;
-	CGameFlashAnimation m_animHUDCornerRight;
 	CGameFlashAnimation m_animPlayerStats;
 	CGameFlashAnimation m_animHexIcons;
 	CGameFlashAnimation m_animKillLog;
@@ -766,6 +766,7 @@ private:
 	CGameFlashAnimation m_animNetworkConnection;
 	CGameFlashAnimation m_animMPMessages;
 	CGameFlashAnimation m_animPlayerPPChange;
+
 	CGameFlashAnimation m_animHitIndicator;
 
 	// HUD objects

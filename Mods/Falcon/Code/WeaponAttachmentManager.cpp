@@ -78,6 +78,7 @@ bool CWeaponAttachmentManager::Init()
 	if(gEnv->bMultiplayer)
 	{
 		CreatePlayerBoneAttachments(); //Only create the attachment, some are needed
+		CreatePlayerProjectedAttachments();
 		return false;
 	}
 	else if(m_pOwner->GetActorSpecies()!=eGCT_HUMAN)

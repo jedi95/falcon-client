@@ -30,7 +30,7 @@
 
 enum ESetInventoryAmmoMode
 {
-	CLIENT_SIDE = 1,	
+	CLIENT_SIDE = 1,
 	SERVER_SIDE = 2,
 };
 
@@ -106,6 +106,7 @@ CScriptBind_Actor::CScriptBind_Actor(ISystem *pSystem)
   SCRIPT_REG_TEMPLFUNC(AttachVulnerabilityEffect, "characterSlot, partid, hitPos, radius, effect, attachmentIdentifier");
   SCRIPT_REG_TEMPLFUNC(ResetVulnerabilityEffects, "characterSlot");
   SCRIPT_REG_TEMPLFUNC(GetCloseColliderParts, "characterSlot, hitPos, radius");
+
 	SCRIPT_REG_TEMPLFUNC(QueueAnimationState,"animationState");
 	SCRIPT_REG_TEMPLFUNC(ChangeAnimGraph,"graph, layer");
 	SCRIPT_REG_TEMPLFUNC(CreateCodeEvent,"params");
@@ -154,7 +155,12 @@ CScriptBind_Actor::CScriptBind_Actor(ISystem *pSystem)
 	SCRIPT_REG_TEMPLFUNC(RenderScore, "");
 
   SCRIPT_REG_TEMPLFUNC(SetSearchBeam, "dir");
-			
+
+	// Crafty #CustomCharacters
+	SCRIPT_REG_TEMPLFUNC(SetCustomSuitMats, "supports");
+	SCRIPT_REG_FUNC(ResetNanoSuit);
+	SCRIPT_REG_FUNC(ResetAnimationGraph);
+
 	m_pSS->SetGlobalValue("STANCE_PRONE", STANCE_PRONE);
 	m_pSS->SetGlobalValue("STANCE_CROUCH", STANCE_CROUCH);
 	m_pSS->SetGlobalValue("STANCE_STAND", STANCE_STAND);
@@ -1775,6 +1781,59 @@ int CScriptBind_Actor::IsFlying(IFunctionHandler *pH)
 		if(pPhysEnt->GetStatus(&livStat))
 			return pH->EndFunction(livStat.bFlying!=0);
 	}
+
+	return pH->EndFunction();
+}
+
+
+// Crafty #CustomCharacters
+//------------------------------------------------------------------------
+int CScriptBind_Actor::SetCustomSuitMats(IFunctionHandler* pH, bool bSupports)
+{
+	//CryWarning(VALIDATOR_MODULE_GAME, VALIDATOR_WARNING, "SERVER: CScriptBind_Actor::SetCustomSuitMats %d", bSupports);
+	CActor* pActor = GetActor(pH);
+	if (pActor)
+	{
+		CPlayer* pPlayer = static_cast<CPlayer*>(pActor);
+		if (pPlayer)
+		{
+			pPlayer->SetSupportsSuitMats(bSupports);
+		}
+	}
+
+	return pH->EndFunction();
+}
+
+//------------------------------------------------------------------------
+int CScriptBind_Actor::ResetNanoSuit(IFunctionHandler* pH)
+{
+	CActor* pActor = GetActor(pH);
+	CPlayer* pPlayer = static_cast<CPlayer*>(pActor);
+
+	if (!pPlayer)
+		return pH->EndFunction();
+
+	CNanoSuit* pSuit = pPlayer->GetNanoSuit();
+	if (pSuit)
+	{
+		// save the player's suit mode and reapply it after resetting
+		ENanoMode eSuitMode = pSuit->GetMode();
+		pSuit->Reset(pPlayer);
+		pSuit->SelectSuitMaterial();
+		pSuit->SetMode(eSuitMode, true, true);
+	}
+
+	return pH->EndFunction();
+}
+
+//------------------------------------------------------------------------
+int CScriptBind_Actor::ResetAnimationGraph(IFunctionHandler* pH)
+{
+	CActor* pActor = GetActor(pH);
+	if (!pActor)
+		return pH->EndFunction();
+
+	pActor->ResetAnimGraph();
 
 	return pH->EndFunction();
 }

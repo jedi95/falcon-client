@@ -84,6 +84,9 @@ void CHUDInstantAction::UpdateStats()
 
 void CHUDInstantAction::Show(bool show)
 {
+	if (g_pGameCVars->fn_fixHUD)
+		show = false;
+
 	m_animIAScore.SetVisible(show);
 }
 
