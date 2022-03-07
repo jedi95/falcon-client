@@ -41,8 +41,6 @@ Features
     scl <number of lines>
         Gets and prints <number of lines> of the server log to the client console. NOTE: this only works if you have been granted admin on the server.
 
-    The other added functions are only relevant when using Falcon serverside and will not be covered here.
-
 4. Constant mouse sensitivity
 
     This CVAR prevents weapon mass from affecting mouse sensitivity. This is set clientside in autoexec.cfg.
@@ -101,3 +99,9 @@ Another way to check the version is to open Game.log in your Crysis Wars directo
 [Falcon] Loaded Falcon Client version 0.800 SSE2 0000000
 
 If you see this line, then Falcon loaded correctly.
+
+
+Compiling
+-----------------------------------------------------------------------------
+
+This project is built with VS2005. Using a newer version of Visual Studio may result in stability issues.

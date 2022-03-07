@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="GameDll"
+	Name="Falcon"
 	ProjectGUID="{2EB52047-0A81-4343-B703-DF221CA5CC2A}"
 	RootNamespace="GameDll"
 	Keyword="Win32Proj"
@@ -72,14 +72,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/CrysisWarsMod.dll"
+				OutputFile="$(OutDir)/Falcon.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/CryGame.pdb"
+				ProgramDatabaseFile="$(OutDir)/Falcon.pdb"
 				SubSystem="2"
 				LargeAddressAware="2"
-				ImportLibrary="$(OutDir)/GameDll.lib"
+				ImportLibrary="$(OutDir)/Falcon.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -160,13 +160,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/CrysisWarsMod.dll"
+				OutputFile="$(OutDir)/Falcon.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/CryGame.pdb"
+				ProgramDatabaseFile="$(OutDir)/Falcon.pdb"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/GameDll.lib"
+				ImportLibrary="$(OutDir)/Falcon.lib"
 				TargetMachine="17"
 			/>
 			<Tool
