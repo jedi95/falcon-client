@@ -1,11 +1,10 @@
------------------------------------------------------------------------------
--- Falcon mod with wall jump by Caffeinic/Yakizakana and DARTH--VADER -------
+Falcon mod by Caffeinic/Yakizakana, DARTH--VADER, and Crafty
 -----------------------------------------------------------------------------
 
 This is the client component of the Falcon mod. It does not include any of the changes required to implement the server functionality.
 
------------------------------------------------------------------------------
--- SETUP --------------------------------------------------------------------
+
+Setup
 -----------------------------------------------------------------------------
 
 NOTE: The launcher installs Falcon automatically. These steps are for a manual, no-launcher install.
@@ -14,8 +13,8 @@ NOTE: The launcher installs Falcon automatically. These steps are for a manual, 
 2. Modify your game shortcut properties to include -mod Falcon.
 3. Start the game and join a server. You should be able to perform the wall jump in the same way as Crysis 1.
 
------------------------------------------------------------------------------
--- ADDED FEATURES------------------------------------------------------------
+
+Features
 -----------------------------------------------------------------------------
 
 1. Wall jump
@@ -90,8 +89,8 @@ NOTE: The launcher installs Falcon automatically. These steps are for a manual, 
     Allows you to disable the gradual "zoom in" effect while firing automatic weapons
     fn_disableShootZoom [0 = No change (default), 1 = Enabled (no zoom effect occurs)]
 
------------------------------------------------------------------------------
--- DEBUGGING ----------------------------------------------------------------
+
+Debugging
 -----------------------------------------------------------------------------
 
 If you can't seem to do wall jumps even after installing the mod the first step is to verify that the mod is being loaded.
