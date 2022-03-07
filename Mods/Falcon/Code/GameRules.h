@@ -1070,7 +1070,6 @@ protected:
 	void UpdateAffectedEntitiesSet(TExplosionAffectedEntities &affectedEnts, const pe_explosion *pExplosion);
 	void AddOrUpdateAffectedEntity(TExplosionAffectedEntities &affectedEnts, IEntity* pEntity, float affected);
 	void CommitAffectedEntitiesSet(SmartScriptTable &scriptExplosionInfo, TExplosionAffectedEntities &affectedEnts);
-	void ChatLog(EChatMessageType type, EntityId sourceId, EntityId targetId, const char *msg);
 
 	// Some explosion processing
 	void ProcessClientExplosionScreenFX(const ExplosionInfo &explosionInfo);

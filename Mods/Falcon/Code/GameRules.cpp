@@ -3206,48 +3206,9 @@ bool CGameRules::CanReceiveChatMessage(EChatMessageType type, EntityId sourceId,
 }
 
 //------------------------------------------------------------------------
-void CGameRules::ChatLog(EChatMessageType type, EntityId sourceId, EntityId targetId, const char *msg)
-{
-	IEntity * pSource = gEnv->pEntitySystem->GetEntity(sourceId);
-	IEntity * pTarget = gEnv->pEntitySystem->GetEntity(targetId);
-	const char * sourceName = pSource? pSource->GetName() : "<unknown>";
-	const char * targetName = pTarget? pTarget->GetName() : "<unknown>";
-	int teamId = GetTeam(sourceId);
-
-	char tempBuffer[64];
-
-	switch (type)
-	{
-	case eChatToTeam:
-		if (teamId)
-		{
-			IActor *pClientActor = g_pGame->GetIGameFramework()->GetClientActor();
-			if(!(gEnv->bServer && gEnv->pSystem->IsDedicated()) && pClientActor && teamId != GetTeam(pClientActor->GetEntityId()))
-				return;
-			targetName = tempBuffer;
-			sprintf(tempBuffer, "Team %s", GetTeamName(teamId));
-		}
-		else
-		{
-	case eChatToAll:
-		targetName = "ALL";
-		}
-		break;
-	}
-
-	CryLogAlways("CHAT %s to %s: %s", sourceName, targetName, msg);
-}
-
-
-//------------------------------------------------------------------------
 void CGameRules::SendChatMessage(EChatMessageType type, EntityId sourceId, EntityId targetId, const char *msg)
 {
 	ChatMessageParams params(type, sourceId, targetId, msg, (type == eChatToTeam)?true:false);
-
-	bool sdead=IsDead(sourceId);
-	bool sspec=IsSpectator(sourceId);
-
-	ChatLog(type, sourceId, targetId, msg);
 
 	if (gEnv->bServer)
 	{
