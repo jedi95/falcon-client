@@ -42,7 +42,6 @@ History:
 #include "GameActions.h"
 #include "IViewSystem.h"
 #include "GameNetworkProfile.h"
-#include "SPAnalyst.h"
 
 //both are defined again in FlashMenuObjectOptions
 static const char* scuiControlCodePrefix = "@cc_"; // "@cc_"; // AlexL 03/04/2007: enable this when keys/controls are fully localized
@@ -2218,29 +2217,16 @@ void CFlashMenuObject::HandleFSCommand(const char *szCommand,const char *szArgs)
 	{
 		m_bIsEndingGameContext = true;
 		if(INetChannel* pCh = g_pGame->GetIGameFramework()->GetClientChannel())
-      pCh->Disconnect(eDC_UserRequested,"User left the game");
-    g_pGame->GetIGameFramework()->EndGameContext();
+			pCh->Disconnect(eDC_UserRequested,"User left the game");
+		g_pGame->GetIGameFramework()->EndGameContext();
 		HideInGameMenuNextFrame(false);
-		if(!gEnv->bMultiplayer && g_pGameCVars->g_spRecordGameplay)
-			g_pGame->GetSPAnalyst()->StopRecording();
 		m_bIsEndingGameContext = false;
 		m_bClearScreen = true;
 	}
 	else if(!strcmp(szCommand,"Quit"))
 	{
-#ifdef SP_DEMO
-		StartSplashScreenCountDown();
-#else
-		gEnv->pSystem->Quit();
-#endif
-	}
-#ifdef SP_DEMO
-	else if(!strcmp(szCommand,"preorder"))
-	{
-		gEnv->pGame->GetIGameFramework()->ShowPageInBrowser("http://www.buycrysis.ea.com");
 		gEnv->pSystem->Quit();
 	}
-#endif
 	else if(!strcmp(szCommand,"RollOver"))
 	{
 		PlaySound(ESound_RollOver);
@@ -3287,37 +3273,14 @@ void CFlashMenuObject::OnPostUpdate(float fDeltaTime)
 		}
 	}
 
-#ifdef SP_DEMO
-	if(m_splashScreenTimer>0.0f)
+	if(!IsOnScreen(MENUSCREEN_FRONTENDINGAME) && !IsOnScreen(MENUSCREEN_FRONTENDSTART))
 	{
-		if(m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART] && m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->IsLoaded())
+		if(!g_pGame->GetIGameFramework()->StartedGameContext() && !g_pGame->GetIGameFramework()->GetClientChannel() && !m_bIgnorePendingEvents)// if nothing happens we should show user a menu so she can interact with the game
 		{
-			m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Unload();
-		}
-		if(!m_apFlashMenuScreens[MENUSCREEN_FRONTENDSPLASH] || !m_apFlashMenuScreens[MENUSCREEN_FRONTENDSPLASH]->IsLoaded())
-		{
-			m_apFlashMenuScreens[MENUSCREEN_FRONTENDSPLASH] = new CFlashMenuScreen();
-			m_apFlashMenuScreens[MENUSCREEN_FRONTENDSPLASH]->Load("Libs/UI/SplashScreen_Singleplayer.gfx");
-			m_pCurrentFlashMenuScreen = m_apFlashMenuScreens[MENUSCREEN_FRONTENDSPLASH];
-			m_apFlashMenuScreens[MENUSCREEN_FRONTENDSPLASH]->GetFlashPlayer()->SetFSCommandHandler(this);
-
-		}
-		m_splashScreenTimer -= fDeltaTime;
-		if(m_splashScreenTimer<=0.0f)
-		{
-			gEnv->pSystem->Quit();
+			g_pGame->DestroyHUD();
+			ShowMainMenu();
 		}
 	}
-	else
-#endif
-	if(!IsOnScreen(MENUSCREEN_FRONTENDINGAME) && !IsOnScreen(MENUSCREEN_FRONTENDSTART))
-  {
-    if(!g_pGame->GetIGameFramework()->StartedGameContext() && !g_pGame->GetIGameFramework()->GetClientChannel() && !m_bIgnorePendingEvents)// if nothing happens we should show user a menu so she can interact with the game
-    {
-      g_pGame->DestroyHUD();
-      ShowMainMenu();
-    }
-  }
 
 	if(m_resolutionTimer>0.0)
 	{

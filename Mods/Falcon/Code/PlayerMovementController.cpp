@@ -6,7 +6,6 @@
 #include "IVehicleSystem.h"
 #include "IItemSystem.h"
 #include "GameCVars.h"
-#include "NetInputChainDebug.h"
 #include "Item.h"
 
 #define ENABLE_NAN_CHECK
@@ -839,9 +838,6 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 			}
 
 			float stanceSpeed=m_pPlayer->GetStanceMaxSpeed(m_pPlayer->GetStance());
-			NETINPUT_TRACE(m_pPlayer->GetEntityId(), desiredSpeed);
-			NETINPUT_TRACE(m_pPlayer->GetEntityId(), stanceSpeed);
-			NETINPUT_TRACE(m_pPlayer->GetEntityId(), desiredMovement);
 			if ((desiredSpeed > MIN_DESIRED_SPEED) && stanceSpeed>0.001f)
 			{
 				//pRend->GetIRenderAuxGeom()->DrawLine( playerPos, ColorF(1,1,1,1), playerPos + desiredMovement, ColorF(1,1,1,1) );
@@ -1306,25 +1302,6 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 	{
     params.prediction.nStates = 0;
 	 }
-
-/*
-#ifdef USER_dejan
-	// Debug Render & Text
-	{
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(moveTarget, 0.2f, ColorB(128,255,0, 255), true);
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(playerPos, ColorB(255,255,255, 128), moveTarget, ColorB(128,255,0, 128), 0.4f);
-
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(bodyTarget, 0.2f, ColorB(255,128,0, 128), true);
-		//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(moveTarget, ColorB(255,255,255, 128), bodyTarget, ColorB(255,128,0, 128), 0.2f);
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(playerPos, ColorB(255,255,255, 128), bodyTarget, ColorB(255,128,0, 128), 0.4f);
-	}
-#endif
-*/
-
-	NETINPUT_TRACE(m_pPlayer->GetEntityId(), params.desiredVelocity);
-	NETINPUT_TRACE(m_pPlayer->GetEntityId(), params.desiredLean);
-	NETINPUT_TRACE(m_pPlayer->GetEntityId(), Vec3(params.deltaAngles));
-	NETINPUT_TRACE(m_pPlayer->GetEntityId(), params.sprint);
 
 	return true;
 }

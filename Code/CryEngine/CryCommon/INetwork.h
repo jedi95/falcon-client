@@ -639,22 +639,14 @@ struct INetContext
 	virtual void SafelyUnbind( EntityId id ) = 0;
 	// Description:
 	//    Remove the binding of an object to the network
-#ifdef SP_DEMO
-	virtual bool UnbindObject( EntityId id ) = 0;
-#else
 	virtual bool IsBound( EntityId id ) = 0;
-#endif
 	// Description:
 	//    Must be called ONCE in response to a message sent from a SendSpawnObject call on the server
 	//    (from the client)
 	virtual void SpawnedObject( EntityId id ) = 0;
 	// Description:
 	//    Determine if an object is bound or not
-#ifdef SP_DEMO
-	virtual bool IsBound( EntityId id ) = 0;
-#else
 	virtual bool UnbindObject( EntityId id ) = 0;
-#endif
 	// Description:
 	//    Enable/disable the synchronization of some aspects over the network
 	// Arguments:

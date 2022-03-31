@@ -5,7 +5,6 @@
 #include "GameCVars.h"
 #include "PlayerInput.h"
 #include "GameActions.h"
-#include "NetInputChainDebug.h"
 
 #undef CALL_PLAYER_EVENT_LISTENERS
 #define CALL_PLAYER_EVENT_LISTENERS(func) \
@@ -88,9 +87,6 @@ void CPlayerMovement::Commit( CPlayer& player )
 		m_request.allowStrafe = m_movement.allowStrafe;
     m_request.prediction = m_movement.prediction;
 
-		NETINPUT_TRACE(m_player.GetEntityId(), m_request.rotation * FORWARD_DIRECTION);
-		NETINPUT_TRACE(m_player.GetEntityId(), m_request.velocity);
-
 		m_request.jumping = m_stats.jumped;
 
 		m_player.DebugGraph_AddValue("ReqVelo", m_request.velocity.GetLength());
@@ -109,9 +105,6 @@ void CPlayerMovement::Commit( CPlayer& player )
 
 	if (m_hasJumped)
 		player.CreateScriptEvent("jumped",0);
-
-	NETINPUT_TRACE(m_player.GetEntityId(), m_velocity);
-	NETINPUT_TRACE(m_player.GetEntityId(), m_jumped);
 
 	// Reset ground timer to prevent ground time before the jump to be inherited
 	// and incorrectly/prematurely used to identify landing in mid air in MP.
@@ -988,9 +981,6 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 				backwardMul = LERP(backwardMul, m_params.backwardMultiplier, -desiredVelocityClamped.y);
 		}
 
-		NETINPUT_TRACE(m_player.GetEntityId(), backwardMul);
-		NETINPUT_TRACE(m_player.GetEntityId(), strafeMul);
-
 		move += m_baseQuat.GetColumn0() * desiredVelocityClamped.x * strafeMul * backwardMul;
 		move += m_baseQuat.GetColumn1() * desiredVelocityClamped.y * backwardMul;
 	}
@@ -1010,8 +1000,6 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 				move /= moveModule;
 		}
 
-		NETINPUT_TRACE(m_player.GetEntityId(), moveModule);
-
 		//move *= m_animParams.runSpeed/GetStanceMaxSpeed(m_stance);
 		bool speedMode = false;
 
@@ -1020,8 +1008,6 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 			sprintMult = pSuit->GetSprintMultiplier(cry_fabsf(m_movement.desiredVelocity.x)>0.01f);
 			speedMode = (pSuit->GetMode() == NANOMODE_SPEED)?true:false;
 		}
-
-		NETINPUT_TRACE(m_player.GetEntityId(), sprintMult);
 
 		if (gEnv->bMultiplayer)
 		{
@@ -1041,7 +1027,6 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 		move *= scale*0.75f;
 	else
 		move *= scale;
-	NETINPUT_TRACE(m_player.GetEntityId(), scale);
 
 	//when using gravity boots speed can be slowed down
 	if (m_player.GravityBootsOn())
@@ -1374,8 +1359,6 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 	}
 */
 
-	NETINPUT_TRACE(m_player.GetEntityId(), jumpVec);
-
 	m_request.velocity = desiredVel + jumpVec;
 	if(!m_stats.inZeroG && (m_movement.jump && (g_pGameCVars->dt_enable && m_stats.inAir > 0.3f)) && m_request.velocity.len() > 22.0f)	//cap maximum velocity when jumping (limits speed jump length)
 		m_request.velocity = m_request.velocity.normalized() * 22.0f;
@@ -1413,8 +1396,6 @@ void CPlayerMovement::AdjustMovementForEnvironment( Vec3& move, bool sprinting )
 					float nanoSpeed = pSuit->GetSlotValue(NANOSLOT_SPEED);
 					float nanoSpeedMul = 1.0f+nanoSpeed*0.01f*0.5f;
 					move *= nanoSpeedMul;
-
-					NETINPUT_TRACE(m_player.GetEntityId(), nanoSpeedMul);
 				}
 				else //confirmed with CJ : also in MP the suit is a bit faster in speed mode walking
 					move *= 1.3f;
@@ -1429,13 +1410,11 @@ void CPlayerMovement::AdjustMovementForEnvironment( Vec3& move, bool sprinting )
 				nanoSpeed = pSuit->GetSlotValue(NANOSLOT_SPEED); //multiplies up with suit sprint function
 			float nanoSpeedMul = 1.0f+nanoSpeed*0.01f;
 			move *= nanoSpeedMul;
-			NETINPUT_TRACE(m_player.GetEntityId(), nanoSpeedMul);
 		}
 	}
 
 	//player is slowed down by carrying heavy objects (max. 33%)
 	float massFactor = m_player.GetMassFactor();
-	NETINPUT_TRACE(m_player.GetEntityId(), massFactor);
 	move *= massFactor;
 
 	//Stop movement while firing in prone

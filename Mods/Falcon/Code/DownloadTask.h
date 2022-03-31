@@ -47,9 +47,6 @@ public:
 	// check client and server machines both have a particular level
 	bool StartMapDownload(SFileDownloadParameters& dl, int attempts, IDownloadTaskListener* pListener = NULL);
 
-	// download a patch executable
-	bool StartPatchDownload(SFileDownloadParameters& dl);
-
 	void Update();
 	void StopDownloadTask();
 

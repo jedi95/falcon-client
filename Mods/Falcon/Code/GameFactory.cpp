@@ -175,50 +175,33 @@ void InitGameFactory(IGameFramework *pFramework)
   REGISTER_FACTORY(pVehicleSystem, "Hovercraft", CVehicleMovementHovercraft, false);
   REGISTER_FACTORY(pVehicleSystem, "Helicopter", CVehicleMovementHelicopter, false);
   REGISTER_FACTORY(pVehicleSystem, "StdBoat", CVehicleMovementStdBoat, false);
-	REGISTER_FACTORY(pVehicleSystem, "StdWheeled", CVehicleMovementStdWheeled, false);
+  REGISTER_FACTORY(pVehicleSystem, "StdWheeled", CVehicleMovementStdWheeled, false);
   REGISTER_FACTORY(pVehicleSystem, "Tank", CVehicleMovementTank, false);
-	REGISTER_FACTORY(pVehicleSystem, "VTOL", CVehicleMovementVTOL, false);
+  REGISTER_FACTORY(pVehicleSystem, "VTOL", CVehicleMovementVTOL, false);
   REGISTER_FACTORY(pVehicleSystem, "Warrior", CVehicleMovementWarrior, false);
   REGISTER_FACTORY(pVehicleSystem, "Amphibious", CVehicleMovementAmphibious, false);
 
-#ifndef SP_DEMO
   //aliens
   REGISTER_FACTORY(pFramework, "AlienPlayer", CAlien, false);
   REGISTER_FACTORY(pFramework, "Aliens/Alien", CAlien, true);
-//  REGISTER_FACTORY(pFramework, "Aliens/Observer", CObserver, true);
   REGISTER_FACTORY(pFramework, "Aliens/Trooper", CTrooper, true);
   REGISTER_FACTORY(pFramework, "Aliens/Scout", CScout, true);
   REGISTER_FACTORY(pFramework, "Aliens/Hunter", CHunter, true);
-	REGISTER_FACTORY(pFramework, "Misc/Shark", CShark, true);
-  //	REGISTER_FACTORY(m_pFramework, "Aliens/Warrior", CDrone, true);
-  //REGISTER_FACTORY(pFramework, "Aliens/Coordinator", CObserver, true);
-#else
-	REGISTER_FACTORY(pFramework, "Aliens/Scout", CScout, true);
-	REGISTER_FACTORY(pFramework, "Aliens/Trooper", CTrooper, true);
-#endif
+  REGISTER_FACTORY(pFramework, "Misc/Shark", CShark, true);
 
 	// Custom GameObjects
 	REGISTER_GAME_OBJECT(pFramework, Tornado, "Scripts/Entities/Environment/Tornado.lua");
 	REGISTER_GAME_OBJECT(pFramework, Shake, "Scripts/Entities/Environment/Shake.lua");
-
-	// Custom Extensions
-	//REGISTER_GAME_OBJECT(pFramework, CustomFreezing);
-	//REGISTER_GAME_OBJECT(pFramework, CustomShatter);
 
 	REGISTER_GAME_OBJECT(pFramework, BattleEvent, "");
 	HIDE_FROM_EDITOR("BattleEvent");
 
 	//GameRules
 	REGISTER_FACTORY(pFramework, "GameRules", CGameRules, false);
-
-
 	REGISTER_GAME_OBJECT_EXTENSION(pFramework, ScriptControlledPhysics);
 
-#ifndef CRYSIS_BETA
 	pFramework->GetIGameRulesSystem()->RegisterGameRules("SinglePlayer", "GameRules");
 	pFramework->GetIGameRulesSystem()->AddGameRulesAlias("SinglePlayer", "sp");
-
-#ifndef SP_DEMO
 	pFramework->GetIGameRulesSystem()->RegisterGameRules("InstantAction", "GameRules");
 	pFramework->GetIGameRulesSystem()->AddGameRulesAlias("InstantAction", "ia");
 	pFramework->GetIGameRulesSystem()->AddGameRulesAlias("InstantAction", "dm");
@@ -229,14 +212,8 @@ void InitGameFactory(IGameFramework *pFramework)
 	pFramework->GetIGameRulesSystem()->AddGameRulesAlias("TeamInstantAction", "tdm");
 	pFramework->GetIGameRulesSystem()->AddGameRulesLevelLocation("TeamInstantAction", "multiplayer/tia/");
 	pFramework->GetIGameRulesSystem()->AddGameRulesLevelLocation("TeamInstantAction", "multiplayer/ia/");
-#endif //spdemo
 
-	//pFramework->GetIGameRulesSystem()->RegisterGameRules("TeamAction", "GameRules");
-#endif //crysis_beta
-
-#ifndef SP_DEMO
 	pFramework->GetIGameRulesSystem()->RegisterGameRules("PowerStruggle", "GameRules");
 	pFramework->GetIGameRulesSystem()->AddGameRulesAlias("PowerStruggle", "ps");
 	pFramework->GetIGameRulesSystem()->AddGameRulesLevelLocation("PowerStruggle", "multiplayer/ps/");
-#endif //spdemo
 }

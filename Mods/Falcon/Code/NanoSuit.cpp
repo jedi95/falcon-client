@@ -18,7 +18,6 @@
 #include "GameUtils.h"
 #include "HUD/HUD.h"
 #include "GameRules.h"
-#include "NetInputChainDebug.h"
 #include "BulletTime.h"
 #include "SoundMoods.h"
 #include "WeaponSystem.h"
@@ -528,9 +527,6 @@ void CNanoSuit::Update(float frameTime)
 	//this deals with sprinting
 	UpdateSprinting(recharge, stats, frameTime);
 
-	NETINPUT_TRACE(m_pOwner->GetEntityId(), m_energy);
-	NETINPUT_TRACE(m_pOwner->GetEntityId(), recharge);
-
 	if (isServer)
 	{
 		if (recharge < 0.0f || m_energyRechargeDelay <= 0.0f)
@@ -597,8 +593,6 @@ void CNanoSuit::Update(float frameTime)
 	}
 
 	Balance(m_energy);
-	NETINPUT_TRACE(m_pOwner->GetEntityId(), m_slots[NANOSLOT_SPEED].realVal);
-	NETINPUT_TRACE(m_pOwner->GetEntityId(), m_slots[NANOSLOT_SPEED].desiredVal);
 
 	m_cloak.Update(this);
 

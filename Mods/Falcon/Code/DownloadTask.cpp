@@ -63,39 +63,6 @@ bool CDownloadTask::StartMapDownload(SFileDownloadParameters& dl, int attempts, 
 	return true;
 }
 
-bool CDownloadTask::StartPatchDownload(SFileDownloadParameters& dl)
-{
-	if(IsDownloadTaskInProgress())
-		return false;
-
-	if(s_enableDLLogging)
-		CryLog("Downloading patch");
-
-	GetUserDataFolder(m_downloadFolderPath);
-	CreateDestinationFolder(m_downloadFolderPath);
-	dl.destPath = m_downloadFolderPath;
-	m_currentDownload = dl;
-	m_downloadList.push_back(dl);
-	m_downloadAttempt = 0;
-	m_maxDownloadAttempts = 3;
-
-	// store the filename in the patch system so it can be run later if required.
-	INetworkService* pserv = g_pGame->GetIGameFramework()->GetISystem()->GetINetwork()->GetService("GameSpy");
-	if(pserv)
-	{
-		IPatchCheck* pPC = pserv->GetPatchCheck();
-		if(pPC && pPC->IsAvailable())
-		{
-			string filename;
-			filename = m_downloadFolderPath;
-			filename += dl.destFilename;
-			pPC->SetPatchFileName(filename.c_str());
-		}
-	}
-
-	return true;
-}
-
 void CDownloadTask::Update()
 {
 	if(m_downloadState == eDS_None && m_downloadList.empty())

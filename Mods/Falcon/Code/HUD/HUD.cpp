@@ -70,8 +70,6 @@ History:
 #include "WeaponSystem.h"
 #include "Radio.h"
 
-#include "LCD/LCDWrapper.h"
-
 static const float NIGHT_VISION_ENERGY = 30.0f;
 static const float SPAWN_WARNING_TIMER = 2.0f;
 

@@ -41,7 +41,6 @@
 #include "ScriptBind_Game.h"
 
 #include "HUD/ScriptBind_HUD.h"
-#include "LCD/LCDWrapper.h"
 
 #include "GameFactory.h"
 
@@ -51,8 +50,6 @@
 
 #include "ServerSynchedStorage.h"
 #include "ClientSynchedStorage.h"
-
-#include "SPAnalyst.h"
 
 #include "ISaveGame.h"
 #include "ILoadGame.h"
@@ -69,16 +66,7 @@ CModCursor *m_pCursor = 0;
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#define GAME_DEBUG_MEM  // debug memory usage
-#undef  GAME_DEBUG_MEM
-
-#if defined(CRYSIS_BETA)
-	#define CRYSIS_GUID "{CDC82B4A-7540-45A5-B92E-9A7C7033DBF4}"
-#elif defined(SP_DEMO)
-	#define CRYSIS_GUID "{CDC82B4A-7540-45A5-B92E-9A7C7033DBF3}"
-#else
-	#define CRYSIS_GUID "{5C95C427-DCFE-4d7a-ACE4-225C6FECA84F}"	// new for Crysis Wars
-#endif
+#define CRYSIS_GUID "{5C95C427-DCFE-4d7a-ACE4-225C6FECA84F}"	// new for Crysis Wars
 
 //FIXME: really horrible. Remove ASAP
 int OnImpulse( const EventPhys *pEvent ) 
@@ -111,7 +99,6 @@ CGame::CGame()
 	m_pServerSynchedStorage(0),
 	m_pClientSynchedStorage(0),
 	m_uiPlayerID(-1),
-	m_pSPAnalyst(0),
 	m_pDownloadTask(0),
 	m_pLauncher(0),
 	m_dx10Fix(false),
@@ -145,7 +132,6 @@ CGame::~CGame()
 	SAFE_DELETE(m_pBulletTime);
 	SAFE_DELETE(m_pSoundMoods);
 	SAFE_DELETE(m_pHUD);
-	SAFE_DELETE(m_pSPAnalyst);
 	m_pWeaponSystem->Release();
 	SAFE_DELETE(m_pItemStrings);
 	SAFE_DELETE(m_pItemSharedParamsList);
@@ -164,10 +150,6 @@ CGame::~CGame()
 bool CGame::Init(IGameFramework *pFramework)
 {
   LOADING_TIME_PROFILE_SECTION(GetISystem());
-
-#ifdef GAME_DEBUG_MEM
-	DumpMemInfo("CGame::Init start");
-#endif
 
 	m_pFramework = pFramework;
 	assert(m_pFramework);
@@ -213,8 +195,6 @@ bool CGame::Init(IGameFramework *pFramework)
 	m_pWeaponSystem->Scan(itemFolder.c_str());
 
 	m_pOptionsManager = COptionsManager::CreateOptionsManager();
-
-	m_pSPAnalyst = new CSPAnalyst();
  
 	//Ivo: initialites the Crysis conversion file.
 	//this is a conversion solution for the Crysis game DLL. Other projects don't need it.
@@ -329,23 +309,6 @@ bool CGame::Init(IGameFramework *pFramework)
 
 	m_pOptionsManager->SetProfileManager(m_pPlayerProfileManager);
 
-	if (!m_pLCD)
-	{
-#ifdef USE_G15_LCD
-		if(gEnv->pSystem->IsDedicated())
-			m_pLCD = new CNullLCD();
-		else
-			m_pLCD = new CG15LCD();
-#else
-		m_pLCD = new CNullLCD();
-#endif
-
-		if (!m_pLCD->Init())
-		{
-			SAFE_DELETE(m_pLCD);
-		}
-	}
-
 	if (!gEnv->pSystem->IsDedicated())
 	{
 		m_pFlashMenuObject = new CFlashMenuObject;
@@ -377,11 +340,7 @@ bool CGame::Init(IGameFramework *pFramework)
 		m_pSoundMoods = new CSoundMoods();
 	}
 
-  m_pFramework->RegisterListener(this,"Game", FRAMEWORKLISTENERPRIORITY_GAME);
-
-#ifdef GAME_DEBUG_MEM
-	DumpMemInfo("CGame::Init end");
-#endif
+	m_pFramework->RegisterListener(this,"Game", FRAMEWORKLISTENERPRIORITY_GAME);
 
 	if(!gEnv->pSystem->IsDedicated())
 		m_pDownloadTask = new CDownloadTask;
@@ -443,9 +402,6 @@ bool CGame::CompleteInit()
 		}
 	}
 
-#ifdef GAME_DEBUG_MEM
-	DumpMemInfo("CGame::CompleteInit");
-#endif
 	return true;
 }
 
@@ -471,9 +427,6 @@ int CGame::Update(bool haveFocus, unsigned int updateFlags)
 	m_pFramework->GetIActionMapManager()->EnableActionMap("debug", m_inDevMode);
 
 	CheckReloadLevel();
-
-	if (m_pLCD)
-		m_pLCD->Update(frameTime);
 
 	if(m_pDownloadTask)
 	{
@@ -985,21 +938,6 @@ void CGame::OnClearPlayerIds()
 	}
 }
 
-void CGame::DumpMemInfo(const char* format, ...)
-{
-	CryModuleMemoryInfo memInfo;
-	CryGetMemoryInfoForModule(&memInfo);
-
-	va_list args;
-	va_start(args,format);
-	gEnv->pSystem->GetILog()->LogV( ILog::eAlways,format,args );
-	va_end(args);
-
-	gEnv->pSystem->GetILog()->LogWithType( ILog::eAlways, "Alloc=%I64d kb  String=%I64d kb  STL-alloc=%I64d kb  STL-wasted=%I64d kb", (memInfo.allocated - memInfo.freed) >> 10 , memInfo.CryString_allocated >> 10, memInfo.STL_allocated >> 10 , memInfo.STL_wasted >> 10);
-	// gEnv->pSystem->GetILog()->LogV( ILog::eAlways, "%s alloc=%llu kb  instring=%llu kb  stl-alloc=%llu kb  stl-wasted=%llu kb", text, memInfo.allocated >> 10 , memInfo.CryString_allocated >> 10, memInfo.STL_allocated >> 10 , memInfo.STL_wasted >> 10);
-}
-
-
 const string& CGame::GetLastSaveGame(string &levelName)
 {
 	if (m_pPlayerProfileManager)
@@ -1083,11 +1021,6 @@ const char* CGame::CreateSaveGameName()
 	const char* levelName = GetIGameFramework()->GetLevelName();
 	const char* mappedName = GetMappedLevelName(levelName);
 	m_newSaveGame += mappedName;
-
-	m_newSaveGame += "_";
-	string timeString;
-	secondsToString(m_pSPAnalyst->GetTimePlayed(), timeString);
-	m_newSaveGame += timeString;
 
 	SModInfo info;
 	if(GetIGameFramework()->GetModInfo(&info))

@@ -185,13 +185,10 @@ public:
 		return m_pServerSynchedStorage;
 	}
 
-	CSPAnalyst* GetSPAnalyst() const { return m_pSPAnalyst; }
-
 	const string& GetLastSaveGame(string &levelName);
 	const string& GetLastSaveGame() { string tmp; return GetLastSaveGame(tmp); }
 
-  ILINE SCVars *GetCVars() {return m_pCVars;}
-	static void DumpMemInfo(const char* format, ...) PRINTF_PARAMS(1, 2);
+	ILINE SCVars *GetCVars() {return m_pCVars;}
 
 	CDownloadTask* GetDownloadTask() const { return m_pDownloadTask; }
 
@@ -297,7 +294,6 @@ protected:
 
 	CBulletTime						*m_pBulletTime;
 	CSoundMoods						*m_pSoundMoods;
-	ILCD									*m_pLCD;
 
 	typedef std::map<string, string, stl::less_stricmp<string> > TLevelMapMap;
 	TLevelMapMap m_mapNames;

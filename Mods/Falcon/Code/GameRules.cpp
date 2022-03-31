@@ -37,7 +37,6 @@
 #include "Environment/BattleDust.h"
 #include "MPTutorial.h"
 #include "Voting.h"
-#include "SPAnalyst.h"
 #include "IWorldQuery.h"
 #include "C4Projectile.h"
 
@@ -182,8 +181,6 @@ bool CGameRules::Init( IGameObject * pGameObject )
 		}
 	}
 
-	g_pGame->GetSPAnalyst()->Enable(!isMultiplayer);
-
 	m_pRadio=new CRadio(this);
 
 	// create battledust object in SP, and on dx10 MP servers.
@@ -301,9 +298,6 @@ void CGameRules::FullSerialize( TSerialize ser )
 	SAFE_HUD_FUNC(Serialize(ser));
 
 	SAFE_SOUNDMOODS_FUNC(Serialize(ser));
-
-	if (g_pGame->GetSPAnalyst())
-		g_pGame->GetSPAnalyst()->Serialize(ser);
 
 	bool battleDustActive = (m_pBattleDust)?true:false;
 	ser.Value("battleDustActive", battleDustActive);
@@ -634,7 +628,7 @@ bool CGameRules::OnClientConnect(int channelId, bool isReset)
 		status[0] = GetTeam(pActor->GetEntityId());
 		status[1] = pActor->GetSpectatorMode();
 		m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Connected, 0, m_pGameFramework->IsChannelOnHold(channelId)?1.0f:0.0f, (void*)status));
-		
+
 		//notify client he has entered the game
 		GetGameObject()->InvokeRMIWithDependentObject(ClEnteredGame(), NoParams(), eRMI_ToClientChannel, pActor->GetEntityId(), channelId);
 		

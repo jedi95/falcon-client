@@ -435,51 +435,10 @@ public:
 	}
 };
 
-//USE_FRAME_PROFILER
-#if defined(USE_FRAME_PROFILER) && (!defined(_RELEASE) || defined(WIN64))
-
-//////////////////////////////////////////////////////////////////////////
-//! Place this macro when you need to profile a function.
-//!
-//! void CTest::Func() {
-//!   FUNCTION_PROFILER( GetISystem() );
-//!   // function body will be profiled.
-//! }
-#define FUNCTION_PROFILER( pISystem,subsystem ) \
-	static CFrameProfiler staticFrameProfiler( pISystem,__FUNCTION__,subsystem ); \
-	CFrameProfilerSection frameProfilerSection( &staticFrameProfiler );
-
-#define FUNCTION_PROFILER_FAST( pISystem,subsystem,bProfileEnabled ) \
-	static CFrameProfiler staticFrameProfiler( pISystem,__FUNCTION__,subsystem ); \
-	CFrameProfilerSection frameProfilerSection( &staticFrameProfiler );
-
-//////////////////////////////////////////////////////////////////////////
-//! Place this macro when you need to profile any code block.
-//! {
-//!		... some code ...
-//!   {
-//!			FRAME_PROFILER( GetISystem(),"MyCode" );
-//!     ... more code ... // This code will be profiled with counter named "MyCode"
-//!		}
-//! }
-#define FRAME_PROFILER( szProfilerName,pISystem,subsystem ) \
-	static CFrameProfiler staticFrameProfiler( pISystem,szProfilerName,subsystem ); \
-	CFrameProfilerSection frameProfilerSection( &staticFrameProfiler );
-
-//! Faster version of FRAME_PROFILE macro, also accept a pointer to boolean variable which turn on/off profiler.
-#define FRAME_PROFILER_FAST( szProfilerName,pISystem,subsystem,bProfileEnabled ) \
-	static CFrameProfiler staticFrameProfiler( pISystem,szProfilerName,subsystem ); \
-	CFrameProfilerSection frameProfilerSection( &staticFrameProfiler );
-
-#else //#if !defined(_RELEASE) || defined(WIN64)
-
 #define FUNCTION_PROFILER( pISystem,subsystem )
 #define FUNCTION_PROFILER_FAST( pISystem,subsystem,bProfileEnabled )
 #define FRAME_PROFILER( szProfilerName,pISystem,subsystem )
 #define FRAME_PROFILER_FAST( szProfilerName,pISystem,subsystem,bProfileEnabled )
-;
-
-#endif //USE_FRAME_PROFILER
 
 #define FUNCTION_PROFILER_SYS(subsystem) \
 	FUNCTION_PROFILER_FAST( gEnv->pSystem, PROFILE_##subsystem, m_bProfilerEnabled )

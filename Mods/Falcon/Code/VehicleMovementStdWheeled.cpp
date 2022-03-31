@@ -25,8 +25,6 @@ History:
 #include "IGameTokens.h"
 #include "Player.h"
 
-#include "NetInputChainDebug.h"
-
 #define THREAD_SAFE 1
 #define LOAD_RAMP_TIME 0.2f
 #define LOAD_RELAX_TIME 0.25f
@@ -1541,8 +1539,6 @@ void CVehicleMovementStdWheeled::ProcessMovement(const float deltaTime)
 	CVehicleMovementBase::ProcessMovement(deltaTime);
 
 	IPhysicalEntity* pPhysics = GetPhysics();
-
-	NETINPUT_TRACE(m_pVehicle->GetEntityId(), m_action.pedal);
 
 	float speed = m_PhysDyn.v.len();
 

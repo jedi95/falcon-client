@@ -30,7 +30,6 @@
 #include "HUD/HUD.h"
 #include "Menus/QuickGame.h"
 #include "Environment/BattleDust.h"
-#include "NetInputChainDebug.h"
 
 #include "Menus/FlashMenuObject.h"
 #include "Menus/MPHub.h"
@@ -726,8 +725,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 
 	pConsole->Register("g_painSoundGap", &g_painSoundGap, 0.1f, 0, "Minimum time gap between local player pain sounds");
 	pConsole->Register("g_explosionScreenShakeMultiplier", &g_explosionScreenShakeMultiplier, 0.25f, 0, "Multiplier for explosion screenshake");
-
-	NetInputChainInitCVars();
 
 	//Vader mod
 	gEnv->pConsole->GetCVar("fn_fixHUD")->SetOnChangeCallback(fnHudFix);
