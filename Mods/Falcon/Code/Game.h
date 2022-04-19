@@ -192,8 +192,8 @@ public:
 
 	CDownloadTask* GetDownloadTask() const { return m_pDownloadTask; }
 
-	virtual void SetDX10Fix(bool state);
-	virtual bool GetDX10Fix();
+	virtual void SetDX10Fix(int state);
+	virtual int GetDX10Fix();
 
 protected:
 	virtual void LoadActionMaps(const char* filename = "libs/config/defaultProfile.xml");
@@ -258,7 +258,7 @@ protected:
 	CWeaponSystem				*m_pWeaponSystem;
 
 	bool								m_bReload;
-	bool m_dx10Fix;
+	int m_dx10Fix;
 
 	// script binds
 	CScriptBind_Actor		*m_pScriptBindActor;

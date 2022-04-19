@@ -3232,14 +3232,21 @@ void CFlashMenuObject::OnPostUpdate(float fDeltaTime)
 			if (!gEnv->pSoundSystem->IsPaused())
 				PlaySound(ESound_MenuAmbience);
 		}
+	}
 
-		if (g_pGame->GetDX10Fix())
+	if (g_pGame->GetDX10Fix() > 0)
+	{
+		if (g_pGame->GetDX10Fix() > 1) {
+			int newValue = g_pGame->GetDX10Fix() - 1;
+			g_pGame->SetDX10Fix(newValue);
+		}
+		else
 		{
-			if (ICVar *pVar=gEnv->pConsole->GetCVar("r_DisplayInfo"))
+			if (ICVar* pVar = gEnv->pConsole->GetCVar("r_DisplayInfo"))
 			{
 				pVar->Set(0);
 			}
-			g_pGame->SetDX10Fix(false);
+			g_pGame->SetDX10Fix(0);
 		}
 	}
 

@@ -101,7 +101,7 @@ CGame::CGame()
 	m_uiPlayerID(-1),
 	m_pDownloadTask(0),
 	m_pLauncher(0),
-	m_dx10Fix(false),
+	m_dx10Fix(0),
 	m_pRemoteControlSystem(0)
 {
 	m_pCVars = new SCVars();
@@ -368,7 +368,7 @@ bool CGame::Init(IGameFramework *pFramework)
 			if (pVar->GetIVal() == 0)
 			{
 				pVar->Set(1);
-				m_dx10Fix = true;
+				m_dx10Fix = 2;
 			}
 		}
 	}
@@ -377,11 +377,11 @@ bool CGame::Init(IGameFramework *pFramework)
 	return true;
 }
 
-void CGame::SetDX10Fix(bool state)
+void CGame::SetDX10Fix(int state)
 {
 	m_dx10Fix = state;
 }
-bool CGame::GetDX10Fix()
+int CGame::GetDX10Fix()
 {
 	return m_dx10Fix;
 }
