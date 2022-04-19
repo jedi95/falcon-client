@@ -488,20 +488,15 @@ void CPlayerRotation::ClampAngles()
 
 		if (m_player.m_stats.isFrozen.Value())
 		{ 
-      float clampMin = g_pGameCVars->cl_frozenAngleMin;
-      float clampMax = g_pGameCVars->cl_frozenAngleMax;
-      float frozenLimit = DEG2RAD(clampMin + (clampMax-clampMin)*(1.f-m_player.GetFrozenAmount(true)));    
+			float clampMin = g_pGameCVars->cl_frozenAngleMin;
+			float clampMax = g_pGameCVars->cl_frozenAngleMax;
+			float frozenLimit = DEG2RAD(clampMin + (clampMax-clampMin)*(1.f-m_player.GetFrozenAmount(true)));    
 
 			if (limitV == 0 || limitV>frozenLimit)
 				limitV = frozenLimit;
 			if (limitH == 0 || limitH>frozenLimit)
 				limitH = frozenLimit;
 
-      if (g_pGameCVars->cl_debugFreezeShake)
-      {
-        static float color[] = {1,1,1,1};    
-        gEnv->pRenderer->Draw2dLabel(100,200,1.5,color,false,"limit: %f", RAD2DEG(frozenLimit));
-      }
 		}
 
 		if(m_player.m_stats.isOnLadder)

@@ -180,9 +180,6 @@ struct CQuickGame::SQGServerList : public IServerListener
     if(m_minPlayers)
       if(info->m_numPlayers<m_minPlayers)
         return;
-		//drop dx10
-		if(gEnv->pRenderer->GetRenderType() != eRT_DX10 && info->m_dx10)
-			return;
 		//drop other versions
 		if(m_ver!= info->m_gameVersion)
 			return;
@@ -318,23 +315,8 @@ struct CQuickGame::SQGServerList : public IServerListener
 
     m_qg->m_browser->Stop();
 
-    if(g_pGameCVars->g_quickGame_debug!=0)
-    {
-      CryLog("Quick Game debug output. Phase %d\n", m_qg->GetStage());
-      int num = min(g_pGameCVars->g_quickGame_debug,int(m_servers.size()));
-      for(int i=0;i<num;++i)
-      {
-        SRatedServer &svr = m_servers[i];
-        CryLog("\tscore:0x%X plrs:%d ping:%d map:%s mode:%s", svr.score, svr.players, svr.ping, svr.map.c_str(), svr.mode.c_str());
-      }
-      CryLog("Total %d servers\n", m_servers.size());
-      m_qg->NextStage();
-    }
-    else
-    {
-      m_qg->m_ui->OnUIEvent(SUIEvent(eUIE_quickGame,1,m_servers[0].name));
-      m_qg->m_browser->CheckDirectConnect(m_servers[0].id,m_servers[0].port);
-    }
+    m_qg->m_ui->OnUIEvent(SUIEvent(eUIE_quickGame,1,m_servers[0].name));
+    m_qg->m_browser->CheckDirectConnect(m_servers[0].id,m_servers[0].port);
     m_qg->m_searching = false;
   }
 

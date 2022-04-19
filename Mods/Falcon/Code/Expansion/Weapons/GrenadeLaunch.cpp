@@ -34,7 +34,6 @@ History:
 #include "IronSight.h"
 
 #include "IRenderer.h"
-#include "IRenderAuxGeom.h"	
 
 class CGrenadeLaunch::CRotateDrumAction
 {

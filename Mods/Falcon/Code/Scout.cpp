@@ -20,7 +20,6 @@
 #include <IPhysics.h>
 #include <ICryAnimation.h>
 #include <ISerialize.h>
-#include <IRenderAuxGeom.h>
 #include "Lam.h"
 
 
@@ -632,11 +631,7 @@ void CScoutBeam::UpdatePosVelRot(float frameTime)
 				float secondHalf(firstHalf + half);
 				setGrabVel = (m_grabStats.throwVector) * (1.0f-min((secondHalf*2) / m_grabStats.maxDelay,1.0f));
 			}
-
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(grabWPos+setGrabVel,2.5f,ColorB(0,255,0,255) );
 		}
-
-		//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(grabWPos,0.25f,ColorB(0,255,0,255) );
 
 		if (pEnt->GetPhysics() && pGrab->GetPhysics())
 		{

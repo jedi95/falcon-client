@@ -357,12 +357,6 @@ void CProjectile::Update(SEntityUpdateContext &ctx, int updateSlot)
 	if (updateSlot!=0)
 		return;
 
-	float color[4] = {1,1,1,1};
-	bool bDebug = g_pGameCVars->i_debug_projectiles > 0;
-
-	if(bDebug)
-		gEnv->pRenderer->Draw2dLabel(50,15,2.0f,color,false,"Projectile: %s",GetEntity()->GetClass()->GetName());
-
 	Vec3 pos = GetEntity()->GetWorldPos();
 
 	ScaledEffect(m_pAmmoParams->pScaledEffect);

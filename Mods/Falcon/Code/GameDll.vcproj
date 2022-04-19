@@ -1849,14 +1849,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Menus\MovieManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Menus\MovieManager.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Menus\MPHub.cpp"
 				>
 			</File>

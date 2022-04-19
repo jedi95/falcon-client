@@ -21,7 +21,6 @@ History:
 #include "Player.h"
 
 #include "IEntityProxy.h"
-#include "IRenderAuxGeom.h"
 
 //------------------------------------------------------------------------
 CClaymore::CClaymore()
@@ -128,9 +127,6 @@ void CClaymore::ProcessEvent(SEntityEvent &event)
 
 			if(pEntity && (pActor || pVehicle))
 			{
-				if(g_pGameCVars->g_debugMines != 0)
-					CryLog("Claymore detected entity: %d, type %s", pEntity->GetId(), pActor == NULL ? "Vehicle" : "Actor");
-					
 				m_targetList.push_back(pEntity->GetId());
 			}
 			break;
@@ -158,8 +154,6 @@ void CClaymore::ProcessEvent(SEntityEvent &event)
 void CClaymore::Update(SEntityUpdateContext &ctx, int updateSlot)
 {
 	CProjectile::Update(ctx, updateSlot);
-
-	bool debug = (g_pGameCVars->g_debugMines != 0);
 
 	Vec3 centrePos = GetEntity()->GetWorldPos();
 	centrePos.z += 0.2f;
@@ -194,16 +188,8 @@ void CClaymore::Update(SEntityUpdateContext &ctx, int updateSlot)
 							//	to see if it is within the angular range m_triggerAngle.
 							//	If it is, then check distance is less than m_triggerRange,
 							//	and also check line-of-sight between the two entities.
-							IRenderAuxGeom * pRAG = gEnv->pRenderer->GetIRenderAuxGeom();
-							pRAG->SetRenderFlags( e_Mode3D | e_AlphaBlended | e_DrawInFrontOff | e_FillModeSolid | e_CullModeNone );
-
-							AABB entityBBox;	
+							AABB entityBBox;
 							pEntity->GetWorldBounds(entityBBox);
-
-							if(debug)
-							{
-								pRAG->DrawAABB( entityBBox, true, ColorF(1,0,0,0.4f), eBBD_Faceted );
-							}
 
 							Vec3 enemyDir = entityBBox.GetCenter() - centrePos;
 							Vec3 checkDir = enemyDir; 
@@ -234,19 +220,6 @@ void CClaymore::Update(SEntityUpdateContext &ctx, int updateSlot)
 								checkDir.NormalizeSafe();
 								float dotProd = checkDir.Dot(m_triggerDirection);
 
-								if(debug)
-								{
-									pRAG->DrawLine(centrePos, ColorF(1,0,0,1), centrePos + Matrix33::CreateRotationZ(m_triggerAngle/2.0f)*m_triggerDirection*m_triggerRadius, ColorF(1,0,0,1), 5.0f);
-									pRAG->DrawLine(centrePos, ColorF(1,0,0,1), centrePos + Matrix33::CreateRotationZ(-m_triggerAngle/2.0f)*m_triggerDirection*m_triggerRadius, ColorF(1,0,0,1), 5.0f);
-
-									ColorF clr;
-									clr.a = 0.3f;
-									clr.b = 0.4f;
-									clr.g = 0.1f;
-									clr.r = 1.0f;
-									pRAG->DrawLine(centrePos, clr, centrePos + (enemyDir * m_triggerRadius), clr, 5.0f);
-								}
-
 								if(dotProd > cry_cosf(m_triggerAngle/2.0f))
 								{
 									static const int objTypes = ent_all&(~ent_terrain);   
@@ -265,16 +238,6 @@ void CClaymore::Update(SEntityUpdateContext &ctx, int updateSlot)
 									{
 										// pass in the explosion normal, which is -m_triggerDirection
 										Explode(true, false, Vec3(0,0,0), -m_triggerDirection);
-
-										if(debug)
-										{
-											ColorF clr;
-											clr.a = 1.0f;
-											clr.g = 1.0f;
-											clr.r = 1.0f;
-											clr.b = 1.0f;
-											pRAG->DrawLine(centrePos, clr, centrePos + (enemyDir * m_triggerRadius), clr, 5.0f);
-										}
 									}
 								}
 							}
@@ -308,22 +271,6 @@ void CClaymore::Update(SEntityUpdateContext &ctx, int updateSlot)
 				}
 			}
 		}
-	}
-
-	if(debug && m_armed)
-	{
-		IRenderAuxGeom * pRAG = gEnv->pRenderer->GetIRenderAuxGeom();
-		ColorF clr;
-		clr.a = 0.3f;
-		clr.b = 0.4f;
-		clr.g = 0.1f;
-		clr.r = 1.0f;
-		pRAG->SetRenderFlags( e_Mode3D | e_AlphaBlended | e_DrawInFrontOff | e_FillModeSolid | e_CullModeNone );
-		pRAG->DrawCylinder(GetEntity()->GetPos(), Vec3(0, 0, 1), m_triggerRadius, m_triggerRadius * 2.0f, clr);
-		Vec3 size(m_triggerRadius + 2.0f, m_triggerRadius + 2.0f, m_triggerRadius + 2.0f);
-		AABB box(GetEntity()->GetPos() - size, GetEntity()->GetPos() + size);
-		pRAG->DrawAABB(box, false, ColorF(0.1f, 0.1f, 0.1f, 0.1f), eBBD_Faceted);
-		pRAG->DrawLine(GetEntity()->GetPos(), clr, GetEntity()->GetPos() + m_triggerDirection, clr, 5.0f);
 	}
 }
 

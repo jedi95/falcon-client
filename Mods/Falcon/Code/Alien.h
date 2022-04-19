@@ -25,9 +25,6 @@ struct SViewParams;
 struct IItemSystem;
 struct IGroundEffect;
 
-struct IDebugHistory;
-struct IDebugHistoryManager;
-
 //this might change
 struct SAlienInput
 {
@@ -542,12 +539,6 @@ protected:
   
 	CAlienBeam *m_pBeamEffect;
 	Vec3				m_oldGravity;
-
-	void UpdateDebugGraphs();
-	IDebugHistoryManager* m_pDebugHistoryManager;
-public:
-	void DebugGraph_AddValue(const char* id, float value) const;
-
 };
 
 

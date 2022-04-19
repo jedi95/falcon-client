@@ -54,9 +54,6 @@ void CShotValidator::AddShot(EntityId playerId, EntityId weaponId, uint16 seq, u
 
 	while (shot.life>0 && hit!=hits.end() && shot==hit->first)
 	{
-		if(g_pGameCVars->g_debugShotValidator != 0)
-			CryLogAlways("found a matching hit! seq: %d  id: %d  age: %.2f  size: %d", shot.seq, shot.weaponId, (now-hit->second.time).GetMilliSeconds(), hits.size());
-
 		HitInfo info=hit->second.info;
 		hits.erase(hit);
 
@@ -74,9 +71,6 @@ void CShotValidator::AddShot(EntityId playerId, EntityId weaponId, uint16 seq, u
 		assert(csit!=m_shots.end());
 		TShots &shots=csit->second;
 		shots.insert(shot);
-
-		if(g_pGameCVars->g_debugShotValidator != 0)
-			CryLogAlways("added shot! seq: %d  id: %d", shot.seq, shot.weaponId);
 	}
 
 	if (seqr>0)
@@ -113,21 +107,13 @@ bool CShotValidator::ProcessHit(const HitInfo &hitInfo)
 
 		if (found!=shots.end())
 		{
-			if(g_pGameCVars->g_debugShotValidator != 0)
-				CryLogAlways("found a matching shot! seq: %d  id: %d  age: %.2f  size: %d", shot.seq, shot.weaponId, (now-found->time).GetMilliSeconds(), shots.size());
-
 			TShot &fshot=const_cast<TShot&>(*found);
 
 			if (fshot.life>0)
 				--fshot.life;
-			else if(g_pGameCVars->g_debugShotValidator != 0)
-				CryLogAlways("invalid shot consumption! seq: %d  id: %d", fshot.seq, fshot.weaponId);
 
 			if (Expired(now, fshot))
 			{
-				if(g_pGameCVars->g_debugShotValidator != 0)
-					CryLogAlways("expired shot found! seq: %d  id: %d  age: %.2f", fshot.seq, fshot.weaponId, (now-fshot.time).GetMilliSeconds());
-
 				shots.erase(found);
 			}
 
@@ -140,9 +126,6 @@ bool CShotValidator::ProcessHit(const HitInfo &hitInfo)
 	THits &hits=chit->second;
 	hits.insert(THits::value_type(shot, THit(hitInfo, now)));
 
-	if(g_pGameCVars->g_debugShotValidator != 0)
-		CryLogAlways("hit pending! seq: %d  id: %d  age: %.2f  size: %d", shot.seq, shot.weaponId, 0.0f, hits.size());
-
 	return false;
 }
 
@@ -150,10 +133,6 @@ bool CShotValidator::ProcessHit(const HitInfo &hitInfo)
 void CShotValidator::Connected(int channelId)
 {
 	Disconnected(channelId); // make sure it's cleaned up
-
-	if(g_pGameCVars->g_debugShotValidator != 0)
-		CryLogAlways("shot validator: channel %d connected", channelId);
-
 	m_shots.insert(TChannelShots::value_type(channelId, TShots()));
 	m_pendinghits.insert(TChannelHits::value_type(channelId, THits()));
 }
@@ -161,9 +140,6 @@ void CShotValidator::Connected(int channelId)
 //------------------------------------------------------------------------
 void CShotValidator::Disconnected(int channelId)
 {
-	if(g_pGameCVars->g_debugShotValidator != 0)
-		CryLogAlways("shot validator: channel %d disconnected", channelId);
-
 	m_shots.erase(channelId);
 	m_pendinghits.erase(channelId);
 }
@@ -171,9 +147,6 @@ void CShotValidator::Disconnected(int channelId)
 //------------------------------------------------------------------------
 void CShotValidator::Reset()
 {
-	if(g_pGameCVars->g_debugShotValidator != 0)
-		CryLogAlways("shot validator: reset deletes all shots/hits");
-
 	TChannelShots::iterator csend=m_shots.end();
 	for (TChannelShots::iterator csit=m_shots.begin(); csit!=csend; ++csit)
 	{
@@ -208,11 +181,6 @@ void CShotValidator::Update()
 				++shot;
 				continue;
 			}
-			if(g_pGameCVars->g_debugShotValidator != 0)
-			{
-				CryLogAlways("expired shot found! seq: %d  id: %d  age: %.2f", shot->seq, shot->weaponId, (now-shot->time).GetMilliSeconds());
-			}
-
 			TShots::iterator erasing=shot++;
 			shots.erase(erasing);
 		}
@@ -224,14 +192,6 @@ void CShotValidator::Update()
 		THits &hits=chit->second;
 		for (THits::iterator hit=hits.begin(); hit!=hits.end();)
 		{
-			if(g_pGameCVars->g_debugShotValidator != 0)
-			{
-				CryLogAlways("aged hit found...");
-				CryLogAlways(" &hit = %p", &hit);
-				CryLogAlways(" Shot seq=%d, weapon=%d, time=%.2f, life=%d", hit->first.seq, hit->first.weaponId, hit->first.time.GetSeconds(), hit->first.life);
-				CryLogAlways(" Hit time=%.2f", hit->second.time.GetMilliSeconds());
-			}
-
 			if (!Expired(now, hit->second))
 			{
 				++hit;
@@ -239,12 +199,6 @@ void CShotValidator::Update()
 			}
 
 			DeclareExpired(chit->first, hit->second.info);
-
-			if(g_pGameCVars->g_debugShotValidator != 0)
-			{
-				CryLogAlways("aged hit found! seq: %d  id: %d  age: %.2f", hit->second.info.seq, hit->second.info.weaponId, (now-hit->second.time).GetMilliSeconds());
-			}
-
 			THits::iterator erasing=hit++;
 			hits.erase(erasing);
 		}

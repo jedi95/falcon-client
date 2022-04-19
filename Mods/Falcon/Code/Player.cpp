@@ -35,12 +35,9 @@ History:
 #include <ISound.h>
 #include "IMaterialEffects.h"
 
-#include <IRenderAuxGeom.h>
 #include <IWorldQuery.h>
 
 #include <IGameTokens.h>
-
-#include <IDebugHistory.h>
 
 #include <IMusicSystem.h>
 #include <StringUtils.h>
@@ -203,7 +200,6 @@ CPlayer::CPlayer()
 	m_eyeOffset.Set(0,0,0);
 	m_weaponOffset.Set(0,0,0);
 
-	m_pDebugHistoryManager = NULL;
 	m_pSoundProxy = 0;
 	m_bVoiceSoundPlaying = false;
 	m_bVoiceSoundRecursionFlag = false;
@@ -216,12 +212,6 @@ CPlayer::CPlayer()
 
 CPlayer::~CPlayer()
 {
-	if (m_pDebugHistoryManager != NULL) 
-	{
-		m_pDebugHistoryManager->Release();
-		delete m_pDebugHistoryManager;
-	}
-
 	StopLoopingSounds();
 
 	if(IsClient())
@@ -939,9 +929,6 @@ void CPlayer::Update(SEntityUpdateContext& ctx, int updateSlot)
 		}
 
 		UpdateParachute(frameTime);
-
-		//Vec3 camPos(pEnt->GetSlotWorldTM(0) * GetStanceViewOffset(GetStance()));
-		//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(camPos, 0.05f, ColorB(0,255,0,255) );
 	}
 
 	// need to create this even when player is dead, otherwise spectators don't see tank turrets rotate etc until they spawn in.
@@ -1250,26 +1237,7 @@ void CPlayer::ProcessCharacterOffset()
 				m_modelOffset.y -= max(-lookDown,0.0f)*0.6f;
 			}
 		}
-
-	/*
-		SEntitySlotInfo slotInfo; 
-		pEnt->GetSlotInfo( 0, slotInfo );
-
-		Matrix34 LocalTM=Matrix34(IDENTITY);	
-		if (slotInfo.pLocalTM)
-			LocalTM=*slotInfo.pLocalTM;	
-
-		LocalTM.m03 += m_modelOffset.x;
-		LocalTM.m13 += m_modelOffset.y;
-		LocalTM.m23 += m_modelOffset.z;
-	  pEnt->SetSlotLocalTM(0,LocalTM);
-	*/
-
 		m_modelOffset.z = 0.0f;
-
-		//DebugGraph_AddValue("ModelOffsetX", m_modelOffset.x);
-		//DebugGraph_AddValue("ModelOffsetY", m_modelOffset.y);
-
 		GetAnimatedCharacter()->SetExtraAnimationOffset(QuatT(m_modelOffset, IDENTITY));
 	}
 }
@@ -1287,8 +1255,6 @@ void CPlayer::PrePhysicsUpdate()
 	IEntity* pEnt = GetEntity();
 	if (pEnt->IsHidden() && !(GetEntity()->GetFlags() & ENTITY_FLAG_UPDATE_HIDDEN))
 		return;
-
-	Debug();
 
 	//workaround - Avoid collision with grabbed NPC - Beni
 	/*if(m_pHumanGrabEntity && !m_throwingNPC)
@@ -1377,18 +1343,7 @@ void CPlayer::PrePhysicsUpdate()
 		SActorFrameMovementParams frameMovementParams;
 		if (m_pMovementController->Update(frameTime, frameMovementParams))
 		{
-/*
-#ifdef _DEBUG
-			if(m_pMovementDebug)
-				m_pMovementDebug->AddValue(frameMovementParams.desiredVelocity.len());
-			if(m_pDeltaXDebug)
-				m_pDeltaXDebug->AddValue(frameMovementParams.desiredVelocity.x);
-			if(m_pDeltaYDebug)
-				m_pDeltaYDebug->AddValue(frameMovementParams.desiredVelocity.y);
-#endif
-*/
-
-      if (m_linkStats.CanRotate())
+			if (m_linkStats.CanRotate())
 			{
 				Quat baseQuatBackup(m_baseQuat);
 
@@ -1601,16 +1556,6 @@ void CPlayer::SetIK( const SActorFrameMovementParams& frameMovementParams )
 		}
 		pSkeletonPose->SetAimIK( aimEnabled, aimTarget );
 		pGraph->SetInput( m_inputAiming, aimEnabled ? 1 : 0 );
-
-
-/*
-		if (frameMovementParams.aimIK)
-		{
-			ICVar *pg_aimDebug = gEnv->pConsole->GetCVar("g_aimdebug");
-			if (pg_aimDebug && pg_aimDebug->GetIVal()!=0)
-				gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(  frameMovementParams.aimTarget, 0.5f, ColorB(255,0,255,255) );
-		}
-*/
 	}
 }
 
@@ -2313,46 +2258,6 @@ void CPlayer::UpdateSwimStats(float frameTime)
 
 		PlaySound(ESound_Underwater, (cameraWaterLevel < 0.0f));
 	}
-
-	// DEBUG RENDERING
-	bool debugSwimming = (g_pGameCVars->cl_debugSwimming != 0);
-	if (debugSwimming && (playerWaterLevel > -10.0f) && (playerWaterLevel < 10.0f))
-	{
-		Vec3 vRight(m_baseQuat.GetColumn0());
-
-		static ColorF referenceColor(1,1,1,1);
-		static ColorF surfaceColor1(0,0.5f,1,1);
-		static ColorF surfaceColor0(0,0,0.5f,0);
-		static ColorF bottomColor(0,0.5f,0,1);
-
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(referencePos, 0.1f, referenceColor);
-
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(referencePos, surfaceColor1, surfacePos, surfaceColor1, 2.0f);
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(surfacePos, 0.2f, surfaceColor1);
-		gEnv->pRenderer->DrawLabel(referencePos + vRight * 0.5f, 1.5f, "WaterLevel %3.2f (HWL %3.2f) (SurfaceZ %3.2f)", playerWaterLevel, headWaterLevel, surfacePos.z);
-		gEnv->pRenderer->DrawLabel(referencePos + vRight * 0.5f - Vec3(0,0,-0.2f), 1.5f, "InWaterTimer %3.2f", m_stats.inWaterTimer);
-
-		static int lines = 16;
-		static float radius0 = 0.5f;
-		static float radius1 = 1.0f;
-		static float radius2 = 2.0f;
-		for (int i = 0; i < lines; ++i)
-		{
-			float radians = ((float)i / (float)lines) * gf_PI2;
-			Vec3 offset0(radius0 * cry_cosf(radians), radius0 * cry_sinf(radians), 0);
-			Vec3 offset1(radius1 * cry_cosf(radians), radius1 * cry_sinf(radians), 0);
-			Vec3 offset2(radius2 * cry_cosf(radians), radius2 * cry_sinf(radians), 0);
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(surfacePos+offset0, surfaceColor0, surfacePos+offset1, surfaceColor1, 2.0f);
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(surfacePos+offset1, surfaceColor1, surfacePos+offset2, surfaceColor0, 2.0f);
-		}
-
-		if (bottomDepth > 0.0f)
-		{
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(referencePos, bottomColor, bottomPos, bottomColor, 2.0f);
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(bottomPos, 0.2f, bottomColor);
-			gEnv->pRenderer->DrawLabel(bottomPos + Vec3(0,0,0.5f) - vRight * 0.5f, 1.5f, "BottomDepth %3.3f", bottomDepth);
-		}
-	}
 }
 
 //------------------------------------------------------------------------
@@ -2360,8 +2265,6 @@ void CPlayer::UpdateUWBreathing(float frameTime, Vec3 worldBreathPos)
 {
 	if (!IsPlayer())
 		return;
-
-	bool debugSwimming = (g_pGameCVars->cl_debugSwimming != 0);
 
 	bool breath = (m_stats.headUnderWaterTimer > 0.0f);
 
@@ -2437,20 +2340,14 @@ void CPlayer::UpdateUWBreathing(float frameTime, Vec3 worldBreathPos)
 			m_underwaterBubblesDelay = +0.01f;
 		}
 
-		float breathDebugFraction = 0.0f;
 		if (m_underwaterBubblesDelay >= 0.0f)
 		{
 			m_underwaterBubblesDelay += frameTime;
-			breathDebugFraction = 1.0f - m_underwaterBubblesDelay / breathInDuration;
 		}
 		else
 		{
 			m_underwaterBubblesDelay -= frameTime;
-			breathDebugFraction = -m_underwaterBubblesDelay / breathOutDuration;
 		}
-
-		if (debugSwimming)
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(worldBreathPos, 0.2f + 0.2f * breathDebugFraction, ColorB(128,196,255,255));
 	}
 	else
 	{
@@ -2663,7 +2560,6 @@ void CPlayer::UpdateStats(float frameTime)
 				if (gEnv->pPhysicalWorld->RayWorldIntersection(ppos, testSpots[i], ent_terrain|ent_static|ent_rigid, rayFlags, &hit, 1, &pPhysEnt, 1) && IsMaterialBootable(hit.surface_idx))
 				{
 					surfaceNormal += hit.n;
-					//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(hit.pt, ColorB(0,255,0,100), hit.pt + hit.n, ColorB(255,0,0,100));
 					++surfaceNum;
 				}
 			}
@@ -2686,7 +2582,6 @@ void CPlayer::UpdateStats(float frameTime)
 			m_stats.upVector = Vec3::CreateSlerp(m_stats.upVector,newUp.GetNormalized(),min(3.0f*frameTime, 1.0f));
       
 			gravityVec = -m_stats.upVector * 9.81f;
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(ppos, ColorB(255,255,0,255), ppos - gravityVec, ColorB(255,255,0,255));
 		}
 		else 
 		{
@@ -2730,24 +2625,11 @@ void CPlayer::UpdateStats(float frameTime)
 		}
 	}
 
-	//
 	if (m_stats.forceUpVector.len2()>0.01f)
 	{
 		m_stats.upVector = m_stats.forceUpVector;    
 		m_stats.forceUpVector.zero(); 
 	}
-	//
-
-
-	DebugGraph_AddValue("PhysVelo", livStat.vel.GetLength());
-	DebugGraph_AddValue("PhysVeloX", livStat.vel.x);
-	DebugGraph_AddValue("PhysVeloY", livStat.vel.y);
-	DebugGraph_AddValue("PhysVeloZ", livStat.vel.z);
-
-	DebugGraph_AddValue("PhysVeloUn", livStat.velUnconstrained.GetLength());
-	DebugGraph_AddValue("PhysVeloUnX", livStat.velUnconstrained.x);
-	DebugGraph_AddValue("PhysVeloUnY", livStat.velUnconstrained.y);
-	DebugGraph_AddValue("PhysVeloUnZ", livStat.velUnconstrained.z);
 
 	bool onGround = false;
 	bool isFlying = (livStat.bFlying != 0);
@@ -2778,16 +2660,6 @@ void CPlayer::UpdateStats(float frameTime)
 		if ((feetElevation < 0.1f) && !m_stats.jumped && (m_stats.inAir == 0.0f))
 			onGround = true;
 	}
-
-//*
-	DebugGraph_AddValue("OnGround", onGround ? 1.0f : 0.0f);
-	DebugGraph_AddValue("Jumping", m_stats.jumped ? 1.0f : 0.0f);
-	DebugGraph_AddValue("Flying", isFlying ? 1.0f : 0.0f);
-	DebugGraph_AddValue("StuckTimer", m_stats.stuckTimeout);
-	DebugGraph_AddValue("InAirTimer", m_stats.inAir);
-	DebugGraph_AddValue("OnGroundTimer", m_stats.onGround);
-	DebugGraph_AddValue("InWaterTimer", m_stats.inWaterTimer);
-/**/
 
 	//update status table
 	if (!onGround && !m_stats.spectatorMode && !GetLinkedVehicle())
@@ -2999,33 +2871,6 @@ void CPlayer::UpdateStats(float frameTime)
  						pRagDoll->Action(&v);
  				}
 			}
-
-			if (g_pGameCVars->pl_debugFallDamage != 0)
-			{
-				char* side = gEnv->bServer ? "Server" : "Client";
-
-				char* color = "";
-				if (velFraction < 0.33f)
-					color = "$6"; // Yellow
-				else if (velFraction < 0.66f)
-					color = "$8"; // Orange
-				else
-					color = "$4"; // Red
-
-				CryLogAlways("%s[%s][%s] ImpactVelo=%3.2f, FallSpeed=%3.2f, FallDamage=%3.1f (ArmorMode=%2.0f%%, NonArmorMode=%2.0f%%)", 
-					color, side, GetEntity()->GetName(), m_stats.downwardsImpactVelocity, m_stats.fallSpeed, 
-					hit.damage, hit.damage / maxDamage * 100.0f, hit.damage / maxHealth * 100.0f);
-			}
-		}
-		else if (g_pGameCVars->pl_debugFallDamage != 0)
-		{
-			if (m_stats.downwardsImpactVelocity > 0.5f)
-			{
-				char* side = gEnv->bServer ? "Server" : "Client";
-				char* color = "$3"; // Green
-				CryLogAlways("%s[%s][%s] ImpactVelo=%3.2f, FallSpeed=%3.2f, FallDamage: NONE", 
-					color, side, GetEntity()->GetName(), m_stats.downwardsImpactVelocity, m_stats.fallSpeed);
-			}
 		}
 	}
 
@@ -3046,22 +2891,6 @@ void CPlayer::UpdateStats(float frameTime)
 	else
 	{
 		m_stats.fallSpeed = 0.0f;
-		//CryLogAlways( "[player] end falling %f", ppos.z);
-	}
-
-	if (g_pGameCVars->pl_debugFallDamage == 2)
-	{
-		Vec3 pos = GetEntity()->GetWorldPos();
-		char* side = gEnv->bServer ? "Sv" : "Cl";
-		CryLogAlways("[%s] liv.vel=%0.1f,%0.1f,%3.2f liv.velU=%0.1f,%0.1f,%3.2f impactVel=%3.2f posZ=%3.2f (liv.velReq=%0.1f,%0.1f,%3.2f) (fallspeed=%3.2f) gt=%3.3f, pt=%3.3f", 
-								side, 
-								livStat.vel.x, livStat.vel.y, livStat.vel.z, 
-								livStat.velUnconstrained.x, livStat.velUnconstrained.y, livStat.velUnconstrained.z, 
-								m_stats.downwardsImpactVelocity, 
-								/*pos.x, pos.y,*/ pos.z, 
-								livStat.velRequested.x, livStat.velRequested.y, livStat.velRequested.z, 
-								m_stats.fallSpeed, 
-								gEnv->pTimer->GetCurrTime(), gEnv->pPhysicalWorld->GetPhysicsTime());
 	}
 
 	m_stats.mass = dynStat.mass;
@@ -3083,35 +2912,10 @@ void CPlayer::UpdateStats(float frameTime)
 		ChangeParachuteState(0);
 	}
 
-	/*if (m_stats.inAir>0.001f)
-	Interpolate(m_modelOffset,GetStanceInfo(m_stance)->modelOffset,3.0f,frameTime,3.0f);
-	else*/
-
 	if (livStat.groundHeight>-0.001f)
 		m_groundElevation = livStat.groundHeight - ppos*GetEntity()->GetRotation().GetColumn2();
 
-	if (m_stats.inAir<0.5f)
-	{
-		/*Vec3 touch_point = ppos + GetEntity()->GetRotation().GetColumn2()*m_groundElevation;
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(touch_point, ColorB(0,255,255,255), touch_point - GetEntity()->GetRotation().GetColumn2()*m_groundElevation, ColorB(0,255,255,255));   
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(touch_point,0.12f,ColorB(0,255,0,100) );*/
-
-		//Interpolate(m_modelOffset.z,m_groundElevation,5.0f,frameTime);
-		//m_modelOffset.z = m_groundElevation;
-	}
-
-
-
-	//
 	pe_player_dimensions ppd;
-/*	switch (m_stance)
-	{
-	default:
-	case STANCE_STAND:ppd.heightHead = 1.6f;break;
-	case STANCE_CROUCH:ppd.heightHead = 0.8f;break;
-	case STANCE_PRONE:ppd.heightHead = 0.35f;break;
-	}
-	*/
 	ppd.headRadius = 0.0f;
 	pPhysEnt->SetParams(&ppd);
 
@@ -4460,24 +4264,6 @@ bool CPlayer::CreateCodeEvent(SmartScriptTable &rTable)
 
 		return true;
 	}
-/* kirill - needed for debugging AI aiming/accuracy 
-	else if (event && !strcmp(event,"aiHitDebug"))
-	{
-		if(!IsPlayer())
-			return true;
-		ScriptHandle id;
-		id.n = 0;
-		rTable->GetValue("shooterId",id);
-		IEntity *pEntity((id.n)?gEnv->pEntitySystem->GetEntity(id.n):NULL);
-		if(pEntity && pEntity->GetAI())
-		{
-			IAIObject *pAIObj(pEntity->GetAI());
-				if(pAIObj->GetProxy())
-					++(pAIObj->GetProxy()->DebugValue());
-		}
-		return true;
-	}
-*/
 	else
 		return CActor::CreateCodeEvent(rTable);
 }
@@ -5313,13 +5099,6 @@ void CPlayer::UpdateUnfreezeInput(const Ang3 &deltaRotation, const Vec3 &deltaMo
 
 	static float color[] = {1,1,1,1};    
 
-	if (g_pGameCVars->cl_debugFreezeShake)
-	{    
-		gEnv->pRenderer->Draw2dLabel(100,50,1.5,color,false,"frozenAmount: %f (actual: %f)", GetFrozenAmount(true), m_frozenAmount);
-		gEnv->pRenderer->Draw2dLabel(100,80,1.5,color,false,"deltaRotation: %f (freeze mult: %f)", deltaRot, mult);
-		gEnv->pRenderer->Draw2dLabel(100,110,1.5,color,false,"deltaMovement: %f", deltaMov);
-	}
-
 	float freezeDelta = deltaRot*g_pGameCVars->cl_frozenMouseMult + deltaMov*g_pGameCVars->cl_frozenKeyMult;
 
 	if (freezeDelta >0)    
@@ -5332,11 +5111,6 @@ void CPlayer::UpdateUnfreezeInput(const Ang3 &deltaRotation, const Vec3 &deltaMo
 				float strength = pSuit->GetSlotValue(NANOSLOT_STRENGTH);
 				strength = max(-0.75f, (strength-50)/50.f) * freezeDelta;
 				freezeDelta += strength;
-
-				if (g_pGameCVars->cl_debugFreezeShake)
-				{ 
-					gEnv->pRenderer->Draw2dLabel(100,140,1.5,color,false,"freezeDelta: %f (suit mod: %f)", freezeDelta, strength);
-				}
 			}
 		}
 
@@ -5906,110 +5680,6 @@ void CPlayer::GetMemoryStatistics(ICrySizer * s)
 	if (m_pPlayerInput.get())
 		m_pPlayerInput->GetMemoryStatistics(s);
 	s->AddContainer(m_clientPostEffects);
-  
-	if (m_pDebugHistoryManager)
-    m_pDebugHistoryManager->GetMemoryStatistics(s);
-}
-
-
-void CPlayer::Debug()
-{
-	bool debug = (g_pGameCVars->pl_debug_movement != 0);
-
-	const char* filter = g_pGameCVars->pl_debug_filter->GetString();
-	const char* name = GetEntity()->GetName();
-	if ((strcmp(filter, "0") != 0) && (strcmp(filter, name) != 0))
-		debug = false;
-
-	if (!debug)
-	{
-		if (m_pDebugHistoryManager != NULL)
-			m_pDebugHistoryManager->Clear();
-    return;
-	}
-
-  if (m_pDebugHistoryManager == NULL)
-    m_pDebugHistoryManager = g_pGame->GetIGameFramework()->CreateDebugHistoryManager();
-
-	bool showReqVelo = true;
-	m_pDebugHistoryManager->LayoutHelper("ReqVelo", NULL, showReqVelo, -20, 20, 0, 5, 0.0f, 0.0f);
-	m_pDebugHistoryManager->LayoutHelper("ReqVeloX", NULL, showReqVelo, -20, 20, -5, 5, 1.0f, 0.0f);
-	m_pDebugHistoryManager->LayoutHelper("ReqVeloY", NULL, showReqVelo, -20, 20, -5, 5, 2.0f, 0.0f);
-	m_pDebugHistoryManager->LayoutHelper("ReqVeloZ", NULL, showReqVelo, -20, 20, -5, 5, 3.0f, 0.0f);
-	m_pDebugHistoryManager->LayoutHelper("ReqRotZ", NULL, showReqVelo, -360, 360, -5, 5, 4.0f, 0.0f);
-
-	m_pDebugHistoryManager->LayoutHelper("PhysVelo", NULL, showReqVelo, -20, 20, 0, 5, 0.0f, 1.0f);
-	m_pDebugHistoryManager->LayoutHelper("PhysVeloX", NULL, showReqVelo, -20, 20, -5, 5, 1.0f, 1.0f);
-	m_pDebugHistoryManager->LayoutHelper("PhysVeloY", NULL, showReqVelo, -20, 20, -5, 5, 2.0f, 1.0f);
-	m_pDebugHistoryManager->LayoutHelper("PhysVeloZ", NULL, showReqVelo, -20, 20, -5, 5, 3.0f, 1.0f);
-
-	m_pDebugHistoryManager->LayoutHelper("PhysVeloUn", NULL, showReqVelo, -20, 20, 0, 5, 0.0f, 2.0f);
-	m_pDebugHistoryManager->LayoutHelper("PhysVeloUnX", NULL, showReqVelo, -20, 20, -5, 5, 1.0f, 2.0f);
-	m_pDebugHistoryManager->LayoutHelper("PhysVeloUnY", NULL, showReqVelo, -20, 20, -5, 5, 2.0f, 2.0f);
-	m_pDebugHistoryManager->LayoutHelper("PhysVeloUnZ", NULL, showReqVelo, -20, 20, -5, 5, 3.0f, 2.0f);
-
-/*
-	m_pDebugHistoryManager->LayoutHelper("InputMoveX", NULL, showReqVelo, -1, 1, -1, 1, 0.0f, 1.0f);
-	m_pDebugHistoryManager->LayoutHelper("InputMoveY", NULL, showReqVelo, -1, 1, -1, 1, 1.0f, 1.0f);
-/**/
-
-/*
-	bool showVelo = true;
-	m_pDebugHistoryManager->LayoutHelper("Velo", NULL, showVelo, -20, 20, 0, 8, 0.0f, 0.0f);
-	m_pDebugHistoryManager->LayoutHelper("VeloX", NULL, showVelo, -20, 20, -5, 5, 1.0f, 0.0f);
-	m_pDebugHistoryManager->LayoutHelper("VeloY", NULL, showVelo, -20, 20, -5, 5, 2.0f, 0.0f);
-	m_pDebugHistoryManager->LayoutHelper("VeloZ", NULL, showVelo, -20, 20, -5, 5, 3.0f, 0.0f);
-/**/
-
-/*
-	m_pDebugHistoryManager->LayoutHelper("Axx", NULL, showVelo, -20, 20, -1, 1, 0.0f, 1.0f);
-	m_pDebugHistoryManager->LayoutHelper("AxxX", NULL, showVelo, -20, 20, -1, 1, 1.0f, 1.0f);
-	m_pDebugHistoryManager->LayoutHelper("AxxY", NULL, showVelo, -20, 20, -1, 1, 2.0f, 1.0f);
-	m_pDebugHistoryManager->LayoutHelper("AxxZ", NULL, showVelo, -20, 20, -1, 1, 3.0f, 1.0f);
-/**/
-
-	//m_pDebugHistoryManager->LayoutHelper("ModelOffsetX", NULL, true, 0, 1, -0.5, 0.5, 5.0f, 0.5f);
-	//m_pDebugHistoryManager->LayoutHelper("ModelOffsetY", NULL, true, 0, 1, 0, 1, 5.0f, 1.5f, 1.0f, 0.5f);
-
-//*
-	bool showJump = true;
-	m_pDebugHistoryManager->LayoutHelper("OnGround", NULL, showJump, 0, 1, 0, 1, 5.0f, 0.5f, 1.0f, 0.5f);
-	m_pDebugHistoryManager->LayoutHelper("Jumping", NULL, showJump, 0, 1, 0, 1, 5.0f, 1.0f, 1.0f, 0.5f);
-	m_pDebugHistoryManager->LayoutHelper("Flying", NULL, showJump, 0, 1, 0, 1, 5.0f, 1.5f, 1.0f, 0.5f);
-	m_pDebugHistoryManager->LayoutHelper("StuckTimer", NULL, showJump, 0, 0.5, 0, 0.5, 5.0f, 2.0f, 1.0f, 1.0f);
-	m_pDebugHistoryManager->LayoutHelper("InAirTimer", NULL, showJump, 0, 5, 0, 5, 4.0f, 2.0f, 1.0f, 1.0f);
-	m_pDebugHistoryManager->LayoutHelper("InWaterTimer", NULL, showJump, -5, 5, -0.5, 0.5, 4, 3);
-	m_pDebugHistoryManager->LayoutHelper("OnGroundTimer", NULL, showJump, 0, 5, 0, 5, 4.0f, 1.0f, 1.0f, 1.0f);
-/**/
-
-
-//*
-	m_pDebugHistoryManager->LayoutHelper("GroundSlope", NULL, true, 0, 90, 0, 90, 0, 3);
-	m_pDebugHistoryManager->LayoutHelper("GroundSlopeMod", NULL, true, 0, 90, 0, 90, 1, 3);
-/**/
-
-	//m_pDebugHistoryManager->LayoutHelper("ZGDashTimer", NULL, showVelo, -20, 20, -0.5, 0.5, 5.0f, 0.5f);
-/*
-	m_pDebugHistoryManager->LayoutHelper("StartTimer", NULL, showVelo, -20, 20, -0.5, 0.5, 5.0f, 0.5f);
-	m_pDebugHistoryManager->LayoutHelper("DodgeFraction", NULL, showVelo, 0, 1, 0, 1, 5.0f, 1.5f, 1.0f, 0.5f);
-	m_pDebugHistoryManager->LayoutHelper("RampFraction", NULL, showVelo, 0, 1, 0, 1, 5.0f, 2.0f, 1.0f, 0.5f);
-	m_pDebugHistoryManager->LayoutHelper("ThrustAmp", NULL, showVelo, 0, 5, 0, 5, 5.0f, 2.5f, 1.0f, 0.5f);
-*/
-}
-
-void CPlayer::DebugGraph_AddValue(const char* id, float value) const
-{
-	if (m_pDebugHistoryManager == NULL)
-		return;
-
-	if (id == NULL)
-		return;
-
-	// NOTE: It's alright to violate the const here. The player is a good common owner for debug graphs, 
-	// but it's also not non-const in all places, even though graphs might want to be added from those places.
-	IDebugHistory* pDH = const_cast<IDebugHistoryManager*>(m_pDebugHistoryManager)->GetHistory(id);
-	if (pDH != NULL)
-		pDH->AddValue(value);
 }
 
 //Try to predict if the player needs to go to crouch stance to pick up a weapon/item
@@ -6075,11 +5745,9 @@ void CPlayer::RecordExplosivePlaced(EntityId entityId, EExplosiveType typeId)
 {
 	if(typeId == eET_All || typeId >= eET_NumTypes)
 	{
-		CryLog("invalid explosive type");
 		return;
 	}
 	int limit=g_pGameCVars->g_explosiveLimits[typeId];
-	bool debug = (g_pGameCVars->g_debugMines != 0);
 
 	std::list<EntityId> &explosives=m_explosiveList[typeId];
 
@@ -6088,23 +5756,15 @@ void CPlayer::RecordExplosivePlaced(EntityId entityId, EExplosiveType typeId)
 		// remove the oldest mine.
 		EntityId explosiveId = explosives.front();
 		explosives.pop_front();
-		if(debug)
-			CryLog("%s: Explosive(%d) force removed: %d", GetEntity()->GetName(), typeId, explosiveId);
 		gEnv->pEntitySystem->RemoveEntity(explosiveId);
 	}
 	explosives.push_back(entityId);
-
-	if(debug)
-		CryLog("%s: Explosive(%d) placed: %d, now %d", GetEntity()->GetName(), typeId, entityId, explosives.size());
 }
 
 void CPlayer::RecordExplosiveDestroyed(EntityId entityId, EExplosiveType typeId)
 {
-	bool debug = (g_pGameCVars->g_debugMines != 0);
-
 	if(typeId == eET_All || typeId >= eET_NumTypes)
 	{
-		CryLog("invalid explosive type");
 		return;
 	}
 	
@@ -6114,13 +5774,6 @@ void CPlayer::RecordExplosiveDestroyed(EntityId entityId, EExplosiveType typeId)
 	if(it != explosives.end())
 	{
 		explosives.erase(it);
-		if(debug)
-			CryLog("%s: Explosive(%d) destroyed: %d, now %d", GetEntity()->GetName(), typeId, entityId, explosives.size());
-	}
-	else
-	{
-		if(debug)
-			CryLog("%s: Explosive(%d) destroyed but not in list: %d", GetEntity()->GetName(), typeId, entityId);
 	}
 }
 

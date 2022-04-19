@@ -179,14 +179,10 @@ void SIKLimb::Update(IEntity *pOwner,float frameTime)
 			pISkeletonPose->CCDInitIKChain(rootBoneID,endBoneID);
 
 			Vec3 limbEndNormal(0,0,0);
-			//limbEndNormal = Matrix33(pISkeleton->GetAbsJMatrixByID(endBoneID)).GetColumn(0);
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(finalPos, ColorB(0,255,0,100), finalPos + limbEndNormal * 3.0f, ColorB(255,0,0,100));
 			pISkeletonPose->CCDRotationSolver(finalPos,0.02f,0.25f,100,goalNormal,pRelativeQuatIK,pAbsoluteQuatIK);
 			pISkeletonPose->CCDTranslationSolver(finalPos,pRelativeQuatIK,pAbsoluteQuatIK);
 			pISkeletonPose->CCDUpdateSkeleton(pRelativeQuatIK,pAbsoluteQuatIK);
 		}
-
-		//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(finalPos,0.2f,ColorB(0,255,255,255) );
 	}
 }
 
@@ -1974,9 +1970,6 @@ void CActor::DamageInfo(EntityId shooterID, EntityId weaponID, float damage, con
 void CActor::SetFrozenAmount(float amount)
 { 
   m_frozenAmount = max(0.f, min(1.f, amount)); 
-
-  if (g_pGameCVars->cl_debugFreezeShake)
-    CryLog("SetFrozenAmount <%s> -> %.2f", GetEntity()->GetName(), m_frozenAmount);
 }
 
 void CActor::AddFrost(float frost)
@@ -2617,9 +2610,6 @@ void CActor::UpdateZeroG(float frameTime)
 
 							pStats->zeroGUp += sp.q.GetColumn2();
 							pStats->zeroGUp.NormalizeSafe(Vec3(0,0,1));
-
-							//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(wpos, ColorB(0,0,255,255), wpos + pStats->zeroGUp * 2.0f, ColorB(0,0,255,255));
-
 							pStats->inZeroG = true;
 						}
 /*

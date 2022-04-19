@@ -159,20 +159,6 @@ void CNetPlayerInput::PreUpdate()
 		m_pPlayer->m_actions |= ACTION_LEANRIGHT;
 	else
 		m_pPlayer->m_actions &= ~ACTION_LEANRIGHT;
-
-	// debug..
-	if (g_pGameCVars->g_debugNetPlayerInput & 2)
-	{
-		IPersistantDebug * pPD = gEnv->pGame->GetIGameFramework()->GetIPersistantDebug();
-		pPD->Begin( string("update_player_input_") + m_pPlayer->GetEntity()->GetName(), true );
-		Vec3 wp = m_pPlayer->GetEntity()->GetWorldPos();
-		wp.z += 2.0f;
-		pPD->AddSphere( moveRequest.GetLookTarget(), 0.5f, ColorF(1,0,1,0.3f), 1.0f );
-		//		pPD->AddSphere( moveRequest.GetMoveTarget(), 0.5f, ColorF(1,1,0,0.3f), 1.0f );
-		pPD->AddDirection( m_pPlayer->GetEntity()->GetWorldPos() + Vec3(0,0,2), 1, m_curInput.deltaMovement, ColorF(1,0,0,0.3f), 1.0f );
-	}
-
-	//m_curInput.deltaMovement.zero();
 }
 
 void CNetPlayerInput::Update()
@@ -255,17 +241,4 @@ void CNetPlayerInput::DoSetState(const SSerializedPlayerInput& input )
 	moveRequest.SetLean(lean);
 
 	m_pPlayer->GetMovementController()->RequestMovement(moveRequest);
-
-	// debug..
-	if (g_pGameCVars->g_debugNetPlayerInput & 1)
-	{
-		IPersistantDebug * pPD = gEnv->pGame->GetIGameFramework()->GetIPersistantDebug();
-		pPD->Begin( string("net_player_input_") + m_pPlayer->GetEntity()->GetName(), true );
-		pPD->AddSphere( moveRequest.GetLookTarget(), 0.5f, ColorF(1,0,1,1), 1.0f );
-		//			pPD->AddSphere( moveRequest.GetMoveTarget(), 0.5f, ColorF(1,1,0,1), 1.0f );
-
-		Vec3 wp(m_pPlayer->GetEntity()->GetWorldPos() + Vec3(0,0,2));
-		pPD->AddDirection( wp, 1.5f, m_curInput.deltaMovement, ColorF(1,0,0,1), 1.0f );
-		pPD->AddDirection( wp, 1.5f, m_curInput.lookDirection, ColorF(0,1,0,1), 1.0f );
-	}
 }

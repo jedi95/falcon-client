@@ -853,8 +853,6 @@ void CLam::UpdateFPLaser(float frameTime, CItem* parent)
 			laserLength = 3.0f;
 		}
 		hitPos = m_lastLaserHitPt;
-		if(g_pGameCVars->i_debug_projectiles!=0)
-		 gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(hitPos, 0.2f, ColorB(255,0,0));
 	}
 
 	if (m_laserActivated && m_dotEffectSlot >= 0)

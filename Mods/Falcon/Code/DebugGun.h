@@ -36,8 +36,6 @@ public:
   virtual void Select(bool select);
 
 private:
-  ICVar* m_pAIDebugDraw;
-  int m_aiDebugDrawPrev;
   
   typedef std::pair<string, float> TFmPair;
   std::vector<TFmPair> m_fireModes;    

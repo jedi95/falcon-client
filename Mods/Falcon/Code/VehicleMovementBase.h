@@ -231,16 +231,6 @@ struct SMovementSoundStatus
   float inout;
 };
 
-
-namespace 
-{
-  bool DebugParticles()
-  {
-    static ICVar* pVar = gEnv->pConsole->GetCVar("v_debugdraw");
-    return pVar->GetIVal() == eVDB_Particles;
-  }
-}
-
 class CVehicleMovementBase : 
   public IVehicleMovement, 
   public IVehicleObject, 
@@ -323,7 +313,6 @@ protected:
   void SetSoundParam(EVehicleMovementSound eSID, const char* param, float value);
   void SetSoundParam(ISound* pSound, const char* param, float value);
   tSoundID GetSoundId(EVehicleMovementSound eSID);
-  void DebugDraw(const float deltaTime);
 
   // animation methiods
   void StartAnimation(EVehicleMovementAnimation eAnim);

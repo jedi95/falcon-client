@@ -34,12 +34,6 @@ struct SSharkStats : public SActorStats
 
 struct SSharkParams : public SActorParams
 {
-/*	string trailEffect;
-	float trailEffectMinSpeed;
-	float trailEffectMaxSpeedSize;
-	float trailEffectMaxSpeedCount;
-	Vec3	trailEffectDir;
-*/
 	float speedInertia;
 	float rollAmount;
 	float rollSpeed;
@@ -77,12 +71,6 @@ struct SSharkParams : public SActorParams
 		spineBoneName2 = "";
 		spineBoneName1 = "";
 		headBoneName = "";
-/*		trailEffectMinSpeed = 0;
-		trailEffectMaxSpeedSize = 0;
-		trailEffectMaxSpeedCount = 0;
-		trailEffectDir.zero();
-		trailEffect = "";
-*/
 		speedInertia = 0;
 		rollAmount = 0;
 		rollSpeed = 0;
@@ -369,9 +357,6 @@ protected:
 	Matrix33	m_baseMtx;//base rotation matrix, rotating on the Z axis
 
 	Vec3		m_velocity;
-
-	Vec3		m_debugcenter;
-	float		m_debugradius;
 
 	float		m_curSpeed;
 	float		m_turnSpeed;

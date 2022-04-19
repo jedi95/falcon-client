@@ -716,11 +716,6 @@ void CHUD::SubtitleCreateChunks(CHUD::SSubtitleEntry& entry, const wstring& loca
 			size_t realPos = chunk.start - i * tokenLen; // calculated with respect to realCharLength
 			float pos = (float) realPos / (float) realCharLength; // pos = [0,1]
 			chunk.time = time - time * pos; // we put in the remaining time
-			if (g_pGameCVars->hud_subtitlesDebug)
-			{
-				wstring s = localizedString.substr(chunk.start, chunk.len);
-				CryLogAlways("[SUB] %s chunk=%d time=%f '%S'", entry.key.c_str(), i, chunk.time, s.c_str());
-			}
 		}
 
 		entry.localized = localizedString;
@@ -728,22 +723,6 @@ void CHUD::SubtitleCreateChunks(CHUD::SSubtitleEntry& entry, const wstring& loca
 	}
 
 	entry.nChunks = nChunks;
-
-	/*
-	static const bool bDebug = true;
-	if (bDebug && entry.nChunks > 0)
-	{
-		CryLogAlways("Key: %s SoundLength=%f NumChunks=%d", entry.key.c_str(), entry.timeRemaining, entry.nChunks);
-		CryFixedWStringT<128> tmp;
-		for (size_t i=0; i<entry.nChunks; ++i)
-		{
-			SSubtitleEntry::Chunk& chunk = entry.chunks[i];
-			tmp.assign(entry.localized.c_str(), chunk.start, chunk.len);
-			CryLogAlways("Chunk %d: Time=%f S=%d L=%d Text=%S", i, chunk.time, chunk.start, chunk.len, tmp.c_str());
-		}
-	}
-	*/
-
 }
 
 namespace
@@ -836,14 +815,6 @@ void CHUD::InternalShowSubtitle(const char* subtitleLabel, ISound* pSound, bool 
 				{
 					entry.soundId = pSound->GetId();
 					float timeToShow = pSound->GetLengthMs() * 0.001f; // msec to sec
-					if (g_pGameCVars->hud_subtitlesDebug)
-					{
-						float now = gEnv->pTimer->GetCurrTime();
-						CryLogAlways("[SUB] Sound %s started at %f for %f secs, endtime=%f", pSound->GetName(), now, timeToShow, now+timeToShow);
-					}
-#if 1 // make the text stay longer than the sound
-					// timeToShow = std::min(timeToShow*1.2f, timeToShow+2.0f); // 10 percent longer, but max 2 seconds
-#endif
 					entry.timeRemaining = timeToShow;
 					entry.bPersistant = false;
 				}
@@ -892,13 +863,6 @@ void CHUD::InternalShowSubtitle(const char* subtitleLabel, ISound* pSound, bool 
 	else // if (bShow)
 	{
 		tSoundID soundId = pSound ? pSound->GetId() : INVALID_SOUNDID;
-
-		if (pSound && g_pGameCVars->hud_subtitlesDebug)
-		{
-			float now = gEnv->pTimer->GetCurrTime();
-			CryLogAlways("[SUB] Sound %s requested to stop at %f", pSound->GetName(), now);
-		}
-
 		for (TSubtitleEntries::iterator iter = m_subtitleEntries.begin(); iter != m_subtitleEntries.end(); )
 		{
 			const SSubtitleEntry& entry = *iter;
@@ -909,11 +873,6 @@ void CHUD::InternalShowSubtitle(const char* subtitleLabel, ISound* pSound, bool 
 			// [e.g. the sound is cancelled in the middle]
 			if (iter->key == subtitleLabel && (soundId == INVALID_SOUNDID || (iter->soundId == soundId && iter->nChunks > 0 && iter->nCurChunk < iter->nChunks-1 && iter->timeRemaining > 0.8f)))
 			{
-				if (g_pGameCVars->hud_subtitlesDebug)
-				{
-					float now = gEnv->pTimer->GetCurrTime();
-					CryLogAlways("[SUB] Entry '%s' stopped at %f", entry.key.c_str(), now);
-				}
 				iter = m_subtitleEntries.erase(iter);
 				m_bSubtitlesNeedUpdate = true;
 			}
@@ -1240,11 +1199,6 @@ void CHUD::UpdateSubtitlesManualRender(float frameTime)
 							if (entry.timeRemaining < .8f)
 							{
 								entry.timeRemaining = 0.8f;
-								if (g_pGameCVars->hud_subtitlesDebug)
-								{
-									float now = gEnv->pTimer->GetCurrTime();
-									CryLogAlways("[SUB] Chunked entry '%s' last chunk end delayed by 0.8 secs [now=%f]", entry.key.c_str(), now);
-								}
 							}
 						}
 					}
@@ -1258,11 +1212,6 @@ void CHUD::UpdateSubtitlesManualRender(float frameTime)
 				const bool bDelete = entry.timeRemaining <= 0.0f;
 				if (bDelete)
 				{
-					if (g_pGameCVars->hud_subtitlesDebug)
-					{
-						float now = gEnv->pTimer->GetCurrTime();
-						CryLogAlways("[SUB] Chunked entry '%s' time-end delete at %f", entry.key.c_str(), now);
-					}
 					TSubtitleEntries::iterator toDelete = iter;
 					++iter;
 					m_subtitleEntries.erase(toDelete);

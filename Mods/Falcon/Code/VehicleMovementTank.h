@@ -49,7 +49,6 @@ protected:
   virtual float GetEnginePedal(){ return m_currPedal; }
   virtual bool DoGearSound() { return false; }
   virtual float GetMinRPMSoundRatio() { return 0.6f; }  
-  virtual void DebugDrawMovement(const float deltaTime);
   virtual float GetWheelCondition() const;
   void SetLatFriction(float latFric);
 

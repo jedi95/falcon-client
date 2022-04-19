@@ -22,8 +22,6 @@ History:
 #include "ICryAnimation.h"
 #include "GameUtils.h"
 
-#include "IRenderAuxGeom.h"
-
 //------------------------------------------------------------------------
 CVehicleMovementHelicopter::CVehicleMovementHelicopter()
 : m_pRotorHelper(NULL),

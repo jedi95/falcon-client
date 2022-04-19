@@ -31,19 +31,7 @@ History:
 
 namespace 
 {
-  enum eGunTurretDebug
-  {
-    eGTD_Off = 0,
-    eGTD_Basic,
-    eGTD_Prediction,
-    eGTD_Sweep,
-    eGTD_Search,
-    eGTD_Deviation,    
-  };
-
   const float minLenSqr = sqr(0.001f);
-
-  ILINE bool DebugTurret() { return (g_pGameCVars->i_debug_turrets != 0); }
   
   inline void Interp(float &actual, float goal, float speed, float frameTime, float minSpeed = 0.f)
   {
@@ -483,11 +471,6 @@ Vec3 CGunTurret::PredictTargetPos(IEntity* pTarget, bool sec)//sec - weapon to u
   
   Vec3 delta = vel*(time_to) + 0.5f*a*acc*time_to*time_to; 
   delta *= m_turretparams.prediction;
-	
-	if (g_pGameCVars->i_debug_turrets == eGTD_Prediction)
-	{ 
-		gEnv->pRenderer->DrawLabel(vpos, 1.4f, "Predict %s: speed %.1f (dspeed %.1f), acc %.1f, time %.1f", pTarget->GetName(), vel.len(), d_speed, a, time_to);
-	}
 
 	return tpos+delta;
 }
@@ -540,18 +523,6 @@ Vec3 CGunTurret::GetSweepPos(IEntity* pTarget, const Vec3& shootPos)
 
   if (sweepRelTime == 1.f && m_fireHint < nhints)
     ++m_fireHint;
-
-  if (g_pGameCVars->i_debug_turrets == eGTD_Sweep)
-  {
-    IRenderAuxGeom* pGeom = gEnv->pRenderer->GetIRenderAuxGeom();
-    pGeom->SetRenderFlags(e_Def3DPublicRenderflags);
-    ColorB col(0,255,255,128);
-    pGeom->DrawSphere(currPos, 0.3f, col);
-    pGeom->DrawSphere(lastHintPos, 0.3f, col);
-    pGeom->DrawSphere(nextHintPos, 0.3f, col);
-    pGeom->DrawLine(lastHintPos, col, nextHintPos, col);
-    gEnv->pRenderer->DrawLabel(currPos, 1.4f, "sweep, hint %i, ratio %.2f)", m_fireHint, sweepRelTime);
-  }
 
   return currPos;  
 }
@@ -699,19 +670,14 @@ bool CGunTurret::IsInRange(const Vec3& pos, ETargetClass cl)const
 
 	float dist=(pos-GetWeaponPos()).len2();
 	if(dist>r*r+0.1f)
-  {
-    //if (DebugTurret()) CryLog("Target out of range (%.1f > %.1f)", sqrt(dist), r);
 		return false;
-  }
 	
 	float yaw, pitch;
 	GetTargetAngles(pos,yaw,pitch);
 	
 	if(!IsTargetAimable(yaw,pitch))
-  {
-    //if (DebugTurret()) CryLog("Target is not aimable");
 		return false;
-  }
+
 	return true;
 }
 
@@ -1058,18 +1024,6 @@ bool CGunTurret::IsTargetCloaked(IActor* pActor) const
     }
 
     cloaked = !inside;
-
-    if (g_pGameCVars->i_debug_turrets == eGTD_Search)
-    {
-      IRenderAuxGeom* pGeom = gEnv->pRenderer->GetIRenderAuxGeom();
-      pGeom->SetRenderFlags(e_Def3DPublicRenderflags);                    
-      float color[] = {1,1,1,1};
-      Vec3 points[] = {wpos, a, b};          
-      pGeom->DrawPolyline(points, 3, true, ColorB(0,255,0,255));          
-
-      if (inside)
-        gEnv->pRenderer->Draw2dLabel(200,200,1.4f,color,false,"target inside cone");                
-    }
   }  
 
   return cloaked;
@@ -1080,24 +1034,19 @@ void CGunTurret::UpdateGoal(IEntity* pTarget, float deltaTime)
 {
 	Vec3 shootPos = PredictTargetPos(pTarget,false);
   
-  if (m_turretparams.sweep_time != 0.f && !m_fireparams.hints.empty())
-    shootPos = GetSweepPos(pTarget, shootPos);
+	if (m_turretparams.sweep_time != 0.f && !m_fireparams.hints.empty())
+		shootPos = GetSweepPos(pTarget, shootPos);
 
-  if (m_fireparams.deviation_amount != 0.f)
-    UpdateDeviation(deltaTime, shootPos);
+	if (m_fireparams.deviation_amount != 0.f)
+		UpdateDeviation(deltaTime, shootPos);
 	
-  float goalYaw(0.f), goalPitch(0.f);
+	float goalYaw(0.f), goalPitch(0.f);
 	if (!GetTargetAngles(shootPos, goalYaw, goalPitch))  
 		return;
 	
 	if(!IsTargetAimable(goalYaw,goalPitch))
-  {
-    if (DebugTurret()) CryLog("UpdateGoal: %s IsTargetAimable failed (yaw: %.2f, pitch: %.2f)", pTarget->GetName(), goalYaw, goalPitch);
 		return;
-  }
 
-	// if (cry_fabsf(m_goalYaw-goalYaw)<0.0001f && cry_fabsf(m_goalPitch-m_goalPitch)<0.0001f )
-	//     return;
 	m_goalPitch = goalPitch;
 	m_goalYaw = goalYaw;
 	GetGameObject()->ChangedNetworkState(ASPECT_GOALORIENTATION);
@@ -1116,12 +1065,6 @@ void CGunTurret::UpdateDeviation(float deltaTime, const Vec3& shootPos)
   
   Vec3 dev(amount*sinT, amount*sinT, 0.f);
   m_deviationPos = dev;
-    
-  if (g_pGameCVars->i_debug_turrets == eGTD_Deviation)
-  {
-    float color[] = {0.8f,1.f,0.8f,1.f};
-    gEnv->pRenderer->Draw2dLabel(100,400,1.5f,color,false,"dev: %.2f (amount: %.2f)",dev.x, amount);
-  }
 }
 
 //------------------------------------------------------------------------
@@ -1248,12 +1191,6 @@ void CGunTurret::UpdateOrientation(float deltaTime)
   }
 
   UpdatePhysics();
-  
-  if (g_pGameCVars->i_debug_turrets == eGTD_Basic)
-  {
-    DrawDebug();
-    //gEnv->pRenderer->DrawLabel(GetEntity()->GetWorldPos(), 1.4f, "%s yaw: %.2f, goalYaw: %.2f (%.2f), goalPitch: %.2f (%.2f/%.2f)", searching?"[search]":"", RAD2DEG(turretAngles.z), RAD2DEG(m_goalYaw), 0.5f*(m_turretparams.yaw_range), RAD2DEG(m_goalPitch), m_turretparams.min_pitch, m_turretparams.max_pitch);
-  }
 }
 
 //------------------------------------------------------------------------
@@ -1383,9 +1320,6 @@ void CGunTurret::UpdatePhysics()
 //------------------------------------------------------------------------
 void CGunTurret::StartFire(bool sec)
 {
-  if (g_pGameCVars->i_debug_turrets)
-    CryLog("%s StartFire(%i)", GetEntity()->GetName(), sec+1);
-  
 	if (!sec)
 		CWeapon::StartFire();
 	else if (m_fm2)
@@ -1397,9 +1331,6 @@ void CGunTurret::StartFire(bool sec)
 //------------------------------------------------------------------------
 void CGunTurret::StopFire(bool sec)
 {
-  if (g_pGameCVars->i_debug_turrets)
-    CryLog("%s StopFire(%i)", GetEntity()->GetName(), sec+1);
-
 	if (!sec)
 		CWeapon::StopFire();
 	else if (m_fm2)
@@ -1612,28 +1543,7 @@ void CGunTurret::ServerUpdate(SEntityUpdateContext& ctx, int update)
 			// a bit less tolerant for rockets
 			aim=aim&&IsAiming(tpos, m_turretparams.aim_tolerance*0.5f);
 
-			rocket = aim && !m_turretparams.search_only && m_fm2 && t_class == eTC_Vehicle && IsTargetRocketable(tpos);
-
-      if (g_pGameCVars->i_debug_turrets)
-      {
-        IRenderer* pRenderer = gEnv->pRenderer;
-        static float white[4] = {1,1,1,1};    
-        float x = 5.f, y = 50.f, step1 = 15.f, step2 = 20.f, size=1.3f;
-        
-        pRenderer->Draw2dLabel(x, y+=step1, size, white, false, "Target: %s", pCurrentTarget->GetName());
-        pRenderer->Draw2dLabel(x, y+=step1, size, white, false, "InRange: %i", inrange);
-        pRenderer->Draw2dLabel(x, y+=step1, size, white, false, "CanShoot: %i", m_canShoot);
-        pRenderer->Draw2dLabel(x, y+=step1, size, white, false, "IsAiming: %i", aim);
-        pRenderer->Draw2dLabel(x, y+=step1, size, white, false, "Burst: %i", burst);
-        pRenderer->Draw2dLabel(x, y+=step1, size, white, false, "MG: %i", mg);
-        pRenderer->Draw2dLabel(x, y+=step1, size, white, false, "BurstTimer: %.2f", m_burstTimer);
-        //pRenderer->Draw2dLabel(x, y+=step1, size, white, false, "Rocket: %i", rocket);
-        pRenderer->Draw2dLabel(x, y+=step1, size, white, false, "TargetPos: %.1f %.1f %.1f", tpos.x, tpos.y, tpos.z);
-        pRenderer->Draw2dLabel(x, y+=step1, size, white, false, "Abandon: %.2f", m_abandonTargetTimer);
-        pRenderer->Draw2dLabel(x, y+=step1, size, white, false, "Update: %.2f", m_updateTargetTimer);
-        pRenderer->Draw2dLabel(x, y+=step1, size, white, false, "GoalYaw: %.2f, GoalPitch: %.2f", m_goalYaw, m_goalPitch);
-      }
-			
+			rocket = aim && !m_turretparams.search_only && m_fm2 && t_class == eTC_Vehicle && IsTargetRocketable(tpos);	
 			break;        
 		}
 
@@ -1725,38 +1635,6 @@ void CGunTurret::Update( SEntityUpdateContext& ctx, int update)
 		ServerUpdate(ctx,update);
 
 	UpdateOrientation(ctx.fFrameTime);	// rotate turret towards target, adhering to angle limits
-
-  if (g_pGameCVars->i_debug_turrets == eGTD_Search)
-  { 
-    DrawCircle(GetEntity()->GetWorldPos(), m_turretparams.mg_range);
-  }
-
-	//
-	/*
-	if(IsFiring(false))
-	{
-	IEntity* pCurrentTarget = gEnv->pEntitySystem->GetEntity(m_targetId);
-	if(!pCurrentTarget)
-	return;
-	CSingle* pFM = (CSingle*)GetFireMode(0);
-	Vec3 hit = pFM->GetProbableHit(2000.0f);
-	Vec3 dir = pFM->NetGetFiringDir(hit, pFM->NetGetFiringPos(hit));
-	Vec3 pos = GetTargetPos(pCurrentTarget);
-	Vec3 wpos = GetWeaponPos();
-	Vec3 tdir = (pos-wpos).normalized();
-	float angcos = tdir*dir;
-	float ang = RAD2DEG(cry_acosf(angcos));
-	if(ang>2.0f)
-	{
-	CryLog("%X Shooting while not in cone, %.3f",GetEntity()->GetId(),ang);
-	}
-	float yaw, pitch;
-	GetTargetAngles(pos,yaw,pitch);
-	if(!IsAiming(pos,5.0f))
-	{
-	CryLog("Turret %X firing at %X. Goal %.2f %.2f, target %.2f %.2f, diff %.2f %.2f",GetEntity()->GetId(),m_targetId,m_goalYaw,m_goalPitch,yaw,pitch,cry_fabsf(m_goalYaw-yaw),cry_fabsf(m_goalPitch-pitch));
-	}
-	}*/
 }
 
 //----------------------------------------------------------------------
@@ -1829,10 +1707,4 @@ bool CGunTurret::SetAspectProfile( EEntityAspects aspect, uint8 profile )
 	}
 
   return true;
-}
-
-
-void    CGunTurret::DrawDebug()
-{
-
 }

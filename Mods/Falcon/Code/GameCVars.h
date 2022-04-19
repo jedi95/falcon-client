@@ -65,9 +65,6 @@ struct SCVars
 	int		cl_crouchToggle;
 	int		cl_fpBody;
 	int   cl_hud;
-	int		cl_debugSwimming;
-	int   cl_g15lcdEnable;
-	int   cl_g15lcdTick;
 
 	ICVar* 	ca_GameControlledStrafingPtr;
 	float pl_curvingSlowdownSpeedScale;
@@ -78,7 +75,6 @@ struct SCVars
 	float cl_shallowWaterDepthLo;
 	float cl_shallowWaterDepthHi;
 
-	int		cl_debugFreezeShake;
 	float cl_frozenSteps;
 	float cl_frozenSensMin;
 	float cl_frozenSensMax;
@@ -176,7 +172,6 @@ struct SCVars
 	float g_frostDecay;
 	float g_stanceTransitionSpeed;
 	float g_stanceTransitionSpeedSecondary;
-	int   g_debugaimlook;
 	int		g_enableIdleCheck;
 	int		g_playerRespawns;
 	float g_playerLowHealthThreshold;
@@ -242,7 +237,6 @@ struct SCVars
 	int		g_spawnteamdist;
 	float	g_spawnenemydist;
 	float	g_spawndeathdist;
-	int		g_spawnDebug;
 
   float g_friendlyfireratio;
 	float g_friendlyVehicleCollisionRatio;
@@ -256,10 +250,6 @@ struct SCVars
 	int   g_tk_punish;
 	int		g_tk_punish_limit;
 
-	int   g_debugNetPlayerInput;
-	int   g_debugCollisionDamage;
-	int   g_debugHits;
-
 	float g_trooperProneMinDistance;
 	/*	float g_trooperMaxPhysicAnimBlend;
 	float g_trooperPhysicAnimBlendSpeed;
@@ -269,8 +259,6 @@ struct SCVars
 	float g_trooperBankingMultiplier;
 	float g_alienPhysicsAnimRatio;  
 
-	int		g_debug_fscommand;
-	int		g_debugDirectMPMenu;
 	int		g_skipIntro;
 	int		g_resetActionmapOnStart;
 	int		g_useProfile;
@@ -286,14 +274,6 @@ struct SCVars
 	float	g_ragdollPollTime;
 	float	g_ragdollDistance;
 
-	int		pl_debug_ladders;
-	int		pl_debug_movement;
-	int		pl_debug_jumping;
-	ICVar*pl_debug_filter;
-
-	int		aln_debug_movement;
-	ICVar*aln_debug_filter;
-
 	int   v_profileMovement;  
 	int   v_draw_suspension;
 	int   v_draw_slip;
@@ -303,7 +283,6 @@ struct SCVars
 	float v_sprintSpeed;
 	int   v_dumpFriction;
 	int   v_rockBoats;
-  int   v_debugSounds;
 	float v_altitudeLimit;
 	ICVar* pAltitudeLimitCVar;
 	float v_altitudeLimitLowerOffset;
@@ -311,7 +290,6 @@ struct SCVars
 	float v_airControlSensivity;
 	float v_stabilizeVTOL;
 	int   v_help_tank_steering;
-  int   v_debugMountedWeapon;
 	ICVar* pVehicleQuality;
 	int		v_newBrakingFriction;
 	int		v_newBoost;
@@ -335,9 +313,8 @@ struct SCVars
 	float pl_fallDamage_Strength_SpeedSafe;
 	float pl_fallDamage_Strength_SpeedFatal;
 	float pl_fallDamage_SpeedBias;
-	int pl_debugFallDamage;
 	
-  float pl_zeroGSpeedMultSpeed;
+	float pl_zeroGSpeedMultSpeed;
 	float pl_zeroGSpeedMultSpeedSprint;
 	float pl_zeroGSpeedMultNormal;
 	float pl_zeroGSpeedMultNormalSprint;
@@ -386,7 +363,6 @@ struct SCVars
 	int		hud_showTeamMessages;
 	int		hud_showKillMessages;
 	int		hud_subtitles;
-	int		hud_subtitlesDebug;
 	int   hud_subtitlesRenderMode;
 	int   hud_subtitlesHeight;
 	int   hud_subtitlesFontSize;
@@ -402,7 +378,6 @@ struct SCVars
 	float hud_ctrl_Coeff_X;
 	float hud_ctrl_Coeff_Z;
 	int		hud_ctrlZoomMode;
-	int   hud_faderDebug;
 	int		hud_attachBoughtEquipment;
 	int		hud_startPaused;
 	float hud_nightVisionRecharge;
@@ -430,14 +405,10 @@ struct SCVars
 	int hit_assistMultiplayerEnabled;
 
   int aim_assistCrosshairSize;
-  int aim_assistCrosshairDebug;
 		
 	float g_combatFadeTime;
 	float g_combatFadeTimeDelay;
 	float g_battleRange;
-
-	ICVar*i_debuggun_1;
-	ICVar*i_debuggun_2;
 
 	float	tracer_min_distance;
 	float	tracer_max_distance;
@@ -445,13 +416,8 @@ struct SCVars
 	float	tracer_max_scale;
 	int		tracer_max_count;
 	float	tracer_player_radiusSqr;
-	int		i_debug_projectiles;
 	int		i_auto_turret_target;
 	int		i_auto_turret_target_tacshells;
-	int		i_debug_zoom_mods;
-  int   i_debug_turrets;
-  int   i_debug_sounds;
-	int		i_debug_mp_flowgraph;
   
 	float h_turnSpeed;
 	int		h_useIK;
@@ -465,14 +431,12 @@ struct SCVars
   int     g_quickGame_prefer_my_country;
   int     g_quickGame_ping1_level;
   int     g_quickGame_ping2_level;
-  int     g_quickGame_debug;
 	int			g_skip_tutorial;
 
   int     g_displayIgnoreList;
   int     g_buddyMessagesIngame;
 
   int			g_battleDust_enable;
-	int			g_battleDust_debug;
 	ICVar*  g_battleDust_effect;
 
 	int			g_PSTutorial_Enabled;
@@ -485,7 +449,6 @@ struct SCVars
 	int			g_spectate_FixedOrientation;
 	float		g_spectate_FreeLookMoveSpeed;
 	int			g_explosiveLimits[eET_NumTypes];
-	int			g_debugMines;
 	int			g_deathCam;
 	float		g_deathCamMaxZoomFOV;
 	int			g_deathCamMinZoomDistance;
@@ -497,8 +460,6 @@ struct SCVars
 	int			g_roundRestartTime;
 
 	ICVar*  net_mapDownloadURL;
-
-	int			g_debugShotValidator;
 
 	float		g_painSoundGap;
 	float		g_explosionScreenShakeMultiplier;

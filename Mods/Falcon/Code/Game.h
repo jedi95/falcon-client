@@ -272,7 +272,6 @@ protected:
 	CFlashMenuObject		*m_pFlashMenuObject;
 	COptionsManager			*m_pOptionsManager;
 
-	IActionMap					*m_pDebugAM;
 	IActionMap					*m_pDefaultAM;
 	IActionMap					*m_pMultiplayerAM;
 	CGameActions				*m_pGameActions;	

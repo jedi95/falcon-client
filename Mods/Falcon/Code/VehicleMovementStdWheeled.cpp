@@ -72,7 +72,6 @@ CVehicleMovementStdWheeled::CVehicleMovementStdWheeled()
   m_boostRegen = m_boostEndurance;
   m_brakeImpulse = 0.f;
   m_boostStrength = 6.f;
-  m_lastDebugFrame = 0;
   m_wheelContactsLeft = 0;  
   m_wheelContactsRight = 0;  
 m_netActionSync.PublishActions( CNetworkMovementStdWheeled(this) );  	  
@@ -377,13 +376,7 @@ void CVehicleMovementStdWheeled::InitSurfaceEffects()
       emitter.group = i;
       emitter.active = layer.IsGroupActive(i);
       emitter.quatT = QuatT(tm);
-      m_paStats.envStats.emitters.push_back(emitter);
-      
-      if (DebugParticles())
-      {
-        const Vec3 loc = tm.GetTranslation();
-        CryLog("WheelGroup %i local pos: %.1f %.1f %.1f", i, loc.x, loc.y, loc.z);        
-      }      
+      m_paStats.envStats.emitters.push_back(emitter); 
     }
   }
   
@@ -671,167 +664,6 @@ void CVehicleMovementStdWheeled::ApplyBoost(float speed, float maxSpeed, float s
   }
 }
 
-//----------------------------------------------------------------------------------
-void CVehicleMovementStdWheeled::DebugDrawMovement(const float deltaTime)
-{
-  if (!IsProfilingMovement())
-    return;
-
-  if (g_pGameCVars->v_profileMovement==3 || g_pGameCVars->v_profileMovement==1 && m_lastDebugFrame == gEnv->pRenderer->GetFrameID())
-    return;
-  
-  m_lastDebugFrame = gEnv->pRenderer->GetFrameID();
-  
-  IPhysicalEntity* pPhysics = GetPhysics();
-  IRenderer* pRenderer = gEnv->pRenderer;
-  static float color[4] = {1,1,1,1};
-  float green[4] = {0,1,0,1};
-  float red[4] = {1,0,0,1};
-  static ColorB colRed(255,0,0,255);
-  float y = 50.f, step1 = 15.f, step2 = 20.f, size=1.3f, sizeL=1.5f;
-
-  float speed = m_vehicleStatus.vel.len();
-  float speedRel = min(speed, m_vMaxSteerMax) / m_vMaxSteerMax;
-  float steerMax = GetMaxSteer(speedRel);
-  float steerSpeed = GetSteerSpeed(speedRel);  
-  int percent = (int)(speed / m_maxSpeed * 100.f);
-  Vec3 localVel = m_pVehicle->GetEntity()->GetWorldRotation().GetInverted() * m_statusDyn.v;
-
-  pe_params_car carparams;
-  pPhysics->GetParams(&carparams);
-
-  pRenderer->Draw2dLabel(5.0f,   y, sizeL, color, false, "Car movement");
-  pRenderer->Draw2dLabel(5.0f,  y+=step2, size, color, false, "Speed: %.1f (%.1f km/h) (%i)", speed, speed*3.6f, percent);
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "localVel: %.1f %.1f %.1f", localVel.x, localVel.y, localVel.z);
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "rpm_scale:   %.2f (max rpm: %.0f)", m_rpmScale, carparams.engineMaxRPM); 
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "Gear:  %i", m_vehicleStatus.iCurGear-1);
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "Clutch:  %.2f", m_vehicleStatus.clutch);
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "Torque:  %.1f", m_vehicleStatus.drivingTorque);
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "AxleFric:  %.0f", m_axleFriction);
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "Dampers:  %.2f", m_suspDamping);
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "Stabi:  %.2f", m_stabi);
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "LatSlip:  %.2f", m_avgLateralSlip);  
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "AvgWheelSpeed:  %.2f", m_avgWheelRot);
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "BrakeTime:  %.2f", m_brakeTimer);
-    
-  if (m_statusDyn.submergedFraction > 0.f)
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "Submerged:  %.2f", m_statusDyn.submergedFraction);
-
-  if (m_damage > 0.f)
-    pRenderer->Draw2dLabel(5.0f,  y+=step2, size, color, false, "Damage:  %.2f", m_damage);  
-    
-  if (Boosting())
-    pRenderer->Draw2dLabel(5.0f,  y+=step1, size, green, false, "Boost:  %.2f", m_boostCounter);
-
-  pRenderer->Draw2dLabel(5.0f,  y+=step2, sizeL, color, false, "Driver input");
-  pRenderer->Draw2dLabel(5.0f,  y+=step2, size, color, false, "power: %.2f", m_movementAction.power);
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "steer: %.2f", m_movementAction.rotateYaw); 
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "brake: %i", m_movementAction.brake);
-
-  pRenderer->Draw2dLabel(5.0f,  y+=step2, sizeL, color, false, "Car action");
-  pRenderer->Draw2dLabel(5.0f,  y+=step2, size, color, false, "pedal: %.2f", m_action.pedal);
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "steer: %.2f (max %.2f)", RAD2DEG(m_action.steer), RAD2DEG(steerMax)); 
-  pRenderer->Draw2dLabel(5.0f,  y+=step1, size, color, false, "brake: %i", m_action.bHandBrake);
-
-  pRenderer->Draw2dLabel(5.0f,  y+=step2, size, color, false, "steerSpeed: %.2f", steerSpeed); 
-
-  const Matrix34& worldTM = m_pVehicle->GetEntity()->GetWorldTM();
-  
-  IRenderAuxGeom* pGeom = gEnv->pRenderer->GetIRenderAuxGeom();
-  ColorB colGreen(0,255,0,255);
-  pGeom->DrawSphere(m_statusDyn.centerOfMass, 0.1f, colGreen);
-  
-  pe_status_wheel ws;
-  pe_status_pos wp;
-  pe_params_wheel wparams;
-
-  pe_status_nparts tmpStatus;
-  int numParts = pPhysics->GetStatus(&tmpStatus);
-  
-  int count = m_pVehicle->GetWheelCount();
-  float tScaleTotal = 0.f;
-  
-  // wheel-specific
-  for (int i=0; i<count; ++i)
-  {
-    ws.iWheel = i;
-    wp.ipart = numParts - count + i;
-    wparams.iWheel = i;
-
-    int ok = pPhysics->GetStatus(&ws);
-    ok &= pPhysics->GetStatus(&wp);
-    ok &= pPhysics->GetParams(&wparams);
-
-    if (!ok)
-      continue;
-
-    // slip
-    if (g_pGameCVars->v_draw_slip)
-    {
-      if (ws.bContact)
-      { 
-        pGeom->DrawSphere(ws.ptContact, 0.05f, colRed);
-
-        float slip = ws.velSlip.len();        
-        if (ws.bSlip>0)
-        { 
-          IRenderAuxGeom* pGeom = gEnv->pRenderer->GetIRenderAuxGeom();
-          pGeom->DrawLine(wp.pos, colRed, wp.pos+ws.velSlip, colRed);
-        }        
-      }
-            
-      //gEnv->pRenderer->DrawLabel(wp.pos, 1.2f, "%.2f", m_wheelStats[i].friction);      
-
-      if (wparams.bDriving || g_pGameCVars->v_draw_slip>1)
-      {
-        gEnv->pRenderer->DrawLabel(wp.pos, 1.2f, "T: %.2f", m_wheelStats[i].torqueScale);
-        tScaleTotal += m_wheelStats[i].torqueScale;
-      }      
-    }    
-
-    // suspension    
-    if (g_pGameCVars->v_draw_suspension)
-    {
-      IRenderAuxGeom* pAuxGeom = gEnv->pRenderer->GetIRenderAuxGeom();
-      ColorB col(255,0,0,255);
-
-      Vec3 lower = m_wheelParts[i]->GetLocalTM(false).GetTranslation();
-      lower.x += sgn(lower.x) * 0.5f;
-      
-      Vec3 upper(lower);
-      upper.z += ws.suspLen;
-      
-      lower = worldTM.TransformPoint(lower);
-      pAuxGeom->DrawSphere(lower, 0.1f, col);              
-      
-      upper = worldTM.TransformPoint(upper);
-      pAuxGeom->DrawSphere(upper, 0.1f, col);
-
-      //pAuxGeom->DrawLine(lower, col, upper, col);
-    }    
-  }
-
-  if (tScaleTotal != 0.f)
-  {
-    gEnv->pRenderer->DrawLabel(worldTM.GetTranslation(),1.3f,"tscale: %.2f",tScaleTotal);
-  }
-
-  if (m_pWind[0])
-  {
-    pe_params_buoyancy buoy;
-    pe_status_pos pos;
-    if (m_pWind[0]->GetParams(&buoy) && m_pWind[0]->GetStatus(&pos))
-    {
-      gEnv->pRenderer->DrawLabel(pos.pos, 1.3f, "rad: %.1f", buoy.waterFlow.len());
-    }
-    if (m_pWind[1]->GetParams(&buoy) && m_pWind[1]->GetStatus(&pos))
-    {
-      gEnv->pRenderer->DrawLabel(pos.pos, 1.3f, "lin: %.1f", buoy.waterFlow.len());
-    }
-  }
-}
-
-
 //------------------------------------------------------------------------
 void CVehicleMovementStdWheeled::Update(const float deltaTime)
 {
@@ -862,8 +694,6 @@ void CVehicleMovementStdWheeled::Update(const float deltaTime)
 	bool distant = m_pVehicle->GetGameObject()->IsProbablyDistant();
   if (!distant && m_blownTires && m_carParams.steerTrackNeutralTurn == 0.f)
     m_tireBlownTimer += deltaTime;       
-
-	DebugDrawMovement(deltaTime);
 
 	const SVehicleDamageParams& damageParams = m_pVehicle->GetDamageParams();
 	m_submergedRatioMax = damageParams.submergedRatioMax;
@@ -1517,13 +1347,7 @@ void CVehicleMovementStdWheeled::ProcessAI(const float deltaTime)
 			m_movementAction.power *= 0.0f ;
 			step =5;
 		}
-
-//		m_prevAngle =  angle;
-//		char buf[1024];
-//		sprintf(buf, "steering	%4.2f	%4.2f %4.2f	%4.2f	%4.2f	%4.2f	%d\n", deltaTime,currentSpeed,angle,currentAngleSpeed, m_movementAction.rotateYaw,currentAngleSpeed-m_prevAngle,step);
-//		OutputDebugString( buf );
 	}
-
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1829,12 +1653,6 @@ void CVehicleMovementStdWheeled::UpdateSurfaceEffects(const float deltaTime)
   }
     
   float soundSlip = 0;
-
-  if (DebugParticles())
-  {
-    float color[] = {1,1,1,1};
-    gEnv->pRenderer->Draw2dLabel(100, 280, 1.3f, color, false, "%s:", m_pVehicle->GetEntity()->GetName());
-  }
     
   SEnvironmentParticles* envParams = m_pPaParams->GetEnvironmentParticles();
   SEnvParticleStatus::TEnvEmitters::iterator emitterIt = m_paStats.envStats.emitters.begin();
@@ -1952,9 +1770,6 @@ void CVehicleMovementStdWheeled::UpdateSurfaceEffects(const float deltaTime)
               
       if (effect && (pEff = gEnv->p3DEngine->FindParticleEffect(effect)))
       {           
-        if (DebugParticles())          
-          CryLog("<%s> changes sfx to %s (slot %i)", pEntity->GetName(), effect, emitterIt->slot);
-
         if (info.pParticleEmitter)
         {   
           // free old emitter and load new one, for old effect to die gracefully           
@@ -1974,12 +1789,7 @@ void CVehicleMovementStdWheeled::UpdateSurfaceEffects(const float deltaTime)
       }
       else 
       {
-        if (DebugParticles())
-          CryLog("<%s> found no effect for %i", pEntity->GetName(), matId);
-
-        // effect not available, disable
-        //info.pParticleEmitter->Activate(false);
-        countScale = 0.f; 
+        countScale = 0.f;
         emitterIt->matId = 0;
       }        
     }
@@ -1995,13 +1805,6 @@ void CVehicleMovementStdWheeled::UpdateSurfaceEffects(const float deltaTime)
 			sp.fSpeedScale = speedScale;
       info.pParticleEmitter->SetSpawnParams(sp);
     }
-    
-    if (DebugParticles())
-    {
-      float color[] = {1,1,1,1};
-      gEnv->pRenderer->Draw2dLabel(100+330*emitterIt->layer, 300+25*emitterIt->group, 1.2f, color, false, "group %i, matId %i: sizeScale %.2f, countScale %.2f, speedScale %.2f (emit: %i)", emitterIt->group, emitterIt->matId, sizeScale, countScale, speedScale, info.pParticleEmitter?1:0);
-      gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(m_pVehicle->GetEntity()->GetSlotWorldTM(emitterIt->slot).GetTranslation(), 0.2f, ColorB(0,0,255,200));
-    }     
   }
   
   if (m_maxSoundSlipSpeed > 0.f)

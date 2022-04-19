@@ -393,31 +393,6 @@ float CVehicleMovementTank::GetWheelCondition() const
   return 1.0f - (0.8f * (1.0f - treadCondition));
 }
 
-//----------------------------------------------------------------------------------
-void CVehicleMovementTank::DebugDrawMovement(const float deltaTime)
-{
-  if (!IsProfilingMovement())
-    return;
-
-  CVehicleMovementStdWheeled::DebugDrawMovement(deltaTime);
-
-  IPhysicalEntity* pPhysics = GetPhysics();
-  IRenderer* pRenderer = gEnv->pRenderer;
-  float color[4] = {1,1,1,1};
-  float green[4] = {0,1,0,1};
-  ColorB colRed(255,0,0,255);
-  float y = 50.f, step1 = 15.f, step2 = 20.f, size=1.3f, sizeL=1.5f;
-
-  if (g_pGameCVars->v_dumpFriction)
-  {
-    if (m_avgLateralSlip > 0.01f)
-    {
-      CryLog("%4.2f, %4.2f, %4.2f", m_currSteer, m_avgLateralSlip, m_latFriction);
-    }
-  }
-}
-
-
 //------------------------------------------------------------------------
 bool CVehicleMovementTank::RequestMovement(CMovementRequest& movementRequest)
 {
@@ -565,14 +540,8 @@ void CVehicleMovementTank::ProcessAI(const float deltaTime)
 			m_movementAction.power *=0.1f;
 			step =4;
 		}
-
-//		char buf[1024];
-//		sprintf(buf, "steering	%4.2f	%4.2f	%4.2f	%d\n", deltaTime,currentAngleSpeed, angle - m_prevAngle, step);
-//		OutputDebugString( buf );
 		m_prevAngle =  angle;
-
 	}
-
 }
 
 //------------------------------------------------------------------------
@@ -619,9 +588,7 @@ void CVehicleMovementTank::Update(const float deltaTime)
 				pGeom->DrawCone(worldTM.GetTranslation()+Vec3(0,0,5)-(dir*len), dir, 0.5f, len, ColorB(128,0,0,255));        
 			}
 		}
-	}    
-
-	DebugDrawMovement(deltaTime);
+	}
 }
 
 //------------------------------------------------------------------------

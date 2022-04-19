@@ -46,7 +46,6 @@
 #include "Falcon.h"
 #include "RemoteControlSystem.h"
 
-DbgPlotter	g_dbgPlotter;
 
 int CGameRules::s_invulnID = 0;
 int CGameRules::s_barbWireID = 0;
@@ -1988,20 +1987,17 @@ void CGameRules::FreezeEntity(EntityId entityId, bool freeze, bool vapor, bool f
 			}
 		}	
 
-    // if entity implements "GetFrozenAmount", check it and freeze only when >= 1
-    HSCRIPTFUNCTION pfnGetFrozenAmount=0;
-    if (!force && pScriptTable && pScriptTable->GetValue("GetFrozenAmount", pfnGetFrozenAmount))
-    {
-      float frost = 1.0f;
-      Script::CallReturn(gEnv->pScriptSystem, pfnGetFrozenAmount, pScriptTable, frost);
-      gEnv->pScriptSystem->ReleaseFunc(pfnGetFrozenAmount);
+		// if entity implements "GetFrozenAmount", check it and freeze only when >= 1
+		HSCRIPTFUNCTION pfnGetFrozenAmount=0;
+		if (!force && pScriptTable && pScriptTable->GetValue("GetFrozenAmount", pfnGetFrozenAmount))
+		{
+			float frost = 1.0f;
+			Script::CallReturn(gEnv->pScriptSystem, pfnGetFrozenAmount, pScriptTable, frost);
+			gEnv->pScriptSystem->ReleaseFunc(pfnGetFrozenAmount);
 
-      if (g_pGameCVars->cl_debugFreezeShake)
-        CryLog("%s frost amount: %.2f", pEntity->GetName(), frost);
-
-      if (frost < 0.99f)
-        return;
-    }
+			if (frost < 0.99f)
+				return;
+		}
 	}
 
 	// call script event
@@ -2582,7 +2578,6 @@ EntityId CGameRules::GetSpawnLocationTeamFirst( ) const
 		avrgPos += pSpawn->GetWorldPos();
 	}	
 	avrgPos /= static_cast<float>(m_spawnLocations.size());
-	g_dbgPlotter.Plot(avrgPos.x, avrgPos.y, DbgPlotter::eT_Type1);
 	typedef std::map<float, EntityId>	TCandidates;
 	TCandidates candidates;
 	for (TSpawnLocations::const_iterator it=m_spawnLocations.begin(); it!=m_spawnLocations.end(); ++it)
@@ -3475,10 +3470,6 @@ void CGameRules::RegisterConsoleCommands(IConsole *pConsole)
 	// todo: move to power struggle implementation when there is one
 	pConsole->AddCommand("buy",			"if (g_gameRules and g_gameRules.Buy) then g_gameRules:Buy(%1); end");
 	pConsole->AddCommand("buyammo", "if (g_gameRules and g_gameRules.BuyAmmo) then g_gameRules:BuyAmmo(%%); end");
-	pConsole->AddCommand("g_debug_spawns", CmdDebugSpawns);
-	pConsole->AddCommand("g_debug_minimap", CmdDebugMinimap);
-	pConsole->AddCommand("g_debug_teams", CmdDebugTeams);
-	pConsole->AddCommand("g_debug_objectives", CmdDebugObjectives);
 }
 
 //------------------------------------------------------------------------
@@ -3486,11 +3477,6 @@ void CGameRules::UnregisterConsoleCommands(IConsole *pConsole)
 {
 	pConsole->RemoveCommand("buy");
 	pConsole->RemoveCommand("buyammo");
-	pConsole->RemoveCommand("avarst_meharties");
-	pConsole->RemoveCommand("g_debug_spawns");
-	pConsole->RemoveCommand("g_debug_minimap");
-	pConsole->RemoveCommand("g_debug_teams");
-	pConsole->RemoveCommand("g_debug_objectives");
 }
 
 //------------------------------------------------------------------------
@@ -3498,107 +3484,6 @@ void CGameRules::RegisterConsoleVars(IConsole *pConsole)
 {
 }
 
-
-//------------------------------------------------------------------------
-void CGameRules::CmdDebugSpawns(IConsoleCmdArgs *pArgs)
-{
-	CGameRules *pGameRules=g_pGame->GetGameRules();
-	if (!pGameRules->m_spawnGroups.empty())
-	{
-		CryLogAlways("// Spawn Groups //");
-		for (TSpawnGroupMap::const_iterator sit=pGameRules->m_spawnGroups.begin(); sit!=pGameRules->m_spawnGroups.end(); ++sit)
-		{
-			IEntity *pEntity=gEnv->pEntitySystem->GetEntity(sit->first);
-			int groupTeamId=pGameRules->GetTeam(pEntity->GetId());
-			const char *Default="$5*DEFAULT*";
-			CryLogAlways("Spawn Group: %s  (eid: %d %08x  team: %d) %s", pEntity->GetName(), pEntity->GetId(), pEntity->GetId(), groupTeamId, 
-				(sit->first==pGameRules->GetTeamDefaultSpawnGroup(groupTeamId))?Default:"");
-
-			for (TSpawnLocations::const_iterator lit=sit->second.begin(); lit!=sit->second.end(); ++lit)
-			{
-				int spawnTeamId=pGameRules->GetTeam(pEntity->GetId());
-				IEntity *pEntity=gEnv->pEntitySystem->GetEntity(*lit);
-				const char *cs="";
-				if (spawnTeamId && spawnTeamId!=groupTeamId)
-					cs="$4";
-				CryLogAlways("    -> Spawn Location: %s  (eid: %d %08x  team: %d)", pEntity->GetName(), pEntity->GetId(), pEntity->GetId(), spawnTeamId);
-			}
-		}
-	}
-
-	CryLogAlways("// Spawn Locations //");
-	for (TSpawnLocations::const_iterator lit=pGameRules->m_spawnLocations.begin(); lit!=pGameRules->m_spawnLocations.end(); ++lit)
-	{
-		IEntity *pEntity=gEnv->pEntitySystem->GetEntity(*lit);
-		Vec3 pos=pEntity?pEntity->GetWorldPos():ZERO;
-		CryLogAlways("Spawn Location: %s  (eid: %d %08x  team: %d) %.2f,%.2f,%.2f", pEntity->GetName(), pEntity->GetId(), pEntity->GetId(), pGameRules->GetTeam(pEntity->GetId()), pos.x, pos.y, pos.z);
-	}
-}
-
-//------------------------------------------------------------------------
-void CGameRules::CmdDebugMinimap(IConsoleCmdArgs *pArgs)
-{
-	CGameRules *pGameRules=g_pGame->GetGameRules();
-	if (!pGameRules->m_minimap.empty())
-	{
-		CryLogAlways("// Minimap Entities //");
-		for (TMinimap::const_iterator it=pGameRules->m_minimap.begin(); it!=pGameRules->m_minimap.end(); ++it)
-		{
-			IEntity *pEntity=gEnv->pEntitySystem->GetEntity(it->entityId);
-			CryLogAlways("  -> Entity %s  (eid: %d %08x  class: %s  lifetime: %.3f  type: %d)", pEntity->GetName(), pEntity->GetId(), pEntity->GetId(), pEntity->GetClass()->GetName(), it->lifetime, it->type);
-		}
-	}
-}
-
-//------------------------------------------------------------------------
-void CGameRules::CmdDebugTeams(IConsoleCmdArgs *pArgs)
-{
-	CGameRules *pGameRules=g_pGame->GetGameRules();
-	if (!pGameRules->m_entityteams.empty())
-	{
-		CryLogAlways("// Teams //");
-		for (TTeamIdMap::const_iterator tit=pGameRules->m_teams.begin(); tit!=pGameRules->m_teams.end(); ++tit)
-		{
-			CryLogAlways("Team: %s  (id: %d)", tit->first.c_str(), tit->second);
-			for (TEntityTeamIdMap::const_iterator eit=pGameRules->m_entityteams.begin(); eit!=pGameRules->m_entityteams.end(); ++eit)
-			{
-				if (eit->second==tit->second)
-				{
-					IEntity *pEntity=gEnv->pEntitySystem->GetEntity(eit->first);
-					CryLogAlways("    -> Entity: %s  class: %s  (eid: %d %08x)", pEntity?pEntity->GetName():"<null>", pEntity?pEntity->GetClass()->GetName():"<null>", eit->first, eit->first);
-				}
-			}
-		}
-	}
-}
-
-//------------------------------------------------------------------------
-void CGameRules::CmdDebugObjectives(IConsoleCmdArgs *pArgs)
-{
-	const char *status[CHUDMissionObjective::LAST+1];
-	status[0]="$5invalid$o";
-	status[CHUDMissionObjective::LAST]="$5invalid$o";
-
-	status[CHUDMissionObjective::ACTIVATED]="$3active$o";
-	status[CHUDMissionObjective::DEACTIVATED]="$9inactive$o";
-	status[CHUDMissionObjective::COMPLETED]="$2complete$o";
-	status[CHUDMissionObjective::FAILED]="$4failed$o";
-
-	CGameRules *pGameRules=g_pGame->GetGameRules();
-	if (!pGameRules->m_objectives.empty())
-	{
-		CryLogAlways("// Teams //");
-		for (TTeamIdMap::const_iterator tit=pGameRules->m_teams.begin(); tit!=pGameRules->m_teams.end(); ++tit)
-		{
-			if (TObjectiveMap *pObjectives=pGameRules->GetTeamObjectives(tit->second))
-			{
-				for (TObjectiveMap::const_iterator it=pObjectives->begin(); it!=pObjectives->end(); ++it)
-					CryLogAlways("  -> Objective: %s  teamId: %d  status: %s  (eid: %d %08x)", it->first.c_str(), tit->second,
-						status[CLAMP(it->second.status, 0, CHUDMissionObjective::LAST)], it->second.entityId, it->second.entityId);
-			}
-		}
-	}
-}
 //------------------------------------------------------------------------
 void CGameRules::CreateScriptHitInfo(SmartScriptTable &scriptHitInfo, const HitInfo &hitInfo)
 {
@@ -4024,10 +3909,6 @@ void CGameRules::CreateEntityRespawnData(EntityId entityId)
 	respawn.obb.center=pEntity->GetWorldTM().GetTranslation()+aabb.GetCenter();
 	respawn.obb.size=aabb.GetSize();
 	respawn.obb.bOriented=true;
-
-#ifdef _DEBUG
-	respawn.name = pEntity->GetName();
-#endif
 	
 	IScriptTable *pScriptTable = pEntity->GetScriptTable();
 
@@ -4116,12 +3997,7 @@ void CGameRules::UpdateEntitySchedules(float frameTime)
 			params.nFlags=data.flags;
 
 			string name;
-#ifdef _DEBUG
-			name=data.name;
-			name.append("_repop");
-#else
 			name=data.pClass->GetName();
-#endif
 			params.sName = name.c_str();
 
 			IEntity *pEntity=m_pEntitySystem->SpawnEntity(params, false);
@@ -4514,210 +4390,6 @@ bool CGameRules::IsItemAllowed(const char* itemName)
 		return true;
 
 	return (std::find(m_restrictedItemList.begin(), m_restrictedItemList.end(), itemName) == m_restrictedItemList.end());
-}
-
-
-//
-//-------------------------------------------------------------------------------------------
-void	DbgPlotter::Reset()
-{
-	m_isEnabled = g_pGameCVars->g_spawnDebug!=0;
-	if(!m_isEnabled)
-		return;
-
-	CGameRules*pGameRules =	static_cast<CGameRules*>(gEnv->pGame->GetIGameFramework()->GetIGameRulesSystem()->GetCurrentGameRules());
-
-	m_maxY = m_maxX = 0.f;
-	m_minY = m_minX = GetISystem()->GetI3DEngine()->GetTerrainSize();
-	int count=pGameRules->GetSpawnLocationCount()-1;
-	for(; count>=0; --count)
-	{
-		const IEntity *pEntity( gEnv->pEntitySystem->GetEntity(pGameRules->GetSpawnLocation(count)));
-		if(!pEntity)
-			continue;
-		const Vec3 pos(pEntity->GetWorldPos());
-		if(m_minX > pos.x)
-			m_minX = pos.x;
-		if(m_minY > pos.y)
-			m_minY = pos.y;
-		if(m_maxX < pos.x)
-			m_maxX = pos.x;
-		if(m_maxY < pos.y)
-			m_maxY = pos.y;
-	}
-
-	m_maxX += 5;
-	m_minX -= 5;
-	m_maxY += 5;
-	m_minY -= 5;
-
-	float ratio = (m_maxY - m_minY) / (m_maxX - m_minX);
-
-	const float sizeX = (m_maxX - m_minX);
-	m_imgSizeX = max(m_maxX - m_minX, 512.0f);
-	m_imgSizeY = ratio * m_imgSizeX;
-
-	if(m_pImgBuffer==NULL)
-		m_pImgBuffer = static_cast<byte*>(malloc(m_imgSizeX*m_imgSizeY*4));
-	memset(m_pImgBuffer, 0, m_imgSizeX*m_imgSizeY*4);
-
-	m_world2ImgScaleX = static_cast<float>(m_imgSizeX)/(m_maxX-m_minX);
-	m_world2ImgScaleY = static_cast<float>(m_imgSizeY)/(m_maxY-m_minY);
-}
-
-void	DbgPlotter::WriteImg(EntityId ownerId)
-{
-	if(!m_isEnabled)
-		return;
-	string	fileName = "spwn_";
-	char szNumber[16];
-	fileName += PathUtil::GetFile(g_pGame->GetIGameFramework()->GetLevelName());
-	fileName += "_";
-	sprintf(szNumber,"%.4d_",m_Counter++);
-	fileName += szNumber;
-	const IEntity *pEntity( gEnv->pEntitySystem->GetEntity(ownerId));
-	if(pEntity)
-		fileName += pEntity->GetName();
-	fileName += ".tga";
-
-	GetISystem()->GetIRenderer()->SaveTga(m_pImgBuffer, FORMAT_32_BIT, m_imgSizeX, m_imgSizeY, fileName, false);
-
-	free(m_pImgBuffer);
-	m_pImgBuffer = NULL;
-}
-
-void	DbgPlotter::PlotSpawnPoints( )
-{
-	if(!m_isEnabled)
-		return;
-	CGameRules*pGameRules =	static_cast<CGameRules*>(gEnv->pGame->GetIGameFramework()->GetIGameRulesSystem()->GetCurrentGameRules());
-	int count=pGameRules->GetSpawnLocationCount()-1;
-	for(; count>=0; --count)
-		g_dbgPlotter.Plot( pGameRules->GetSpawnLocation(count), DbgPlotter::eT_SpawnPoint );
-}
-
-void	DbgPlotter::PlotTeam( const EntityId entID, bool enemy )
-{
-	if(!m_isEnabled)
-		return;
-	CGameRules*pGameRules =	static_cast<CGameRules*>(gEnv->pGame->GetIGameFramework()->GetIGameRulesSystem()->GetCurrentGameRules());
-	int teamId( enemy ? pGameRules->GetEnemyTeamId(pGameRules->GetTeam(entID)) : pGameRules->GetTeam(entID));
-	EDbgPlotTypes	plotType( enemy ? eT_Enemy : eT_Friend );
-	int idx=0;
-	EntityId teamMateId;
-	while( teamMateId=pGameRules->GetTeamActivePlayer(teamId, idx++) )
-	{
-		if(teamMateId == entID)
-			continue;
-		//		if(!pGameRules->IsPlayerActivelyPlaying(teamMateId))
-		//			continue;
-		Plot(teamMateId, plotType);
-	}
-}
-
-void	DbgPlotter::PlotAllPlayers(const EntityId skipId)
-{
-	if(!m_isEnabled)
-		return;
-	CGameRules*pGameRules =	static_cast<CGameRules*>(gEnv->pGame->GetIGameFramework()->GetIGameRulesSystem()->GetCurrentGameRules());
-
-	CGameRules::TPlayers players;
-	pGameRules->GetPlayers(players);
-
-	for(CGameRules::TPlayers::iterator it=players.begin();it!=players.end();++it)
-	{
-		if(*it == skipId)
-			continue;
-//		CActor* pActor = reinterpret_cast<CActor*>(g_pGame->GetIGameFramework()->GetIActorSystem()->GetActor(playerId));
-		Plot( *it, eT_Enemy );
-	}
-}
-
-void	DbgPlotter::PlotBox( float x, float y, float halfSz, EDbgPlotTypes entType )
-{
-	if(!m_isEnabled)
-		return;
-	float x0(max(m_minX,(x-halfSz)));
-	float x1(min(m_maxX,(x+halfSz)));
-	float y0(max(m_minY,(y-halfSz)));
-	float y1(min(m_maxY,(y+halfSz)));
-	for(float xx=x0; xx<x1; xx+=1.3f)		
-	{
-		Plot( xx, y0, entType, false);
-		Plot( xx, y1, entType, false);
-	}
-	for(float yy=y0; yy<y1; yy+=1.3f)
-	{
-		Plot( x0, yy, entType, false);
-		Plot( x1, yy, entType, false);
-	}
-}
-
-void DbgPlotter::PlotCircle(float x, float y, float r, EDbgPlotTypes entType)
-{
-	if(!m_isEnabled)
-		return;
-
-	for(float angle=0.0f; angle<6.28f; angle+=0.1f)
-	{
-		float x2 = min(max(0.0f, x + r * sinf(angle)), m_maxX);
-		float y2 = min(max(0.0f, y + r * cosf(angle)), m_maxY);
-
-		Plot(x2, y2, entType, false);
-	}
-}
-
-void	DbgPlotter::Plot( const EntityId entID, EDbgPlotTypes entType )
-{
-	if(!m_isEnabled)
-		return;
-	const IEntity *pEntity( gEnv->pEntitySystem->GetEntity(entID));
-	const Vec3 pos(pEntity->GetWorldPos());
-	Plot(pos.x, pos.y, entType);
-}
-
-void	DbgPlotter::Plot( float x, float y, EDbgPlotTypes entType, bool bigPixel)
-{
-	if(!m_isEnabled)
-		return;
-
-byte red = 0;
-byte green = 0;
-byte blue = 0;
-	switch( entType )
-	{
-		case eT_Myself:			red=0xFF; green=0xFF; blue=0x00; break;
-		case eT_SpawnPoint:	red=0x77; green=0x77; blue=0x77; break;
-		case eT_Friend:			red=0x00; green=0x00; blue=0xFF; break;
-		case eT_Enemy:			red=0xFF; green=0x00; blue=0x00; break;
-		case eT_Type1:			red=0x33; green=0x33; blue=0xFF; break;
-		default:						red=0xFF; green=0xFF; blue=0xFF; 
-	}
-//	unsigned offset( (m_imgSize*static_cast<unsigned>(y*m_world2ImgScale) + static_cast<unsigned>(x*m_world2ImgScale))*4 );
-	long offset( (m_imgSizeX*static_cast<unsigned>((y-m_minY)*m_world2ImgScaleY) + static_cast<unsigned>((x-m_minX)*m_world2ImgScaleX))*4 );
-	if(offset<0 || offset+4+m_imgSizeX >= m_imgSizeX*m_imgSizeY*4 )
-		return;
-	m_pImgBuffer[offset] = red;
-	m_pImgBuffer[offset+1] = green;
-	m_pImgBuffer[offset+2] = blue;
-	m_pImgBuffer[offset+3] = 0xFF;
-	if(!bigPixel)
-		return;
-	offset+=4;
-	m_pImgBuffer[offset] = red;
-	m_pImgBuffer[offset+1] = green;
-	m_pImgBuffer[offset+2] = blue;
-	m_pImgBuffer[offset+3] = 0xFF;
-	offset+= m_imgSizeX*4-4;
-	m_pImgBuffer[offset] = red;
-	m_pImgBuffer[offset+1] = green;
-	m_pImgBuffer[offset+2] = blue;
-	m_pImgBuffer[offset+3] = 0xFF;
-	offset+=4;
-	m_pImgBuffer[offset] = red;
-	m_pImgBuffer[offset+1] = green;
-	m_pImgBuffer[offset+2] = blue;
-	m_pImgBuffer[offset+3] = 0xFF;
 }
 
 //	kirill: need this to mark used spawn-points, to make sure no two actors are placed at the same location on Restart

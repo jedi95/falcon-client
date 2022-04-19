@@ -116,8 +116,6 @@ void CHomingMissile::UpdateControlledMissile(float frameTime)
 	const static float step = 15.f;  
 	float y = 20.f;    
 
-	bool bDebug = g_pGameCVars->i_debug_projectiles > 0;
-
 	if (isOwner || isServer)
 	{
 		//If there's a target, follow the target
@@ -138,9 +136,6 @@ void CHomingMissile::UpdateControlledMissile(float frameTime)
 						Vec3 finalDes = box.GetCenter();
 						SetDestination(finalDes);
 						//SetDestination( box.GetCenter() );
-
-						if (bDebug)
-							pRenderer->Draw2dLabel(5.0f, y+=step, 1.5f, color, false, "Target Entity: %s", pTarget->GetName());
 					}
 
 					m_lockedTimer+=0.05f;
@@ -231,13 +226,6 @@ void CHomingMissile::UpdateControlledMissile(float frameTime)
 						params.pt=(eyePos+m_maxTargetDistance*eyeDir);	//Some point in the sky...
 
 					GetGameObject()->InvokeRMI(SvRequestDestination(), params, eRMI_ToServer);
-
-					if (bDebug)
-					{
-						pRenderer->Draw2dLabel(5.0f, y+=step, 1.5f, color, false, "PlayerView eye direction: %.3f %.3f %.3f", eyeDir.x, eyeDir.y, eyeDir.z);
-						pRenderer->Draw2dLabel(5.0f, y+=step, 1.5f, color, false, "PlayerView Target: %.3f %.3f %.3f", hit.pt.x, hit.pt.y, hit.pt.z);
-						pRenderer->GetIRenderAuxGeom()->DrawCone(m_destination, Vec3(0,0,-1), 2.5f, 7.f, ColorB(255,0,0,255));
-					}
 				}
 
 				m_controlledTimer+=0.0f;
@@ -287,14 +275,6 @@ void CHomingMissile::UpdateControlledMissile(float frameTime)
 			//Turn more slowly...
 			currentVel.Normalize();
 
-			if(bDebug)
-			{
-
-				pRenderer->Draw2dLabel(50,55,2.0f,color,false, "  Destination: %.3f, %.3f, %.3f",m_destination.x,m_destination.y,m_destination.z);
-				pRenderer->Draw2dLabel(50,80,2.0f,color,false, "  Current Dir: %.3f, %.3f, %.3f",currentVel.x,currentVel.y,currentVel.z);
-				pRenderer->Draw2dLabel(50,105,2.0f,color,false,"  Goal    Dir: %.3f, %.3f, %.3f",goalDir.x,goalDir.y,goalDir.z);
-			}
-
 			float cosine = currentVel.Dot(goalDir);
 			cosine = CLAMP(cosine,-1.0f,1.0f);
 			float totalAngle = RAD2DEG(cry_acosf(cosine));
@@ -314,9 +294,6 @@ void CHomingMissile::UpdateControlledMissile(float frameTime)
 				goalDir.Normalize();
 			}
 
-			if(bDebug)
-				pRenderer->Draw2dLabel(50,180,2.0f,color,false,"Corrected Dir: %.3f, %.3f, %.3f",goalDir.x,goalDir.y,goalDir.z);
-
 			pe_action_set_velocity action;
 			action.v = goalDir * currentSpeed;
 			GetEntity()->GetPhysics()->Action(&action);
@@ -334,8 +311,6 @@ void CHomingMissile::UpdateCruiseMissile(float frameTime)
 	const static float step = 15.f;  
 	float y = 20.f;    
 
-	bool bDebug = g_pGameCVars->i_debug_projectiles > 0;
-
 	if (m_targetId)
 	{
 		IEntity* pTarget = gEnv->pEntitySystem->GetEntity(m_targetId);
@@ -344,9 +319,6 @@ void CHomingMissile::UpdateCruiseMissile(float frameTime)
 			AABB box;
 			pTarget->GetWorldBounds(box);
 			SetDestination( box.GetCenter() );
-
-			//if (bDebug)
-				//pRenderer->Draw2dLabel(5.0f, y+=step, 1.5f, color, false, "Target Entity: %s", pTarget->GetName());
 		}    
 	}
 	else 
@@ -358,9 +330,6 @@ void CHomingMissile::UpdateCruiseMissile(float frameTime)
 		{
 			const Vec3& dest = pItem->GetIWeapon()->GetDestination();
 			SetDestination( dest );
-
-			//if (bDebug)
-				//pRenderer->Draw2dLabel(5.0f, y+=step, 1.5f, color, false, "Weapon Destination: (%.1f %.1f %.1f)", dest.x, dest.y, dest.z);
 		}
 	}
 
@@ -381,18 +350,9 @@ void CHomingMissile::UpdateCruiseMissile(float frameTime)
 			return;
 		}
 
-		if (bDebug)
-			pGeom->DrawCone(m_destination, Vec3(0,0,-1), 2.5f, 7.f, ColorB(255,0,0,255));
-
 		float heightDiff = (m_cruiseAltitude-m_alignAltitude) - currentPos.z;
 
-		if (!m_isCruising && heightDiff * sgn(status.v.z) > 0.f)
-		{
-			// if heading towards align altitude (but not yet reached) accelerate to max speed    
-			if (bDebug)
-				pRenderer->Draw2dLabel(5.0f,  y+=step,   1.5f, color, false, "[HomingMissile] accelerating (%.1f / %.1f)", currentSpeed, m_maxSpeed);    
-		}
-		else if (!m_isCruising && heightDiff * sgnnz(status.v.z) < 0.f && (status.v.z<0 || status.v.z>0.25f))
+		if (!m_isCruising && heightDiff * sgnnz(status.v.z) < 0.f && (status.v.z<0 || status.v.z>0.25f))
 		{
 			// align to cruise
 			if (currentSpeed != 0)
@@ -401,15 +361,9 @@ void CHomingMissile::UpdateCruiseMissile(float frameTime)
 				goalDir.z = 0;
 				goalDir.normalize();
 			}    
-
-			if (bDebug)
-				pRenderer->Draw2dLabel(5.0f,  y+=step, 1.5f, color, false, "[HomingMissile] aligning"); 
 		}
 		else
 		{
-			if (bDebug)
-				pRenderer->Draw2dLabel(5.0f,  y+=step, 1.5f, color, false, "[HomingMissile] cruising..."); 
-
 			// cruise
 			m_isCruising = true;
 
@@ -421,9 +375,6 @@ void CHomingMissile::UpdateCruiseMissile(float frameTime)
 
 				if (m_isDescending || groundDistSq <= descendDistSq)
 				{
-					if (bDebug)
-						pRenderer->Draw2dLabel(5.0f,  y+=step, 1.5f, color, false, "[HomingMissile] descending!"); 
-
 					if (distSq != 0)
 						goalDir = (m_destination - currentPos).normalized();
 					else 
@@ -458,13 +409,6 @@ void CHomingMissile::UpdateCruiseMissile(float frameTime)
 		float goalAngle = RAD2DEG(acos_tpl(cosine));
 		float maxAngle = m_turnSpeed * frameTime;
 
-		if (bDebug)
-		{ 
-			pGeom->DrawCone( currentPos, goalDir, 0.4f, 12.f, ColorB(255,0,0,255) );
-			pRenderer->Draw2dLabel(5.0f,  y+=step, 1.5f, color, false, "[HomingMissile] goalAngle: %.2f", goalAngle); 
-
-		}
-
 		if (goalAngle > maxAngle+0.05f)    
 			dir = (Vec3::CreateSlerp(currentDir, goalDir, maxAngle/goalAngle)).normalize();
 		else //if (goalAngle < 0.005f)
@@ -474,12 +418,6 @@ void CHomingMissile::UpdateCruiseMissile(float frameTime)
 	pe_action_set_velocity action;
 	action.v = dir * desiredSpeed;
 	GetEntity()->GetPhysics()->Action(&action);
-
-	if (bDebug)
-	{
-		pGeom->DrawCone( currentPos, dir, 0.4f, 12.f, ColorB(128,128,0,255) );  
-		pRenderer->Draw2dLabel(5.0f,  y+=step, 1.5f, color, false, "[HomingMissile] currentSpeed: %.1f (max: %.1f)", currentSpeed, m_maxSpeed); 
-	}
 }
 //-------------------------------------------------------------------------------
 void CHomingMissile::FullSerialize(TSerialize ser)

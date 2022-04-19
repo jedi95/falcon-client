@@ -38,8 +38,6 @@ History:
 #include <IVehicleSystem.h>
 #include <ISerialize.h>
 
-#include <IRenderAuxGeom.h>
-
 #include <IGameTokens.h>
 
 #include "HUD/HUD.h"
@@ -1198,11 +1196,6 @@ void CPlayerView::ViewFirstPersonOnLadder(SViewParams & viewParams)
 
 	viewParams.nearplane = 0.12f;
 	viewParams.position = m_in.entityWorldMatrix * (m_in.localEyePos+Vec3(0.02f,0.0f,0.05f));// * (m_in.localEyePos+Vec3(0.1f,0.0f,0.0f));
-
-	//Different camera angles for debugging
-	if(g_pGameCVars->pl_debug_ladders!=0)
-		viewParams.position = m_in.entityWorldMatrix * (m_in.localEyePos + Vec3(0.1f,-g_pGameCVars->cl_tpvDist,-0.3f));
-
 	
 	m_io.viewQuat = m_io.viewQuatFinal = viewParams.rotation;
 

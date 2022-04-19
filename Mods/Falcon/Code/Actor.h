@@ -1148,8 +1148,6 @@ protected:
 
 	virtual void SetMaterialRecursive(ICharacterInstance *charInst, bool undo, IMaterial *newMat = 0);
 
-	void DisplayDebugInfo();
-
 	virtual void UpdateAnimGraph( IAnimationGraphState * pState );
 
 	//movement

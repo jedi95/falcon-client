@@ -19,7 +19,6 @@ History:
 #include "Game.h"
 #include "GameCVars.h"
 #include "GameRules.h"
-#include "IRenderAuxGeom.h"
 #include "IEntitySystem.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -138,32 +137,6 @@ void CBattleEvent::Update(SEntityUpdateContext &ctx, int updateSlot)
 				SpawnParams sp;
 				sp.fCountScale = (float)m_numParticles/60.0f;
 				info.pParticleEmitter->SetSpawnParams(sp);
-			}
-		}
-
-		if(g_pGameCVars->g_battleDust_debug != 0)
-		{
-			if(g_pGameCVars->g_battleDust_debug >= 2)
-			{
-				if(m_numParticles > 0)
-				{
-					gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(m_worldPos, m_numParticles, ColorF(0.0f,1.0f,0.0f,0.2f));
-				}
-				else
-				{
-					gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(m_worldPos, 0.5f, ColorF(1.0f,0.0f,0.0f,0.2f));
-				}
-			}
-			else
-			{
-				if(m_numParticles > 0)
-				{
-					gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(m_worldPos, 0.5f, ColorF(0.0f,1.0f,0.0f,0.2f));
-				}
-				else
-				{
-					gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(m_worldPos, 0.5f, ColorF(1.0f,0.0f,0.0f,0.2f));
-				}
 			}
 		}
 	}
@@ -492,11 +465,6 @@ void CBattleDust::Update()
 	if(!gEnv->bServer)
 		return;
 
-	if(g_pGameCVars->g_battleDust_debug != 0)
-	{
-		float col[] = {1,1,1,1};
-		gEnv->pRenderer->Draw2dLabel(50, 40, 2.0f, col, false, "Num BD areas: %d (max %d)", m_eventIdList.size(), m_maxBattleEvents);
-	}
 	float ypos = 60.0f;
 
 	// go through the list of areas, remove any which are too small
@@ -515,13 +483,6 @@ void CBattleDust::Update()
 		{
 			pBattleArea->m_lifeRemaining -= gEnv->pTimer->GetFrameTime();
 			pBattleArea->m_radius = pBattleArea->m_peakRadius * (pBattleArea->m_lifeRemaining / pBattleArea->m_lifetime);
-		}
-
-		if(g_pGameCVars->g_battleDust_debug != 0)
-		{
-			float col[] = {1,1,1,1};
-			gEnv->pRenderer->Draw2dLabel(50, ypos, 1.4f, col, false, "Area: (%.2f, %.2f, %.2f), Radius: %.2f/%.2f, Particles: %.0f, Lifetime: %.2f/%.2f", pBattleArea->m_worldPos.x, pBattleArea->m_worldPos.y, pBattleArea->m_worldPos.z, pBattleArea->m_radius, pBattleArea->m_peakRadius, pBattleArea->m_numParticles, pBattleArea->m_lifeRemaining, pBattleArea->m_lifetime);
-			ypos += 10.0f;
 		}
 
 		if(pBattleArea->m_lifeRemaining < 0.0f)

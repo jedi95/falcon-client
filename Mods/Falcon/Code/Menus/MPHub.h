@@ -175,15 +175,6 @@ struct SUIEvent
   const SUIEventParam*  data;
 };
 
-struct STrustedIp
-{
-	STrustedIp():lower(0),upper(0){}
-	uint32 lower;
-	uint32 upper;
-};
-
-struct STSPDownload;
-
 class   CMultiPlayerMenu;
 class   CQuickGame;
 class   CGameNetworkProfile;
@@ -271,10 +262,6 @@ public:
 	void SetIsInLogin(bool isInLogin);
 	void ShowRetrivePasswordResult(bool ok);
 
-	bool IsIpTrusted(uint32 ip)const;
-	bool LoadTrustedIPs();
-	void CheckTSPIPs();
-
 	void MapDownloadPromptUser(const char* url, bool levelPresent);
 	void MapDownloadBegin();
 	void ShowMapDownload(const char* str);
@@ -311,9 +298,6 @@ private:
 	wstring													m_errorTextLarge;
 	string													m_errorNameLarge;
 	bool                            m_isInLogin;
-	std::vector<STrustedIp>					m_trustedIPs;
-	bool														m_trustedIPsLoaded;
-	std::auto_ptr<STSPDownload>			m_trustedDownload;
 
 	string													m_downloadURL;	// stored URL to download map from
 };

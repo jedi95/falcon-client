@@ -572,9 +572,8 @@ void CMultiPlayerMenu::SCreateGame::SetGlobalSettings()
   }
 
   {
-    m_dx10 = gEnv->pRenderer->GetRenderType() == eRT_DX10;
     keyArray.push_back(VALUE_BY_KEY(eCGO_dx10,gCreateGameOptions));
-    valueArray.push_back(m_dx10?"1":"0");
+    valueArray.push_back("1");
   }
 
   if(ICVar* v = gEnv->pConsole->GetCVar("g_battledust_enable"))

@@ -170,7 +170,6 @@ struct CMultiPlayerMenu::SGSBrowser : public IServerListener
   m_menu(0),
   m_pendingUpdate(0)
   {
-		m_dx10 = gEnv->pRenderer->GetRenderType() == eRT_DX10;
 		char strProductVersion[256];
 		gEnv->pSystem->GetProductVersion().ToString(strProductVersion);
 		m_version = strProductVersion;
@@ -215,7 +214,7 @@ struct CMultiPlayerMenu::SGSBrowser : public IServerListener
     si.m_gameVersion  = info->m_gameVersion;
     si.m_gameTypeName = GetGameType(info->m_gameType);
     si.m_gameType     = info->m_gameType;
-		si.m_official     = m_menu->m_hub->IsIpTrusted(info->m_publicIP);
+	si.m_official = false;
     si.m_anticheat    = info->m_anticheat;
     si.m_voicecomm    = info->m_voicecomm; 
     si.m_friendlyfire = info->m_friendlyfire;
@@ -254,7 +253,7 @@ struct CMultiPlayerMenu::SGSBrowser : public IServerListener
 			return;
 		}
 
-		si.m_canjoin = (m_dx10 || (!si.m_dx10)) && (m_version.empty() || m_version == si.m_gameVersion) && (m_modName==si.m_modName) && (m_modVersion==si.m_modVersion);
+		si.m_canjoin = (m_version.empty() || m_version == si.m_gameVersion) && (m_modName==si.m_modName) && (m_modVersion==si.m_modVersion);
 
     if(update)
       m_menu->m_ui->UpdateServer(si);
@@ -301,7 +300,6 @@ struct CMultiPlayerMenu::SGSBrowser : public IServerListener
         si.m_gameType = value;
         break;
       case eSIK_official:
-				//si.m_official = atoi(value)!=0;
         break;
       case eSIK_anticheat:
         si.m_anticheat = atoi(value)!=0;
@@ -527,7 +525,6 @@ struct CMultiPlayerMenu::SGSBrowser : public IServerListener
   int                         m_pendingUpdate;
   CMPLobbyUI::SServerDetails  m_details;
 
-	bool												m_dx10;//is client DX10 capable
 	string											m_version;//client version
 	string											m_modName;
 	string											m_modVersion;

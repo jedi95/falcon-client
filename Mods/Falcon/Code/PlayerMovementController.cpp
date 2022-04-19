@@ -638,16 +638,6 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 
 	ITimer * pTimer = gEnv->pTimer;
 
-	IRenderer * pRend = gEnv->pRenderer;
-	if (g_pGame->GetCVars()->g_debugaimlook)
-	{
-		if (pTimer->GetFrameStartTime()!=lastTime)
-		{
-			y = 100;
-			lastTime = pTimer->GetFrameStartTime();
-		}
-	}
-
 	IEntity * pEntity = m_pPlayer->GetEntity();
 	Vec3 playerPos = pEntity->GetWorldPos();
 
@@ -980,9 +970,6 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 		m_aimInterpolator.TargetValue( tgt, now, AIM_TIME, frameTime, hasAimTarget, playerPos, MAX_AIM_AT_ANGULAR_VELOCITY );
 
 	const char * ikType = "none";
-	ColorB dbgClr(0,255,0,255);
-	ColorB * pDbgClr = g_pGame->GetCVars()->g_debugaimlook? &dbgClr : NULL;
-	//if (!m_state.HasNoAiming() && m_aimInterpolator.HasTarget( now, AIM_TIME ))	// AIM IK
 
 	bool swimming = (m_pPlayer->GetStance() == STANCE_SWIM);
 
@@ -1068,12 +1055,6 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 
 			const float LOOK_CONE_FOV = DEG2RAD(80.0f);
 			const float AIM_CONE_FOV = DEG2RAD(m_pPlayer->IsPlayer() ? 180.0f : 70.0f);
-
-			if (g_pGame->GetCVars()->g_debugaimlook)
-			{
-				DebugDrawWireFOVCone(gEnv->pRenderer, weaponPos, limitDirection, 2.0f, AIM_CONE_FOV, ColorB(255,255,255));
-				DebugDrawWireFOVCone(gEnv->pRenderer, eyePosition, limitDirection, 3.0f, LOOK_CONE_FOV, ColorB(0,196,255));
-			}
 
 			if (hasLookTarget)
 			{
@@ -1194,27 +1175,6 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 		params.deltaAngles += m_state.GetDeltaRotation();
 		CHECKQNAN_VEC(params.deltaAngles);
 		ikType = "mouse";
-	}
-
-
-	if (g_pGame->GetCVars()->g_debugaimlook)
-	{
-		pRend->Draw2dLabel( 10, y, 1.5f, white, false, 
-			"%s:  body=%s   look=%s   aim=%s   rotik=%s   move=%s   delta ang=(%3.2f, %3.2f, %3.2f)", 
-			pEntity->GetName(), bodyTargetType, aimType, lookType, ikType, moveTargetType, 
-			params.deltaAngles.x, params.deltaAngles.y, params.deltaAngles.z );
-		y += 15;
-		if (m_state.GetDistanceToPathEnd() >= 0.0f)
-		{
-			pRend->Draw2dLabel( 10, y, 1.5f, yellow, false, "distanceToEnd: %f (%f)", m_state.GetDistanceToPathEnd(), moveTarget.GetDistance(playerPos) );
-			y += 15;
-		}
-
-		if (m_state.HasAimTarget())
-		{
-			pRend->GetIRenderAuxGeom()->DrawLine( m_currentMovementState.weaponPosition, ColorF(1,1,1,1), params.aimTarget+Vec3(0,0,0.05f), ColorF(1,1,1,1), 3.0f);
-			pRend->GetIRenderAuxGeom()->DrawLine( m_currentMovementState.weaponPosition, ColorF(1,1,1,0.3f), m_state.GetAimTarget(), ColorF(1,1,1,0.3f));
-		}
 	}
 
 	// process incremental movement

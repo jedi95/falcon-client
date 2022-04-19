@@ -1479,8 +1479,6 @@ void CHUD::OnPlayerVehicleBuilt(EntityId playerId, EntityId vehicleId)
 //handles all kinds of mouse clicks and flash callbacks
 void CHUD::HandleFSCommand(const char *szCommand,const char *szArgs)
 {
-  if(g_pGameCVars->g_debug_fscommand)
-    CryLog("HandleFSCommand : %s %s\n", szCommand, szArgs);
 	HandleFSCommandPDA(szCommand,szArgs);
 
 	if(!strcmp(szCommand,"WeaponAccessory"))

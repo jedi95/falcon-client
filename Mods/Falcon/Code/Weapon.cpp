@@ -1226,11 +1226,6 @@ void CWeapon::AddEventListener(IWeaponEventListener *pListener, const char *who)
 
 	SListenerInfo info;
 	info.pListener=pListener;
-#ifdef _DEBUG
-	memset(info.who, 0, sizeof(info.who));
-	strncpy(info.who, who, 64);
-	info.who[63]=0;
-#endif
 	m_listeners.push_back(info);
 }
 

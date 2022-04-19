@@ -22,8 +22,6 @@ History:
 #include "HUD/HUDRadar.h"
 #include "HUD/HUDTextChat.h"
 
-static const bool DEBUG_VERBOSE = false;
-
 enum EUserInfoKey
 {
   eUIK_none,
@@ -302,8 +300,6 @@ private:
 				if(!md.free && md.recordId == -1 && !md.locked)
 				{
 					md.locked = true;
-					if(DEBUG_VERBOSE)
-						CryLog("Writing %d",i);
 					m_ids.push_back(i);
 				}
 			}
@@ -361,8 +357,6 @@ private:
 		virtual void  OnResult(int idx, int id, bool success)
 		{
 			m_processed++;
-			if(DEBUG_VERBOSE)
-				CryLog("Written %s %d, id:%x",success?"ok":"failed",m_ids[idx],id);
 			if(m_parent)
 			{
 				m_array->GetMetaData(m_ids[idx]).locked = false;
@@ -394,8 +388,6 @@ private:
 				if(md.free && md.recordId != -1 && !md.locked)
 				{
 					md.locked = true;
-					if(DEBUG_VERBOSE)
-						CryLog("Deleting %d, id:%x",i,md.recordId);
 					ids.push_back(i);
 				}
 			}
@@ -415,8 +407,6 @@ private:
 		virtual void  OnResult(int idx, int id, bool success)
 		{
 			processed++;
-			if(DEBUG_VERBOSE)
-				CryLog("Deleted %s %d, id:%x",success?"ok":"failed",ids[idx],id);
 			if(m_parent)
 			{
 				m_array->GetMetaData(ids[idx]).locked = false;
@@ -634,9 +624,6 @@ struct CGameNetworkProfile::SUserInfoReader : public CStoredBase
 
 	void OnValue(int id, SStoredUserInfo& info)
 	{
-		if(DEBUG_VERBOSE)
-			CryLog("Info for %d read successfully - kills %d", id, info.m_kills);
-		
 		IGameStatsConfig* config = g_pGame->GetIGameFramework()->GetIGameStatsConfig();
 
 		SUserStats stats;
@@ -1009,8 +996,6 @@ struct CGameNetworkProfile::SBuddies  : public INetworkProfileListener
 			{
 				if(it->second.m_expires < gEnv->pTimer->GetFrameStartTime())
 				{
-					if(DEBUG_VERBOSE)
-						CryLog("Stats for %d expired on %d",it->first, uint32(it->second.m_expires.GetValue()&0xFFFFFFFF));
 					it->second.m_basic = true;//clear it
 				}
 				else
@@ -1033,8 +1018,6 @@ struct CGameNetworkProfile::SBuddies  : public INetworkProfileListener
 				{
 					if(it->second.m_expires < gEnv->pTimer->GetFrameStartTime())
 					{
-						if(DEBUG_VERBOSE)
-							CryLog("Stats for %d expired on %d",it->first, uint32(it->second.m_expires.GetValue()&0xFFFFFFFF));
 						it->second.m_basic = true;//clear it
 					}
 					else
@@ -1248,9 +1231,6 @@ struct CGameNetworkProfile::SBuddies  : public INetworkProfileListener
 				it->second.m_expires = gEnv->pTimer->GetFrameStartTime() + 10*60.0f;//10 minutes cache
 			else
 				it->second.m_expires = gEnv->pTimer->GetFrameStartTime() + 20*60.0f;//20 minutes for chat users
-	
-			if(DEBUG_VERBOSE)
-				CryLog("Stats for %d cached on %d",it->first, uint32(it->second.m_expires.GetValue()&0xFFFFFFFF));
 			if(m_ui)
 				m_ui->ProfileInfo(id, it->second);
 		}

@@ -35,7 +35,6 @@ History:
 #include "HUD/HUDRadar.h"
 #include "HUD/HUDTextChat.h"
 #include "OptionsManager.h"
-#include "MovieManager.h"
 #include "IAVI_Reader.h"
 #include <StringUtils.h>
 #include "IActionMapManager.h"
@@ -114,8 +113,6 @@ CFlashMenuObject::CFlashMenuObject()
 	m_bDestroyInGameMenuPending = false;
 	m_bIgnorePendingEvents = false;
 
-	m_pMovieMgr = new CMovieManager();
-
 	m_eSaveGameCompareMode = eSAVE_COMPARE_DATE;
 	m_bSaveGameSortUp = true;
 	m_bInLoading = false;
@@ -193,7 +190,6 @@ CFlashMenuObject::~CFlashMenuObject()
 
 	SAFE_RELEASE(m_pFlashPlayer);
 	SAFE_RELEASE(m_pVideoPlayer);
-	SAFE_DELETE(m_pMovieMgr);
 	SAFE_DELETE(m_pSubtitleScreen);
 
 	if(gEnv->pSystem->IsEditor() || gEnv->pSystem->IsDedicated()) return;
@@ -265,7 +261,7 @@ void CFlashMenuObject::UpdateRatio()
 
 	StopVideo();
 	
-	if(!m_pMovieMgr->IsPlaying() && m_pCurrentFlashMenuScreen==m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART])
+	if(m_pCurrentFlashMenuScreen==m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART])
 		PlayVideo("Localized/Video/bg.sfd", false, IVideoPlayer::LOOP_PLAYBACK);
 
 	m_iWidth = gEnv->pRenderer->GetWidth();
@@ -547,11 +543,6 @@ bool CFlashMenuObject::OnInputEvent(const SInputEvent &rInputEvent)
 					rInputEvent.keyId == eKI_XI_Start || 
 					rInputEvent.keyId == eKI_PS3_Start)
 			{
-				if(m_pMovieMgr->IsPlaying())
-				{
-					m_pMovieMgr->SkipVideo();
-					check = true;
-				}
 				if(!check && m_bTutorialVideo)
 					check = StopTutorialVideo();
 			}
@@ -910,11 +901,6 @@ void CFlashMenuObject::OnLoadingStart(ILevelInfo *pLevel)
 
 	StopVideo();	//stop background video
 	StopTutorialVideo();
-
-	if(m_pMovieMgr->IsPlaying())
-	{
-		SAFE_HARDWARE_MOUSE_FUNC(IncrementCounter());
-	}
 
 	if(gEnv->pSystem->IsEditor() || gEnv->pSystem->IsDedicated()) return;
 
@@ -1910,9 +1896,6 @@ void CFlashMenuObject::UpdateLevels(const char* gamemode)
 
 void CFlashMenuObject::HandleFSCommand(const char *szCommand,const char *szArgs)
 {
-  if(g_pGameCVars->g_debug_fscommand)
-    CryLog("HandleFSCommand : %s %s\n", szCommand, szArgs);
-
 	if(g_pGame->GetOptions()->HandleFSCommand(szCommand, szArgs))
 		return;
 
@@ -2935,21 +2918,11 @@ void CFlashMenuObject::InitStartMenu()
 
 	if(!m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->IsLoaded())
 	{
-#ifdef CRYSIS_BETA
-		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Load("Libs/UI/Menus_StartMenu_Beta.gfx");
-#else
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Load("Libs/UI/Menus_StartMenu.gfx");
-#endif
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->GetFlashPlayer()->SetFSCommandHandler(this);
 
 		// not working yet, gets reset on loadMovie within .swf/.gfx
 		// m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->GetFlashPlayer()->SetLoadMovieHandler(this);
-
-		if(g_pGameCVars->g_debugDirectMPMenu)
-		{
-			m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->SetVariable("MainWindow",2);
-			m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->SetVariable("SubWindow",2);
-		}
 
 		char strProductVersion[256];
 		gEnv->pSystem->GetProductVersion().ToString(strProductVersion);
@@ -2966,7 +2939,7 @@ void CFlashMenuObject::InitStartMenu()
 			m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Invoke("addLoadedModText","Falcon");
 		//}
 
-		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Invoke("Directx10", (gEnv->pRenderer->GetRenderType() == eRT_DX10)?true:false);
+		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Invoke("Directx10", true);
 		time_t today = time(NULL);
 		struct tm theTime;
 		theTime = *localtime(&today);
@@ -3069,7 +3042,7 @@ void CFlashMenuObject::InitIngameMenu()
 				m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Invoke("setActiveProfile", GetMappedProfileName(pProfile->GetName()));
 		}
 
-		m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Invoke("Directx10", (gEnv->pRenderer->GetRenderType() == eRT_DX10)?true:false);
+		m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Invoke("Directx10", true);
 		time_t today = time(NULL);
 		struct tm theTime;
 		theTime = *localtime(&today);
@@ -3227,9 +3200,6 @@ void CFlashMenuObject::OnPostUpdate(float fDeltaTime)
 		CloseWaitingScreen();
 		return;
 	}
-
-	if(m_pMovieMgr->Update(fDeltaTime))
-		return;
 
 	if(m_bTutorialVideo)
 	{
@@ -3459,64 +3429,6 @@ void CFlashMenuObject::OnPostUpdate(float fDeltaTime)
 	{
 		m_bClearScreen = false;
 	}
-
-	// TODO: just some quick code from Craig to get connection state displayed; please move to a suitable location later
-	/*IGameFramework * pGFW = g_pGame->GetIGameFramework();
-	if (INetChannel * pNC = pGFW->GetClientChannel())
-	{
-		bool show = true;
-		char status[512];
-		switch (pNC->GetChannelConnectionState())
-		{
-		case eCCS_StartingConnection:
-			strcpy(status, "Waiting for server");
-			break;
-		case eCCS_InContextInitiation:
-			{
-				const char * state = "<unknown state>";
-				switch (pNC->GetContextViewState())
-				{
-				case eCVS_Initial:
-					state = "Requesting Game Environment";
-					break;
-				case eCVS_Begin:
-					state = "Receiving Game Environment";
-					break;
-				case eCVS_EstablishContext:
-					state = "Loading Game Assets";
-					break;
-				case eCVS_ConfigureContext:
-					state = "Configuring Game Settings";
-					break;
-				case eCVS_SpawnEntities:
-					state = "Spawning Entities";
-					break;
-				case eCVS_PostSpawnEntities:
-					state = "Initializing Entities";
-					break;
-				case eCVS_InGame:
-					state = "In Game";
-					break;
-				}
-				sprintf(status, "%s [%d]", state, pNC->GetContextViewStateDebugCode());
-			}
-			break;
-		case eCCS_InGame:
-			show = false;
-			strcpy(status, "In Game");
-			break;
-		case eCCS_Disconnecting:
-			strcpy(status, "Disconnecting");
-			break;
-		default:
-			strcpy(status, "Unknown State");
-			break;
-		}
-
-		float white[] = {1,1,1,1};
-		if (show)
-			gEnv->pRenderer->Draw2dLabel( 10, 750, 1, white, false, "Connection State: %s", status );
-	}*/
 }
 
 //-----------------------------------------------------------------------------------------------------

@@ -419,9 +419,7 @@ void CVehicleMovementBase::Update(const float deltaTime)
     UpdateExhaust(deltaTime);
     UpdateSurfaceEffects(deltaTime);
     UpdateWind(deltaTime);
-  }  
-    
-  DebugDraw(deltaTime);
+  }
       
 	if (m_isEngineStarting)
 	{
@@ -1156,9 +1154,6 @@ ISound* CVehicleMovementBase::PlaySound(EVehicleMovementSound eSID, float pulse,
       m_soundStats.sounds[eSID] = m_pEntitySoundsProxy->PlaySound(soundName.c_str(), offset, Vec3Constants<float>::fVec3_OneY, nSoundFlags, eSoundSemantic_Vehicle);
     
     m_soundStats.lastPlayed[eSID] = currTime;
-
-    if (g_pGameCVars->v_debugSounds && !soundName.empty())
-      CryLog("[%s] playing sound %s", m_pVehicle->GetEntity()->GetName(), soundName.c_str());
   }
   
   ISound* pSound = GetSound(eSID);
@@ -1464,18 +1459,6 @@ void CVehicleMovementBase::UpdateExhaust(const float deltaTime)
         info.pParticleEmitter->SetSpawnParams(sp);
       }      
     }
-    
-    if (DebugParticles())
-    {
-      IRenderer* pRenderer = gEnv->pRenderer;
-      float color[4] = {1,1,1,1};
-      float x = 200.f;
-
-      pRenderer->Draw2dLabel(x,  80.0f, 1.5f, color, false, "Exhaust:");
-      pRenderer->Draw2dLabel(x,  105.0f, 1.5f, color, false, "countScale: %.2f", sp.fCountScale);
-      pRenderer->Draw2dLabel(x,  120.0f, 1.5f, color, false, "sizeScale: %.2f", sp.fSizeScale);
-			pRenderer->Draw2dLabel(x,  135.0f, 1.5f, color, false, "speedScale: %.2f", sp.fSpeedScale);
-    }
   }
 }
 
@@ -1524,14 +1507,6 @@ bool CVehicleMovementBase::GetStanceState(EStance stance, float lean, bool defau
 //------------------------------------------------------------------------
 bool CVehicleMovementBase::IsProfilingMovement()
 {
-  if (!m_pVehicle || !m_pVehicle->GetEntity())
-    return false;
-
-  static ICVar* pDebugVehicle = gEnv->pConsole->GetCVar("v_debugVehicle");
-  
-  if (g_pGameCVars->v_profileMovement && (m_pVehicle->IsPlayerDriving() || 0 == strcmpi(pDebugVehicle->GetString(), m_pVehicle->GetEntity()->GetName())))
-    return true;
-
   return false;
 }
 
@@ -1552,12 +1527,6 @@ SMFXResourceListPtr CVehicleMovementBase::GetEffectNode(int matId)
   { 
     return mfx->GetResources(effectId);
   }
-  else
-  {
-    if (DebugParticles())
-      CryLog("GetEffectString for %s -> %i failed", effCol.c_str(), matId);
-  }
-
   return 0;
 }
 
@@ -1645,9 +1614,6 @@ void CVehicleMovementBase::InitSurfaceEffects()
 
           emitter.pGroundEffect = pGroundEffect;
           m_paStats.envStats.emitters.push_back(emitter);
-
-          if (DebugParticles())
-            CryLog("<%s> Ground effect loaded with height %f", m_pVehicle->GetEntity()->GetName(), layer.alignGroundHeight);
         }
       }      
       else if (layer.alignToWater)
@@ -1663,13 +1629,7 @@ void CVehicleMovementBase::InitSurfaceEffects()
           
         emitter.slot = -1;
         emitter.quatT = QuatT(tm);
-        m_paStats.envStats.emitters.push_back(emitter);
-          
-        if (DebugParticles())
-        {
-          const Vec3 loc = tm.GetTranslation();
-          CryLog("<%s> water-aligned emitter %i, local pos: %.1f %.1f %.1f", m_pVehicle->GetEntity()->GetName(), i, loc.x, loc.y, loc.z);          
-        }              
+        m_paStats.envStats.emitters.push_back(emitter);         
       }
     }
   }
@@ -1862,19 +1822,8 @@ Vec3 CVehicleMovementBase::GetWindPos(Vec3& posRad, Vec3& posLin)
   {
     posRad = center + 1.5f*(intersect - center);
     posLin = posRad + 2.f*(intersect - center);
-
-    if (IsProfilingMovement())
-    {
-      IPersistantDebug* pDebug = g_pGame->GetIGameFramework()->GetIPersistantDebug();
-      pDebug->Begin("GetWindPos", false);
-      pDebug->AddSphere(m_pEntity->GetWorldTM()*posRad, 0.25f, ColorF(0,1,0,0.8f), 0.1f);
-      pDebug->AddSphere(m_pEntity->GetWorldTM()*posLin, 0.25f, ColorF(0.5,1,0,0.8f), 0.1f);
-    }
-
     posRad = m_pEntity->GetWorldTM() * posRad;
     posLin = m_pEntity->GetWorldTM() * posLin;
-
-    //return m_pEntity->GetWorldTM() * posRad;
   } 
   
   return m_pEntity->GetWorldTM() * center;
@@ -1969,122 +1918,6 @@ void CVehicleMovementBase::SetSoundParam(EVehicleMovementSound eSID, const char*
 void CVehicleMovementBase::SetSoundParam(ISound* pSound, const char* param, float value)
 {
   pSound->SetParam(param, value, false);  
-}
-
-//------------------------------------------------------------------------
-void CVehicleMovementBase::DebugDraw(const float deltaTime)
-{
-  static float color[] = {1,1,1,1}; 
-  static float red[] = {1,0,0,1};    
-  static ICVar* pDebugVehicle = gEnv->pConsole->GetCVar("v_debugVehicle");
-  float val = 0.f;
-  float size = 1.4f;
-  int y = 75;
-  int step = 20;
-
-  while (g_pGameCVars->v_debugSounds)
-  {
-    if (!m_pVehicle->IsPlayerPassenger() && 0!=strcmpi(m_pVehicle->GetEntity()->GetName(), pDebugVehicle->GetString()))
-      break;
-
-    gEnv->pRenderer->Draw2dLabel(500,y,1.5f,color,false,"vehicle rpm: %.2f", m_rpmScale);
-
-    if (ISound* pSound = GetSound(eSID_Run))
-    { 
-      if (pSound->GetParam("rpm_scale", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":run rpm_scale: %.2f", val);
-
-      if (pSound->GetParam("load", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":run load: %.2f", val);
-
-      if (pSound->GetParam("speed", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":run speed: %.2f", val);
-
-      if (pSound->GetParam("acceleration", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":run acceleration: %.1f", val);
-
-      if (pSound->GetParam("surface", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":run surface: %.2f", val);
-
-      if (pSound->GetParam("scratch", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":run scratch: %.0f", val);
-
-      if (pSound->GetParam("slip", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":run slip: %.1f", val);
-
-      if (pSound->GetParam("in_out", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":run in_out: %.1f", val);
-
-      if (pSound->GetParam("damage", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":run damage: %.2f", val);
-
-      if (pSound->GetParam("swim", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":run swim: %.2f", val);
-    }
-
-    if (ISound* pSound = GetSound(eSID_Ambience))
-    { 
-      gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,"-----------------------------");
-
-      if (pSound->GetParam("rpm_scale", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":ambience rpm_scale: %.2f", val);
-
-      if (pSound->GetParam("speed", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":ambience speed: %.2f", val);
-
-      if (pSound->GetParam("thirdperson", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":ambience thirdperson: %.1f", val);
-    }
-
-    if (ISound* pSound = GetSound(eSID_Slip))
-    { 
-      gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,"-----------------------------");
-
-      if (pSound->GetParam("slip_speed", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":slip slip_speed: %.2f", val);
-
-      if (pSound->GetParam("surface", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":slip surface: %.2f", val);
-    }
-
-    if (ISound* pSound = GetSound(eSID_Bump))
-    { 
-      gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,"-----------------------------");
-
-      if (pSound->GetParam("intensity", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":bump intensity: %.2f", val);
-    }
-
-    if (ISound* pSound = GetSound(eSID_Splash))
-    { 
-      gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,"-----------------------------");
-
-      if (pSound->GetParam("intensity", &val, false) != -1)
-        gEnv->pRenderer->Draw2dLabel(500,y+=step,size,color,false,":splash intensity: %.2f", val);
-    }
-    
-    break;
-  }
-
-  while (g_pGameCVars->v_sprintSpeed != 0.f)
-  { 
-    if (!m_pVehicle->IsPlayerPassenger() && 0!=strcmpi(m_pVehicle->GetEntity()->GetName(), pDebugVehicle->GetString()))
-      break;
-
-    float speed = m_pVehicle->GetStatus().speed;
-    float* col = color;
-            
-    if (speed < 0.2f)
-      m_sprintTime = 0.f;
-    else if (speed*3.6f < g_pGameCVars->v_sprintSpeed)    
-      m_sprintTime += deltaTime;      
-    else
-      col = red;
-    
-    gEnv->pRenderer->Draw2dLabel(400, 300, 1.5f, color, false, "t: %.2f", m_sprintTime);
-
-    break;
-  }  
 }
 
 //------------------------------------------------------------------------

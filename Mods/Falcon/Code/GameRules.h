@@ -42,45 +42,6 @@ class CMPTutorial;
 class CShotValidator;
 
 
-//-----------------------------------------------------------------------------------------------
-//
-class DbgPlotter
-{
-public:
-	enum EDbgPlotTypes
-	{
-		eT_Myself = 0,
-		eT_SpawnPoint,
-		eT_Friend,
-		eT_Enemy,
-		eT_Type1,
-	};
-	DbgPlotter():m_Counter(0),m_pImgBuffer(NULL),m_imgSizeX(512),m_imgSizeY(512){}
-	void	Reset();
-	void	WriteImg(EntityId ownerId);
-
-	void	PlotSpawnPoints();
-	void	PlotAllPlayers(const EntityId skipId);
-	void  PlotTeam( const EntityId entID, bool enemy );
-	void	PlotBox( float x, float y, float halfSz, EDbgPlotTypes entType );
-	void  PlotCircle(float x, float y, float r, EDbgPlotTypes entType);
-
-	void	Plot( float x, float y, EDbgPlotTypes entType, bool bigPixel=true );
-	void	Plot( const EntityId entID, EDbgPlotTypes entType );
-
-protected:
-	bool	m_isEnabled;
-	int	m_Counter;
-	int	m_imgSizeX;
-	int m_imgSizeY;
-	byte* m_pImgBuffer;
-	float	m_world2ImgScaleX;
-	float	m_world2ImgScaleY;
-	float	m_minX, m_minY, m_maxX, m_maxY;
-};
-extern DbgPlotter	g_dbgPlotter;
-//-----------------------------------------------------------------------------------------------
-
 #define GAMERULES_INVOKE_ON_TEAM(team, rmi, params)	\
 { \
 	TPlayerTeamIdMap::const_iterator _team=m_playerteams.find(team); \
@@ -411,8 +372,6 @@ public:
 	virtual void SetTeamDefaultSpawnGroup(int teamId, EntityId spawnGroupId);
 	virtual EntityId GetTeamDefaultSpawnGroup(int teamId);
 	virtual void CheckSpawnGroupValidity(EntityId spawnGroupId);
-
-	void DebugPlotSpawn(EntityId spawnId);
 
 	//------------------------------------------------------------------------
 	// spectator
@@ -1028,11 +987,6 @@ public:
 		int								flags;
 		IEntityClass			*pClass;
 		primitives::box		obb;
-
-
-#ifdef _DEBUG
-		string						name;
-#endif
 	};
 
 	typedef struct SEntityRespawn
@@ -1060,11 +1014,6 @@ public:
 	bool IsSpawnUsedTouch( EntityId spawnId );
 
 protected:
-	static void CmdDebugSpawns(IConsoleCmdArgs *pArgs);
-	static void CmdDebugMinimap(IConsoleCmdArgs *pArgs);
-	static void CmdDebugTeams(IConsoleCmdArgs *pArgs);
-	static void CmdDebugObjectives(IConsoleCmdArgs *pArgs);
-
 	void CreateScriptHitInfo(SmartScriptTable &scriptHitInfo, const HitInfo &hitInfo);
 	void CreateScriptExplosionInfo(SmartScriptTable &scriptExplosionInfo, const ExplosionInfo &explosionInfo);
 	void UpdateAffectedEntitiesSet(TExplosionAffectedEntities &affectedEnts, const pe_explosion *pExplosion);

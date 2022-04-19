@@ -359,8 +359,6 @@ private:
   ILINE float GetPitch() const;
   ILINE float GetBurstTime() const;
 
-  void    DrawDebug();
-
 	SGunTurretParams m_turretparams;
   SSearchParams m_searchparams;
   SFireParams m_fireparams;

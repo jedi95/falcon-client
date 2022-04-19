@@ -22,7 +22,6 @@ History:
 #include <IPhysics.h>
 #include <ICryAnimation.h>
 #include <ISerialize.h>
-#include <IRenderAuxGeom.h>
 #include <IMaterialEffects.h>
 #include <IEffectSystem.h>
 
@@ -1184,12 +1183,6 @@ void CTrooper::ProcessAnimation(ICharacterInstance *pCharacter,float frameTime)
 			}
 			Interpolate(m_oldVelocity,m_stats.velocity,2.0f + max(dot,0.f),frameTime);
 			goalSteelModelOffset = m_baseMtx.GetInverted() * (m_oldVelocity - m_stats.velocity  ) * m_steerInertia;
-			/* debug
-			Vec3 pos(GetEntity()->GetWorldPos());
-			pos.z+=1;
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(pos, ColorB(128,255,128,255), pos + desiredMovement, ColorB(128,255,128,255), 1.0f);
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(pos, ColorB(255,128,128,255), pos + m_stats.velocity, ColorB(255,128,128,255), 1.0f);
-			*/
 			interpolateSpeed = 2.0f+max(dot,0.f);
 		}
 		else if(m_bExactPositioning)

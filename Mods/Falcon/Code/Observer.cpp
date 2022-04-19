@@ -21,4 +21,3 @@
 #include <IPhysics.h>
 #include <ICryAnimation.h>
 #include <ISerialize.h>
-#include <IRenderAuxGeom.h>

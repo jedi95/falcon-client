@@ -149,8 +149,6 @@ protected:
   
   virtual bool DoGearSound();
   virtual float GetMinRPMSoundRatio() { return 0.f; }
-    
-  virtual void DebugDrawMovement(const float deltaTime);
 
   float GetMaxSteer(float speedRel);
   float GetSteerSpeed(float speedRel);
@@ -221,7 +219,6 @@ protected:
   int   m_wheelContactsLeft;
   int   m_wheelContactsRight;
   int	m_passengerCount;
-  int   m_lastDebugFrame;
 
 	//------------------------------------------------------------------------------
 	// AI related

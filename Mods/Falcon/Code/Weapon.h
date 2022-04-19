@@ -52,9 +52,6 @@ protected:
 	struct SListenerInfo
 	{
 		IWeaponEventListener	*pListener;
-#ifdef _DEBUG
-		char who[64];
-#endif
 	};
 
 	typedef std::vector<SListenerInfo>					TEventListenerVector;

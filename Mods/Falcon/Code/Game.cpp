@@ -112,7 +112,6 @@ CGame::CGame()
 	m_bReload = false;
 	m_inDevMode = false;
 
-	m_pDebugAM = 0;
 	m_pDefaultAM = 0;
 	m_pMultiplayerAM = 0;
 
@@ -419,12 +418,6 @@ int CGame::Update(bool haveFocus, unsigned int updateFlags)
 	}
 
 	m_pFramework->PostUpdate( true, updateFlags );
-
-	if(m_inDevMode != gEnv->pSystem->IsDevMode())
-	{
-		m_inDevMode = gEnv->pSystem->IsDevMode();
-	}
-	m_pFramework->GetIActionMapManager()->EnableActionMap("debug", m_inDevMode);
 
 	CheckReloadLevel();
 
@@ -762,14 +755,10 @@ void CGame::LoadActionMaps(const char* filename)
 		pActionMapMan->Clear();
 		pActionMapMan->LoadFromXML(rootNode);
 		m_pDefaultAM = pActionMapMan->GetActionMap("default");
-		m_pDebugAM = pActionMapMan->GetActionMap("debug");
 		m_pMultiplayerAM = pActionMapMan->GetActionMap("multiplayer");
 
 		// enable defaults
 		pActionMapMan->EnableActionMap("default",true);
-
-		// enable debug
-		pActionMapMan->EnableActionMap("debug",gEnv->pSystem->IsDevMode());
 
 		// enable player action map
 		pActionMapMan->EnableActionMap("player",true);
@@ -782,7 +771,6 @@ void CGame::LoadActionMaps(const char* filename)
 
 void CGame::ReleaseActionMaps()
 {
-	SAFE_RELEASE(m_pDebugAM);
 	SAFE_RELEASE(m_pDefaultAM);
 	SAFE_RELEASE(m_pMultiplayerAM);
 	SAFE_DELETE(m_pGameActions);
@@ -900,16 +888,6 @@ void CGame::GetMemoryStatistics(ICrySizer * s)
 	s->Add(*m_pScriptBindHUD);
 
 	SAFE_MENU_FUNC(GetMemoryStatistics(s));
-
-	/* handled by actionmapmanager
-	m_pDefaultAM->GetMemoryStatistics(s);
-	m_pDefaultAM->GetMemoryStatistics(s);
-	m_pDebugAM->GetMemoryStatistics(s);
-	m_pMultiplayerAM->GetMemoryStatistics(s);
-	m_pNoMoveAF->GetMemoryStatistics(s);
-	m_pNoMouseAF->GetMemoryStatistics(s);
-	m_pInVehicleSuitMenu->GetMemoryStatistics(s);
-	*/
 
 	s->Add(*m_pGameActions);
 

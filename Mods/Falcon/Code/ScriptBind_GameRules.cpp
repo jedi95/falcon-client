@@ -701,22 +701,13 @@ int CScriptBind_GameRules::GetSpawnLocation(IFunctionHandler *pH, ScriptHandle p
 
 		minDistanceToDeath = g_pGameCVars->g_spawndeathdist;
 
-		g_dbgPlotter.Reset();
-		g_dbgPlotter.PlotSpawnPoints();
-		g_dbgPlotter.PlotAllPlayers((EntityId)playerId.n);
-		if(!deathPos.IsZero(1.f))
-			g_dbgPlotter.PlotCircle(deathPos.x, deathPos.y, minDistanceToDeath, DbgPlotter::eT_Type1);
-
 		EntityId id=pGameRules->GetSpawnLocation((EntityId)playerId.n, ignoreTeam, includeNeutral, groupId, minDistanceToDeath, deathPos, &zOffset, skipId);
 
 		if (id)
 		{
-			g_dbgPlotter.Plot(id, DbgPlotter::eT_Myself);
 			const IEntity *pEntity( gEnv->pEntitySystem->GetEntity(id));
 			const Vec3 pos(pEntity->GetWorldPos());
-			g_dbgPlotter.PlotCircle(pos.x, pos.y, minDistanceToDeath, DbgPlotter::eT_Myself);
 		}
-		g_dbgPlotter.WriteImg( (EntityId)playerId.n );
 
 		if (id)
 			return pH->EndFunction(ScriptHandle(id), zOffset);
@@ -739,15 +730,6 @@ int CScriptBind_GameRules::GetSpawnLocationTeam(IFunctionHandler *pH, ScriptHand
 	if (pH->GetParamCount()>1 && pH->GetParamType(2)==svtObject)
 		pH->GetParam(2, deathPos);
 
-	g_dbgPlotter.Reset();
-	g_dbgPlotter.PlotSpawnPoints();
-	g_dbgPlotter.PlotTeam((EntityId)playerId.n, true);
-	g_dbgPlotter.PlotTeam((EntityId)playerId.n, false);
-	if(!deathPos.IsZero(1.f))
-	{
-		g_dbgPlotter.PlotCircle(deathPos.x, deathPos.y, g_pGameCVars->g_spawndeathdist, DbgPlotter::eT_Type1);
-	}
-
 	EntityId id=pGameRules->GetSpawnLocationTeam((EntityId)playerId.n, deathPos);
 
 	if (!id)
@@ -755,13 +737,9 @@ int CScriptBind_GameRules::GetSpawnLocationTeam(IFunctionHandler *pH, ScriptHand
 
 	if (id)
 	{
-		g_dbgPlotter.Plot(id, DbgPlotter::eT_Myself);
 		const IEntity *pEntity( gEnv->pEntitySystem->GetEntity(id));
 		const Vec3 pos(pEntity->GetWorldPos());
-		g_dbgPlotter.PlotCircle(pos.x, pos.y, g_pGameCVars->g_spawnenemydist, DbgPlotter::eT_Myself);
 	}
-
-	g_dbgPlotter.WriteImg( (EntityId)playerId.n );
 
 	if (id)
 	{
@@ -2312,13 +2290,13 @@ int CScriptBind_GameRules::ShatterEntity(IFunctionHandler *pH, ScriptHandle enti
 //------------------------------------------------------------------------
 int CScriptBind_GameRules::DebugCollisionDamage(IFunctionHandler *pH)
 {
-  return pH->EndFunction(g_pGameCVars->g_debugCollisionDamage);
+  return pH->EndFunction(0);
 }
 
 //------------------------------------------------------------------------
 int CScriptBind_GameRules::DebugHits(IFunctionHandler *pH)
 {
-	return pH->EndFunction(g_pGameCVars->g_debugHits);
+	return pH->EndFunction(0);
 }
 
 //------------------------------------------------------------------------

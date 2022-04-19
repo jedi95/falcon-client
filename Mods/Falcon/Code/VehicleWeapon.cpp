@@ -228,21 +228,6 @@ bool CVehicleWeapon::FilterView(SViewParams& viewParams)
     viewParams.position = GetSlotHelperPos(eIGS_FirstPerson, m_camerastats.helper, true);
     viewParams.rotation = Quat(GetSlotHelperRotation(eIGS_FirstPerson, m_camerastats.helper, true));    
     viewParams.blend = false;
-    
-    if (g_pGameCVars->v_debugMountedWeapon)
-    { 
-      Vec3 local = GetSlotHelperPos(eIGS_FirstPerson, m_camerastats.helper, false, true);
-      Vec3 entity = GetSlotHelperPos(eIGS_FirstPerson, m_camerastats.helper, false, false);
-                 
-      float color[] = {1,1,1,1};      
-      gEnv->pRenderer->Draw2dLabel(50,400,1.3f,color,false,"cam_pos local(%.3f %.3f %.3f), entity(%.3f %.3f %.3f)", local.x, local.y, local.z, entity.x, entity.y, entity.z);
-      
-      Ang3 angLocal(GetSlotHelperRotation(eIGS_FirstPerson, m_camerastats.helper, false, true));
-      Ang3 angEntity(GetSlotHelperRotation(eIGS_FirstPerson, m_camerastats.helper, false, true));      
-
-      gEnv->pRenderer->Draw2dLabel(50,420,1.3f,color,false,"cam_rot local(%.3f %.3f %.3f), entity(%.3f %.3f %.3f)", angLocal.x, angLocal.y, angLocal.z, angEntity.x, angEntity.y, angEntity.z);
-    }
-        
     return true;
   }
 

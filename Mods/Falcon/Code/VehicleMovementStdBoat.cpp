@@ -475,9 +475,6 @@ void CVehicleMovementStdBoat::UpdateSurfaceEffects(const float deltaTime)
 
       if (effect && (pEff = gEnv->p3DEngine->FindParticleEffect(effect)))
       {           
-        if (DebugParticles())              
-          CryLog("%s changes water sfx to %s (slot %i)", pEntity->GetName(), effect, emitterIt->slot);
-
         if (info.pParticleEmitter)
         {
           info.pParticleEmitter->Activate(false);
@@ -516,21 +513,6 @@ void CVehicleMovementStdBoat::UpdateSurfaceEffects(const float deltaTime)
         pEntity->SetSlotLocalTM(emitterIt->slot, localTM);           
       }
     }
-
-    if (DebugParticles() && m_pVehicle->IsPlayerDriving())
-    {          
-      float color[] = {1,1,1,1};
-      ColorB red(255,0,0,255);
-      IRenderAuxGeom* pAuxGeom = gEnv->pRenderer->GetIRenderAuxGeom();
-      
-      const char* effect = info.pParticleEmitter ? info.pParticleEmitter->GetName() : "";
-      const Matrix34& slotTM = m_pEntity->GetSlotWorldTM(emitterIt->slot);
-      Vec3 ppos = slotTM.GetTranslation();
-      
-      pAuxGeom->DrawSphere(ppos, 0.2f, red);
-      pAuxGeom->DrawCone(ppos, slotTM.GetColumn1(), 0.1f, 0.5f, red);
-      gEnv->pRenderer->Draw2dLabel(50, 400+10*emitterIt->slot, 1.2f, color, false, "<%s> water fx: slot %i [%s], speed %.1f, sizeScale %.2f, countScale %.2f (pos %.0f,%0.f,%0.f)", pEntity->GetName(), emitterIt->slot, effect, speed, sizeScale, countScale, ppos.x, ppos.y, ppos.z);        
-    }    
   }
 
   // generate water splashes

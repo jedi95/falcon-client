@@ -24,7 +24,6 @@ History:
 
 
 #include "IRenderer.h"
-#include "IRenderAuxGeom.h"	
 
 
 //std::vector<Vec3> g_points;

@@ -280,10 +280,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->RegisterInt("cl_righthand", 1, 0, "Select right-handed weapon!");
 	pConsole->RegisterInt("cl_screeneffects", 1, 0, "Enable player screen effects (depth-of-field, motion blur, ...).");
 
-	pConsole->Register("cl_debugSwimming", &cl_debugSwimming, 0, VF_CHEAT, "enable swimming debugging");
-	pConsole->Register("cl_g15lcdEnable", &cl_g15lcdEnable, 1, VF_DUMPTODISK, "enable support for Logitech G15 LCD");
-	pConsole->Register("cl_g15lcdTick", &cl_g15lcdTick, 250, VF_DUMPTODISK, "milliseconds between lcd updates");
-
 	ca_GameControlledStrafingPtr = pConsole->GetCVar("ca_GameControlledStrafing");
 	pConsole->Register("pl_curvingSlowdownSpeedScale", &pl_curvingSlowdownSpeedScale, 0.5f, VF_CHEAT, "Player only slowdown speedscale when curving/leaning extremely.");
 	pConsole->Register("ac_enableProceduralLeaning", &ac_enableProceduralLeaning, 1.0f, VF_CHEAT, "Enable procedural leaning (disabled asset leaning and curving slowdown).");
@@ -317,7 +313,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("hr_fovTime", &hr_fovTime, .05f, VF_CHEAT, "fov time");
 
 	// frozen shake vars (for tweaking only)
-	pConsole->Register("cl_debugFreezeShake", &cl_debugFreezeShake, 0, VF_CHEAT|VF_DUMPTODISK, "Toggle freeze shake debug draw");  
 	pConsole->Register("cl_frozenSteps", &cl_frozenSteps, 3, VF_CHEAT, "Number of steps for unfreeze shaking");  
 	pConsole->Register("cl_frozenSensMin", &cl_frozenSensMin, 1.0f, VF_CHEAT, "Frozen sensitivity min"); // was 0.2
 	pConsole->Register("cl_frozenSensMax", &cl_frozenSensMax, 1.0f, VF_CHEAT, "Frozen sensitivity max"); // was 0.4
@@ -406,7 +401,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_ragdollUnseenTime", &g_ragdollUnseenTime, 2.0f, 0, "time in seconds that the player has to look away from the ragdoll before it disappears");
 	pConsole->Register("g_ragdollPollTime", &g_ragdollPollTime, 0.5f, 0, "time in seconds where 'unseen' polling is done");
 	pConsole->Register("g_ragdollDistance", &g_ragdollDistance, 10.0f, 0, "distance in meters that the player has to be away from the ragdoll before it can disappear");
-	pConsole->Register("g_debugaimlook", &g_debugaimlook, 0, VF_CHEAT, "Debug aim/look direction");
 	pConsole->Register("g_enableIdleCheck", &g_enableIdleCheck, 1, 0);
 
 	// Crysis supported gamemode CVars
@@ -423,7 +417,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_spawnteamdist", &g_spawnteamdist, 20, 0, "TIA; tend to choose spawnpoints with max teammates withing the dist.");
 	pConsole->Register("g_spawnenemydist", &g_spawnenemydist, 15, 0, "TIA; reject spawn-points closer than this to enemy.");
 	pConsole->Register("g_spawndeathdist", &g_spawndeathdist, 20, 0, "TIA; reject spawn-points closer than this to death position.");
-	pConsole->Register("g_spawndebug", &g_spawnDebug, 0, VF_CHEAT, "enables debugging spawn for TIA");
 
   pConsole->Register("g_friendlyfireratio", &g_friendlyfireratio, 0.5f, 0, "Sets friendly damage ratio.");
 	pConsole->Register("g_friendlyVehicleCollisionRatio", &g_friendlyVehicleCollisionRatio, 0.5f, 0, "Sets ratio of damage applied by friendly vehicles");
@@ -438,9 +431,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_teamlock", &g_teamlock, 2, 0, "Number of players one team needs to have over the other, for the game to deny joining it. 0 disables.");
 	pConsole->Register("g_useHitSoundFeedback", &g_useHitSoundFeedback, 1, 0, "Switches hit readability feedback sounds on/off.");
 
-	pConsole->Register("g_debugNetPlayerInput", &g_debugNetPlayerInput, 0, VF_CHEAT, "Show some debug for player input");
-	pConsole->Register("g_debug_fscommand", &g_debug_fscommand, 0, 0, "Print incoming fscommands to console");
-	pConsole->Register("g_debugDirectMPMenu", &g_debugDirectMPMenu, 0, 0, "Jump directly to MP menu on application start.");
 	pConsole->Register("g_skipIntro", &g_skipIntro, 0, VF_CHEAT, "Skip all the intro videos.");
 	pConsole->Register("g_resetActionmapOnStart", &g_resetActionmapOnStart, 0, 0, "Resets Keyboard mapping on application start.");
 	pConsole->Register("g_useProfile", &g_useProfile, 1, 0, "Don't save anything to or load anything from profile.");
@@ -453,8 +443,6 @@ void SCVars::InitCVars(IConsole *pConsole)
   pConsole->Register("g_detachCamera", &g_detachCamera, 0, VF_CHEAT, "Detach camera");
   pConsole->Register("g_suicideDelay", &g_suicideDelay, 2, VF_CHEAT, "delay in sec before executing kill command");
 
-  pConsole->Register("g_debugCollisionDamage", &g_debugCollisionDamage, 0, VF_DUMPTODISK, "Log collision damage");
-	pConsole->Register("g_debugHits", &g_debugHits, 0, VF_DUMPTODISK, "Log hits");
   pConsole->Register("g_trooperProneMinDistance", &g_trooperProneMinDistance, 10, VF_DUMPTODISK, "Distance to move for trooper to switch to prone stance");
 //	pConsole->Register("g_trooperMaxPhysicsAnimBlend", &g_trooperMaxPhysicAnimBlend, 0, VF_DUMPTODISK, "Max value for trooper tentacle dynamic physics/anim blending");
 //	pConsole->Register("g_trooperPhysicsAnimBlendSpeed", &g_trooperPhysicAnimBlendSpeed, 100.f, VF_DUMPTODISK, "Trooper tentacle dynamic physics/anim blending speed");
@@ -468,14 +456,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 
 	pConsole->Register("g_melee_damage", &g_meleeDamage, 27.0f, 0, "damage for a single melee hit");
 	pConsole->Register("g_melee_strength_damage", &g_meleeStrenghtDamage, 100.0f, 0, "damage for a single strength melee hit");
-
-	pConsole->Register("pl_debug_ladders", &pl_debug_ladders, 0, VF_CHEAT);
-	pConsole->Register("pl_debug_movement", &pl_debug_movement, 0, VF_CHEAT);
-	pConsole->Register("pl_debug_jumping", &pl_debug_jumping, 0, VF_CHEAT);
-	pl_debug_filter = pConsole->RegisterString("pl_debug_filter","",VF_CHEAT);
-
-	pConsole->Register("aln_debug_movement", &aln_debug_movement, 0, VF_CHEAT);
-	aln_debug_filter = pConsole->RegisterString("aln_debug_filter","",VF_CHEAT);
 
 	// emp grenade
 	pConsole->Register("g_emp_style", &g_empStyle, 0, VF_CHEAT, "");
@@ -513,7 +493,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("hud_showKillMessages", &hud_showKillMessages, 0, 0, "Show team messages for player.");
 	pConsole->Register("hud_panoramicHeight", &hud_panoramicHeight, 10,0,"Set screen border for 'cinematic view' in percent.", CHUD::OnSubtitlePanoramicHeightCVarChanged);
 	pConsole->Register("hud_subtitles", &hud_subtitles, 0,0,"Subtitle mode. 0==Off, 1=All, 2=CutscenesOnly", CHUD::OnSubtitleCVarChanged);
-	pConsole->Register("hud_subtitlesDebug", &hud_subtitlesDebug, 0,0,"Debug subtitles");
 	pConsole->Register("hud_subtitlesRenderMode", &hud_subtitlesRenderMode, 0,0,"Subtitle RenderMode. 0==Flash, 1=3DEngine");
 	pConsole->Register("hud_subtitlesFontSize", &hud_subtitlesFontSize, 16, 0, "FontSize for Subtitles.");
 	pConsole->Register("hud_subtitlesHeight", &hud_subtitlesHeight, 10, 0,"Height of Subtitles in Percent. Normally same as hud_PanoramicHeight");
@@ -525,7 +504,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("hud_radarJammingEffectScale", &hud_radarJammingEffectScale, 0.75f, 0, "Scales the intensity of the radar jamming effect.");
 	pConsole->Register("hud_radarJammingThreshold", &hud_radarJammingThreshold, 0.99f, 0, "Threshold to disable the radar (independent from effect).");
 	pConsole->Register("hud_startPaused", &hud_startPaused, 1, 0, "The game starts paused, waiting for user input.");
-	pConsole->Register("hud_faderDebug", &hud_faderDebug, 0, 0, "Show Debug Information for FullScreen Faders.");
 	pConsole->Register("hud_nightVisionConsumption", &hud_nightVisionConsumption, 0.5f, VF_CHEAT, "Scales the energy consumption of the night vision.");
 	pConsole->Register("hud_nightVisionRecharge", &hud_nightVisionRecharge, 2.0f, VF_CHEAT, "Scales the energy recharge of the night vision.");
 	pConsole->Register("hud_showBigVehicleReload", &hud_showBigVehicleReload, 0, 0, "Enables an additional reload bar around the crosshair in big vehicles.");
@@ -572,8 +550,6 @@ void SCVars::InitCVars(IConsole *pConsole)
   pConsole->Register("v_sprintSpeed", &v_sprintSpeed, 0.f, 0, "Set speed for acceleration measuring");
   pConsole->Register("v_rockBoats", &v_rockBoats, 1, 0, "Enable/disable boats idle rocking");  
   pConsole->Register("v_dumpFriction", &v_dumpFriction, 0, 0, "Dump vehicle friction status");
-  pConsole->Register("v_debugSounds", &v_debugSounds, 0, 0, "Enable/disable vehicle sound debug drawing");
-  pConsole->Register("v_debugMountedWeapon", &v_debugMountedWeapon, 0, 0, "Enable/disable vehicle mounted weapon camera debug draw");
 	pConsole->Register("v_newBrakingFriction", &v_newBrakingFriction, 1, VF_CHEAT, "Change rear wheel friction under handbraking (true/false)");
 	pConsole->Register("v_newBoost", &v_newBoost, 0, VF_CHEAT, "Apply new boost scheme (true/false)");
 
@@ -601,7 +577,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("pl_fallDamage_SpeedSafe", &pl_fallDamage_Normal_SpeedSafe, 8.0f, VF_CHEAT, "Safe fall speed (in all modes, including strength jump on flat ground).");
 	pConsole->Register("pl_fallDamage_SpeedFatal", &pl_fallDamage_Normal_SpeedFatal, 13.7f, VF_CHEAT, "Fatal fall speed in armor mode (13.5 m/s after falling freely for ca 20m).");
 	pConsole->Register("pl_fallDamage_SpeedBias", &pl_fallDamage_SpeedBias, 1.5f, VF_CHEAT, "Damage bias for medium fall speed: =1 linear, <1 more damage, >1 less damage.");
-	pConsole->Register("pl_debugFallDamage", &pl_debugFallDamage, 0, VF_CHEAT, "Enables console output of fall damage information.");
 	
 
 	pConsole->Register("pl_zeroGSpeedMultNormal", &pl_zeroGSpeedMultNormal, 1.2f, VF_CHEAT, "Modify movement speed in zeroG, in normal mode.");
@@ -626,9 +601,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("pl_zeroGAimResponsiveness", &pl_zeroGAimResponsiveness, 8.0f, VF_CHEAT, "ZeroG aim responsiveness vs. inertia (default is 8.0).");
 
 	// weapon system
-	i_debuggun_1 = pConsole->RegisterString("i_debuggun_1", "ai_statsTarget", VF_DUMPTODISK, "Command to execute on primary DebugGun fire");
-	i_debuggun_2 = pConsole->RegisterString("i_debuggun_2", "ag_debug", VF_DUMPTODISK, "Command to execute on secondary DebugGun fire");
-
 	pConsole->Register("tracer_min_distance", &tracer_min_distance, 4.0f, 0, "Distance at which to start scaling/lengthening tracers.");
 	pConsole->Register("tracer_max_distance", &tracer_max_distance, 50.0f, 0, "Distance at which to stop scaling/lengthening tracers.");
 	pConsole->Register("tracer_min_scale", &tracer_min_scale, 0.5f, 0, "Scale at min distance.");
@@ -636,23 +608,8 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("tracer_max_count", &tracer_max_count, 32, 0, "Max number of active tracers.");
 	pConsole->Register("tracer_player_radiusSqr", &tracer_player_radiusSqr, 400.0f, 0, "Sqr Distance around player at which to start decelerate/acelerate tracer speed.");
 
-	pConsole->Register("i_debug_projectiles", &i_debug_projectiles, 0, VF_CHEAT, "Displays info about projectile status, where available.");
 	pConsole->Register("i_auto_turret_target", &i_auto_turret_target, 1, VF_CHEAT, "Enables/Disables auto turrets aquiring targets.");
 	pConsole->Register("i_auto_turret_target_tacshells", &i_auto_turret_target_tacshells, 0, 0, "Enables/Disables auto turrets aquiring TAC shells as targets");
-
-	pConsole->Register("i_debug_zoom_mods", &i_debug_zoom_mods, 0, VF_CHEAT, "Use zoom mode spread/recoil mods");
-  pConsole->Register("i_debug_sounds", &i_debug_sounds, 0, VF_CHEAT, "Enable item sound debugging");
-  pConsole->Register("i_debug_turrets", &i_debug_turrets, 0, VF_CHEAT, 
-    "Enable GunTurret debugging.\n"
-    "Values:\n"
-    "0:  off"
-    "1:  basics\n"
-    "2:  prediction\n"
-    "3:  sweeping\n"
-    "4:  searching\n"      
-    "5:  deviation\n"    
-    );
-	pConsole->Register("i_debug_mp_flowgraph", &i_debug_mp_flowgraph, 0, VF_CHEAT, "Displays info on the MP flowgraph node");
   
 	pConsole->Register("h_turnSpeed", &h_turnSpeed, 1.3f, 0);
 
@@ -666,8 +623,6 @@ void SCVars::InitCVars(IConsole *pConsole)
   pConsole->Register("g_quickGame_prefer_mycountry",&g_quickGame_prefer_my_country,0,VF_DUMPTODISK,"QuickGame option");
   pConsole->Register("g_quickGame_ping1_level",&g_quickGame_ping1_level,80,VF_DUMPTODISK,"QuickGame option");
   pConsole->Register("g_quickGame_ping2_level",&g_quickGame_ping2_level,170,VF_DUMPTODISK,"QuickGame option");
-
-	pConsole->Register("g_quickGame_debug",&g_quickGame_debug,0,VF_CHEAT,"QuickGame option");
 	
 	pConsole->Register("g_displayIgnoreList",&g_displayIgnoreList,1,VF_DUMPTODISK,"Display ignore list in chat tab.");
   pConsole->Register("g_buddyMessagesIngame",&g_buddyMessagesIngame,1,VF_DUMPTODISK,"Output incoming buddy messages in chat while playing game.");
@@ -676,7 +631,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 
 	// battledust
 	pConsole->Register("g_battleDust_enable", &g_battleDust_enable, 1, 0, "Enable/Disable battledust");
-	pConsole->Register("g_battleDust_debug", &g_battleDust_debug, 0, 0, "0: off, 1: text, 2: text+gfx");
 	g_battleDust_effect = pConsole->RegisterString("g_battleDust_effect", "misc.battledust.light", 0, "Sets the effect to use for battledust");
 	
 	pConsole->Register("g_PSTutorial_Enabled", &g_PSTutorial_Enabled, 1, 0, "Enable/disable powerstruggle tutorial");
@@ -698,10 +652,8 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_avmine_limit", &g_explosiveLimits[eET_AVMine], 3, 0, "Max avmines a player can place (recycled above this value)");
 	pConsole->Register("g_c4_limit", &g_explosiveLimits[eET_C4], 1, 0, "Max C4 a player can place (recycled above this value)");
 	pConsole->Register("g_fgl_limit", &g_explosiveLimits[eET_LaunchedGrenade], 2, 0, "Max FGL remote grenades a player can launch (recycled above this value)");
-	pConsole->Register("g_debugMines", &g_debugMines, 0, 0, "Enable debug output for mines and claymores");
 
   pConsole->Register("aim_assistCrosshairSize", &aim_assistCrosshairSize, 25, VF_CHEAT, "screen size used for crosshair aim assistance");
-  pConsole->Register("aim_assistCrosshairDebug", &aim_assistCrosshairDebug, 0, VF_CHEAT, "debug crosshair aim assistance");
 
 	pConsole->Register("g_MPDeathCam", &g_deathCam, 1, 0, "Enables / disables the MP death camera (shows the killer's location)");
 	pConsole->Register("g_MPDeathCamMaxZoomFOV", &g_deathCamMaxZoomFOV, 0.1f, 0, "FOV at maximum zoom of the death camera");
@@ -718,8 +670,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_roundRestartTime", &g_roundRestartTime, 30, 0, "Time until round start after minimum people join");
 
 	net_mapDownloadURL = pConsole->RegisterString("net_mapDownloadURL", "", 0, "URL for clients to download the current map");
-
-	pConsole->Register("g_debugShotValidator", &g_debugShotValidator, 0, 0, "Debug the shot validator");
 
 	pConsole->AddCommand("g_listVisiblePlayers", CmdListInvisiblePlayers, 0, "List all players and their visible status");
 
@@ -820,7 +770,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("hr_fovAmt", true);
 	pConsole->UnregisterVariable("hr_fovTime", true);
 
-	pConsole->UnregisterVariable("cl_debugFreezeShake", true);  
 	pConsole->UnregisterVariable("cl_frozenSteps", true);  
 	pConsole->UnregisterVariable("cl_frozenSensMin", true);
 	pConsole->UnregisterVariable("cl_frozenSensMax", true);
@@ -874,7 +823,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("g_enableTracers", true);
 	pConsole->UnregisterVariable("g_meleeWhileSprinting", true);
 
-	pConsole->UnregisterVariable("g_spawndebug", true);
 	pConsole->UnregisterVariable("g_spawnteamdist", true);
 	pConsole->UnregisterVariable("g_spawn_force_timeout", true);
 	pConsole->UnregisterVariable("g_spawnenemydist", true);
@@ -887,9 +835,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("g_roundtime", true);
 	pConsole->UnregisterVariable("g_fraglimit", true);
 	pConsole->UnregisterVariable("g_fraglead", true);
-	pConsole->UnregisterVariable("g_debugNetPlayerInput", true);
-	pConsole->UnregisterVariable("g_debug_fscommand", true);
-	pConsole->UnregisterVariable("g_debugDirectMPMenu", true);
 	pConsole->UnregisterVariable("g_skipIntro", true);
 	pConsole->UnregisterVariable("g_resetActionmapOnStart", true);
 	pConsole->UnregisterVariable("g_useProfile", true);
@@ -902,8 +847,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("g_detachCamera", true);
 	pConsole->UnregisterVariable("g_suicideDelay", true);
 
-	pConsole->UnregisterVariable("g_debugCollisionDamage", true);
-	pConsole->UnregisterVariable("g_debugHits", true);
 	pConsole->UnregisterVariable("g_trooperProneMinDistance", true);
 	pConsole->UnregisterVariable("g_trooperTentacleAnimBlend", true);
 	pConsole->UnregisterVariable("g_trooperBankingMultiplier", true);
@@ -916,7 +859,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("v_invertPitchControl", true);
 	pConsole->UnregisterVariable("v_sprintSpeed", true);
 	pConsole->UnregisterVariable("v_rockBoats", true);  
-  pConsole->UnregisterVariable("v_debugMountedWeapon", true);  
 	pConsole->UnregisterVariable("v_zeroGSpeedMultSpeed", true);
 	pConsole->UnregisterVariable("v_zeroGSpeedMultSpeedSprint", true);
 	pConsole->UnregisterVariable("v_zeroGSpeedMultNormal", true);
@@ -928,7 +870,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("v_zeroGSwitchableGyro", true);
 	pConsole->UnregisterVariable("v_zeroGEnableGBoots", true);
 	pConsole->UnregisterVariable("v_dumpFriction", true);
-  pConsole->UnregisterVariable("v_debugSounds", true);
 	pConsole->UnregisterVariable("v_altitudeLimit", true);
 	pConsole->UnregisterVariable("v_altitudeLimitLowerOffset", true);
 	pConsole->UnregisterVariable("v_airControlSensivity", true);
@@ -937,17 +878,9 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("player_DrawIK", true);
 	pConsole->UnregisterVariable("player_NoIK", true);
 	pConsole->UnregisterVariable("g_enableIdleCheck", true);
-	pConsole->UnregisterVariable("pl_debug_ladders", true);
-	pConsole->UnregisterVariable("pl_debug_movement", true);
-	pConsole->UnregisterVariable("pl_debug_filter", true);
-
-	// alien debugging
-	pConsole->UnregisterVariable("aln_debug_movement", true);
-	pConsole->UnregisterVariable("aln_debug_filter", true);
 
 	// variables from CPlayerMovementController
 	pConsole->UnregisterVariable("g_showIdleStats", true);
-	pConsole->UnregisterVariable("g_debugaimlook", true);
 
 	// variables from CHUD
 	pConsole->UnregisterVariable("hud_mpNamesNearDistance", true);
@@ -1025,9 +958,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("hit_assistMultiplayerEnabled", true);
 		
 	// weapon system
-	pConsole->UnregisterVariable("i_debuggun_1", true);
-	pConsole->UnregisterVariable("i_debuggun_2", true);
-
 	pConsole->UnregisterVariable("tracer_min_distance", true);
 	pConsole->UnregisterVariable("tracer_max_distance", true);
 	pConsole->UnregisterVariable("tracer_min_scale", true);
@@ -1035,12 +965,8 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("tracer_max_count", true);
 	pConsole->UnregisterVariable("tracer_player_radiusSqr", true);
 
-	pConsole->UnregisterVariable("i_debug_projectiles", true);
 	pConsole->UnregisterVariable("i_auto_turret_target", true);
 	pConsole->UnregisterVariable("i_auto_turret_target_tacshells", true);
-
-  pConsole->UnregisterVariable("i_debug_zoom_mods", true);
-	pConsole->UnregisterVariable("i_debug_mp_flowgraph", true);
 
   pConsole->UnregisterVariable("g_quickGame_map",true);
   pConsole->UnregisterVariable("g_quickGame_mode",true);
@@ -1050,14 +976,12 @@ void SCVars::ReleaseCVars()
   pConsole->UnregisterVariable("g_quickGame_prefer_mycountry",true);
   pConsole->UnregisterVariable("g_quickGame_ping1_level",true);
   pConsole->UnregisterVariable("g_quickGame_ping2_level",true);
-	pConsole->UnregisterVariable("g_quickGame_debug",true);
 	pConsole->UnregisterVariable("g_skip_tutorial",true);
 
 	pConsole->UnregisterVariable("g_displayIgnoreList",true);
   pConsole->UnregisterVariable("g_buddyMessagesIngame",true);
 
   pConsole->UnregisterVariable("g_battleDust_enable", true);
-  pConsole->UnregisterVariable("g_battleDust_debug", true);
 	pConsole->UnregisterVariable("g_battleDust_effect", true);
 
   pConsole->UnregisterVariable("g_PSTutorial_Enabled", true);
@@ -1073,18 +997,14 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("g_spectate_TeamOnly", true);
 	pConsole->UnregisterVariable("g_claymore_limit", true);
 	pConsole->UnregisterVariable("g_avmine_limit", true);
-	pConsole->UnregisterVariable("g_debugMines", true);
 
  pConsole->UnregisterVariable("aim_assistCrosshairSize", true);
-  pConsole->UnregisterVariable("aim_assistCrosshairDebug", true);
 
 	pConsole->UnregisterVariable("i_restrictItems", true);
 	pConsole->UnregisterVariable("g_spawnProtectionTime", true);
 	pConsole->UnregisterVariable("g_roundRestartTime", true);
 
 	pConsole->UnregisterVariable("net_mapDownloadURL", true);
-
-	pConsole->UnregisterVariable("g_debugShotValidator", true);
 
 	pConsole->UnregisterVariable("g_painSoundFrequency", true);
 	pConsole->UnregisterVariable("g_explosionScreenShakeMultiplier", true);

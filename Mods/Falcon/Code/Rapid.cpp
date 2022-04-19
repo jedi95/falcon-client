@@ -404,12 +404,6 @@ void CRapid::UpdateSound(float frameTime)
 			ISound *pSound = m_pWeapon->GetISound(m_soundId);
 			if (pSound)
 			{
-        if (g_pGameCVars->i_debug_sounds)
-        {
-          float color[] = {1,1,1,0.5};
-          gEnv->pRenderer->Draw2dLabel(150,500,1.3f,color,false,"%s rpm_scale: %.2f", m_pWeapon->GetEntity()->GetName(), rpm_scale);
-        }
-
 				pSound->SetParam("rpm_scale", rpm_scale, false);
 				pSound->SetParam("ammo", ammo, false);
 				//Sound variations for FY71 (AI most common weapon)

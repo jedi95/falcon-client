@@ -40,10 +40,6 @@ CBeam::~CBeam()
 //------------------------------------------------------------------------
 void CBeam::Update(float frameTime, uint frameId)
 {
-
-	//for (std::vector<Vec3>::iterator it=gpoints.begin(); gpoints.end()!=it;++it)
-		//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(*it, 0.35f, ColorB(255, 128, 0, 255));
-
 	bool keepUpdating=false;
 
 	if(m_firing)

@@ -23,11 +23,8 @@
 #include <IPhysics.h>
 #include <ICryAnimation.h>
 #include <ISerialize.h>
-#include <IRenderAuxGeom.h>
 #include <IEffectSystem.h>
 #include <ISound.h>
-
-#include <IDebugHistory.h>
 
 #include "CompatibilityAlienMovementController.h"
 
@@ -374,8 +371,7 @@ CAlien::CAlien() :
 	m_oldGravity(0,0,-9.81f),
   m_trailSpeedScale(0.f),
 	m_healthTrailScale(0.f),
-	m_followEyesTime(0.f),
-	m_pDebugHistoryManager(0)
+	m_followEyesTime(0.f)
 {	
 	m_tentaclesProxy.clear();
 	m_tentaclesProxyFullAnimation.clear();
@@ -400,7 +396,6 @@ CAlien::~CAlien()
 	SAFE_DELETE(m_pGroundEffect);
   	
 	SAFE_DELETE(m_pBeamEffect);
-	SAFE_DELETE(m_pDebugHistoryManager);
 }
 
 void CAlien::BindInputs( IAnimationGraphState * pAGState )
@@ -734,20 +729,10 @@ void CAlien::PrePhysicsUpdate()
 				assert(m_moveRequest.rotation.IsValid());
 				assert(m_moveRequest.velocity.IsValid());
 
-				int frameID = gEnv->pRenderer->GetFrameID();
-				DebugGraph_AddValue("EntID", pEnt->GetId());
-				DebugGraph_AddValue("ReqVelo", m_moveRequest.velocity.GetLength());
-				DebugGraph_AddValue("ReqVeloX", m_moveRequest.velocity.x);
-				DebugGraph_AddValue("ReqVeloY", m_moveRequest.velocity.y);
-				DebugGraph_AddValue("ReqVeloZ", m_moveRequest.velocity.z);
-				DebugGraph_AddValue("ReqRotZ", RAD2DEG(m_moveRequest.rotation.GetRotZ()));
-
 				m_pAnimatedCharacter->AddMovement(m_moveRequest);
 			}
 		}
 	}
-
-	UpdateDebugGraphs();
 }
 
 void CAlien::Update(SEntityUpdateContext& ctx, int updateSlot)
@@ -1029,11 +1014,7 @@ void CAlien::UpdateStats(float frameTime)
 	else
 		Interpolate(m_stats.lookTargetSmooth,lookTarget,3.0f,frameTime);
 
-	//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(GetEntity()->GetWorldPos(), ColorB(255,0,0,255), m_stats.lookTargetSmooth, ColorB(255,0,0,255));
-
-	//
 	UpdateFiringDir(frameTime);
-	//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(GetEntity()->GetWorldPos() + Vec3(0,0,5), ColorB(255,0,0,255), GetEntity()->GetWorldPos() + Vec3(0,0,5) + m_stats.fireDir * 20.0f, ColorB(255,0,0,255));
 
 	//update some timers
 	m_stats.inFiring = max(0.0f,m_stats.inFiring - frameTime);
@@ -1393,11 +1374,6 @@ void CAlien::ProcessMovement2(float frameTime)
 
 	velMtx.SetFromVectors(right,forward,right % forward);
 	vecRefRoll = tempVel;
-
-	/*gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(GetEntity()->GetWorldPos(), ColorB(255,0,0,255), GetEntity()->GetWorldPos() + velMtx.GetColumn(0), ColorB(255,0,0,255));
-	gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(GetEntity()->GetWorldPos(), ColorB(0,255,0,255), GetEntity()->GetWorldPos() + velMtx.GetColumn(1), ColorB(0,255,0,255));
-	gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(GetEntity()->GetWorldPos(), ColorB(0,0,255,255), GetEntity()->GetWorldPos() + velMtx.GetColumn(2), ColorB(0,0,255,255));
-	*/
 
 	//rollage
 	if (m_input.upTarget.len2()>0.0f)
@@ -2244,19 +2220,6 @@ void CAlien::SetActorMovementCommon(SMovementRequestParams& control)
 
 	if (m_pAnimatedCharacter)
 		m_pAnimatedCharacter->GetAnimationGraphState()->SetInput( m_inputAiming, control.aimLook? 1 : 0 );
-
-  // draw pathpoints
-  /*if (nPoints)
-  { 
-    IRenderAuxGeom *pGeom = gEnv->pRenderer->GetIRenderAuxGeom();
-    float size = 0.25f;
-
-    for (PATHPOINTVECTOR::iterator it = control.path.begin(); it != control.path.end(); ++it)
-    {        
-      pGeom->DrawSphere((*it).vPos, size, ColorB(0,255,0,128));
-      size += 0.1f;
-    }
-  }*/
 }
 
 //---------------------------------
@@ -2439,12 +2402,9 @@ void CAlien::GetActorInfo(SBodyInfo& bodyInfo)
 		bodyInfo.vEyeDirAnim = bodyInfo.vEyeDir;
 	}
 
-	//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(bodyInfo.vEyePos, ColorB(0,255,0,100), bodyInfo.vEyePos + bodyInfo.vEyeDir * 10.0f, ColorB(255,0,0,100));
-
 	bodyInfo.vFwdDir = GetEntity()->GetRotation().GetColumn1();//m_viewMtx.GetColumn(1);
 	bodyInfo.vUpDir = m_viewMtx.GetColumn(2);
 	bodyInfo.vFireDir = m_stats.fireDir;
-	//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(GetEntity()->GetWorldPos(), ColorB(0,255,0,100), GetEntity()->GetWorldPos() + bodyInfo.vFwdDir * 10, ColorB(255,0,0,100));
 
 	const SStanceInfo * pStanceInfo = GetStanceInfo(m_stance);
 	bodyInfo.minSpeed = min(m_params.speed_min, pStanceInfo->maxSpeed*0.01f);
@@ -2595,51 +2555,6 @@ void SAlienStats::Serialize( TSerialize ser )
   ser.Value("cloaked", cloaked);
 	//ser.Value("dynModelOffset",dynModelOffset);
 	ser.EndGroup();
-}
-
-
-void CAlien::UpdateDebugGraphs()
-{
-	bool debug = (g_pGameCVars->aln_debug_movement != 0);
-
-	const char* filter = g_pGameCVars->aln_debug_filter->GetString();
-	const char* name = GetEntity()->GetName();
-	if ((strcmp(filter, "0") != 0) && (strcmp(filter, name) != 0))
-		debug = false;
-
-	if (!debug)
-	{
-		if (m_pDebugHistoryManager != NULL)
-			m_pDebugHistoryManager->Clear();
-		return;
-	}
-
-	if (m_pDebugHistoryManager == NULL)
-		m_pDebugHistoryManager = g_pGame->GetIGameFramework()->CreateDebugHistoryManager();
-
-	m_pDebugHistoryManager->LayoutHelper("EntID", NULL, true, -1000000, 1000000, 1000000, -1000000, 0.0f, 1.0f);
-
-	bool showReqVelo = true;
-	m_pDebugHistoryManager->LayoutHelper("ReqVelo", NULL, showReqVelo, -20, 20, 0, 5, 0.0f, 0.0f);
-	m_pDebugHistoryManager->LayoutHelper("ReqVeloX", NULL, showReqVelo, -20, 20, -5, 5, 1.0f, 0.0f);
-	m_pDebugHistoryManager->LayoutHelper("ReqVeloY", NULL, showReqVelo, -20, 20, -5, 5, 2.0f, 0.0f);
-	m_pDebugHistoryManager->LayoutHelper("ReqVeloZ", NULL, showReqVelo, -20, 20, -5, 5, 3.0f, 0.0f);
-	m_pDebugHistoryManager->LayoutHelper("ReqRotZ", NULL, showReqVelo, -360, 360, -5, 5, 4.0f, 0.0f);
-}
-
-void CAlien::DebugGraph_AddValue(const char* id, float value) const
-{
-	if (m_pDebugHistoryManager == NULL)
-		return;
-
-	if (id == NULL)
-		return;
-
-	// NOTE: It's alright to violate the const here. The player is a good common owner for debug graphs, 
-	// but it's also not non-const in all places, even though graphs might want to be added from those places.
-	IDebugHistory* pDH = const_cast<IDebugHistoryManager*>(m_pDebugHistoryManager)->GetHistory(id);
-	if (pDH != NULL)
-		pDH->AddValue(value);
 }
 
 void CAlien::GetAlienMemoryStatistics(ICrySizer * s)

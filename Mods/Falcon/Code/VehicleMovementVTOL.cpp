@@ -22,8 +22,6 @@ History:
 #include "VehicleMovementVTOL.h"
 #include "VehicleActionLandingGears.h"
 
-#include "IRenderAuxGeom.h"
-
 #include "GameUtils.h"
 
 //------------------------------------------------------------------------

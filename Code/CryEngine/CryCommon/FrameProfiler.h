@@ -436,12 +436,6 @@ public:
 };
 
 #define FUNCTION_PROFILER( pISystem,subsystem )
-#define FUNCTION_PROFILER_FAST( pISystem,subsystem,bProfileEnabled )
 #define FRAME_PROFILER( szProfilerName,pISystem,subsystem )
-#define FRAME_PROFILER_FAST( szProfilerName,pISystem,subsystem,bProfileEnabled )
-
-#define FUNCTION_PROFILER_SYS(subsystem) \
-	FUNCTION_PROFILER_FAST( gEnv->pSystem, PROFILE_##subsystem, m_bProfilerEnabled )
-
 
 #endif // __frameprofiler_h__

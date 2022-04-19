@@ -20,7 +20,6 @@ History:
 #include <IPhysics.h>
 #include <ICryAnimation.h>
 #include <ISerialize.h>
-#include <IRenderAuxGeom.h>
 #include <IEffectSystem.h>
 #include <ISound.h>
 
@@ -85,27 +84,6 @@ bExactPositioning (false)
 	}
 }
 
-//debug
-void DrawSharkCircle( const Vec3& center, float radius )
-{
-	Vec3 p0,p1,pos;
-	pos = center;
-	p0.x = pos.x + radius*sin(0.0f);
-	p0.y = pos.y + radius*cos(0.0f);
-	p0.z = pos.z;
-	float step = 10.0f/180*gf_PI;
-	ColorB col(0,255,0,128);
-
-	for (float angle = step; angle < 360.0f/180*gf_PI+step; angle += step)
-	{
-		p1.x = pos.x + radius*sin(angle);
-		p1.y = pos.y + radius*cos(angle);
-		p1.z = pos.z;
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(p0,col,p1,col);
-		p0 = p1;
-	}    
-}
-
 inline float CrossZ(const Vec3& a, const Vec3& b)
 {
 	return a.x * b.y - a.y * b.x;
@@ -165,48 +143,9 @@ bool GetCirclePassingBy(const Vec3& P, const Vec3& Q, const Vec3& Ptan, Vec3& ce
 	return false;
 }
 
-
-//====================================================================
-// IntersectSweptSphere
-// hitPos is optional - may be faster if 0
-//====================================================================
-/*
-bool IntersectSweptSphere(Vec3 *hitPos, float& hitDist, const Lineseg& lineseg, float radius,IPhysicalEntity** pSkipEnts=0, int nSkipEnts=0, int additionalFilter = 0)
-{
-	IPhysicalWorld* pPhysics = gEnv->pPhysicalWorld;
-	primitives::sphere spherePrim;
-	spherePrim.center = lineseg.start;
-	spherePrim.r = radius;
-	Vec3 dir = lineseg.end - lineseg.start;
-
-	geom_contact *pContact = 0;
-	geom_contact **ppContact = hitPos ? &pContact : 0;
-	int geomFlagsAll=0;
-	int geomFlagsAny=rwi_stop_at_pierceable|(geom_colltype_player<<rwi_colltype_bit);
-
-	float d = pPhysics->PrimitiveWorldIntersection(spherePrim.type, &spherePrim, dir, 
-		ent_static | ent_terrain | ent_ignore_noncolliding | additionalFilter, ppContact, 
-		geomFlagsAll, geomFlagsAny, 0,0,0, pSkipEnts, nSkipEnts);
-
-	if (d > 0.0f)
-	{
-		hitDist = d;
-		if (pContact && hitPos)
-			*hitPos = pContact->pt;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-*/
-
 // -------------------
 
 CShark::CShark() : 
-//m_pTrailAttachment(NULL),
-//m_trailSpeedScale(0.f),
 m_chosenEscapeDir(ZERO),
 m_escapeDir(ZERO)
 {	
@@ -560,7 +499,6 @@ float CShark::GetDistHeadTarget(const Vec3& targetPos, const Vec3& targetDirN,fl
 			Vec3 v1(bonePos1 - bonePos2);//.GetNormalizedSafe());
 
 			Vec3 boneDir = (v0+v0-v1 ).GetNormalizedSafe();
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(bonePos, ColorB(255,120,0,255), bonePos + boneDir*6, ColorB(255,120,0,255));
 			dotMouth = targetDirN.Dot(boneDir);
 			return Distance::Point_Point(headBonePos,targetPos);
 		}
@@ -588,7 +526,6 @@ void CShark::UpdateStatus(float frameTime, const IEntity* pTarget)
 
 	Vec3 myPos(GetEntity()->GetWorldPos());
 	Vec3 myBodyDir(GetEntity()->GetRotation().GetColumn1());
-	//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(myPos, ColorB(255,0,255,255), myPos+ myBodyDir*6, ColorB(255,0,255,255));
 	Vec3 targetDir(targetPos - myPos);
 	float distTarget = targetDir.GetLength();
 	Vec3 targetDirN(distTarget>0 ? targetDir/distTarget : ZERO);
@@ -744,7 +681,6 @@ void CShark::UpdateStatus(float frameTime, const IEntity* pTarget)
 			}
 			SetMoveTarget(moveTarget, force, m_params.minDistForUpdatingMoveTarget);
 
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(targetPos, ColorB(255,255,255,255), m_moveTarget, ColorB(255,255,255,255));
 			Vec3 moveTargetDir(m_moveTarget - myPos);
 			float moveDistTarget = moveTargetDir.GetLength();
 			moveTargetDir.z = 0;
@@ -1291,7 +1227,6 @@ void CShark::ProcessMovement(float frameTime)
 	float desiredSpeed;
 	float rotSpeed;
 	Vec3 center;
-	ColorB debugColor(0, 0, 255, 48);
 
 	if(m_moveTarget.IsZero())
 	{
@@ -1305,41 +1240,7 @@ void CShark::ProcessMovement(float frameTime)
 		Vec3 bodyDir(GetEntity()->GetWorldTM().TransformVector(Vec3Constants<float>::fVec3_OneY));
 		float	dot =  bodyDir.Dot(desiredDir.GetNormalizedSafe());
 		float distMoveTarget = desiredDir.GetLength();
-/*
-		float velScale =  (dot< 0.7f ? 0 : (dot-0.7f)/0.3f) ;
 
-		// Slow down if too fast compared to slower target, and not aligned to it
-		if(m_state == S_FinalAttack || m_state == S_Attack || m_state == S_FinalAttackAlign)
-		{
-			IEntity* pTarget = gEnv->pEntitySystem->GetEntity(m_targetId);
-			if(pTarget)
-			{
-				float distHead = m_headOffset*2.5f;
-				//Vec3 dir( pTarget->GetWorldPos() - GetEntity()->GetWorldPos());
-				if(distMoveTarget < distHead)
-				{
-					IPhysicalEntity *phys = pTarget->GetPhysics();
-					pe_status_dynamics	targetdyn;
-					if( phys && phys->GetStatus(&targetdyn))
-					{
-						Vec3 relVelocity(m_stats.velocity - targetdyn.v);
-						float relSpeed = relVelocity.GetLength();
-						static const float speedThr = 1.f;
-						//float dot = bodyDir.Dot(dir.GetNormalizedSafe());
-						if(dot<0.7f && relSpeed > speedThr)
-						{
-							if(dot<0)
-								dot=0;
-							float maxRelSpeed = speedThr*2;
-							if(relSpeed > maxRelSpeed)
-								relSpeed = maxRelSpeed;
-							velScale *= dot/0.7f*(relSpeed - speedThr)/(maxRelSpeed - speedThr);
-						}
-					}
-				}
-			}
-		}
-		*/
 		// get the turn radius to reach the move target
 		Vec3 velNorm(m_stats.velocity.GetNormalizedSafe());
 		
@@ -1353,46 +1254,28 @@ void CShark::ProcessMovement(float frameTime)
 		else if(m_state != S_Circling && dot<0.2 || dot<0.8 && ( m_state == S_FinalAttackAlign ))
 		{
 			// target behind or align before final attack, do a slow narrow turn
-//			m_bCircularTrajectory = true;
-			desiredSpeed = m_params.speed_min;// + (maxSpeed - m_params.speed_min)/3;
+			desiredSpeed = m_params.speed_min;
 			rotSpeed = desiredSpeed/m_params.minTurnRadius;
 			rotSpeed = CLAMP(rotSpeed,0,m_params.rotSpeed_max);
-			// debug
-			m_debugradius = desiredSpeed/rotSpeed;
-			Vec3 disp(bodyDir.y,-bodyDir.x,bodyDir.z);
-			if(CrossZ(bodyDir, desiredDir) >0)
-				disp = -disp;
-			m_debugcenter = myPos+disp*m_debugradius;
-
-			debugColor.Set(12,255,12,48);
 			m_bCircularTrajectory = false;
 
 		}
 		else if(m_state != S_Circling && dot>0.7f || ( m_state == S_FinalAttackAlign || m_state == S_FinalAttack))
 		{
 			// almost aligned, try to go straight
-			//m_bCircularTrajectory = true;
 			desiredSpeed = max(dot*dot,0.3f)*maxSpeed;
 			float eta = distMoveTarget/desiredSpeed;
-			//rotSpeed = 2*cry_acosf(dot)/eta;
-			//if(rotSpeed > m_params.rotSpeed_max)
-				rotSpeed = m_params.rotSpeed_max;
-			//debug
-			m_debugradius = 0;//rotSpeed>0? desiredSpeed/rotSpeed : 0;
-			m_debugcenter = m_moveTarget;
+			rotSpeed = m_params.rotSpeed_max;
 			m_bCircularTrajectory = false;
 
 		}
 		else if(!m_bCircularTrajectory)// && !velNorm.IsZero() && !m_moveTarget.IsZero())
 		{
-			//float reqTurnRadius = m_params.rotSpeed_max > 0 ? maxSpeed * m_params.rotSpeed_max : m_params.minTurnRadius;
-			//if(reqTurnRadius < m_params.minTurnRadius)
+
 			m_bCircularTrajectory = GetCirclePassingBy(myPos,m_moveTarget,velNorm,center,desiredTurnRadius);
 			if(m_bCircularTrajectory)
 			{
-				m_debugcenter = center;
 				m_turnRadius = desiredTurnRadius;
-				m_debugradius = desiredTurnRadius;
 			}
 			else
 			{
@@ -1435,29 +1318,7 @@ void CShark::ProcessMovement(float frameTime)
 	// rotSpeed = speed / turnRadius
 	Interpolate(m_curSpeed,desiredSpeed,(m_curSpeed < desiredSpeed ? m_params.accel : m_params.decel),frameTime);
 	Interpolate(m_turnSpeed,rotSpeed,5.0f,frameTime);
-	/*
-	if(m_bCircularTrajectory)
-	{
-		if(!m_debugcenter.IsZero())
-		{
-			if(m_debugradius==0)
-				gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(myPos, ColorB(0,0,255,255), m_moveTarget, ColorB(128,128,255,255));
-			else
-			{
-				IEntity* pTarget = gEnv->pEntitySystem->GetEntity(m_targetId);
-				if(!(pTarget && strcmp(pTarget->GetClass()->GetName(),"Player")==0))
-				{
-					gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(m_debugcenter, 0.5f, ColorB(255, 255, 12, 60), true);
-					gEnv->pRenderer->GetIRenderAuxGeom()->DrawCylinder(m_debugcenter, Vec3(0,0,1), m_debugradius,0.1f,debugColor, true);
-				}
-			}
-		}
-	}
-	*/
-	/*Quat currQuat(m_baseMtx);
-	m_baseMtx = Matrix33(Quat::CreateSlerp( currQuat.GetNormalized(), m_desiredVeloctyQuat, min(frameTime * m_turnSpeed , 1.0f)));
-	m_baseMtx.OrthonormalizeFast();
-	*/
+
 	Vec3 right(forward.y, -forward.x, 0);
 	if(right.IsZero())
 		right = m_baseMtx.GetColumn0();
@@ -1496,18 +1357,6 @@ void CShark::ProcessMovement(float frameTime)
 	m_moveRequest.type = eCMT_Fly;
 
 	m_lastPos = myPos;
-
-	// debug draw
-	/*
-	Vec3 basepos = GetEntity()->GetWorldPos();
-	gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(255,255,255,255), basepos+ goalQuat.GetColumn0() * 4.0f, ColorB(255,255,255,255));
-	gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(0,0,255,255), basepos+ goalQuat.GetColumn1() * 4.0f, ColorB(255,255,255,255));
-	gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(255,255,255,255),basepos+  goalQuat.GetColumn2() * 4.0f, ColorB(255,255,255,255));
-
-	gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(0,255,255,255), basepos+ m_modelQuat.GetColumn0() * 7.0f, ColorB(0,255,255,255));
-	gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(0,0,0,255), basepos+ m_modelQuat.GetColumn1() * 7.0f, ColorB(0,255,255,255));
-	gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(0,255,255,255), basepos+ m_modelQuat.GetColumn2() * 7.0f, ColorB(0,255,255,255));
-	*/
 }
 
 
@@ -1896,11 +1745,6 @@ void CShark::SetActorMovementCommon(SMovementRequestParams& control)
 	if(IScriptTable* pScriptTable = GetEntity()->GetScriptTable())
 		if(pScriptTable->GetValue("Properties",props))
 			props->GetValue("bExactPos", bExactPos);
-
-//	m_input.posTarget.zero();
-//	m_input.dirTarget.zero();
-
-
 }
 
 //---------------------------------
@@ -1918,55 +1762,7 @@ void CShark::SetActorMovement(SMovementRequestParams &control)
 
 	// overrides AI (which doesn't request movement
 	// shark always moves
-
 	SetDesiredSpeed(bodyDir*m_curSpeed);//(control.vMoveDir * control.fDesiredSpeed);
-	 
-	// debug state and move target
-	/*
-	static char stateName[9][32] = {"S_Sleeping","S_Reaching","S_Circling","S_Attack","S_FinalAttackAlign","S_FinalAttack","S_PrepareEscape","S_Escaping","S_Spawning"};
-	
-
-	if(!m_moveTarget.IsZero())
-	{
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(m_moveTarget, 0.5f, ColorB(255, 0, 255, 255), true);
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(GetEntity()->GetWorldPos(), ColorB(0,255,0,100), m_moveTarget, ColorB(255,0,0,100));
-		gEnv->pRenderer->DrawLabel(GetEntity()->GetWorldPos()+Vec3(0,0,2), 1.4f, stateName[m_state]);
-		IEntity* pTarget = gEnv->pEntitySystem->GetEntity(m_targetId);
-		if(pTarget)
-			DrawSharkCircle(pTarget->GetWorldPos(),m_circleRadius);
-
-	}
-	else
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(GetEntity()->GetWorldPos()+Vec3(0,0,1), 0.5f, ColorB(255, 255, 255, 255), true);
-	*/
-	
-	//	m_input.actions = control.m_desiredActions;
-	/*
-	int actions;
-
-	switch(control.bodystate)
-	{
-	case 1:
-		actions = ACTION_CROUCH;
-		break;
-	case 2:
-		actions = ACTION_PRONE;
-		break;
-	case 3:
-		actions = ACTION_RELAXED;
-		break;
-	case 4:
-		actions = ACTION_STEALTH;
-		break;
-	default:
-		actions = 0;
-		break;
-	}
-
-
-	m_input.actions = actions;
-
-	*/
 }
 
 
@@ -1987,12 +1783,9 @@ void CShark::GetActorInfo(SBodyInfo& bodyInfo)
 		bodyInfo.vEyeDirAnim = bodyInfo.vEyeDir;
 	}
 
-	//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(bodyInfo.vEyePos, ColorB(0,255,0,100), bodyInfo.vEyePos + bodyInfo.vEyeDir * 10.0f, ColorB(255,0,0,100));
-
 	bodyInfo.vFwdDir = GetEntity()->GetRotation().GetColumn1();//m_viewMtx.GetColumn(1);
 	bodyInfo.vUpDir = m_viewMtx.GetColumn(2);
 	bodyInfo.vFireDir = bodyInfo.vFwdDir;
-	//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(GetEntity()->GetWorldPos(), ColorB(0,255,0,100), GetEntity()->GetWorldPos() + bodyInfo.vFwdDir * 10, ColorB(255,0,0,100));
 
 	const SStanceInfo * pStanceInfo = GetStanceInfo(m_stance);
 	bodyInfo.minSpeed = min(m_params.speed_min, pStanceInfo->maxSpeed*0.01f);

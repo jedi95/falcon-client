@@ -27,7 +27,6 @@ History:
 class CFlashMenuScreen;
 class CGameFlashAnimation;
 class CMPHub;
-class CMovieManager;
 struct IAVI_Reader;
 struct IMusicSystem;
 struct IVideoPlayer;
@@ -36,9 +35,6 @@ struct IVideoPlayer;
 
 class CFlashMenuObject : public IGameFrameworkListener, IHardwareMouseEventListener, IInputEventListener, IFSCommandHandler, ILevelSystemListener, IFlashLoadMovieHandler
 {
-
-	friend class CMovieManager;
-
 public:
 
 	enum EMENUSCREEN
@@ -162,27 +158,7 @@ public:
 	FSAAMode GetFSAAMode(const char* name);
 	string GetFSAAMode(int samples, int quality);
 
-	enum EEntryMovieState
-	{
-		eEMS_Start,
-		eEMS_SPDEMO,
-		eEMS_EA,
-		eEMS_Crytek,
-		eEMS_NVidia,
-		eEMS_Intel,
-		eEMS_PEGI,
-		eEMS_RatingLogo,
-		eEMS_Rating,
-		eEMS_Legal,
-		eEMS_Stop,
-		eEMS_Done,
-		eEMS_GameStart,
-		eEMS_GameIntro,
-		eEMS_GameStop,
-		eEMS_GameDone
-	};
-
-						CFlashMenuObject();
+	CFlashMenuObject();
 	virtual ~	CFlashMenuObject();
 
 private:
@@ -340,8 +316,6 @@ private:
 	ButtonPosMap::iterator FindButton(const TKeyName &shortcut);
 
 	bool ShouldIgnoreInGameEvent();
-
-	CMovieManager* m_pMovieMgr;
 
 	int m_iMaxProgress;
 

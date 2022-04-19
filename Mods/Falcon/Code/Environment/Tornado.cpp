@@ -7,8 +7,6 @@
 #include <IEffectSystem.h>
 #include <IVehicleSystem.h>
 
-#include <IRenderAuxGeom.h>
-
 //------------------------------------------------------------------------
 CTornado::CTornado() :
 	m_pPhysicalEntity(0),
@@ -440,9 +438,7 @@ void CTornado::UpdateFlow()
 
 			if (!ppEnt->GetStatus(&spos) || !ppEnt->GetStatus(&sdyn))
 				continue;
-		
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(spos.pos,2.0f,ColorB(255,0,255,255));
-						
+
 			Vec3 delta(pos - spos.pos);
 			delta.z = 0.0f;
 
@@ -492,8 +488,6 @@ void CTornado::UpdateFlow()
 
 			aimpulse.iApplyTime = 0;
 			ppEnt->Action(&aimpulse);
-
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(spos.pos,ColorB(255,0,255,255),spos.pos+aimpulse.impulse.GetNormalizedSafe(ZERO),ColorB(255,0,255,255));
 		}
 	}
 }

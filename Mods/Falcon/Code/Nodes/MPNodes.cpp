@@ -132,10 +132,6 @@ public:
 
 					if(cancel)
 					{
-						if(g_pGame->GetCVars()->i_debug_mp_flowgraph != 0)
-						{
-							CryLog("MP flowgraph: EndGameInvalid");
-						}
 						ActivateOutput(&m_actInfo, EOP_EndGameInvalid, true);
 						m_endGameNear = false;
 					}
@@ -153,10 +149,6 @@ public:
 							// entity exists so trigger loud music if not already done
 							if(!m_endGameNear)
 							{
-								if(g_pGame->GetCVars()->i_debug_mp_flowgraph != 0)
-								{
-									CryLog("--MP flowgraph: EndGameNear");
-								}
 								ActivateOutput(&m_actInfo, EOP_EndGameNear, true);
 								m_endGameNear = true;
 							}
@@ -183,10 +175,6 @@ public:
 					float timeRemaining = g_pGame->GetGameRules()->GetRemainingGameTime();
 					if(timeRemaining < GetPortFloat(pActInfo, EIP_GameEndTime) )
 					{
-						if(g_pGame->GetCVars()->i_debug_mp_flowgraph != 0)
-						{
-							CryLog("--MP flowgraph: EndGameNear");
-						}
 						ActivateOutput(&m_actInfo, EOP_EndGameNear, timeRemaining);
 						m_timeRemainingTriggered = true;
 						m_endGameNear = true;
@@ -204,10 +192,6 @@ public:
 				if((pPlayer->GetSpectatorMode() == 0 && m_localPlayerSpectatorMode != 0)
 					|| (!m_gameStarted && inGame) )
 				{
-					if(g_pGame->GetCVars()->i_debug_mp_flowgraph != 0)
-					{
-						CryLog("--MP flowgraph: EnteredGame");
-					}
 					ActivateOutput(&m_actInfo, EOP_EnteredGame, true);
 					m_localPlayerSpectatorMode = pPlayer->GetSpectatorMode();
 				}
@@ -224,26 +208,14 @@ protected:
 			switch(localWinner)
 			{
 				case 1:
-					if(g_pGame->GetCVars()->i_debug_mp_flowgraph != 0)
-					{
-						CryLog("--MP flowgraph: GameWon");
-					}
 					ActivateOutput(&m_actInfo, EOP_GameWon,true);
 					break;
 			
 				case -1:
-					if(g_pGame->GetCVars()->i_debug_mp_flowgraph != 0)
-					{
-						CryLog("--MP flowgraph: GameLost");
-					}
 					ActivateOutput(&m_actInfo, EOP_GameLost,true);
 					break;
 
 				default:
-					if(g_pGame->GetCVars()->i_debug_mp_flowgraph != 0)
-					{
-						CryLog("--MP flowgraph: GameTied");
-					}
 					ActivateOutput(&m_actInfo, EOP_GameTied, true);
 					break;
 			}

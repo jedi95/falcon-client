@@ -31,14 +31,6 @@ public:
 		SAFE_RELEASE(m_pTexture);
 	}
 
-
-	const char* GetDebugName() const
-	{
-		if (m_pTexture)
-			return m_pTexture->GetName();
-		return "<no texture>";
-	}
-
 	void Stop()
 	{
 		m_bActive = false;
@@ -222,29 +214,6 @@ public:
 					m_pHUDFader[i]->Draw();
 				if (m_pHUDFader[i]->IsActive())
 					++nActive;
-			}
-		}
-		if (g_pGame->GetCVars()->hud_faderDebug != 0)
-		{
-			const float x = 5.0f;
-			float y = 115.0f;
-			float white[] = {1,1,1,1};
-			gEnv->pRenderer->Draw2dLabel( x, y, 1.2f, white, false, "HUDFader Active: %d", nActive );
-			y+=12.0f;
-			if (nActive > 0)
-			{
-				for (int i=0; i<NUM_FADERS; ++i)
-				{
-					if (m_pHUDFader[i] && m_pHUDFader[i]->IsActive())
-					{
-						const ColorF colF = m_pHUDFader[i]->GetCurrentColor();
-						const ColorB colB (colF);
-						const bool bMFX = (i>= MFX_FADER_OFFSET && i <= MFX_FADER_END);
-						const bool bSkipDraw = bInTimeDemo && !bMFX;
-						gEnv->pRenderer->Draw2dLabel( x, y, 1.2f, white, false, " %sFader %d: ColRGBA=%d,%d,%d,%d Texture='%s' %s", bMFX ? "MFX " : "", i, colB.r, colB.g, colB.b, colB.a, m_pHUDFader[i]->GetDebugName(), bSkipDraw ? "[not drawn TimeDemo!]" : "");
-					}
-					y+=10.0f;
-				}
 			}
 		}
 	}

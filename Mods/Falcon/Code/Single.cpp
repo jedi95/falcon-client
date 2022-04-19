@@ -32,34 +32,6 @@ History:
 
 #include "IronSight.h"
 
-#include "IRenderer.h"
-#include "IRenderAuxGeom.h"	
-
-struct DebugShoot{
-	Vec3 pos;
-	Vec3 hit;
-	Vec3 dir;
-};
-
-//std::vector<DebugShoot> g_shoots;
-
-//---------------------------------------------------------------------------
-// TODO remove when aiming/fire direction is working
-// debugging aiming dir
-struct DBG_shoot{
-	Vec3	src;
-	Vec3	dst;
-};
-
-const	int	DGB_ShotCounter(3);
-int	DGB_curIdx(-1);
-int	DGB_curLimit(-1);
-DBG_shoot DGB_shots[DGB_ShotCounter];
-// remove over
-//---------------------------------------------------------------------------
-
-
-
 //------------------------------------------------------------------------
 CSingle::CSingle()
 : m_pWeapon(0),
@@ -89,9 +61,9 @@ CSingle::CSingle()
 	m_reloading(false),
 	m_firing(false),
 	m_fired(false),
-  m_heatEffectId(0),
-  m_heatSoundId(INVALID_SOUNDID),
-  m_barrelId(0),
+	m_heatEffectId(0),
+	m_heatSoundId(INVALID_SOUNDID),
+	m_barrelId(0),
 	m_autoaimTimeOut(AUTOAIM_TIME_OUT),
 	m_bLocking(false),
 	m_autoFireTimer(-1.0f),
@@ -105,7 +77,7 @@ CSingle::CSingle()
 	m_nextHeatTime(0.0f),
 	m_saved_next_shot(0.0f)
 {	
-  m_mflightId[0] = m_mflightId[1] = 0;
+	m_mflightId[0] = m_mflightId[1] = 0;
 	m_soundVariationParam = floor_tpl(Random(1.1f,3.9f));		//1.0, 2.0f or 3.0f
 	m_targetSpot.Set(0.0f,0.0f,0.0f);
 }
@@ -239,70 +211,13 @@ void CSingle::Update(float frameTime, uint frameId)
 		keepUpdating=true;
 	}
 
-
 	UpdateRecoil(frameTime);
 	UpdateHeat(frameTime);
 
 	m_fired = false;
 
-  if (g_pGameCVars->aim_assistCrosshairDebug && m_fireparams.crosshair_assist_range>0.f && m_pWeapon->GetOwnerActor() && m_pWeapon->GetOwnerActor()->IsClient())
-  {
-    // debug only
-    bool bHit(false); ray_hit rayhit; rayhit.pCollider=0;
-    Vec3 hit = GetProbableHit(WEAPON_HIT_RANGE, &bHit, &rayhit);
-    Vec3 pos = GetFiringPos(hit);
-    Vec3 dir = GetFiringDir(hit, pos);
-    CrosshairAssistAiming(pos, dir, &rayhit);
-
-    keepUpdating = true;
-  }
-
 	if (keepUpdating)
 		m_pWeapon->RequireUpdate(eIUS_FireMode);
-
-	//---------------------------------------------------------------------------
-	// TODO remove when aiming/fire direction is working
-	// debugging aiming dir
-	static ICVar* pAimDebug = gEnv->pConsole->GetCVar("g_aimdebug");
-	if(pAimDebug->GetIVal()!=0)
-	{
-		const ColorF	queueFireCol( .4f, 1.0f, 0.4f, 1.0f );
-		for(int dbgIdx(0);dbgIdx<DGB_curLimit; ++dbgIdx)
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine( DGB_shots[dbgIdx].src, queueFireCol, DGB_shots[dbgIdx].dst, queueFireCol );
-	}
-	
-	if(g_pGameCVars->i_debug_zoom_mods!=0 && m_pWeapon->GetOwnerActor() && m_pWeapon->GetOwnerActor()->IsPlayer())
-	{
-		float white[4] = {1,1,1,1};
-		gEnv->pRenderer->Draw2dLabel(50.0f,50.0f,1.4f,white,false,"Recoil.angular_impulse : %f", m_recoilparams.angular_impulse);
-		gEnv->pRenderer->Draw2dLabel(50.0f,60.0f,1.4f,white,false,"Recoil.attack : %f", m_recoilparams.attack);
-		gEnv->pRenderer->Draw2dLabel(50.0f,70.0f,1.4f,white,false,"Recoil.back_impulse : %f", m_recoilparams.back_impulse);
-		gEnv->pRenderer->Draw2dLabel(50.0f,80.0f,1.4f,white,false,"Recoil.decay : %f", m_recoilparams.decay);
-		gEnv->pRenderer->Draw2dLabel(50.0f,90.0f,1.4f,white,false,"Recoil.impulse : %f", m_recoilparams.impulse);
-		gEnv->pRenderer->Draw2dLabel(50.0f,100.0f,1.4f,white,false,"Recoil.max x,y : %f, %f", m_recoilparams.max.x, m_recoilparams.max.y);
-		gEnv->pRenderer->Draw2dLabel(50.0f,110.0f,1.4f,white,false,"Recoil.max_recoil : %f", m_recoilparams.max_recoil);
-		gEnv->pRenderer->Draw2dLabel(50.0f,120.0f,1.4f,white,false,"Recoil.recoil_crouch_m : %f", m_recoilparams.recoil_crouch_m);
-		gEnv->pRenderer->Draw2dLabel(50.0f,130.0f,1.4f,white,false,"Recoil.recoil_jump_m : %f", m_recoilparams.recoil_jump_m);
-		gEnv->pRenderer->Draw2dLabel(50.0f,140.0f,1.4f,white,false,"Recoil.recoil_prone_m : %f", m_recoilparams.recoil_prone_m);
-		gEnv->pRenderer->Draw2dLabel(50.0f,150.0f,1.4f,white,false,"Recoil.recoil_strMode_m : %f", m_recoilparams.recoil_strMode_m);
-		gEnv->pRenderer->Draw2dLabel(50.0f,160.0f,1.4f,white,false,"Recoil.recoil_zeroG_m : %f", m_recoilparams.recoil_zeroG_m);
-
-		gEnv->pRenderer->Draw2dLabel(300.0f, 50.0f, 1.4f, white, false, "Spread.attack : %f", m_spreadparams.attack);
-		gEnv->pRenderer->Draw2dLabel(300.0f, 60.0f, 1.4f, white, false, "Spread.decay : %f", m_spreadparams.decay);
-		gEnv->pRenderer->Draw2dLabel(300.0f, 70.0f, 1.4f, white, false, "Spread.max : %f", m_spreadparams.max);
-		gEnv->pRenderer->Draw2dLabel(300.0f, 80.0f, 1.4f, white, false, "Spread.min : %f", m_spreadparams.min);
-		gEnv->pRenderer->Draw2dLabel(300.0f, 90.0f, 1.4f, white, false, "Spread.rotation_m : %f", m_spreadparams.rotation_m);
-		gEnv->pRenderer->Draw2dLabel(300.0f, 100.0f, 1.4f, white, false, "Spread.speed_m : %f", m_spreadparams.speed_m);
-		gEnv->pRenderer->Draw2dLabel(300.0f, 110.0f, 1.4f, white, false, "Spread.spread_crouch_m : %f", m_spreadparams.spread_crouch_m);
-		gEnv->pRenderer->Draw2dLabel(300.0f, 120.0f, 1.4f, white, false, "Spread.spread_jump_m : %f", m_spreadparams.spread_jump_m);
-		gEnv->pRenderer->Draw2dLabel(300.0f, 130.0f, 1.4f, white, false, "Spread.spread_prone_m : %f", m_spreadparams.spread_prone_m);
-		gEnv->pRenderer->Draw2dLabel(300.0f, 130.0f, 1.4f, white, false, "Spread.spread_zeroG_m : %f", m_spreadparams.spread_zeroG_m);
-
-	}
-
-
-	
-	//---------------------------------------------------------------------------
 }
 
 void CSingle::PostUpdate(float frameTime)
@@ -1242,7 +1157,6 @@ bool CSingle::CrosshairAssistAiming(const Vec3& firingPos, Vec3& firingDir, ray_
   
   float t = 0.f;  
   AABB bounds;
-  int debugY = 100;
   std::vector<IEntity*> ents;
     
   const std::vector<EntityId> *pEntities = g_pGame->GetHUD()->GetRadar()->GetNearbyEntities();
@@ -1320,12 +1234,6 @@ bool CSingle::CrosshairAssistAiming(const Vec3& firingPos, Vec3& firingDir, ray_
     bool xin = smin.x <= -cx && smax.x >= cx;
     bool yin = smin.y <= -cy && smax.y >= cy;    
     bool overlap = (xin || abs(smin.x) <= cx || abs(smax.x) <= cx) && (yin || abs(smin.y) <= cy || abs(smax.y) <= cy);
-
-    if (g_pGameCVars->aim_assistCrosshairDebug)
-    {
-      float color[] = {1,1,1,1};
-      gEnv->pRenderer->Draw2dLabel(100,debugY+=20,1.3f,color,false,"%s: min (%.1f %.1f), max: (%.1f %.1f) %s", pEntity->GetName(), smin.x, smin.y, smax.x, smax.y, overlap?"OVERLAP":"");    
-    }
     
     if (overlap && !pTarget)
     { 
@@ -1346,9 +1254,7 @@ bool CSingle::CrosshairAssistAiming(const Vec3& firingPos, Vec3& firingDir, ray_
       }
 
       pTarget = pEntity;
-      
-      if (!g_pGameCVars->aim_assistCrosshairDebug)
-        break;
+	  break;
     }
   }   
 
@@ -1358,14 +1264,6 @@ bool CSingle::CrosshairAssistAiming(const Vec3& firingPos, Vec3& firingDir, ray_
   { 
     firingDir = newPos - firingPos;
     firingDir.Normalize();
-    
-    if (g_pGameCVars->aim_assistCrosshairDebug)
-    {
-      IPersistantDebug* pDebug = g_pGame->GetIGameFramework()->GetIPersistantDebug();
-      pDebug->Begin("CHAimAssistance", false);
-      pDebug->AddLine(firingPos, newPos, ColorF(0,1,0,1), 0.5f);
-      pDebug->AddSphere(newPos, 0.3f, ColorF(1,0,0,1), 0.5f);
-    }    
   }
   
   return true;
@@ -1474,22 +1372,6 @@ bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool 
 		m_cocking = true;
 		m_pWeapon->GetScheduler()->TimerAction(time-100, CSchedulerAction<EndCockingAction>::Create(this), false);
 	}
-
-	// debug
-  static ICVar* pAimDebug = gEnv->pConsole->GetCVar("g_aimdebug");
-  if (pAimDebug->GetIVal()) 
-  {
-    IPersistantDebug* pDebug = g_pGame->GetIGameFramework()->GetIPersistantDebug();
-    pDebug->Begin("CSingle::Shoot", false);
-    pDebug->AddSphere(hit, 0.6f, ColorF(0,0,1,1), 10.f);
-    pDebug->AddDirection(pos, 0.25f, dir, ColorF(0,0,1,1), 1.f);
-  }
-/*
-	DebugShoot shoot;
-	shoot.pos=pos;
-	shoot.dir=dir;
-	shoot.hit=hit;
-	g_shoots.push_back(shoot);*/
 
 	CheckNearMisses(hit, pos, dir, (hit-pos).len(), 1.0f);
 
@@ -1612,16 +1494,7 @@ bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool 
 			m_pWeapon->GetScheduler()->TimerAction(m_pWeapon->GetCurrentAnimationTime(CItem::eIGS_FirstPerson), CSchedulerAction<ScheduleReload>::Create(m_pWeapon), false);
 		}
 	}
-	//---------------------------------------------------------------------------
-	// TODO remove when aiming/fire direction is working
-	// debugging aiming dir
-	if(++DGB_curLimit>DGB_ShotCounter)	DGB_curLimit = DGB_ShotCounter;
-	if(++DGB_curIdx>=DGB_ShotCounter)	DGB_curIdx = 0;
-	DGB_shots[DGB_curIdx].dst=pos+dir*200.f;
-	DGB_shots[DGB_curIdx].src=pos;
-	//---------------------------------------------------------------------------
 
-	//CryLog("RequestShoot - pos(%f,%f,%f), dir(%f,%f,%f), hit(%f,%f,%f)", pos.x, pos.y, pos.z, dir.x, dir.y, dir.z, hit.x, hit.y, hit.z);
 	m_pWeapon->RequestShoot(ammo, pos, dir, vel, hit, m_speed_scale, pAmmo? pAmmo->GetGameObject()->GetPredictionHandle() : 0, m_pWeapon->GetShootSeqN(), 0, false);
 
 	return true;
@@ -1734,7 +1607,6 @@ int CSingle::GetSkipEntities(CWeapon* pWeapon, IPhysicalEntity** pSkipEnts, int 
 Vec3 CSingle::GetProbableHit(float range, bool *pbHit, ray_hit *pHit) const
 {
   static Vec3 pos,dir; 
-  static ICVar* pAimDebug = gEnv->pConsole->GetCVar("g_aimdebug");
 
   CActor *pActor = m_pWeapon->GetOwnerActor();
     
@@ -1759,12 +1631,6 @@ Vec3 CSingle::GetProbableHit(float range, bool *pbHit, ray_hit *pHit) const
     
     if (!pActor->IsPlayer())
     {
-      if (pAimDebug->GetIVal())
-      {
-        //gEnv->pRenderer->GetIRenderAuxGeom()->SetRenderFlags(e_Def3DPublicRenderflags);
-        //gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(info.fireTarget, 0.5f, ColorB(255,0,0,255));
-      }
-      
       dir = range * (info.fireTarget-pos).normalized();
     }
     else
@@ -2599,15 +2465,6 @@ void CSingle::UpdateHeat(float frameTime)
 
 			m_heat += add-sub;
 			m_heat = CLAMP(m_heat, 0.0f, 1.0f);
-
-      static ICVar* pAimDebug = gEnv->pConsole->GetCVar("g_aimdebug");
-      if (pAimDebug && pAimDebug->GetIVal() > 1)
-      {
-        float color[] = {1,1,1,1};
-        gEnv->pRenderer->Draw2dLabel(300, 300, 1.2f, color, false, "    + %.2f", add);
-        gEnv->pRenderer->Draw2dLabel(300, 315, 1.2f, color, false, "    - %.2f", sub);
-        gEnv->pRenderer->Draw2dLabel(300, 335, 1.3f, color, false, "heat: %.2f", m_heat);
-      }
 
 			if (m_heat >= 1.0f)
 			{
