@@ -3551,8 +3551,6 @@ void CPlayer::SetHealth(int health )
 		}
 		// report normal death
 		CALL_PLAYER_EVENT_LISTENERS(OnDeath(this, false));
-		if (gEnv->bMultiplayer == false && IsClient())
-			g_pGame->GetIGameFramework()->GetIGameplayRecorder()->Event(GetEntity(), eGE_Death);
 
 		SendMusicLogicEvent(eMUSICLOGICEVENT_PLAYER_KILLED);
 	}

@@ -596,10 +596,6 @@ int CScriptBind_HUD::SpawnGroupInvalid(IFunctionHandler *pH)
 
 int CScriptBind_HUD::FakeDeath(IFunctionHandler *pH)
 {
-	CHUD *pHUD = g_pGame->GetHUD();
-	if (pHUD && !pHUD->IsFakeDead())
-		pHUD->FakeDeath();
-
 	return pH->EndFunction();
 }
 

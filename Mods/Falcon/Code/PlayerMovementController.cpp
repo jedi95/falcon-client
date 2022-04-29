@@ -57,8 +57,6 @@ CPlayerMovementController::CPlayerMovementController( CPlayer * pPlayer ) : m_pP
 	m_aimTarget=Vec3(ZERO);
 	m_fireTarget=Vec3(ZERO);
 	Reset();
-
-
 }
 
 void CPlayerMovementController::Reset()
@@ -80,10 +78,9 @@ void CPlayerMovementController::Reset()
 	m_strengthJump = false;
 	m_idleChecker.Reset(this);
 
-	if(!GetISystem()->IsSerializingFile() == 1)
+	if(GetISystem()->IsSerializingFile() != 1)
 		UpdateMovementState( m_currentMovementState );
 
-	//
 	m_aimTargets.resize(1);
 	uint32 numAimTargets = m_aimTargets.size();
 	for (uint32 i=0; i<numAimTargets; i++)
@@ -171,7 +168,6 @@ bool CPlayerMovementController::RequestMovement( CMovementRequest& request )
 	else if (request.RemoveAimTarget())
 	{
 		state.ClearAimTarget();
-		//state.SetNoAiming();
 	}
 
 	if (request.HasBodyTarget())
@@ -259,33 +255,6 @@ bool CPlayerMovementController::RequestMovement( CMovementRequest& request )
 		m_state = state;
 	}
 
-//	if (ICharacterInstance * pChar = m_pPlayer->GetEntity()->GetCharacter(0))
-//		pChar->GetISkeleton()->SetFuturePathAnalyser( (m_state.HasPathTarget() || m_state.HasMoveTarget())? 1 : 0 );
-
-/*
-	if (m_state.HasPathTarget())
-	{
-		SAnimationTargetRequest req;
-		if (m_state.HasDesiredBodyDirectionAtTarget())
-		{
-			req.direction = m_state.GetDesiredBodyDirectionAtTarget();
-			req.directionRadius = DEG2RAD(1.0f);
-		}
-		else
-		{
-			req.direction = FORWARD_DIRECTION;
-			req.directionRadius = DEG2RAD(180.0f);
-		}
-		req.position = m_state.GetPathTarget();
-
-		IAnimationSpacialTrigger * pTrigger = m_pPlayer->GetAnimationGraphState()->SetTrigger( req );
-		if (m_state.HasDesiredSpeedAtTarget())
-			pTrigger->SetInput("DesiredSpeed", m_state.GetDesiredSpeedAtTarget());
-		else
-			pTrigger->SetInput("DesiredSpeed", 0.0f); // TODO: workaround to test
-	}
-*/
-
 	if (request.HasActorTarget())
 	{
 		const SActorTargetParams& p = request.GetActorTarget();
@@ -357,16 +326,6 @@ ILINE static Quat GetTargetRotation( Vec3 oldTarget, Vec3 newTarget, Vec3 origin
 		return Quat::CreateRotationV0V1( oldDir, newDir );
 }
 
-static void DrawArrow( Vec3 from, Vec3 to, float length, float * clr )
-{
-	float r = clr[0];
-	float g = clr[1];
-	float b = clr[2];
-	float color[] = {r,g,b,1};
-	gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine( from, ColorF(r,g,b,1), to, ColorF(r,g,b,1) );
-	gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere( to, 0.05f, ColorF(r,g,b,1) );
-}
-
 static float bias( float b, float t )
 {
 	if (b == 0.0f)
@@ -381,14 +340,6 @@ static float gain( float g, float t )
 	else
 		return 1.0f - bias( 1.0f-g, 2.0f-2.0f*t );
 }
-
-static float white[4] = {1,1,1,1};
-static float blue[4] = {0,0,1,1};
-static float red[4] = {1,0,0,1};
-static float yellow[4] = {1,1,0,1};
-static float green[4] = {0,1,0,1};
-static CTimeValue lastTime;
-static int y = 100;
 
 void CPlayerMovementController::BindInputs( IAnimationGraphState * pAGState )
 {
@@ -408,39 +359,10 @@ bool CPlayerMovementController::Update( float frameTime, SActorFrameMovementPara
 	params.lookTarget = Vec3(-1,-1,-1);
 	params.aimTarget = Vec3(-1,-1,-1);
 
-/*
-	if (m_pPlayer->IsFrozen())
-	{
-		params.lookTarget = Vec3(-2,-2,-2);
-		params.aimTarget = Vec3(-2,-2,-2);
-
-		if (m_state.HasAimTarget())
-		{
-			Vec3 aimTarget = m_state.GetAimTarget();
-			if (!aimTarget.IsValid())
-				CryError("");
-			m_state.ClearAimTarget();
-		}
-
-		if (m_state.HasLookTarget())
-		{
-			Vec3 lookTarget = m_state.GetLookTarget();
-			if (!lookTarget.IsValid())
-				CryError("");
-			m_state.ClearLookTarget();
-		}
-	}
-*/
-
 	if (m_updateFunc)
 	{
 		ok = (this->*m_updateFunc)(frameTime, params);
 	}
-
-
-//	m_state.RemoveDeltaMovement();
-//	m_state.RemoveDeltaRotation();
-
 	return ok;
 }
 
@@ -552,50 +474,6 @@ bool CPlayerMovementController::CTargetInterpolator::GetTarget(
 	return retVal;
 }
 
-static void DebugDrawWireFOVCone(IRenderer* pRend, const Vec3& pos, const Vec3& dir, float rad, float fov, ColorB col)
-{
-	const unsigned npts = 32;
-	const unsigned npts2 = 16;
-	Vec3	points[npts];
-	Vec3	pointsx[npts2];
-	Vec3	pointsy[npts2];
-
-	Matrix33	base;
-	base.SetRotationVDir(dir);
-
-	fov *= 0.5f;
-
-	float coneRadius = sinf(fov) * rad;
-	float coneHeight = cosf(fov) * rad;
-
-	for(unsigned i = 0; i < npts; i++)
-	{
-		float	a = ((float)i / (float)npts) * gf_PI2;
-		float rx = cosf(a) * coneRadius;
-		float ry = sinf(a) * coneRadius;
-		points[i] = pos + base.TransformVector(Vec3(rx, coneHeight, ry));
-	}
-
-	for(unsigned i = 0; i < npts2; i++)
-	{
-		float	a = -fov + ((float)i / (float)(npts2-1)) * (fov*2);
-		float rx = sinf(a) * rad;
-		float ry = cosf(a) * rad;
-		pointsx[i] = pos + base.TransformVector(Vec3(rx, ry, 0));
-		pointsy[i] = pos + base.TransformVector(Vec3(0, ry, rx));
-	}
-
-	pRend->GetIRenderAuxGeom()->DrawPolyline(points, npts, true, col);
-	pRend->GetIRenderAuxGeom()->DrawPolyline(pointsx, npts2, false, col);
-	pRend->GetIRenderAuxGeom()->DrawPolyline(pointsy, npts2, false, col);
-
-	pRend->GetIRenderAuxGeom()->DrawLine(points[0], col, pos, col);
-	pRend->GetIRenderAuxGeom()->DrawLine(points[npts/4], col, pos, col);
-	pRend->GetIRenderAuxGeom()->DrawLine(points[npts/2], col, pos, col);
-	pRend->GetIRenderAuxGeom()->DrawLine(points[npts/2+npts/4], col, pos, col);
-}
-
-
 static bool ClampTargetPointToCone(Vec3& target, const Vec3& pos, const Vec3& dir, float coneAngle)
 {
 	Vec3	reqDir = target - pos;
@@ -643,7 +521,6 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 
 	params.desiredVelocity = Vec3(0,0,0);
 	params.lookTarget = m_currentMovementState.eyePosition + m_currentMovementState.eyeDirection * 10.0f;
-//	params.aimTarget = m_currentMovementState.handPosition + m_currentMovementState.aimDirection * 10.0f;
 	if(m_state.HasAimTarget())
 		params.aimTarget = m_state.GetAimTarget();
 	else
@@ -667,8 +544,6 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 
 			Vec3 pos = pEntity->GetWorldPos();
 			pos.z += 0.3f;	// move position up a bit so it doesn't intersect the ground.
-
-			//pRend->GetIRenderAuxGeom()->DrawLine( pos, ColorF(1,1,1,0.5f), pos + dir, ColorF(1,1,1,0.5f) );
 
 			ray_hit hit;
 			static const int obj_types = ent_static|ent_rigid|ent_sleeping_rigid|ent_living;
@@ -748,13 +623,6 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 		float animTargetFwdDepthFraction = max(0.0f, animTargetFwdDir.Dot(moveDirection2d));
 		float animTargetFwdDepth = LERP(1.0f, 3.0f, animTargetFwdDepthFraction);
 
-/*
-		Vec3 bump(0,0,0.1f);
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(pAnimTarget->position+bump, 0.05f, ColorB(255,255,255,255), true);
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(pAnimTarget->position+bump, ColorB(255,255,255,255), 
-			pAnimTarget->position+bump + animTargetFwdDepth * animTargetFwdDir, ColorB(255,255,255,255), 4.0f);
-*/
-
 		bodyTarget = pAnimTarget->position + animTargetFwdDepth * animTargetFwdDir;
 		bodyTargetType = "animation";
 		hasBodyTarget = true;
@@ -830,8 +698,6 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 			float stanceSpeed=m_pPlayer->GetStanceMaxSpeed(m_pPlayer->GetStance());
 			if ((desiredSpeed > MIN_DESIRED_SPEED) && stanceSpeed>0.001f)
 			{
-				//pRend->GetIRenderAuxGeom()->DrawLine( playerPos, ColorF(1,1,1,1), playerPos + desiredMovement, ColorF(1,1,1,1) );
-
 				//calculate the desired speed amount (0-1 length) in world space
 				params.desiredVelocity = desiredMovement * desiredSpeed / stanceSpeed;
 				viewFollowMovement = 1.0f; //5.0f * desiredSpeed / stanceSpeed;
@@ -843,29 +709,7 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 		}
 	}
 
-/*	if (m_state.HasAimTarget())
-	{
-		float aimLength = (m_currentMovementState.weaponPosition - m_state.GetAimTarget()).GetLengthSquared();
-		float aimLimit = 9.0f * 9.0f;
-		if (aimLength < aimLimit)
-		{
-			float mult = aimLength / aimLimit;
-			viewFollowMovement *= mult * mult;
-		}
-	}*/
 	float distanceToEnd(m_state.GetDistanceToPathEnd()); // TODO: Warning, a comment above say this function returns incorrect values.
-/*	if (distanceToEnd>0.001f)
-	{
-		float lookOnPathLimit(7.0f);
-		if (distanceToEnd<lookOnPathLimit)
-		{
-			float mult(distanceToEnd/lookOnPathLimit);
-			viewFollowMovement *= mult * mult;
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere( playerPos, 0.5f, ColorF(1,1,1,1) );
-		}
-		//pRend->Draw2dLabel( 100, 100, 1.0f, yellow, false, "distance:%.1f", distanceToEnd);
-	}*/
-
 	if (allowStrafing)
 		viewFollowMovement = 0.0f;
 
@@ -919,12 +763,6 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 		hasLookTarget = true;
 		tgt = m_state.GetAimTarget();
 		lookType = "aim";
-
-		/*		if (m_state.HasFireTarget() && m_state.GetFireTarget().Dot(m_state.GetAimTarget()) < cry_cosf(MAX_FIRE_TARGET_DELTA_ANGLE))
-		{
-		tgt = m_state.GetFireTarget();
-		lookType = "fire";
-		}*/
 	}
 	else if (hasMoveTarget)
 	{
@@ -941,7 +779,6 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 		tgt = m_lookInterpolator.GetTarget();
 		lookType = "lastLook";
 	}
-//	AdjustForMovement( tgt, moveTarget, playerPos, viewFollowMovement );
 
 	Vec3 lookTarget = tgt;
 
@@ -961,13 +798,10 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 		hasAimTarget = true;
 		tgt = m_state.GetAimTarget();
 		aimType = "aim";
-//		AdjustForMovement( tgt, moveTarget, playerPos, viewFollowMovement );
 	}
 
 	Vec3 aimTarget = tgt;
-
-	//if ((pAnimTarget == NULL) || (!pAnimTarget->activated)) // (Dejan was not sure about this yet, for leaning and such stuff.)
-		m_aimInterpolator.TargetValue( tgt, now, AIM_TIME, frameTime, hasAimTarget, playerPos, MAX_AIM_AT_ANGULAR_VELOCITY );
+	m_aimInterpolator.TargetValue( tgt, now, AIM_TIME, frameTime, hasAimTarget, playerPos, MAX_AIM_AT_ANGULAR_VELOCITY );
 
 	const char * ikType = "none";
 
@@ -1509,43 +1343,7 @@ Vec3 CPlayerMovementController::ProcessAimTarget(const Vec3 &newTarget,float fra
 	Vec3 delta(m_aimTargets[0] - newTarget);
 	m_aimTargets[0] = Vec3::CreateLerp(m_aimTargets[0],newTarget,min(1.0f,frameTime*max(1.0f,delta.len2()*1.0f)));
 
-	//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine( newTarget, ColorF(1,0,0,1), m_aimTargets[0], ColorF(1,0,0,1) );
-
 	return m_aimTargets[0];
-	/*int targets(m_aimTargets.size());
-
-	m_aimTargets[m_aimTargetsCount++] = newTarget;
-	bool exit;
-	do
-	{
-		exit = true;
-
-		if (m_aimTargetsCount == m_aimTargetsIterator)
-		{
-			exit = false;
-			++m_aimTargetsCount;
-		}
-		if (m_aimTargetsCount>=targets)
-			m_aimTargetsCount = 0;
-	}
-	while(!exit);
-
-	float holdTime(0.55f);
-	m_aimNextTarget -= frameTime;
-	if (m_aimNextTarget<0.001f)
-	{
-		m_aimNextTarget = holdTime;
-
-		++m_aimTargetsIterator;
-		if (m_aimTargetsIterator>=targets)
-			m_aimTargetsIterator = 0;
-	}
-
-	int nextIter(m_aimTargetsIterator+1);
-	if (nextIter>=targets)
-		nextIter = 0;
-
-	return Vec3::CreateLerp(m_aimTargets[nextIter],m_aimTargets[m_aimTargetsIterator],m_aimNextTarget*(1.0f/holdTime));*/
 }
 
 void CPlayerMovementController::Release()

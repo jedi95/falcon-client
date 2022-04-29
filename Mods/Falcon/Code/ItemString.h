@@ -119,18 +119,6 @@ namespace SharedString
 			free(pEntry);
 */
 		}
-
-		void Dump()
-		{
-			CryLogAlways("NameTable: %d entries", m_nameMap.size());
-			NameMap::const_iterator iter = m_nameMap.begin();
-			NameMap::const_iterator iterEnd = m_nameMap.end();
-			while (iter != iterEnd)
-			{
-				CryLogAlways("'%s'", iter->first);
-				++iter;
-			}
-		}
 	private:
 		typedef stl::hash_map<const char*,SNameEntry*,hash_strcmp<const char*> > NameMap;
 		NameMap m_nameMap;
@@ -177,11 +165,6 @@ namespace SharedString
 			CSharedString name = CSharedString(str);
 			name._addref(name.c_str());
 			return name.c_str();
-		}
-
-		static void DumpNameTable()
-		{
-			GetNameTable()->Dump();
 		}
 
 	private:

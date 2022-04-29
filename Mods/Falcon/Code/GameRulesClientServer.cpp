@@ -266,21 +266,6 @@ void CGameRules::ProcessServerHit(HitInfo &hitInfo)
 				++iter;
 			}
 		}
-
-		CActor *pShooter=GetActorByEntityId(hitInfo.shooterId);
-		if (pShooter && hitInfo.shooterId!=hitInfo.targetId && hitInfo.weaponId!=hitInfo.shooterId && hitInfo.weaponId!=hitInfo.targetId && hitInfo.damage>=0)
-		{
-			EntityId params[2];
-			params[0] = hitInfo.weaponId;
-			params[1] = hitInfo.targetId;
-			m_pGameplayRecorder->Event(pShooter->GetEntity(), GameplayEvent(eGE_WeaponHit, 0, 0, (void *)params));
-		}
-
-		if (pShooter)
-			m_pGameplayRecorder->Event(pShooter->GetEntity(), GameplayEvent(eGE_Hit, 0, 0, (void *)hitInfo.weaponId));
-
-		if (pShooter)
-			m_pGameplayRecorder->Event(pShooter->GetEntity(), GameplayEvent(eGE_Damage, 0, hitInfo.damage, (void *)hitInfo.weaponId));
 	}
 }
 
@@ -489,12 +474,6 @@ void CGameRules::ClientExplosion(const ExplosionInfo &explosionInfo)
 			{
 				SAFE_SOUNDMOODS_FUNC(AddSoundMood(SOUNDMOOD_EXPLOSION,MIN(fDeltaSuitEnergy+fDeltaHealth,100.0f)));
 			}
-		}
-
-		if(!gEnv->bMultiplayer && g_pGameCVars->g_spRecordGameplay)
-		{
-			float distance = (explosion.epicenter-pClientActor->GetEntity()->GetWorldPos()).len();
-			m_pGameplayRecorder->Event(pClientActor->GetEntity(), GameplayEvent(eGE_Explosion, 0, distance, 0));
 		}
 
 		// call hit listeners if any
@@ -1224,7 +1203,6 @@ IMPLEMENT_RMI(CGameRules, ClEnteredGame)
 			int status[2];
 			status[0] = GetTeam(pActor->GetEntityId());
 			status[1] = pActor->GetSpectatorMode();
-			m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Connected, 0, 0, (void*)status));
 			gEnv->pScriptSystem->ExecuteFile("Scripts/init_falcon.lua", false, true);
 		}
 	}

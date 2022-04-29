@@ -52,7 +52,6 @@ class CHUDScore;
 class CHUDTextChat;
 class CHUDObituary;
 class CHUDTextArea;
-class CHUDTweakMenu;
 class CHUDVehicleInterface;
 class CHUDPowerStruggle;
 class CHUDTeamInstantAction;
@@ -485,15 +484,11 @@ public:
 	void ShowKillAreaWarning(bool active, int timer);
 	void ShowTargettingAI(EntityId id);
 	void ShowProgress(int progress = -1, bool init = false, int posX = 0, int posY = 0, const char* text = NULL, bool topText = true, bool lockingBar = false);
-	void FakeDeath(bool revive = false);
 	ILINE bool IsFakeDead() { return (m_fPlayerRespawnTimer)?true:false; }
 	void ShowDataUpload(bool active);
-	void ShowSpectate(bool active);
 	void ShowWeaponsOnGround();
-	void ShowTeamMates();
 	void FireModeSwitch(bool grenades = false);
 	ILINE int GetSelectedFiremode() const { return m_curFireMode; }
-	void DrawGroundCircle(Vec3 pos, float radius, float thickness = 1.0f, float anglePerSection = 5.0f, ColorB col = ColorB(255,0,0,255), bool aligned = true, float offset = 0.1f, bool useSecondColor = false, ColorB colB = ColorB(0,255,0,255));
 
 	// called from CHUDRadar
 	void OnEntityAddedToRadar(EntityId entityId);
@@ -607,7 +602,6 @@ private:
 	CHUDTextChat					*m_pHUDTextChat;
 	CHUDObituary					*m_pHUDObituary;
 	CHUDTextArea					*m_pHUDTextArea;
-	CHUDTweakMenu					*m_pHUDTweakMenu;
 	CHUDVehicleInterface	*m_pHUDVehicleInterface;
 	CHUDPowerStruggle			*m_pHUDPowerStruggle;
 	CHUDTeamInstantAction	*m_pHUDTeamInstantAction;

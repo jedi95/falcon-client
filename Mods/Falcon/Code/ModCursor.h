@@ -2,10 +2,11 @@
 
 #ifndef _MOD_CURSOR
 #define _MOD_CURSOR
- 
+
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "resource.h"
- 
+
 #undef GetUserName // This is a macro in windows.h, gives issues with GetUserName() of ISystem
 
 

@@ -44,7 +44,6 @@
 #include <IConsole.h>
 #include <ITimer.h>
 #include <ILog.h>
-#include <IGameplayRecorder.h>
 
 #ifndef GAMEDLL_EXPORTS
 #define GAMEDLL_EXPORTS

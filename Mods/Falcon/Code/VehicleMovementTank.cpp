@@ -547,48 +547,7 @@ void CVehicleMovementTank::ProcessAI(const float deltaTime)
 //------------------------------------------------------------------------
 void CVehicleMovementTank::Update(const float deltaTime)
 {
-
-
 	CVehicleMovementStdWheeled::Update(deltaTime); 
-
-	if (IsProfilingMovement())
-	{
-		if (m_steeringImpulseMin > 0.f && m_wheelContactsLeft != 0 && m_wheelContactsRight != 0)
-		{  
-			const Matrix34& worldTM = m_pVehicle->GetEntity()->GetWorldTM();   
-			Vec3 localVel = worldTM.GetInvertedFast().TransformVector(m_statusDyn.v);
-			Vec3 localW = worldTM.GetInvertedFast().TransformVector(m_statusDyn.w);
-			float speed = m_statusDyn.v.len();
-			float speedRatio = min(1.f, speed/m_maxSpeed);
-
-			const float maxW = 0.3f*gf_PI;
-			float steer = abs(m_currSteer)>0.001f ? m_currSteer : 0.f;    
-			float desired = steer * maxW; 
-			float curr = -localW.z;
-			float err = desired - curr; // err>0 means correction to right 
-			Limit(err, -maxW, maxW);
-
-			if (abs(err) > 0.01f)
-			{ 
-				float amount = m_steeringImpulseMin + speedRatio*(m_steeringImpulseMax-m_steeringImpulseMin);
-
-				float corr = -err * amount * m_statusDyn.mass * deltaTime;
-
-				pe_action_impulse imp;
-				imp.iApplyTime = 1;      
-				imp.angImpulse = worldTM.GetColumn2() * corr;
-
-				float color[] = {1,1,1,1};
-				gEnv->pRenderer->Draw2dLabel(300,300,1.5f,color,false,"err: %.2f ", err);
-				gEnv->pRenderer->Draw2dLabel(300,320,1.5f,color,false,"corr: %.3f", corr/m_statusDyn.mass);
-
-				IRenderAuxGeom* pGeom = gEnv->pRenderer->GetIRenderAuxGeom();
-				float len = 4.f * imp.angImpulse.len() / deltaTime / m_statusDyn.mass;
-				Vec3 dir = -sgn(corr) * worldTM.GetColumn0(); //imp.angImpulse.GetNormalized();
-				pGeom->DrawCone(worldTM.GetTranslation()+Vec3(0,0,5)-(dir*len), dir, 0.5f, len, ColorB(128,0,0,255));        
-			}
-		}
-	}
 }
 
 //------------------------------------------------------------------------

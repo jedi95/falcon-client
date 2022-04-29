@@ -497,9 +497,7 @@ public:
 
 	void ForceSynchedStorageSynch(int channel);
 
-
 	void PlayerPosForRespawn(CPlayer* pPlayer, bool save);
-	void SPNotifyPlayerKill(EntityId targetId, EntityId weaponId, bool bHeadShot);
 
 	void CreateRestrictedItemList(const char* restrictedItems);
 	bool IsItemAllowed(const char* itemName);
@@ -1090,7 +1088,6 @@ protected:
 	};
 
 	IGameFramework			*m_pGameFramework;
-	IGameplayRecorder		*m_pGameplayRecorder;
 	ISystem							*m_pSystem;
 	IActorSystem				*m_pActorSystem;
 	IEntitySystem				*m_pEntitySystem;

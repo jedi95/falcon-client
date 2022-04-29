@@ -1309,7 +1309,6 @@ protected:
 	static IEntitySystem		*m_pEntitySystem;
 	static IItemSystem			*m_pItemSystem;
 	static IGameFramework		*m_pGameFramework;
-	static IGameplayRecorder*m_pGameplayRecorder;
 
 	bool									m_bPostPostSerialize;
 

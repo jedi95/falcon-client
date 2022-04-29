@@ -63,18 +63,7 @@ CModCursor *m_pCursor = 0;
 
 #include "ILauncher.h"
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
 #define CRYSIS_GUID "{5C95C427-DCFE-4d7a-ACE4-225C6FECA84F}"	// new for Crysis Wars
-
-//FIXME: really horrible. Remove ASAP
-int OnImpulse( const EventPhys *pEvent ) 
-{ 
-	//return 1;
-	return 0;
-}
-
 
 // Needed for the Game02 specific flow node
 CG2AutoRegFlowNodeBase *CG2AutoRegFlowNodeBase::m_pFirst=0;
@@ -181,11 +170,8 @@ bool CGame::Init(IGameFramework *pFramework)
 		}
 	}
 
-  // Register all the games factory classes e.g. maps "Player" to CPlayer
-  InitGameFactory(m_pFramework);
-
-	//FIXME: horrible, remove this ASAP
-	//gEnv->pPhysicalWorld->AddEventClient( EventPhysImpulse::id,OnImpulse,0 );  
+	// Register all the games factory classes e.g. maps "Player" to CPlayer
+	InitGameFactory(m_pFramework);
 
 	m_pWeaponSystem = new CWeaponSystem(this, GetISystem());
 
@@ -194,11 +180,6 @@ bool CGame::Init(IGameFramework *pFramework)
 	m_pWeaponSystem->Scan(itemFolder.c_str());
 
 	m_pOptionsManager = COptionsManager::CreateOptionsManager();
- 
-	//Ivo: initialites the Crysis conversion file.
-	//this is a conversion solution for the Crysis game DLL. Other projects don't need it.
-	// No need anymore
-	//gEnv->pCharacterManager->LoadCharacterConversionFile("Objects/CrysisCharacterConversion.ccc");
 
 	// set game GUID
 	m_pFramework->SetGameGUID(CRYSIS_GUID);

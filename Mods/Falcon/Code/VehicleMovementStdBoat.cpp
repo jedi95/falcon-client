@@ -231,89 +231,6 @@ void CVehicleMovementStdBoat::Update(const float deltaTime)
 
 		SetSoundParam(eSID_Run, "slip", 0.2f*abs(localVel.x)); 
 	}
-
-	if (IsProfilingMovement() && g_pGameCVars->v_profileMovement != 2)
-	{
-		IEntity* pEntity = m_pVehicle->GetEntity();
-		const Matrix34& wTM = pEntity->GetWorldTM();  
-		Matrix34 wTMInv = wTM.GetInvertedFast();
-
-		Vec3 localVel = wTMInv.TransformVector( m_statusDyn.v );
-		Vec3 localW = wTMInv.TransformVector( m_statusDyn.w );   
-
-		float speed = m_statusDyn.v.len2() > 0.001f ? m_statusDyn.v.len() : 0.f;    
-		float speedRatio = min(1.f, speed/m_maxSpeed);  
-		float absPedal = abs(m_movementAction.power);
-		float absSteer = abs(m_movementAction.rotateYaw);
-		float velDotForward = (speed > 0.f) ? m_statusDyn.v.GetNormalized()*wTM.GetColumn1() : 1.f;
-
-		static const float fSubmergedMin = 0.01f;
-		static const float fWaterLevelMaxDiff = 0.5f; // max allowed height difference between propeller center and water level
-
-		Vec3 worldPropPos = wTM * m_pushOffset;  
-		float waterLevelWorld = gEnv->p3DEngine->GetWaterLevel( &worldPropPos );
-		float fWaterLevelDiff = worldPropPos.z - waterLevelWorld;  
-
-		// wave stuff 
-		float waveFreq = 1.f;
-		waveFreq += 3.f*speedRatio;
-		float kx = m_waveIdleStrength.x*(m_waveRandomMult+0.3f) + m_waveSpeedMult*speedRatio;
-		float ky = m_waveIdleStrength.y * (1.f - 0.5f*absPedal - 0.5f*absSteer);
-		Vec3 waveLoc = m_massOffset;
-		waveLoc.y += speedRatio*min(0.f, m_pushOffset.y-m_massOffset.y);
-		waveLoc = wTM * waveLoc;
-
-		IRenderer* pRenderer = gEnv->pRenderer;
-		static float color[4] = {1,1,1,1};    
-		float colorRed[4] = {1,0,0,1};
-		float colorGreen[4] = {0,1,0,1};
-		float y=50.f, step1=15.f, step2=20.f, size1=1.3f, size2=1.5f;
-
-		pRenderer->Draw2dLabel(5.0f,   y, size2, color, false, "Boat movement");
-		pRenderer->Draw2dLabel(5.0f,  y+=step2, size1, color, false, "Speed: %.1f (%.1f km/h)", speed, speed*3.6f);
-		pRenderer->Draw2dLabel(5.0f,  y+=step1, size1, color, false, "LocalW.z norm: %.2f", abs(localW.z)/m_turnRateMax);
-		if (m_velLift > 0.f)
-		{
-			pRenderer->Draw2dLabel(5.0f,  y+=step2, size1, m_lifted ? colorGreen : color, false, m_lifted ? "Lifted" : "not lifted");
-			//pRenderer->Draw2dLabel(5.0f,  y+=step2, size1, color, false, "Impulse lift: %.0f", liftImp.impulse.len());               
-		}    
-		pRenderer->Draw2dLabel(5.0f,  y+=step1, size1, m_statusDyn.submergedFraction > fSubmergedMin ? color : colorRed, false, "Submerged: %.2f", m_statusDyn.submergedFraction);
-		pRenderer->Draw2dLabel(5.0f,  y+=step1, size1, fWaterLevelDiff < fWaterLevelMaxDiff ? color : colorRed, false, "WaterLevel: %.2f (max: %.2f)", fWaterLevelDiff, fWaterLevelMaxDiff);
-
-		pRenderer->Draw2dLabel(5.0f,  y+=step2, size2, color, false, "Driver input");
-		pRenderer->Draw2dLabel(5.0f,  y+=step2, size1, color, false, "power: %.2f", m_movementAction.power);
-		pRenderer->Draw2dLabel(5.0f,  y+=step1, size1, color, false, "steer: %.2f", m_movementAction.rotateYaw); 
-
-		pRenderer->Draw2dLabel(5.0f,  y+=step2, size2, color, false, "Propelling");
-		//pRenderer->Draw2dLabel(5.0f,  y+=step2, size1, color, false, "turnAccel (norm/real): %.2f / %.2f", turnAccelNorm, turnAccel);         
-		//pRenderer->Draw2dLabel(5.0f,  y+=step1, size1, color, false, "Impulse acc: %.0f", linearImp.impulse.len());         
-		//pRenderer->Draw2dLabel(5.0f,  y+=step1, size1, color, false, "Impulse steer/damp: %.0f", angularImp.angImpulse.len()); 
-		//pRenderer->Draw2dLabel(5.0f,  y+=step1, size1, color, false, "Impulse corner: %.0f", dampImp.impulse.len());
-
-		pRenderer->Draw2dLabel(5.0f,  y+=step2, size2, color, false, "Waves");
-		pRenderer->Draw2dLabel(5.0f,  y+=step2, size1, color, false, "timer: %.1f", m_waveTimer); 
-		pRenderer->Draw2dLabel(5.0f,  y+=step1, size1, color, false, "frequency: %.2f", waveFreq); 
-		pRenderer->Draw2dLabel(5.0f,  y+=step1, size1, color, false, "random: %.2f", m_waveRandomMult); 
-		pRenderer->Draw2dLabel(5.0f,  y+=step1, size1, color, false, "kX: %.2f", kx);     
-		pRenderer->Draw2dLabel(5.0f,  y+=step1, size1, color, false, "kY: %.2f", ky); 
-
-		if (Boosting())
-			pRenderer->Draw2dLabel(5.0f,  y+=step1, size1, color, false, "Boost: %.2f", m_boostCounter);
-
-		IRenderAuxGeom* pGeom = pRenderer->GetIRenderAuxGeom();
-		ColorB colorB(0,255,0,255);
-
-		pRenderer->DrawLabel(worldPropPos, 1.3f, "WL: %.2f", waterLevelWorld);
-
-		pGeom->DrawSphere(worldPropPos, 0.15f, colorB);
-		pGeom->DrawSphere(waveLoc, 0.25f, colorB);
-		pGeom->DrawLine(waveLoc, colorB, waveLoc+Vec3(0,0,2), colorB);
-
-		// impulses
-		//DrawImpulse(linearImp, Vec3(0,0,1), 3.f/deltaTime, ColorB(255,0,0,255));
-		//DrawImpulse(angularImp, Vec3(0,0,1), 2.f/deltaTime, ColorB(128,0,0,255));          
-		//DrawImpulse(liftImp, Vec3(0,0,6), 2.f/deltaTime, ColorB(0,0,255,255));
-	}
 }
 
 //------------------------------------------------------------------------
@@ -565,15 +482,7 @@ void CVehicleMovementStdBoat::UpdateSurfaceEffects(const float deltaTime)
     Vec3 pos = tm.GetTranslation();
     pos.z = worldTMInv.TransformPoint(Vec3(wakePos.x,wakePos.y,wakeWaterLevel)).z + 0.2f;
     tm.SetTranslation(pos);
-    pEntity->SetSlotLocalTM(m_wakeSlot, tm);
-
-    if (IsProfilingMovement())
-    {
-      Vec3 wPos = worldTM * tm.GetTranslation();
-      ColorB col(128, 128, 0, 200);
-      gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(wPos, 0.4f, col);
-      gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(wPos, col, wPos+Vec3(0,0,1.5f), col);
-    }          
+    pEntity->SetSlotLocalTM(m_wakeSlot, tm);        
   } 
 
   m_lastWakePos = wakePos;
@@ -933,21 +842,6 @@ void CVehicleMovementStdBoat::ProcessMovement(const float deltaTime)
   
   if (m_bNetSync && m_netActionSync.PublishActions( CNetworkMovementStdBoat(this) ))
     m_pVehicle->GetGameObject()->ChangedNetworkState( eEA_GameClientDynamic );
-}
-
-//------------------------------------------------------------------------
-void CVehicleMovementStdBoat::DrawImpulse(const pe_action_impulse& action, Vec3 offset, float scale, const ColorB& col)
-{
-  if (!is_unused(action.impulse) && action.impulse.len2()>0)
-  {
-    IRenderAuxGeom* pGeom = gEnv->pRenderer->GetIRenderAuxGeom();
-    Vec3 start = action.point + offset;
-    Vec3 end = start - (action.impulse*scale/m_pVehicle->GetMass());
-    Vec3 dir = (start-end).GetNormalizedSafe();
-    pGeom->DrawCone(start-1.f*dir, dir, 0.5f, 1.f, col);
-    pGeom->DrawLine(start, col, end, col);
-    pGeom->DrawSphere(end, 0.25f, col);
-  }  
 }
 
 //------------------------------------------------------------------------

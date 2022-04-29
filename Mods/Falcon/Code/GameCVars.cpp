@@ -295,7 +295,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 
 	pConsole->RegisterInt("cl_actorsafemode", 0, VF_CHEAT, "Enable/disable actor safe mode", BroadcastChangeSafeMode);
 	pConsole->Register("h_useIK", &h_useIK, 1, 0, "Hunter uses always IK");
-	pConsole->Register("h_drawSlippers", &h_drawSlippers, 0, 0, "Red ball when tentacle is lifted, green when on ground");
 	pConsole->Register("g_tentacle_joint_limit", &g_tentacle_joint_limit, -1.0f, 0, "forces specific tentacle limits; used for tweaking");
 	pConsole->Register("g_enableSpeedLean", &g_enableSpeedLean, 0, 0, "Enables player-controlled curve leaning in speed mode.");
 	//
@@ -450,10 +449,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_trooperBankingMultiplier", &g_trooperBankingMultiplier, 1, VF_DUMPTODISK, "Trooper banking multiplier coeff (0..x)");
 	pConsole->Register("g_alienPhysicsAnimRatio", &g_alienPhysicsAnimRatio, 0.0f, VF_CHEAT ); 
 
-	pConsole->Register("g_spRecordGameplay", &g_spRecordGameplay, 0, 0, "Write sp gameplay information to harddrive.");
-	pConsole->Register("g_spGameplayRecorderUpdateRate", &g_spGameplayRecorderUpdateRate, 1.0f, 0, "Update-delta of gameplay recorder in seconds.");
-
-
 	pConsole->Register("g_melee_damage", &g_meleeDamage, 27.0f, 0, "damage for a single melee hit");
 	pConsole->Register("g_melee_strength_damage", &g_meleeStrenghtDamage, 100.0f, 0, "damage for a single strength melee hit");
 
@@ -541,15 +536,11 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("hit_assistMultiplayerEnabled", &hit_assistMultiplayerEnabled, 1, 0, "Enable/disable minimum damage hit assistance in multiplayer games");
 
 	//movement cvars
-  pConsole->Register("v_profileMovement", &v_profileMovement, 0, 0, "Used to enable profiling of the current vehicle movement (1 to enable)");    
   pConsole->Register("v_pa_surface", &v_pa_surface, 1, VF_CHEAT, "Enables/disables vehicle surface particles");
   pConsole->Register("v_wind_minspeed", &v_wind_minspeed, 0.f, VF_CHEAT, "If non-zero, vehicle wind areas always set wind >= specified value");
-  pConsole->Register("v_draw_suspension", &v_draw_suspension, 0, VF_DUMPTODISK, "Enables/disables display of wheel suspension, for the vehicle that has v_profileMovement enabled");
-  pConsole->Register("v_draw_slip", &v_draw_slip, 0, VF_DUMPTODISK, "Draw wheel slip status");  
   pConsole->Register("v_invertPitchControl", &v_invertPitchControl, 0, VF_DUMPTODISK, "Invert the pitch control for driving some vehicles, including the helicopter and the vtol");
   pConsole->Register("v_sprintSpeed", &v_sprintSpeed, 0.f, 0, "Set speed for acceleration measuring");
   pConsole->Register("v_rockBoats", &v_rockBoats, 1, 0, "Enable/disable boats idle rocking");  
-  pConsole->Register("v_dumpFriction", &v_dumpFriction, 0, 0, "Dump vehicle friction status");
 	pConsole->Register("v_newBrakingFriction", &v_newBrakingFriction, 1, VF_CHEAT, "Change rear wheel friction under handbraking (true/false)");
 	pConsole->Register("v_newBoost", &v_newBoost, 0, VF_CHEAT, "Apply new boost scheme (true/false)");
 
@@ -851,11 +842,8 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("g_trooperTentacleAnimBlend", true);
 	pConsole->UnregisterVariable("g_trooperBankingMultiplier", true);
 
-	pConsole->UnregisterVariable("v_profileMovement", true);    
 	pConsole->UnregisterVariable("v_pa_surface", true);
 	pConsole->UnregisterVariable("v_wind_minspeed", true);
-	pConsole->UnregisterVariable("v_draw_suspension", true);
-	pConsole->UnregisterVariable("v_draw_slip", true);  
 	pConsole->UnregisterVariable("v_invertPitchControl", true);
 	pConsole->UnregisterVariable("v_sprintSpeed", true);
 	pConsole->UnregisterVariable("v_rockBoats", true);  
@@ -869,7 +857,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("v_zeroGSpeedModeEnergyConsumption", true);
 	pConsole->UnregisterVariable("v_zeroGSwitchableGyro", true);
 	pConsole->UnregisterVariable("v_zeroGEnableGBoots", true);
-	pConsole->UnregisterVariable("v_dumpFriction", true);
 	pConsole->UnregisterVariable("v_altitudeLimit", true);
 	pConsole->UnregisterVariable("v_altitudeLimitLowerOffset", true);
 	pConsole->UnregisterVariable("v_airControlSensivity", true);
@@ -1011,12 +998,6 @@ void SCVars::ReleaseCVars()
 }
 
 //------------------------------------------------------------------------
-void CGame::CmdDumpSS(IConsoleCmdArgs *pArgs)
-{
-	g_pGame->GetSynchedStorage()->Dump();
-}
-
-//------------------------------------------------------------------------
 void CGame::RegisterConsoleVars()
 {
 	assert(m_pConsole);
@@ -1025,12 +1006,6 @@ void CGame::RegisterConsoleVars()
 	{
 		m_pCVars->InitCVars(m_pConsole);    
 	}
-}
-
-//------------------------------------------------------------------------
-void CmdDumpItemNameTable(IConsoleCmdArgs *pArgs)
-{
-	SharedString::CSharedString::DumpNameTable();
 }
 
 //------------------------------------------------------------------------
@@ -1057,9 +1032,6 @@ void CGame::RegisterConsoleCommands()
 	m_pConsole->AddCommand("sv_say", CmdSay, 0, "Broadcasts a message to all clients.");
 	m_pConsole->AddCommand("i_reload", CmdReloadItems, 0, "Reloads item scripts.");
 
-	m_pConsole->AddCommand("dumpss", CmdDumpSS, 0, "test synched storage.");
-	m_pConsole->AddCommand("dumpnt", CmdDumpItemNameTable, 0, "Dump ItemString table.");
-
   m_pConsole->AddCommand("g_reloadGameRules", CmdReloadGameRules, 0, "Reload GameRules script");
   m_pConsole->AddCommand("g_quickGame", CmdQuickGame, 0, "Quick connect to good server.");
   m_pConsole->AddCommand("g_quickGameStop", CmdQuickGameStop, 0, "Cancel quick game search.");
@@ -1075,7 +1047,6 @@ void CGame::RegisterConsoleCommands()
 	m_pConsole->AddCommand("login_profile", CmdLoginProfile, 0, "Log in to GameSpy using email, profile and password as arguments");
 	m_pConsole->AddCommand("register", CmdRegisterNick, VF_CHEAT, "Register nickname with email, nickname and password");
 	m_pConsole->AddCommand("connect_crynet",CmdCryNetConnect,0,"Connect to online game server");
-	m_pConsole->AddCommand("preloadforstats","PreloadForStats()",VF_CHEAT,"Preload multiplayer assets for memory statistics.");
 
 	//Falcon
 	m_pConsole->AddCommand("sc", CmdRconSc, VF_RESTRICTEDMODE, "execute rcon command");
@@ -1105,8 +1076,6 @@ void CGame::UnregisterConsoleCommands()
 	m_pConsole->RemoveCommand("sv_restart");
 	m_pConsole->RemoveCommand("sv_say");
 	m_pConsole->RemoveCommand("i_reload");
-
-	m_pConsole->RemoveCommand("dumpss");
 
 	m_pConsole->RemoveCommand("g_reloadGameRules");
   m_pConsole->RemoveCommand("g_quickGame");

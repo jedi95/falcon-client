@@ -53,7 +53,6 @@ int CGameRules::s_barbWireID = 0;
 //------------------------------------------------------------------------
 CGameRules::CGameRules()
 : m_pGameFramework(0),
-	m_pGameplayRecorder(0),
 	m_pSystem(0),
 	m_pActorSystem(0),
 	m_pEntitySystem(0),
@@ -113,7 +112,6 @@ bool CGameRules::Init( IGameObject * pGameObject )
 	GetGameObject()->EnablePostUpdates(this);
 
 	m_pGameFramework = g_pGame->GetIGameFramework();
-	m_pGameplayRecorder = m_pGameFramework->GetIGameplayRecorder();
 	m_pSystem = m_pGameFramework->GetISystem();
 	m_pActorSystem = m_pGameFramework->GetIActorSystem();
 	m_pEntitySystem = m_pSystem->GetIEntitySystem();
@@ -622,12 +620,6 @@ bool CGameRules::OnClientConnect(int channelId, bool isReset)
 	CActor *pActor=GetActorByChannelId(channelId);
 	if (pActor)
 	{
-		//we need to pass team somehow so it will be reported correctly
-		int status[2];
-		status[0] = GetTeam(pActor->GetEntityId());
-		status[1] = pActor->GetSpectatorMode();
-		m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Connected, 0, m_pGameFramework->IsChannelOnHold(channelId)?1.0f:0.0f, (void*)status));
-
 		//notify client he has entered the game
 		GetGameObject()->InvokeRMIWithDependentObject(ClEnteredGame(), NoParams(), eRMI_ToClientChannel, pActor->GetEntityId(), channelId);
 		
@@ -657,9 +649,6 @@ void CGameRules::OnClientDisconnect(int channelId, EDisconnectionCause cause, co
 
 	if (!pActor)
 		return;
-
-	if (pActor)
-		m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Disconnected,"",keepClient?1.0f:0.0f));
 
 	if (keepClient)
 	{
@@ -913,10 +902,6 @@ void CGameRules::OnKillMessage(EntityId targetId, EntityId shooterId, const char
 		if(gEnv->bClient && client_id == targetId)
 			m_pRadio->CancelRadio();
 
-		if(!gEnv->bServer && gEnv->bClient && client_id == shooterId && client_id != targetId)
-		{
-			m_pGameplayRecorder->Event(gEnv->pGame->GetIGameFramework()->GetClientActor()->GetEntity(), GameplayEvent(eGE_Kill, weaponClassName)); 
-		}
 		SAFE_HUD_FUNC(ObituaryMessage(targetId, shooterId, weaponClassName, material, hit_type));
 	}	
 }
@@ -1012,8 +997,6 @@ void CGameRules::RevivePlayer(CActor *pActor, const Vec3 &pos, const Ang3 &angle
 
 	pActor->GetGameObject()->InvokeRMI(CActor::ClRevive(), CActor::ReviveParams(pos, angles, teamId), 
 		eRMI_ToAllClients|eRMI_NoLocalCalls);
-
-	m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Revive));
 }
 
 //------------------------------------------------------------------------
@@ -1071,8 +1054,6 @@ void CGameRules::RevivePlayerInVehicle(CActor *pActor, EntityId vehicleId, int s
 
 	pActor->GetGameObject()->InvokeRMI(CActor::ClReviveInVehicle(), 
 		CActor::ReviveInVehicleParams(vehicleId, seatId, teamId), eRMI_ToAllClients|eRMI_NoLocalCalls);
-
-	m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Revive));
 }
 
 
@@ -1121,8 +1102,6 @@ void CGameRules::RenamePlayer(CActor *pActor, const char *name)
 
 		if (INetChannel* pNetChannel = pActor->GetGameObject()->GetNetChannel())
 			pNetChannel->SetNickname(fixed.c_str());
-
-		m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Renamed, fixed));
 	}
 	else if (pActor->GetEntityId() == m_pGameFramework->GetClientActor()->GetEntityId())
 		GetGameObject()->InvokeRMIWithDependentObject(SvRequestRename(), params, eRMI_ToServer, params.entityId);
@@ -1236,11 +1215,6 @@ void CGameRules::KillPlayer(CActor *pActor, bool dropItem, bool ragdoll, EntityI
 	pActor->GetGameObject()->InvokeRMI(CActor::ClKill(),
 		CActor::KillParams(shooterId, weaponClassId, damage, material, hit_type, impulse, shooterhealth),
 		eRMI_ToAllClients|eRMI_NoLocalCalls);
-
-	m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Death));
-	if (shooterId && shooterId!=pActor->GetEntityId())
-		if (IActor *pShooter=m_pGameFramework->GetIActorSystem()->GetActor(shooterId))
-			m_pGameplayRecorder->Event(pShooter->GetEntity(), GameplayEvent(eGE_Kill, 0, 0, (void *)weaponId));
 }
 
 //------------------------------------------------------------------------
@@ -1264,7 +1238,6 @@ void CGameRules::ChangeSpectatorMode(CActor *pActor, uint8 mode, EntityId target
 		ScriptHandle handle(params.entityId);
 		ScriptHandle target(targetId);
 		CallScript(m_serverStateScript, "OnChangeSpectatorMode", handle, mode, target, resetAll);
-    m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Spectator, 0, (float)mode));
 	}
 	else if (pActor->GetEntityId() == m_pGameFramework->GetClientActor()->GetEntityId())
 		GetGameObject()->InvokeRMIWithDependentObject(SvRequestSpectatorMode(), params, eRMI_ToServer, params.entityId);
@@ -1793,9 +1766,6 @@ void CGameRules::SetTeam(int teamId, EntityId id)
 		CheckSpawnGroupValidity(id);
 
 	GetGameObject()->InvokeRMIWithDependentObject(ClSetTeam(), SetTeamParams(id, teamId), eRMI_ToRemoteClients, id);
-
-	if (IEntity *pEntity=m_pEntitySystem->GetEntity(id))
-		m_pGameplayRecorder->Event(pEntity, GameplayEvent(eGE_ChangedTeam, 0, (float)teamId));
 }
 
 //------------------------------------------------------------------------
@@ -4065,8 +4035,6 @@ bool CGameRules::TestEntitySpawnPosition(EntityId entityId, const Vec3 &position
 	box.m33=obb.Basis;
 	box.h=obb.size*0.5f;
 
-	gEnv->pRenderer->GetIRenderAuxGeom()->DrawOBB(box, ZERO, true, ColorB(1.0f, 1.0f, 1.0f, 1.0f), eBBD_Extremes_Color_Encoded);
-
 	if (dist<0.0001f)
 		return true;
 	return false;
@@ -4086,14 +4054,6 @@ void CGameRules::FreezeInput(bool freeze)
 #endif
 
 	g_pGameActions->FilterFreezeTime()->Enable(freeze);
-/*
-	if (IActor *pClientIActor=g_pGame->GetIGameFramework()->GetClientActor())
-	{
-		CActor *pClientActor=static_cast<CActor *>(pClientIActor);
-		if (CWeapon *pWeapon=pClientActor->GetWeapon(pClientActor->GetCurrentItemId()))
-			pWeapon->StopFire(pClientActor->GetEntityId());
-	}
-	*/
 }
 
 //------------------------------------------------------------------------
@@ -4263,13 +4223,6 @@ void CGameRules::PlayerPosForRespawn(CPlayer* pPlayer, bool save)
 	{
 		pPlayer->GetEntity()->SetWorldTM(respawnPlayerTM);
 	}
-}
-
-void CGameRules::SPNotifyPlayerKill(EntityId targetId, EntityId weaponId, bool bHeadShot)
-{
-	IActor *pActor = gEnv->pGame->GetIGameFramework()->GetClientActor();
-	if (pActor)
-		m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Kill)); 
 }
 
 

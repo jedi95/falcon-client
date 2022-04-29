@@ -77,8 +77,4 @@ inline bool GetLuaVarRecursive(const char *sKey, ScriptAnyValue &result,const Sc
 	return bRet;
 }
 
-// Dump a table out to a file stream as LUA code
-bool DumpLuaTable( IScriptTable * table, FILE * file, string &str);
-
-
 #endif __SCRIPTUTILS_H__

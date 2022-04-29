@@ -95,14 +95,6 @@ const char *CHUDTagNames::GetPlayerRank(EntityId uiEntityId)
 
 bool CHUDTagNames::ProjectOnSphere(Vec3 &rvWorldPos,const AABB &rBBox)
 {
-/*	SAuxGeomRenderFlags oldRF = gEnv->pRenderer->GetIRenderAuxGeom()->GetRenderFlags();
-	SAuxGeomRenderFlags newRF;
-	newRF.SetAlphaBlendMode(e_AlphaBlended);
-	newRF.SetDepthWriteFlag(e_DepthWriteOff);
-	gEnv->pRenderer->GetIRenderAuxGeom()->SetRenderFlags(newRF);
-	gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere((rBBox.min+rBBox.max)*0.5f,((rBBox.max-rBBox.min)*0.5f).len(),ColorB(255,0,255,64),true);
-	gEnv->pRenderer->GetIRenderAuxGeom()->SetRenderFlags(oldRF);*/
-
 	Vec3 vCamPos = gEnv->pSystem->GetViewCamera().GetPosition();
 
 	Sphere sphere((rBBox.min+rBBox.max)*0.5f,((rBBox.max-rBBox.min)*0.5f).len());

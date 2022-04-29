@@ -536,17 +536,8 @@ void CVehicleMovementWarrior::Update(const float deltaTime)
 
             pThruster->pParentPart->SetLocalBaseTM(legTM);
             pThruster->pPart->SetLocalBaseTM(footTM);
-          }          
+          }
         }
-
-        if (IsProfilingMovement())
-        {
-          static ICVar* pDebugLeg = GetISystem()->GetIConsole()->GetCVar("warrior_debug_leg");
-          if (pDebugLeg && pDebugLeg->GetIVal() == t)
-          {
-            //CryLog("hoverErr %.2f, levelErr %.2f, neutralErr %.2f -> %s corr %.3f (max %.2f)", hoverError, levelError, neutralError, sMode, correction, maxCorrection);
-          }                    
-        }        
       }
     }
   }

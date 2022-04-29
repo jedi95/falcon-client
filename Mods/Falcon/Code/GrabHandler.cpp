@@ -305,33 +305,6 @@ void CBaseGrabHandler::UpdatePosVelRot(float frameTime)
 	Vec3 grabWPos(GetGrabWPos());
 	Vec3 setGrabVel(0,0,0);
 
-	// TODO Dez 14, 2006: <pvl> if you finally delete this make sure that
-	// BasicActor:DropObject() (in BasicActor.lua) doesn't support its
-	// 'throwDelay' parameter anymore.
-#if 0
-	//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(grabCenter,0.25f,ColorB(0,255,255,255) );
-
-	if (m_grabStats.throwDelay>0.001f)
-	{
-		float half(m_grabStats.maxDelay * 0.5f);
-		float firstHalf(m_grabStats.throwDelay - half);
-
-		if (firstHalf>0.0f)
-		{
-			setGrabVel = (m_grabStats.throwVector*-0.5f) * (1.0f-min((firstHalf*2) / m_grabStats.maxDelay,1.0f));
-		}
-		else
-		{
-			float secondHalf(firstHalf + half);
-			setGrabVel = (m_grabStats.throwVector) * (1.0f-min((secondHalf*2) / m_grabStats.maxDelay,1.0f));
-		}
-
-		//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(grabWPos+setGrabVel,2.5f,ColorB(0,255,0,255) );
-	}
-
-	//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(grabWPos,0.25f,ColorB(0,255,0,255) );
-#endif
-
 	// NOTE Dez 14, 2006: <pvl> grabCenter is where the grabbed object's
 	// AABB's center is, grabWPos is where it should be.  Use physics
 	// to set the grabbed object's speed towards grabWPos.
@@ -686,7 +659,6 @@ void CAnimatedGrabHandler::UpdatePosVelRot(float frameTime)
 			Vec3 actualGrabPos = pGrab->GetWorldPos() + m_grabStats.entityGrabSpot;
 			Vec3 adjustment = actualGrabPos - assumedGrabPos;
 			pLimb->SetWPos(pEnt,animPos + adjustment,ZERO,0.5f,2.0f,1000);
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(pGrab->GetWorldPos() + m_grabStats.entityGrabSpot, 0.5f, ColorB(0,255,0,100));
 		}
 		
 		//if there are multiple limbs, only the first one sets the rotation of the object.
@@ -711,34 +683,7 @@ void CAnimatedGrabHandler::UpdatePosVelRot(float frameTime)
 
 			Quat grabQuat( (endBoneWorldRot*m_grabStats.origEndBoneWorldRot.GetInverted()).q * m_grabStats.origRotation);
 			grabQuat.Normalize();
-
-			// NOTE Dez 14, 2006: <pvl> this code sets up and look vectors for the grabbed
-			// entity in case it's an Actor (the player, mostly) so that the player always
-			// looks roughly at the grabber.  The grabber is supposed to be the Hunter here
-			// so this code is somewhat Hunter-specific.
-			// UPDATE Aug 7, 2007: <pvl> do the above for the player only
-			// UPDATE Sep 13, 2007: <pvl> don't do it for anybody ATM, it doesn't seem useful
-			CActor *pGrabbedActor = (CActor *)g_pGame->GetIGameFramework()->GetIActorSystem()->GetActor(m_grabStats.grabId);
-			if (false && pGrabbedActor && pGrabbedActor->IsClient() && pGrabbedActor->GetActorStats())
-			{
-				Vec3 upVec(Quat(endBoneWorldRot.q * m_grabStats.additionalRotation).GetColumn2());
-				upVec.z = fabs_tpl(upVec.z) * 2.0f;
-				upVec.NormalizeSafe(Vec3(0,0,1));
-
-				SActorStats *pAS = pGrabbedActor->GetActorStats();
-				if (pAS)
-				{
-					pAS->forceUpVector = upVec;
-					pAS->forceLookVector = (pEnt->GetSlotWorldTM(0) * m_pActor->GetLocalEyePos(0)) - pGrabbedActor->GetEntity()->GetWorldPos();
-					float lookLen(pAS->forceLookVector.len());
-					pAS->forceLookVector *= (1.0f/lookLen)*0.33f;
-					//pAS->forceLookVector = -Quat(boneRot * m_grabStats.additionalRotation).GetColumn1();//boneRot.GetColumn2();
-				}
-			}
-			else
-			{
-				pGrab->SetRotation(grabQuat,ENTITY_XFORM_USER);
-			}
+			pGrab->SetRotation(grabQuat,ENTITY_XFORM_USER);
 		}
 	}
 
@@ -749,51 +694,7 @@ void CAnimatedGrabHandler::UpdatePosVelRot(float frameTime)
 		Matrix34 tm(pGrab->GetWorldTM());
 		tm.AddTranslation(GetGrabBoneWorldTM().q * m_grabStats.boneGrabOffset);
 		pGrab->SetWorldTM(tm,ENTITY_XFORM_USER);
-
-		/*
-		{
-			// debug draw for the grab bone
-			QuatT grabBoneWorldTM = GetGrabBoneWorldTM();
-			Vec3 start = grabBoneWorldTM.t;
-			Vec3 end = start + grabBoneWorldTM.q * Vec3 (1,0,0) * 3;
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine (start, ColorB (255,0,0), end, ColorB (0,0,255), 6.0f);
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere (start, 0.5f, ColorB (255,128,0));
-		}
-		*/
-		/*
-		{
-			// draw complete coord systems for both the end bone and the grabbed thing
-			QuatT grabBoneWorldTM = GetGrabBoneWorldTM();
-			Vec3 start = grabBoneWorldTM.t;
-			Vec3 end = start + grabBoneWorldTM.q * Vec3 (1,0,0) * 3;
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine (start, ColorB (128,0,0), end, ColorB (128,0,0), 6.0f);
-			end = start + grabBoneWorldTM.q * Vec3 (0,1,0) * 3;
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine (start, ColorB (0,128,0), end, ColorB (0,128,0), 6.0f);
-			end = start + grabBoneWorldTM.q * Vec3 (0,0,1) * 3;
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine (start, ColorB (0,0,128), end, ColorB (0,0,128), 6.0f);
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere (start, 0.2f, ColorB (255,255,255));
-
-			start = pGrab->GetWorldTM().GetTranslation();
-			end = start + pGrab->GetRotation() * Vec3 (1,0,0) * 3;
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine (start, ColorB (128,0,0), end, ColorB (128,0,0), 6.0f);
-			end = start + pGrab->GetRotation() * Vec3 (0,1,0) * 3;
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine (start, ColorB (0,128,0), end, ColorB (0,128,0), 6.0f);
-			end = start + pGrab->GetRotation() * Vec3 (0,0,1) * 3;
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine (start, ColorB (0,0,128), end, ColorB (0,0,128), 6.0f);
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere (start, 0.2f, ColorB (64,64,64));
-		}
-		*/
 	}
-
-/*
-	{
-		// debug draw for the grabbed object
-		Vec3 start = pGrab->GetWorldTM().GetTranslation();
-		Vec3 end = start + pGrab->GetRotation() * Vec3 (0,0,1) * 3;
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine (start, ColorB (255,0,0), end, ColorB (0,0,255), 6.0f);
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere (start, 0.2f, ColorB (255,128,0));
-	}
-*/
 }
 
 bool CAnimatedGrabHandler::SetDrop(SmartScriptTable &rParams)
@@ -867,7 +768,6 @@ Vec3 CAnimatedGrabHandler::GetGrabIKPos(IEntity *pGrab,int limbIdx)
 			float minDist(9999.9f);
 			for (int i=0;i<2;++i)
 			{
-				//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(pGrab->GetWorldTM() * posPool[i], ColorB(0,255,0,100), pGrab->GetWorldTM() * limbPosInLocal, ColorB(0,255,0,100));
 				float len2((posPool[i] - limbPosInLocal).len2());
 				if (len2<minDist)
 				{
@@ -889,9 +789,6 @@ void CAnimatedGrabHandler::ProcessIKLimbs (ICharacterInstance * pCharacter)
 
 		QuatT boneQ(pCharacter->GetISkeletonPose()->GetAbsJointByID(m_grabStats.followBoneID));
 		Vec3 bonePos(boneQ.t );
-
-		//static float color[] = {1,1,1,1};
-		//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(entMtx* bonePos,ColorB(255,255,0,100),entMtx * (bonePos +boneMtx * m_grabStats.grabOffset),ColorB(255,255,0,100) );
 		m_grabStats.followBoneWPos = entMtx * bonePos;
 	}
 	else
@@ -923,7 +820,7 @@ bool CMultipleGrabHandler::SetGrab(SmartScriptTable &rParams)
 			CAnimatedGrabHandler * handler = new CAnimatedGrabHandler (m_pActor);
 			SmartScriptTable params;
 			iter.value.CopyTo (params);
-			result = handler->SetGrab(params) & result;
+			result = handler->SetGrab(params) && result;
 			m_handlers.push_back (handler);
 		}
 
@@ -946,7 +843,7 @@ bool CMultipleGrabHandler::StartGrab()
 	std::vector <CAnimatedGrabHandler*>::iterator it = m_handlers.begin();
 	std::vector <CAnimatedGrabHandler*>::iterator end = m_handlers.end();
 	for ( ; it != end; ++it)
-		result = (*it)->StartGrab() & result;
+		result = (*it)->StartGrab() && result;
 
 	return result;
 }
@@ -968,7 +865,7 @@ bool CMultipleGrabHandler::SetDrop(SmartScriptTable &rParams)
 		{
 			SmartScriptTable params;
 			iter.value.CopyTo (params);
-			result = m_handlers[i]->SetDrop(params) & result;
+			result = m_handlers[i]->SetDrop(params) && result;
 		}
 
 		dropParamsTable->EndIteration(iter);
@@ -982,7 +879,7 @@ bool CMultipleGrabHandler::SetDrop(SmartScriptTable &rParams)
 		std::vector <CAnimatedGrabHandler*>::iterator it = m_handlers.begin();
 		std::vector <CAnimatedGrabHandler*>::iterator end = m_handlers.end();
 		for ( ; it != end; ++it)
-			result = (*it)->SetDrop(rParams) & result;
+			result = (*it)->SetDrop(rParams) && result;
 
 		return result;
 	}
@@ -995,7 +892,7 @@ bool CMultipleGrabHandler::StartDrop()
 	std::vector <CAnimatedGrabHandler*>::iterator it = m_handlers.begin();
 	std::vector <CAnimatedGrabHandler*>::iterator end = m_handlers.end();
 	for ( ; it != end; ++it)
-		result = (*it)->StartDrop() & result;
+		result = (*it)->StartDrop() && result;
 
 	return result;
 }

@@ -2438,9 +2438,6 @@ int CScriptBind_GameRules::EndGameNear(IFunctionHandler* pH, ScriptHandle entity
 
 int CScriptBind_GameRules::SPNotifyPlayerKill(IFunctionHandler* pH, ScriptHandle targetId, ScriptHandle weaponId, bool bHeadShot)
 {
-	CGameRules* pGameRules = g_pGame->GetGameRules();
-	if(pGameRules)
-		pGameRules->SPNotifyPlayerKill((EntityId)targetId.n, (EntityId)weaponId.n, bHeadShot);
 	return pH->EndFunction();
 }
 

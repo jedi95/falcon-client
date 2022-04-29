@@ -110,12 +110,6 @@ void CHomingMissile::UpdateControlledMissile(float frameTime)
 		pClientActor=static_cast<CActor *>(g_pGame->GetIGameFramework()->GetClientActor());
 	bool isOwner = ((!m_ownerId && isServer) || (isClient && pClientActor && (pClientActor->GetEntityId() == m_ownerId) && pClientActor->IsPlayer()));
 
-	IRenderer* pRenderer = gEnv->pRenderer;
-	IRenderAuxGeom* pGeom = pRenderer->GetIRenderAuxGeom();
-	float color[4] = {1,1,1,1};
-	const static float step = 15.f;  
-	float y = 20.f;    
-
 	if (isOwner || isServer)
 	{
 		//If there's a target, follow the target
@@ -304,13 +298,6 @@ void CHomingMissile::UpdateControlledMissile(float frameTime)
 //----------------------------------------------------------------------------
 void CHomingMissile::UpdateCruiseMissile(float frameTime)
 {
-
-	IRenderer* pRenderer = gEnv->pRenderer;
-	IRenderAuxGeom* pGeom = pRenderer->GetIRenderAuxGeom();
-	float color[4] = {1,1,1,1};
-	const static float step = 15.f;  
-	float y = 20.f;    
-
 	if (m_targetId)
 	{
 		IEntity* pTarget = gEnv->pEntitySystem->GetEntity(m_targetId);

@@ -39,7 +39,6 @@
 
 IItemSystem *CActor::m_pItemSystem=0;
 IGameFramework	*CActor::m_pGameFramework=0;
-IGameplayRecorder	*CActor::m_pGameplayRecorder=0;
 
 SStanceInfo CActor::m_defaultStance;
 
@@ -353,7 +352,6 @@ bool CActor::Init( IGameObject * pGameObject )
 	if (!m_pGameFramework)
 	{
 		m_pGameFramework = g_pGame->GetIGameFramework();
-		m_pGameplayRecorder = g_pGame->GetIGameFramework()->GetIGameplayRecorder();
 		m_pItemSystem = m_pGameFramework->GetIItemSystem();
 	}
 
@@ -3109,8 +3107,6 @@ bool CActor::PickUpItem(EntityId itemId, bool sound, bool ignoreOffhand)
 				}
 			}
 		}
-
-		m_pGameplayRecorder->Event(GetEntity(), GameplayEvent(eGE_ItemPickedUp, 0, 0, (void *)pItem->GetEntityId()));
 	}
 	else
 		GetGameObject()->InvokeRMI(SvRequestPickUpItem(), ItemIdParam(itemId), eRMI_ToServer);
@@ -3150,9 +3146,6 @@ bool CActor::DropItem(EntityId itemId, float impulseScale, bool selectNext, bool
 		if (gEnv->bServer)
 		{
 			pItem->Drop(impulseScale, selectNext, bydeath);
-
-			if (!bydeath)
-				m_pGameplayRecorder->Event(GetEntity(), GameplayEvent(eGE_ItemDropped, 0, 0, (void *)itemId));
 		}
 		else
 			GetGameObject()->InvokeRMI(SvRequestDropItem(), DropItemParams(itemId, impulseScale, selectNext, bydeath), eRMI_ToServer);
@@ -3179,9 +3172,7 @@ void CActor::DropAttachedItems()
 			if(pItemBack)
 			{
 				pItemBack->Drop(1.0f,false,true);
-				m_pGameplayRecorder->Event(GetEntity(), GameplayEvent(eGE_ItemDropped, 0, 0, (void *)pItemBack->GetEntityId()));	
 			}
-
 			it++;
 		}
 	}
@@ -4138,58 +4129,6 @@ IMPLEMENT_RMI(CActor, ClStopUse)
 		pItem->StopUse(GetEntityId());
 
 	return true;
-}
-
-//------------------------------------------------------------------------
-void CActor::DumpActorInfo()
-{
-  IEntity* pEntity = GetEntity();
-
-  CryLog("ActorInfo for %s", pEntity->GetName());
-  CryLog("=====================================");
-  
-  Vec3 pos = pEntity->GetWorldPos();
-  CryLog("Entity Pos: %.f %.f %.f", pos.x, pos.y, pos.z);
-  CryLog("Active: %i", pEntity->IsActive());
-  CryLog("Hidden: %i", pEntity->IsHidden());
-  CryLog("Invisible: %i", pEntity->IsInvisible());  
-  CryLog("Profile: %i", m_currentPhysProfile);
-  CryLog("Health: %i", GetHealth());  
-  CryLog("Frozen: %.2f", GetFrozenAmount());
-  
-  if (IPhysicalEntity* pPhysics = pEntity->GetPhysics())
-  { 
-    CryLog("Physics type: %i", pPhysics->GetType());
-    
-    pe_status_pos pos;
-    if (pPhysics->GetStatus(&pos))
-    {
-      CryLog("Physics pos: %.f %.f %.f", pos.pos.x, pos.pos.y, pos.pos.z);
-    }
-
-    pe_status_dynamics dyn;
-    if (pPhysics->GetStatus(&dyn))
-    {   
-      CryLog("Mass: %.1f", dyn.mass);
-      CryLog("Vel: %.2f %.2f %.2f", dyn.v.x, dyn.v.y, dyn.v.z);
-    } 
-  }  
-
-  if (IVehicle* pVehicle = GetLinkedVehicle())
-  {
-    CryLog("Vehicle: %s (destroyed: %i)", pVehicle->GetEntity()->GetName(), pVehicle->IsDestroyed());
-    
-    IVehicleSeat* pSeat = pVehicle->GetSeatForPassenger(GetEntityId());
-    CryLog("Seat %i", pSeat ? pSeat->GetSeatId() : 0);
-  }
-
-  if (IItem* pItem = GetCurrentItem())
-  {
-    CryLog("Item: %s", pItem->GetEntity()->GetName());
-  }
-
-
-  CryLog("=====================================");
 }
 
 //

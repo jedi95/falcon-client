@@ -112,8 +112,6 @@ bool CCompatibilityAlienMovementController::RequestMovement( CMovementRequest& r
 				if(os.fDesiredSpeed > expectedSpeed)
 					os.fDesiredSpeed = expectedSpeed;
 			}
-			//ColorB sd;
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(currentPos,ColorB(255,255,255,255),currentPos+os.vMoveDir*2,ColorB(255,255,255,255));
 
 			static float startDistance = 5.0f;
 			pTarget->allowActivation = distance < startDistance;

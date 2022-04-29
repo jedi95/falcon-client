@@ -10,6 +10,7 @@ History:
 *************************************************************************/
 #include "StdAfx.h"
 #if defined(WIN32)
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 void* g_hInst = 0;

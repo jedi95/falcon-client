@@ -55,8 +55,6 @@ History:
 #include "Weapon.h"
 #include "OffHand.h"
 
-#include "Tweaks/HUDTweakMenu.h"
-
 #include "HUDVehicleInterface.h"
 #include "HUDPowerStruggle.h"
 #include "HUDTeamInstantAction.h"
@@ -118,7 +116,6 @@ CHUD::CHUD()
 	CFlashMenuObject::GetFlashMenuObject()->SetColorChanged();
 	// CHUDCommon constructor runs first
 	m_pHUDRadar							= NULL;
-	m_pHUDTweakMenu 				= NULL;
 	m_pHUDScore							= NULL;
 	m_pHUDTextChat  				= NULL;
 	m_pRenderer							= NULL;
@@ -450,7 +447,6 @@ bool CHUD::Init()
 	m_pHUDTextArea->SetFadeTime(2.0f);
 	m_pHUDTextArea->SetPos(Vec2(200.0f, 450.0f));
 
-	m_pHUDTweakMenu		= new CHUDTweakMenu( pScriptSystem );
 	m_pHUDCrosshair		= new CHUDCrosshair(this);
 	m_pHUDTagNames		= new CHUDTagNames;
 	m_pHUDSilhouettes	= new CHUDSilhouettes;
@@ -466,7 +462,6 @@ bool CHUD::Init()
 	m_hudObjectsList.push_back(m_pHUDRadar);
 	m_hudObjectsList.push_back(m_pHUDObituary);
 	m_hudObjectsList.push_back(m_pHUDTextArea);
-	m_hudObjectsList.push_back(m_pHUDTweakMenu);
 	m_hudObjectsList.push_back(m_pHUDCrosshair);
 
 	if(gEnv->bMultiplayer || loadEverything)
@@ -2705,9 +2700,6 @@ bool CHUD::OnAction(const ActionId& action, int activationMode, float value)
 			}
 		}
 	}
-	
-	if (m_pHUDTweakMenu)
-		m_pHUDTweakMenu->OnActionTweak(action.c_str(), activationMode, value);
 
 	return filterOut;
 }
@@ -3442,18 +3434,6 @@ void CHUD::OnPostUpdate(float frameTime)
 			if(!pCurrentWeapon->GetScopePosition(vWorldPos))
 				vWorldPos = gEnv->pRenderer->GetCamera().GetPosition();
 
-			//float color[] = {1,1,1,0.5f};
-			//gEnv->pRenderer->Draw2dLabel(100,100,2,color,false,"%f, %f, %f",vWorldPos.x,vWorldPos.y,vWorldPos.z);
-				
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(vWorldPos,0.02f,ColorB(255,0,0),true);
-
-			//if (IMovementController *pMV = pPlayer->GetMovementController())
-			//{
-				//SMovementState state;
-				//pMV->GetMovementState(state);
-				//vWorldPos += state.eyeDirection * 0.5f;
-			//}
-
 			Vec3 vScreenSpace;
 			m_pRenderer->ProjectToScreen(vWorldPos.x,vWorldPos.y,vWorldPos.z,&vScreenSpace.x,&vScreenSpace.y,&vScreenSpace.z);
 			Vec3 vCenter(50.0f, 50.0f,1.0f);
@@ -3470,16 +3450,8 @@ void CHUD::OnPostUpdate(float frameTime)
 			float x = vScreenSpace.x*width*0.01f;
 			float y = vScreenSpace.y*height*0.01f;
 
-			//gEnv->pRenderer->Draw2dLabel(100,125,2,color,false,"%f, %f",x,y);
-
-			//m_pHUDScopes->m_animSniperScope.SetVariable("Root2._x",SFlashVarValue(x));
-			//m_pHUDScopes->m_animSniperScope.SetVariable("Root2._y",SFlashVarValue(y));
-			//m_pHUDScopes->m_animSniperScope.SetVariable("RootMask._x",SFlashVarValue(x));
-			//m_pHUDScopes->m_animSniperScope.SetVariable("RootMask._y",SFlashVarValue(y));
-
 			m_pHUDScopes->m_animSniperScope.SetVariable("Root._x",SFlashVarValue(x));
 			m_pHUDScopes->m_animSniperScope.SetVariable("Root._y",SFlashVarValue(y));
-			//m_pHUDScopes->m_animSniperScope.SetVariable("Root.Scope.Reflex._rotation",SFlashVarValue((pPlayer->GetAngles().z/gf_PI) * 180.0f));
 		}
 	}
 
@@ -4157,9 +4129,6 @@ bool CHUD::UpdateTimers(float frameTime)
 
 	//timer missing
 	ShowWeaponsOnGround();
-
-	if(m_fPlayerRespawnTimer)
-		FakeDeath(true);
 
 	if(m_fMiddleTextLineTimeout!=0.0f)
 	{
@@ -4947,7 +4916,6 @@ void CHUD::GetMemoryStatistics(ICrySizer * s)
 	CHILD_STATISTICS(m_pHUDTextChat);
 	CHILD_STATISTICS(m_pHUDObituary);
 	CHILD_STATISTICS(m_pHUDTextArea);
-	CHILD_STATISTICS(m_pHUDTweakMenu);
 
 	TGameFlashAnimationsList::const_iterator iter=m_gameFlashAnimationsList.begin();
 	TGameFlashAnimationsList::const_iterator end=m_gameFlashAnimationsList.end();

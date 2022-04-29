@@ -1442,9 +1442,6 @@ bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool 
 		pAmmo->GetGameObject()->BindToNetwork();
 	}
 
-	if (m_pWeapon->IsServer())
-		g_pGame->GetIGameFramework()->GetIGameplayRecorder()->Event(m_pWeapon->GetOwner(), GameplayEvent(eGE_WeaponShot, ammo->GetName(), 1, (void *)m_pWeapon->GetEntityId()));
-
   m_pWeapon->OnShoot(m_pWeapon->GetOwnerId(), pAmmo?pAmmo->GetEntity()->GetId():0, ammo, pos, dir, vel);
 
 	MuzzleFlashEffect(true); 
@@ -2596,9 +2593,6 @@ void CSingle::UpdateRecoil(float frameTime)
 		m_recoil += recoil_add-recoil_sub;
 
 		m_recoil = CLAMP(m_recoil, 0.0f, m_recoilparams.max_recoil*m_recoilMultiplier);
-
-		//CryLogAlways("RECOIL update: time %f (+%f); recoil + %.2f - %.2f = %.3f", gEnv->pTimer->GetCurrTime(), frameTime, recoil_add, recoil_sub, m_recoil);
-		//gEnv->pRenderer->Draw2dLabel(50,50,2.0f,white,false,"Current recoil: %.2f (+ %.2f, - %.2f) (frametime %.3f)", m_recoil, recoil_add, recoil_sub, frameTime);
 	}
 	else
 		m_recoil = 0.0f;
@@ -2666,16 +2660,6 @@ void CSingle::UpdateRecoil(float frameTime)
 	}
 	else
 		ResetRecoil();
-
-	/*g_shoots.clear();
-	for (std::vector<DebugShoot>::iterator it=g_shoots.begin(); g_shoots.end() != it; it++)
-	{
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(it->pos, ColorB(200, 200, 0), it->hit, ColorB(200, 200, 0) );
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(it->pos, ColorB(0, 200, 0), it->pos+it->dir*((it->hit-it->pos).len()), ColorB(0, 200, 0) );
-
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(it->pos, 0.125, ColorB(200, 0, 0));
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(it->hit, 0.125, ColorB(0, 0, 200));
-	}*/
 }
 
 //------------------------------------------------------------------------
@@ -2769,9 +2753,6 @@ void CSingle::InternalNetShootEx(IEntityClass* spawn_ammo, const Vec3 &pos, cons
 
 		m_projectileId = pAmmo->GetEntity()->GetId();
 	}
-
-	if (m_pWeapon->IsServer())
-		g_pGame->GetIGameFramework()->GetIGameplayRecorder()->Event(m_pWeapon->GetOwner(), GameplayEvent(eGE_WeaponShot, ammo->GetName(), 1, (void *)m_pWeapon->GetEntityId()));
 
   m_pWeapon->OnShoot(m_pWeapon->GetOwnerId(), pAmmo?pAmmo->GetEntity()->GetId():0, ammo, pos, dir, vel);
 

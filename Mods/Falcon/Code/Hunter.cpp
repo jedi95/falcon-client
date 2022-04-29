@@ -21,7 +21,6 @@
 #include <IPhysics.h>
 #include <ICryAnimation.h>
 #include <ISerialize.h>
-#include <IRenderAuxGeom.h>
 #include <IMaterialEffects.h>
 
 
@@ -58,19 +57,14 @@ public:
 
 		Quat rot = pIEntity->GetRotation();
 		Vec3 UpVector = rot.GetColumn2();
-		//Vec3 pos = pEnt->GetWorldPos();
 
-		//changed by ivo: most likely this doesn't work any more
-//		Vec3 absCurrentBodyDirection(rot * pCharacter->GetISkeleton()->GetCurrentBodyDirection());
 		Vec3 absCurrentBodyDirection(rot * Vec3(0,1,0));
-
 		Vec3 absCurrentMoveDirection(rot * pCharacter->GetISkeletonAnim()->GetCurrentVelocity().GetNormalizedSafe(Vec3(0,1,0)));
 
 		//body-radiant 
 		Vec3 bforward(absCurrentBodyDirection.GetNormalized());
 		Vec3 bup(UpVector);
 		Vec3 bright(bforward % bup);
-		//Matrix33 currBodyDirectionMatrix(Matrix33::CreateFromVectors(bforward, bup%bforward, bup));	
 		Matrix33 currBodyDirectionMatrix(Matrix33::CreateFromVectors(bforward%bup,bforward,bup));	
 		Vec3 newBodyDirLocal(currBodyDirectionMatrix.GetInverted() * DesiredBodyDirection);
 		f32 body_radiant = cry_atan2f(-newBodyDirLocal.x,newBodyDirLocal.y);
@@ -122,18 +116,6 @@ void CHunter::PostPhysicalize()
 		ps.mass = 0;
 		pPhysEnt->SetParams(&ps);
 	}
-
-/*
-	// GC 2007 : this is an unfortunate solution for a hunter physics collision bug [JAN]
-	if (IPhysicalEntity *pPE = GetEntity()->GetPhysics())
-	{
-		pe_params_part params;
-		params.ipart = 0;
-		params.scale = 0;
-		params.flagsAND = ~geom_colltype_player;
-		pPE->SetParams(&params);
-	}
-*/
 }
 
 bool CHunter::CreateCodeEvent(SmartScriptTable &rTable)
@@ -221,11 +203,8 @@ void CHunter::Revive(bool fromInit)
 	{
 		SAnimatedCharacterParams params = m_pAnimatedCharacter->GetParams();
 		
-		params.flags &= ~(eACF_NoTransRot2k | eACF_ConstrainDesiredSpeedToXY/* | eACF_NoLMErrorCorrection*/);
-		params.flags |= eACF_ImmediateStance | eACF_ConstrainDesiredSpeedToXY | eACF_ZCoordinateFromPhysics/* | eACF_NoLMErrorCorrection*/;
-
-		//if (!params.pAnimationBlending)
-		//	params.pAnimationBlending = new CHunterBlending();
+		params.flags &= ~(eACF_NoTransRot2k | eACF_ConstrainDesiredSpeedToXY);
+		params.flags |= eACF_ImmediateStance | eACF_ConstrainDesiredSpeedToXY | eACF_ZCoordinateFromPhysics;
 
 		m_pAnimatedCharacter->SetParams(params);
 	}
@@ -398,15 +377,9 @@ void CHunter::ProcessMovement(float frameTime)
 
 void CHunter::ProcessAnimation(ICharacterInstance *pCharacter,float frameTime)
 {
-	GetISystem()->GetIRenderer()->GetIRenderAuxGeom()->SetRenderFlags( e_Def3DPublicRenderflags );
-//	GetISystem()->GetIRenderer()->GetIRenderAuxGeom()->DrawAABB(AABB (Vec3 (0,0,0), Vec3 (0.5,0.5,0.5)), true, ColorB(255,0,0,255), eBBD_Faceted);
-
 	if (!pCharacter)
 		return;
 
-	//update look ik
-	//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(lookTarget,0.25f,ColorB(255,255,0,255));
-	//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(GetEntity()->GetWorldPos(), ColorB(255,255,0,255), lookTarget, ColorB(255,255,0,255));
 	bool lookIK = (!m_pGrabHandler || m_pGrabHandler->GetStats()->grabId<1);
 	lookIK &= ! Airborne ();
 
@@ -484,21 +457,13 @@ void CHunter::ProcessAnimation(ICharacterInstance *pCharacter,float frameTime)
 			}
 		}
 
-		//if (Airborne ())
-		//	m_footGroundPos[i].Set(0,0,0);
-
 		// transform lAnimPos (which is in model local space) to the world space
 		Vec3 vLimbPos = GetEntity()->GetSlotWorldTM(pLimb->characterSlot)*pLimb->lAnimPos;
 		Vec3 delta(vLimbPos - m_footGroundPos[i]);	// check for IK stretching the limb too much
 		delta.z = 0;
 
-		//if (delta.len2()>/*10.0f*10.0f*/ 500.0f)
-		//	m_footGroundPos[i].Set(0,0,0);// = limbPos;
-
 		bool footOnGround=m_footGroundPos[i].len2()>0.01f;
 
-		
-//		SmoothCD(m_footTouchesGroundSmooth[i], m_footTouchesGroundSmoothRate[i], frameTime, f32(m_footTouchesGround[i]), 0.10f);
 		if (m_footTouchesGround[i])
 			SmoothCD(m_footTouchesGroundSmooth[i], m_footTouchesGroundSmoothRate[i], frameTime, f32(footOnGround), 0.002f);
 		else
@@ -528,36 +493,20 @@ void CHunter::ProcessAnimation(ICharacterInstance *pCharacter,float frameTime)
 		if (fDistance<30.0f)
 			vFinalLimbPosition = m_footGroundPosLast[i]*t0 + vFinalLimbPos*t1;
 
-		//float fColor[4] = {1,1,0,1};
-		//GetISystem()->GetIRenderer()->Draw2dLabel( 1,40+16*i, 1.3f, fColor, false,"leg: %f %f %f   OnGround: %d  fDistance:%f",m_footGroundPos[i].x,m_footGroundPos[i].y,m_footGroundPos[i].z, footOnGround,fDistance );	
-
 		if (g_pGameCVars->h_useIK) 
 			pLimb->SetWPos(GetEntity(),vFinalLimbPosition,Vec3(0,0,-1),1.0f,1.0f,100); // a call to IK
-
-		if (g_pGameCVars->h_drawSlippers)
-		{
-			GetISystem()->GetIRenderer()->GetIRenderAuxGeom()->DrawSphere(vFinalLimbPosition,0.52f,ColorB(uint8(t0*255.0f),uint8(t1*255.0f),0,255));
-			GetISystem()->GetIRenderer()->GetIRenderAuxGeom()->DrawSphere(m_footGroundPosLast[i],0.5f,ColorB(0,0,255,255));
-		}
-
-
 
 		if (footOnGround)
 		{
 			float distToGround = (pLimb->currentWPos - pLimb->goalWPos).len2();
 			if (distToGround < 0.01f && ! m_footTouchesGround[i])
 			{
-				//GetISystem()->GetIRenderer()->GetIRenderAuxGeom()->DrawSphere(pLimb->currentWPos,1.0f,ColorB(0,0,255,255));
 				CreateScriptEvent("footstep",i+1);
 				m_footSoundTime[i] = 0.35f;
 				PlayFootstepEffects (i);
 				m_footTouchesGround[i] = true;
 			}
 		}
-		
-		
-
-
 
 		if (footOnGround)
 		{
@@ -572,12 +521,8 @@ void CHunter::ProcessAnimation(ICharacterInstance *pCharacter,float frameTime)
 		}
 
 		m_footSoundTime[i] -= frameTime;
-
-		//
-		//GetISystem()->GetIRenderer()->GetIRenderAuxGeom()->DrawLine(GetEntity()->GetSlotWorldTM(0).GetTranslation(), ColorB(255,255,0,255), m_footGroundPos[i], ColorB(255,255,0,255));
 	}
 
-	//
 	float wZ(GetEntity()->GetWorldPos().z);
 	float zOffsetGoal(0.0f);
 
@@ -596,16 +541,6 @@ void CHunter::ProcessAnimation(ICharacterInstance *pCharacter,float frameTime)
 	m_modelOffsetAdd.z = (m_smoothZ - wZ) + m_zOffset;
 
 	m_walkEventFlags.reset ();
-
-  /*for (int i=0;i<4;++i)
-  {
-    if (m_footAttachments[i])
-    {
-      Matrix34 boneLocalTM(GetEntity()->GetCharacter(0)->GetISkeleton()->GetAbsJointByID(m_footAttachments[i]->GetBoneID()));
-      Matrix34 tm = GetEntity()->GetSlotWorldTM(0) * boneLocalTM;
-      gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(tm.GetTranslation(), 1.f, ColorB(0,255,0,255));
-    }
-  }*/
 }
 
 void CHunter::PlayFootstepEffects (int tentacle) const
@@ -698,7 +633,6 @@ void CHunter::GetActorInfo(SBodyInfo& bodyInfo)
 	int headBoneID = GetBoneID(BONE_HEAD);
 	if (headBoneID>-1 && GetEntity()->GetCharacter(0))
 	{
-	//	Matrix33 HeadMat(GetEntity()->GetCharacter(0)->GetISkeleton()->GetAbsJMatrixByID(headBoneID));
 		Matrix34 HeadMat( Matrix34(GetEntity()->GetCharacter(0)->GetISkeletonPose()->GetAbsJointByID(headBoneID)) );
 		HeadMat = GetEntity()->GetSlotWorldTM(0) * HeadMat;
 		bodyInfo.vFirePos = HeadMat.GetColumn3();
@@ -706,8 +640,6 @@ void CHunter::GetActorInfo(SBodyInfo& bodyInfo)
 	}
 
 	bodyInfo.vFireDir = bodyInfo.vEyeDir = m_viewMtx.GetColumn(1);
-	
-	//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(bodyInfo.vEyePos, ColorB(0,255,0,100), bodyInfo.vEyePos + bodyInfo.vEyeDir * 10.0f, ColorB(255,255,0,100));
 }
 
 bool CHunter::SetAnimationInput( const char * inputID, const char * value )

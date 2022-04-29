@@ -673,19 +673,6 @@ void CVehicleMovementHelicopter::ProcessActionsLift(float deltaTime)
 	m_control.impulse.x -= m_PhysDyn.v.x * horizDamp;
 	m_control.impulse.y -= m_PhysDyn.v.y * horizDamp;
 	m_control.impulse.z -= m_PhysDyn.v.z * vertDamp;
-
-	IActor* pActor = m_pActorSystem->GetActor(m_actorId);
-
-	int profile = g_pGameCVars->v_profileMovement;
-	if ((profile == 1 && pActor && pActor->IsClient()) || profile == 2)
-	{
-		IRenderer* pRenderer = gEnv->pRenderer;
-		float color[4] = {1,1,1,1};
-
-		Ang3 localAngles = m_pEntity->GetWorldAngles();
-
-		pRenderer->Draw2dLabel(5.0f, 350.0f, 1.5f, color, false, "pitchRatio: %f,  liftAction: %f,  fwdAction: %f", pitchRatio, liftAction, fwdAction);
-	}
 }
 
 void CVehicleMovementHelicopter::Boost(bool enable)
@@ -1039,38 +1026,6 @@ void CVehicleMovementHelicopter::Update(const float deltaTime)
 	// update animation
 	if (m_pRotorAnim)
 		m_pRotorAnim->SetSpeed(m_enginePower / m_enginePowerMax);
-
-	IActor* pActor = m_pActorSystem->GetActor(m_actorId);
-
-	int profile = g_pGameCVars->v_profileMovement;
-	if ((profile == 1 && pActor && pActor->IsClient()) || profile == 2)
-	{
-		IRenderer* pRenderer = gEnv->pRenderer;
-		float color[4] = {1,1,1,1};
-
-		Ang3 localAngles = m_pEntity->GetWorldAngles();
-
-		m_mass = m_statusDyn.mass;
-		Vec3& velocity = m_statusDyn.v;
-		Vec3& angVelocity = m_statusDyn.w;
-
-		pRenderer->Draw2dLabel(5.0f,   0.0f, 2.0f, color, false, "Helicopter movement"); Vec3 i; i = m_control.impulse.GetNormalizedSafe();
-		pRenderer->Draw2dLabel(5.0f,  85.0f, 1.5f, color, false, "impulse: %f, %f, %f (%f, %f, %f)", m_control.impulse.x, m_control.impulse.y, m_control.impulse.z, i.x, i.y, i.z);
-		pRenderer->Draw2dLabel(5.0f, 100.0f, 1.5f, color, false, "angImpulse: %f, %f, %f", m_control.angImpulse.x, m_control.angImpulse.y, m_control.angImpulse.z); i = velocity.GetNormalizedSafe();
-		pRenderer->Draw2dLabel(5.0f, 115.0f, 1.5f, color, false, "velocity: %f, %f, %f (%f) (%f, %f, %f)", velocity.x, velocity.y, velocity.z, velocity.GetLength(), i.x, i.y, i.z);
-		pRenderer->Draw2dLabel(5.0f, 130.0f, 1.5f, color, false, "angular velocity: %f, %f, %f", RAD2DEG(angVelocity.x), RAD2DEG(angVelocity.y), RAD2DEG(angVelocity.z));
-		pRenderer->Draw2dLabel(5.0f, 160.0f, 1.5f, color, false, "angles: %f, %f, %f (%f, %f, %f)", RAD2DEG(localAngles.x), localAngles.y, localAngles.z, RAD2DEG(localAngles.x), RAD2DEG(localAngles.y), RAD2DEG(localAngles.z));
-		pRenderer->Draw2dLabel(5.0f, 175.0f, 1.5f, color, false, "m_rpmScale: %f, damage: %f, damageActual: %f, turbulence: %f", m_rpmScale, m_damage, m_damageActual, m_turbulence);
-		pRenderer->Draw2dLabel(5.0f, 190.0f, 1.5f, color, false, "m_turnAction: %f, actionYaw: %f, targetRotation: %f, %f, %f", m_turnAction, m_actionYaw, RAD2DEG(m_rotateTarget.x), RAD2DEG(m_rotateTarget.y), RAD2DEG(m_rotateTarget.z));
-		pRenderer->Draw2dLabel(5.0f, 220.0f, 1.5f, color, false, "lift: %f, engineForce: %f, hoveringPower: %f, desiredHeight: %f, boost: %d, fwdAction: %f", m_liftAction, m_engineForce, m_hoveringPower, m_desiredHeight, Boosting(), m_forwardAction);
-		pRenderer->Draw2dLabel(5.0f, 235.0f, 1.5f, color, false, "pitchAction:  %f, rollAction:  %f", m_actionPitch, m_actionRoll);
-		pRenderer->Draw2dLabel(5.0f, 250.0f, 1.5f, color, false, "desiredPitch: %f, desiredRoll: %f", m_desiredPitch, m_desiredRoll);
-
-		Vec3 direction = m_pEntity->GetWorldTM().GetColumn(1);
-		pRenderer->Draw2dLabel(5.0f, 270.0f, 1.5f, color, false, "fwd direction: %.2f, %.2f, %.2f", direction.x, direction.y, direction.z);
-		pRenderer->Draw2dLabel(5.0f, 285.0f, 1.5f, color, false, "workingUpDir:  %.2f, %.2f, %.2f", m_workingUpDir.x, m_workingUpDir.y, m_workingUpDir.z);
-		pRenderer->Draw2dLabel(5.0f, 300.0f, 1.5f, color, false, "accel:  %f", m_playerAcceleration);
-	}
 }
 
 //------------------------------------------------------------------------

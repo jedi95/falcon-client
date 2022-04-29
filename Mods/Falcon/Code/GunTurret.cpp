@@ -58,26 +58,6 @@ namespace
     assert(a >= 0.f && a <= gf_PI2);
     return (a > gf_PI) ? a-gf_PI2 : a;
   }
-  
-  void DrawCircle( const Vec3& center, float radius )
-  {
-    Vec3 p0,p1,pos;
-    pos = center;
-    p0.x = pos.x + radius*sin(0.0f);
-    p0.y = pos.y + radius*cos(0.0f);
-    p0.z = pos.z;
-    float step = 10.0f/180*gf_PI;
-    ColorB col(0,255,0,128);
-    
-    for (float angle = step; angle < 360.0f/180*gf_PI+step; angle += step)
-    {
-      p1.x = pos.x + radius*sin(angle);
-      p1.y = pos.y + radius*cos(angle);
-      p1.z = pos.z;
-      gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(p0,col,p1,col);
-      p0 = p1;
-    }    
-  }
 }
 
 //------------------------------------------------------------------------

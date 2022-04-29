@@ -1505,12 +1505,6 @@ bool CVehicleMovementBase::GetStanceState(EStance stance, float lean, bool defau
 }
 
 //------------------------------------------------------------------------
-bool CVehicleMovementBase::IsProfilingMovement()
-{
-  return false;
-}
-
-//------------------------------------------------------------------------
 SMFXResourceListPtr CVehicleMovementBase::GetEffectNode(int matId)
 {
   if (matId <= 0)

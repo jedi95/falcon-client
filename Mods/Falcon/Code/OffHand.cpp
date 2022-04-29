@@ -1082,17 +1082,6 @@ void COffHand::UpdateGrabbedNPCWorldPos(IEntity *pEntity, struct SViewParams *vi
 			}
 
 			Vec3 neckLOffset(pSkeletonPose->GetAbsJointByID(neckId).t);
-			//Vec3 charOffset(pEntity->GetSlotLocalTM(0,false).GetTranslation());
-			//if(m_grabbedNPCSpecies==eGCT_TROOPER)
-			//charOffset.Set(0.0f,0.0f,0.0f);
-			//Vec3 charOffset(0.0f,0.0f,0.0f);		//For some reason the above line didn't work with the trooper...
-
-			//float white[4] = {1,1,1,1};
-			//gEnv->pRenderer->Draw2dLabel( 100, 50, 2, white, false, "neck: %f %f %f", neckLOffset.x,neckLOffset.y,neckLOffset.z );
-			//gEnv->pRenderer->Draw2dLabel( 100, 70, 2, white, false, "char: %f %f %f", charOffset.x,charOffset.y,charOffset.z );
-
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(neckFinal.GetTranslation(),0.08f,ColorB(255,0,0));
-
 			neckFinal.AddTranslation(Quat(neckFinal)*-(neckLOffset+specialOffset));
 			m_lastNPCMatrix = neckFinal;
 		}
@@ -1135,8 +1124,6 @@ void COffHand::UpdateGrabbedNPCWorldPos(IEntity *pEntity, struct SViewParams *vi
 		float EntRotZ = RAD2DEG(Quat(neckFinal).GetRotZ());
 
 		pEntity->SetWorldTM(neckFinal);
-		
-		//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(neckFinal.GetTranslation(),0.08f,ColorB(0,255,0));
 	}
 }
 

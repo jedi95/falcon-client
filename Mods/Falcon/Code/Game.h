@@ -59,7 +59,6 @@ class CServerSynchedStorage;
 struct SCVars;
 struct SItemStrings;
 class CItemSharedParamsList;
-class CSPAnalyst;
 class CSoundMoods;
 class CLCDWrapper;
 class CDownloadTask;
@@ -215,10 +214,7 @@ protected:
 	// marcok: this is bad and evil ... should be removed soon
 	static void CmdRestartGame(IConsoleCmdArgs *pArgs);
 
-	static void CmdDumpSS(IConsoleCmdArgs *pArgs);
-
 	static void CmdLastInv(IConsoleCmdArgs *pArgs);
-	static void CmdName(IConsoleCmdArgs *pArgs);
 	static void CmdTeam(IConsoleCmdArgs *pArgs);
 	static void CmdLoadLastSave(IConsoleCmdArgs *pArgs);
 	static void CmdSpectator(IConsoleCmdArgs *pArgs);
@@ -280,7 +276,6 @@ protected:
 
 	CServerSynchedStorage	*m_pServerSynchedStorage;
 	CClientSynchedStorage	*m_pClientSynchedStorage;
-	CSPAnalyst          *m_pSPAnalyst;
 	bool								m_inDevMode;
 
 	EntityId m_uiPlayerID;

@@ -303,9 +303,6 @@ void CVehicleMovementStdWheeled::PostPhysicalize()
     pe_status_vehicle_abilities ab;    
     if (GetPhysics()->GetStatus(&ab))
       m_maxSpeed = ab.maxVelocity * 0.5f; // fixme! maxVelocity too high
-    
-    if (g_pGameCVars->v_profileMovement)
-      CryLog("%s maxSpeed: %f", m_pVehicle->GetEntity()->GetClass()->GetName(), m_maxSpeed);
   }
 }
 
@@ -586,17 +583,6 @@ void CVehicleMovementStdWheeled::UpdateAxleFriction(float pedal, bool backward, 
       imp.point = m_PhysDyn.centerOfMass;
       imp.iApplyTime = 0;
       GetPhysics()->Action(&imp, THREAD_SAFE);
-/*
-      if (IsProfilingMovement())
-      {
-        IRenderAuxGeom* pGeom = gEnv->pRenderer->GetIRenderAuxGeom();
-        float len = 5.f * imp.impulse.len() / deltaTime / m_statusDyn.mass;
-        Vec3 dir = imp.impulse.GetNormalized();
-        pGeom->DrawCone(imp.point-(dir*len), dir, 1.f, len, ColorB(128,0,0,255));
-
-        pGeom->DrawLine(imp.point+worldTM.TransformVector(Vec3(0,0,1)), ColorB(0,0,255,255), imp.point+worldTM.TransformVector(Vec3(0,0,1))+m_statusDyn.v, ColorB(0,0,255,255));
-      }    
-*/
     }
   }
 }

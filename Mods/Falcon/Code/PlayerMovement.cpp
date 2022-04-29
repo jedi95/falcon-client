@@ -1120,24 +1120,6 @@ void CPlayerMovement::ProcessTurning()
 			}
 			else
 			{
-				/*float turn = m_movement.deltaAngles.z;
-				m_turnTarget = Quat::CreateRotationZ(turn) * m_turnTarget;
-				Quat turnQuat = inverseEntityRot * m_turnTarget;
-
-				Vec3 epos(m_player.GetEntity()->GetWorldPos()+Vec3(1,0,1));
-				gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(epos, ColorB(255,255,0,100), epos + m_turnTarget.GetColumn1()*2.0f, ColorB(255,0,255,100));*/
-
-				/*
-				float turnAngle = cry_acosf( CLAMP( FORWARD_DIRECTION.Dot(turn * FORWARD_DIRECTION), -1.0f, 1.0f ) );
-				float turnRatio = turnAngle / (ROTATION_SPEED * m_frameTime);
-				if (turnRatio > 1)
-					turnQuat = Quat::CreateSlerp( Quat::CreateIdentity(), turnQuat, 1.0f/turnRatio );
-				*/
-
-				//float white[4] = {1,1,1,1};
-				//gEnv->pRenderer->Draw2dLabel( 100, 50, 4, white, false, "%f %f %f %f", turnQuat.w, turnQuat.v.x, turnQuat.v.y, turnQuat.v.z );
-
-				//m_request.turn = turnQuat;
 				m_request.rotation = inverseEntityRot * m_baseQuat;
 				m_request.rotation.Normalize();
 			}
@@ -1145,20 +1127,8 @@ void CPlayerMovement::ProcessTurning()
 	}
 	else
 	{
-		/*Vec3 right = entityRot.GetColumn0();
-		Vec3 up = m_upVector.GetNormalized();
-		Vec3 forward = (up % right).GetNormalized();
-		m_turnTarget = GetQuatFromMat33( Matrix33::CreateFromVectors(forward%up, forward, up) );
-		float turn = m_movement.deltaAngles.z;
-		if (fabsf(turn) > ROTATION_SPEED * m_frameTime)
-			turn = ROTATION_SPEED * m_frameTime * (turn > 0.0f? 1.0f : -1.0f);*/
-		if (1)//m_stats.speedFlat>0.5f)
-		{
-			m_request.rotation = inverseEntityRot * m_baseQuat;//(m_turnTarget * Quat::CreateRotationZ(turn));
-			m_request.rotation.Normalize();
-		}
-		else
-			m_request.rotation = inverseEntityRot * Quat::CreateRotationZ(gf_PI);
+		m_request.rotation = inverseEntityRot * m_baseQuat;//(m_turnTarget * Quat::CreateRotationZ(turn));
+		m_request.rotation.Normalize();
 	}
 
 	if (m_player.IsPlayer() && (g_pGameCVars->ca_GameControlledStrafingPtr->GetIVal() != 0) && (g_pGameCVars->ac_enableProceduralLeaning == 0.0f))
@@ -1172,18 +1142,6 @@ void CPlayerMovement::ProcessTurning()
 	}
 
 	m_request.proceduralLeaning = (g_pGameCVars->ac_enableProceduralLeaning > 0.0f);
-
-/*
-	Vec3 pos = m_player.GetEntity()->GetWorldPos();
-	Vec3 curDir = entityRot.GetColumn1();
-	Vec3 wantDir = m_baseQuat.GetColumn1();
-	Vec3 lftDir = entityRot.GetColumn0();
-	float rot = m_request.rotation.GetRotZ();
-	gEnv->pRenderer->GetIRenderAuxGeom()->SetRenderFlags( e_Def3DPublicRenderflags );
-	gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(pos, ColorB(255,255,0,255), pos+curDir, ColorB(255,255,0,255), 2.0f);
-	gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(pos, ColorB(255,0,255,255), pos+wantDir, ColorB(255,0,255,255), 2.0f);
-	gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(pos+curDir, ColorB(0,255,255,255), pos+curDir+lftDir*rot, ColorB(0,255,255,255), 2.0f);
-*/
 }
 
 //-----------------------------------------------------------------------------------------------

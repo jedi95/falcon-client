@@ -183,8 +183,6 @@ struct SCVars
 	int   g_meleeWhileSprinting;
 	float g_AiSuitStrengthMeleeMult;
 	float g_fallAndPlayThreshold;
-	int		g_spRecordGameplay;
-	float g_spGameplayRecorderUpdateRate;
 	int		g_useHitSoundFeedback;
 
 	int		g_meleeDamage;
@@ -274,14 +272,10 @@ struct SCVars
 	float	g_ragdollPollTime;
 	float	g_ragdollDistance;
 
-	int   v_profileMovement;  
-	int   v_draw_suspension;
-	int   v_draw_slip;
-	int   v_pa_surface;    
-	int   v_invertPitchControl;  
-	float v_wind_minspeed; 
+	int   v_pa_surface;
+	int   v_invertPitchControl;
+	float v_wind_minspeed;
 	float v_sprintSpeed;
-	int   v_dumpFriction;
 	int   v_rockBoats;
 	float v_altitudeLimit;
 	ICVar* pAltitudeLimitCVar;
@@ -421,7 +415,6 @@ struct SCVars
   
 	float h_turnSpeed;
 	int		h_useIK;
-	int		h_drawSlippers;
 
   ICVar*  g_quickGame_map;
   ICVar*  g_quickGame_mode;

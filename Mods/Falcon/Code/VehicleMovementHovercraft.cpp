@@ -21,9 +21,6 @@ History:
 
 #define PE_ACTION_THREAD_SAFE 0
 
-void DrawImpulse(const Vec3& impulse, const Vec3& pos);
-
-
 CVehicleMovementHovercraft::CVehicleMovementHovercraft()
 : m_hoverHeight( 0.1f )
 , m_hoverVariance( 0.f )
@@ -124,12 +121,6 @@ void CVehicleMovementHovercraft::PostPhysicalize()
   if (GetPhysics()->GetParams(&paramsSim))
   {
     m_gravity = paramsSim.gravity;	
-
-// we don't need to set gravityFreefall any more
-// pe_simulation_params paramsSet;
-// paramsSet.gravityFreefall = 1.5f * paramsSim.gravity;
-// GetPhysics()->SetParams(&paramsSet);
-
   }
 }
 
@@ -752,94 +743,13 @@ void CVehicleMovementHovercraft::ProcessMovement(const float deltaTime)
 //------------------------------------------------------------------------
 void CVehicleMovementHovercraft::Update(const float deltaTime)
 {
-  FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
- 
-  CVehicleMovementBase::Update(deltaTime);
-    
-  m_netActionSync.UpdateObject(this);
-     
-/*
-	if (IsProfilingMovement())
-	{
-		//gEnv->pRenderer->DrawLabel(thrusterPos, 1.4f, "e: %.2f, c: %.2f, a: %.2f", error, correction, RAD2DEG(deltaAngle));
-		IRenderAuxGeom* pGeom = gEnv->pRenderer->GetIRenderAuxGeom();                  
-		ColorB col(0,255,255,255);
+	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
+	CVehicleMovementBase::Update(deltaTime);
+	m_netActionSync.UpdateObject(this);
 
-		Vec3 current(pThruster->pos);        
-		pGeom->DrawSphere(wTM*current, 0.2f, ColorB(0,255,0,255));
-
-		if (pThruster->heightAdaption > 0.f)
-		{
-			Vec3 center(pThruster->pos.x, pThruster->pos.y, pThruster->heightInitial);
-			Vec3 min = center + Vec3(0,0,-pThruster->heightAdaption);
-			Vec3 max = center + Vec3(0,0,pThruster->heightAdaption);                  
-
-			pGeom->DrawSphere(wTM*min, 0.2f, col);
-			pGeom->DrawSphere(wTM*max, 0.2f, col);
-			pGeom->DrawSphere(wTM*center, 0.15f, col);
-			pGeom->DrawLine(wTM*min, col, wTM*max, col);
-		}
-
-		if (pThruster->hit)
-		{
-			ColorB col2(255,255,0,255);
-			Vec3 lower = pThruster->prevHit + Vec3(sgn(pThruster->pos.x)*0.25f,0,0);
-			Vec3 upper = lower + hoverHeight*Vec3(0,0,1);
-			pGeom->DrawSphere(upper, 0.1f, col2);
-			pGeom->DrawLine(lower, col2, upper, col2);
-		}
-	}
-
-	if (IsProfilingMovement())
-	{
-		IRenderer* pRenderer = gEnv->pRenderer;
-		static float color[4] = {1,1,1,1};
-		static float red[4] = {1,0,0,1};
-		float y=50.f, step1=15.f, step2=20.f, size1=1.f, size2=1.5f;
-
-		pRenderer->Draw2dLabel(5.0f,   y, size2, color, false, "Hovercraft");
-		pRenderer->Draw2dLabel(5.0f,  y+=step2, 1.5f, color, false, "Speed: %.1f (%.1f km/h)", speed, speed*3.6f);    
-		pRenderer->Draw2dLabel(5.0f,  y+=step2, 1.5f, color, false, "HoverHeight: %.2f", m_hoverHeight);
-		pRenderer->Draw2dLabel(5.0f,  y+=step2, 1.5f, (m_contacts > minContacts) ? color : red, false, "Contacts: %i", m_contacts);
-
-		pRenderer->Draw2dLabel(5.0f,  y+=step2, size2, color, false, "Driver input");
-		pRenderer->Draw2dLabel(5.0f,  y+=step2, 1.5f, color, false, "power: %.2f", m_movementAction.power);
-		pRenderer->Draw2dLabel(5.0f,  y+=step1, 1.5f, color, false, "steer: %.2f", m_movementAction.rotateYaw); 
-
-		pRenderer->Draw2dLabel(5.0f,  y+=step2, size2, color, false, "Propelling");    
-		    
-		pRenderer->Draw2dLabel(5.0f,  y+=step2, 1.5f, color, false, "Accel: %.2f", a); 
-		pRenderer->Draw2dLabel(5.0f,  y+=step2, 1.5f, color, false, "Impulse linear: %.0f", linearImp.impulse.len()); 
-		DrawImpulse(linearImp.impulse, linearImp.point);
-
-		pRenderer->Draw2dLabel(5.0f,  y+=step2, 1.5f, color, false, "TurnAccel: %.2f", turnAccel); 
-		pRenderer->Draw2dLabel(5.0f,  y+=step1, 1.5f, color, false, "Momentum steer: %.0f", angularImp.angImpulse.len()); 
-
-		pRenderer->Draw2dLabel(5.0f,  y+=step1, 1.5f, color, false, "Impulse corner: %.0f", dampImp.impulse.len());     
-		DrawImpulse(dampImp.impulse, dampImp.point);
-		    
-		pRenderer->Draw2dLabel(5.0f,  y+=step1, 1.5f, color, false, "Impulse stabi: %.0f", is_unused(stabImp.angImpulse) ? 0.f : stabImp.angImpulse.len());
-		DrawImpulse(stabImp.angImpulse, m_statusDyn.centerOfMass);
-	}
-*/
 	if (m_netActionSync.PublishActions( CNetworkMovementHovercraft(this) ))
 		m_pVehicle->GetGameObject()->ChangedNetworkState( eEA_GameClientDynamic );
-
 }
-
-
-void DrawImpulse(const Vec3& impulse, const Vec3& pos)
-{
-  if (is_unused(impulse) || impulse.len2() < 0.0001f || is_unused(pos))
-    return;
-
-  IRenderAuxGeom* pGeom = gEnv->pRenderer->GetIRenderAuxGeom();
-  ColorB colStart(255,0,0,128);
-  ColorB colEnd(255,0,0,255);
-
-  pGeom->DrawLine(pos, colStart, pos+impulse, colEnd);
-}
-
 
 //------------------------------------------------------------------------
 bool CVehicleMovementHovercraft::RequestMovement(CMovementRequest& movementRequest)

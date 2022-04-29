@@ -316,8 +316,6 @@ public:
 
 	virtual void Reset();
 
-	virtual void Dump();
-
 	virtual void SerializeValue(TSerialize ser, TSynchedKey &key, TSynchedValue &value, int type);
 	virtual void SerializeEntityValue(TSerialize ser, EntityId id, TSynchedKey &key, TSynchedValue &value, int type);
 

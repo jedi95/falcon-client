@@ -224,12 +224,6 @@ CActor *CScriptBind_Actor::GetActor(IFunctionHandler *pH)
 //------------------------------------------------------------------------
 int CScriptBind_Actor::DumpActorInfo(IFunctionHandler *pH)
 {
-  CActor *pActor = GetActor(pH);
-  if (!pActor)
-    return pH->EndFunction();
-
-  pActor->DumpActorInfo();
-  
   return pH->EndFunction();
 }
 
@@ -1268,51 +1262,45 @@ int CScriptBind_Actor::AttachVulnerabilityEffect(IFunctionHandler *pH, int chara
 
 int CScriptBind_Actor::GetClosestAttachment(IFunctionHandler *pH, int characterSlot, Vec3 testPos, float maxDistance, const char* suffix)
 {
-  CActor *pActor = GetActor(pH);
+	CActor *pActor = GetActor(pH);
 	if (!pActor)
 		return pH->EndFunction();
 
-  IEntity* pEntity = pActor->GetEntity();
-  ICharacterInstance* pChar = pEntity->GetCharacter(characterSlot);
+	IEntity* pEntity = pActor->GetEntity();
+	ICharacterInstance* pChar = pEntity->GetCharacter(characterSlot);
 
-  if (!pChar)  
-    return pH->EndFunction();
+	if (!pChar)
+		return pH->EndFunction();
 
-  //fallback: use nearest attachment
-  float minDiff = maxDistance*maxDistance;  
-  IAttachment* pClosestAtt = 0;
-  
-  IAttachmentManager* pMan = pChar->GetIAttachmentManager();
-  int count = pMan->GetAttachmentCount();
-  
-  for (int i=0; i<count; ++i)
-  {
-    IAttachment* pAtt = pMan->GetInterfaceByIndex(i);		
-		
-    if (pAtt->IsAttachmentHidden() || !pAtt->GetIAttachmentObject())
+	//fallback: use nearest attachment
+	float minDiff = maxDistance*maxDistance;  
+	IAttachment* pClosestAtt = 0;
+
+	IAttachmentManager* pMan = pChar->GetIAttachmentManager();
+	int count = pMan->GetAttachmentCount();
+	for (int i=0; i<count; ++i)
+	{
+		IAttachment* pAtt = pMan->GetInterfaceByIndex(i);
+
+		if (pAtt->IsAttachmentHidden() || !pAtt->GetIAttachmentObject())
 			continue;
-		
+
 		AABB bbox(AABB::CreateTransformedAABB(Matrix34(pAtt->GetAttWorldAbsolute()),pAtt->GetIAttachmentObject()->GetAABB()));
-		//gEnv->pRenderer->GetIRenderAuxGeom()->DrawAABB(bbox,false,ColorB(255,0,0,100),eBBD_Faceted);
-		
-    //float diff = (testPos - pAtt->GetWMatrix().GetTranslation()).len2();
+
 		float diff((testPos - bbox.GetCenter()).len2());
-		
-    if (diff < minDiff)
-    {
-      //CryLogAlways("%s distance: %.1f", pAtt->GetName(), sqrt(diff));
+		if (diff < minDiff)
+		{
+			if (suffix[0] && !strstr(pAtt->GetName(), suffix))
+				continue;
 
-      if (suffix[0] && !strstr(pAtt->GetName(), suffix))
-        continue;
+			minDiff = diff;
+			pClosestAtt = pAtt;
+		}
+	}
 
-      minDiff = diff; 
-      pClosestAtt = pAtt;      
-    }
-  }
+	if (!pClosestAtt)
+		return pH->EndFunction();
 
-  if (!pClosestAtt)
-    return pH->EndFunction();
-  
 	//FIXME FIXME: E3 workaround
 	char attachmentName[64];
 	strncpy(attachmentName,pClosestAtt->GetName(),63);
@@ -1321,9 +1309,7 @@ int CScriptBind_Actor::GetClosestAttachment(IFunctionHandler *pH, int characterS
 		*pDotChar = 0;
 
 	strlwr(attachmentName);
-	//
-
-  return pH->EndFunction(attachmentName);    
+	return pH->EndFunction(attachmentName);
 }
 
 //------------------------------------------------------------------------

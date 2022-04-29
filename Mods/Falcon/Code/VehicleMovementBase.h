@@ -301,7 +301,6 @@ public:
 protected:
 
   ILINE IPhysicalEntity* GetPhysics() const { return m_pVehicle->GetEntity()->GetPhysics(); }
-  bool IsProfilingMovement();
 	
   // sound methods
   ISound* PlaySound(EVehicleMovementSound eSID, float pulse=0.f, const Vec3& offset=Vec3Constants<float>::fVec3_Zero, int soundFlags=0);

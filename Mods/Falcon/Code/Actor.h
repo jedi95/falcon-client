@@ -1137,8 +1137,6 @@ public:
 
   virtual bool IsCloaked() const { return false; }
 
-  virtual void DumpActorInfo();
-
 	virtual bool IsAlien() {return false;}
 
 	void Suicide(float delay) {if(m_suicideDelay<0.f) m_suicideDelay=delay;}
@@ -1202,9 +1200,7 @@ protected:
 
 	static IItemSystem			*m_pItemSystem;
 	static IGameFramework		*m_pGameFramework;
-	static IGameplayRecorder*m_pGameplayRecorder;
 
-	//
 	IAnimationGraph::InputID m_inputHealth;
 	IAnimationGraph::InputID m_inputStance;
 	IAnimationGraph::InputID m_inputFiring;

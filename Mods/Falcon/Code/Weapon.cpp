@@ -1976,9 +1976,6 @@ bool CWeapon::SetAspectProfile( EEntityAspects aspect, uint8 profile )
 		if (m_fm)
 		{
 			m_fm->Activate(true);
-
-			if (IsServer() && GetOwnerId())
-				m_pGameplayRecorder->Event(GetOwner(), GameplayEvent(eGE_WeaponFireModeChanged, m_fm->GetName(), profile, (void *)GetEntityId()));
 		}
 
 		return true;
@@ -3377,7 +3374,7 @@ bool CWeapon::AIUseOverrideOffset(EStance stance, float lean, Vec3& offset) cons
 
 //----------------------------------------------------------
 
-namespace 
+namespace
 {
 	bool raycast(CActor* pActor, Vec3 pos, Vec3 dir, float length)
 	{
@@ -3403,11 +3400,8 @@ namespace
 				else
 					return false;
 			}
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(pos, ColorB(255,255,0,255), hit.pt, ColorB(255,0,0,255), 2.0f);
 			return true;
 		}
-
-		//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(pos, ColorB(0,255,0,255), pos + dir * length, ColorB(0,255,0,255), 2.0f);
 		return false;
 	}
 }

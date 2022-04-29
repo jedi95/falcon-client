@@ -194,8 +194,6 @@ void CPlayerRotation::GetStanceAngleLimits(float & minAngle,float & maxAngle)
 		cyl.hh = dist;
 		cyl.center = movestate.weaponPosition + movestate.aimDirection*cyl.hh;
 
-		//gEnv->pRenderer->GetIRenderAuxGeom()->DrawCylinder(cyl.center, cyl.axis, cyl.r, cyl.hh, ColorF(0.4f,1.0f,0.6f, 0.2f));
-
 		float n = 0.0f;
 		geom_contact *contacts;
 		intersection_params params;
@@ -223,9 +221,6 @@ void CPlayerRotation::GetStanceAngleLimits(float & minAngle,float & maxAngle)
 				Limit(cosangle, -1.0f, 1.0f);
 				float newMin = acos_tpl(cosangle);
 				newMin = -newMin * 180.0f / gf_PI;
-				//float col[] = {1,1,1,1};
-				//gEnv->pRenderer->Draw2dLabel(100,100, 1.0f, col, false, "minangle: %.2f", newMin);
-				//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(contact->pt, 0.03f, ColorF(1,0,0,1));
 				minAngle = MAX(newMin, minAngle);
 			}
 			++currentc;
@@ -516,13 +511,9 @@ void CPlayerRotation::ClampAngles()
 
 			Matrix33 limitMtx;
 			limitMtx.SetFromVectors(right,forward,right%forward);
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(m_player.GetEntity()->GetWorldPos(), ColorB(0,0,255,255), m_player.GetEntity()->GetWorldPos() + limitMtx.GetColumn(0), ColorB(0,0,255,255));
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(m_player.GetEntity()->GetWorldPos(), ColorB(0,255,0,255), m_player.GetEntity()->GetWorldPos() + limitMtx.GetColumn(1), ColorB(0,255,0,255));
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(m_player.GetEntity()->GetWorldPos(), ColorB(255,0,0,255), m_player.GetEntity()->GetWorldPos() + limitMtx.GetColumn(2), ColorB(255,0,0,255));
 			limitMtx.Invert();
 
 			Vec3 localDir(limitMtx * m_viewQuat.GetColumn1());
-//			Vec3 localDir(limitMtx * m_player.GetEntity()->GetWorldRotation().GetColumn1());
 
 			Ang3 limit;
 
@@ -600,7 +591,7 @@ void CPlayerRotation::ProcessNormal()
 
 void CPlayerRotation::ProcessLean()
 {
-	if (!g_pGameCVars->fn_playerLeaning >= 1)
+	if (g_pGameCVars->fn_playerLeaning < 1)
 		return;
 
 	float leanAmt(0.0f);
@@ -631,10 +622,6 @@ void CPlayerRotation::ProcessLean()
 		Vec3 headPos(m_player.GetEntity()->GetWorldPos() + m_baseQuat * m_player.GetStanceViewOffset(stance,&noLean));
 		Vec3 newPos(m_player.GetEntity()->GetWorldPos() + m_baseQuat * m_player.GetStanceViewOffset(stance,&m_leanAmount));
 
-		/*gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(headPos, 0.05f, ColorB(0,0,255,255) );
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(newPos, 0.05f, ColorB(0,0,255,255) );
-		gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(headPos, ColorB(0,0,255,255), newPos, ColorB(0,0,255,255));*/
-
 		ray_hit hit;
 		int rayFlags(rwi_stop_at_pierceable|rwi_colltype_any);//COLLISION_RAY_PIERCABILITY & rwi_pierceability_mask);
 		IPhysicalEntity *pSkip(m_player.GetEntity()->GetPhysics());
@@ -645,8 +632,6 @@ void CPlayerRotation::ProcessLean()
 		{
 			float dist((headPos - newPos).len2() * distMult);
 			m_leanAmount *= ((hit.pt - headPos).len2() / dist) / distMult;
-
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(hit.pt, 0.05f, ColorB(0,255,0,255) );
 		}
 	}
 }

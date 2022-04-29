@@ -99,15 +99,6 @@ void CHUD::AutoSnap()
 		char szAngle[32];
 		sprintf(szAngle,"%f",-fAngle+90.0f);
 
-/*
-		ColorB col(255,255,255,255);
-		int iW=m_pRenderer->GetWidth();
-		int iH=m_pRenderer->GetHeight();
-		m_pRenderer->Set2DMode(true,iW,iH);
-		m_pRenderer->GetIRenderAuxGeom()->DrawLine(Vec3(iW/2,iH/2,0),col,Vec3(iW/2+vCursor.x*100,iH/2+vCursor.y*100,0),col,5);
-		m_pRenderer->Set2DMode(false,0,0);
-*/
-
 		m_animQuickMenu.CheckedSetVariable("Root.QuickMenu.Circle.Indicator._rotation",szAngle);
 
 		if(fAngle >= 342 || fAngle < 52)
@@ -1687,111 +1678,6 @@ void CHUD::ShowProgress(int progress, bool init /* = false */, int posX /* = 0 *
 
 //-----------------------------------------------------------------------------------------------------
 
-void CHUD::FakeDeath(bool revive)
-{
-	return; //feature disabled
-
-	CPlayer *pPlayer = static_cast<CPlayer*>(g_pGame->GetIGameFramework()->GetClientActor());
-	if(pPlayer->IsGod() || gEnv->bMultiplayer)
-		return;
-
-	if(pPlayer->GetLinkedEntity())		//not safe
-	{
-		m_fPlayerRespawnTimer = 0.0f;
-		pPlayer->SetHealth(0);
-		pPlayer->CreateScriptEvent("kill",0);
-		return;
-	}
-
-	if(revive)
-	{
-		float now = gEnv->pTimer->GetFrameStartTime().GetSeconds();
-		float diff = now - m_fPlayerRespawnTimer;
-
-		if(pPlayer->GetHealth() <= 0)
-		{
-			m_fPlayerRespawnTimer = 0.0f;
-			return;
-		}
-		
-		if(diff > -3.0f && (now - m_fLastPlayerRespawnEffect > 0.5f))
-		{
-			IMaterialEffects* pMaterialEffects = gEnv->pGame->GetIGameFramework()->GetIMaterialEffects();
-			SMFXRunTimeEffectParams params;
-			params.pos = pPlayer->GetEntity()->GetWorldPos();
-			params.soundSemantic = eSoundSemantic_HUD;
-			TMFXEffectId id = pMaterialEffects->GetEffectIdByName("player_fx", "player_damage_armormode");
-			pMaterialEffects->ExecuteEffect(id, params);
-			m_fLastPlayerRespawnEffect = now;
-		}
-		else if(diff > 0.0)
-		{
-			if(m_bRespawningFromFakeDeath)
-			{
-				pPlayer->StandUp();
-				pPlayer->Revive(false);
-				RebootHUD();
-				pPlayer->HolsterItem(false);
-				if (g_pGameCVars->g_godMode == 3)
-				{
-					g_pGame->GetGameRules()->PlayerPosForRespawn(pPlayer, false);
-				}
-				m_fPlayerRespawnTimer = 0.0f;
-				//if (IUnknownProxy * pProxy = pPlayer->GetEntity()->GetAI()->GetProxy())
-				//	pProxy->EnableUpdate(true); //seems not to work
-				pPlayer->CreateScriptEvent("cloaking", 0);
-				if (pPlayer->GetEntity()->GetAI())
-					gEnv->pAISystem->SendSignal(SIGNALFILTER_SENDER,1, "OnNanoSuitUnCloak",pPlayer->GetEntity()->GetAI());
-				m_bRespawningFromFakeDeath = false;
-				DisplayOverlayFlashMessage(" ");
-			}
-			else
-			{
-				m_fPlayerRespawnTimer = 0.0f;
-				pPlayer->SetHealth(0);
-				pPlayer->CreateScriptEvent("kill",0);
-			}
-		}
-		else
-		{
-			char text[256];
-			char seconds[10];
-			sprintf(seconds,"%i",(int)(fabsf(diff)));
-			if(m_bRespawningFromFakeDeath)
-				sprintf(text,"@ui_respawn_counter");
-			else
-				sprintf(text,"@ui_revive_counter");
-			DisplayFlashMessage(text, 2, ColorF(1.0f,0.0f,0.0f), true, seconds);
-		}
-	}
-	else if(!m_fPlayerRespawnTimer)
-	{
-		if(pPlayer && (/*g_pGameCVars->g_playerRespawns > 0*/ g_pGameCVars->g_difficultyLevel < 2 || g_pGameCVars->g_godMode == 3))
-		{
-			//g_pGameCVars->g_playerRespawns--;  //unlimited for now
-			//if (g_pGameCVars->g_playerRespawns < 0)
-			//	g_pGameCVars->g_playerRespawns = 0;
-
-			pPlayer->HolsterItem(true);
-			pPlayer->Fall(Vec3(0,0,0), true);
-			pPlayer->SetDeathTimer();
-			//if (IUnknownProxy * pProxy = pPlayer->GetEntity()->GetAI()->GetProxy())
-			//	pProxy->EnableUpdate(false); //seems not to work - cloak instead
-			pPlayer->CreateScriptEvent("cloaking", 1);
-			if (pPlayer->GetEntity()->GetAI())
-				gEnv->pAISystem->SendSignal(SIGNALFILTER_SENDER,1, "OnNanoSuitCloak",pPlayer->GetEntity()->GetAI());
-
-			ShowDeathFX(0);
-			GetRadar()->Reset();
-			BreakHUD(2);
-			m_fPlayerRespawnTimer = gEnv->pTimer->GetFrameStartTime().GetSeconds() + 10.0f;
-			m_fLastPlayerRespawnEffect = 0.0f;
-		}
-	}
-}
-
-//-----------------------------------------------------------------------------------------------------
-
 void CHUD::ShowDataUpload(bool active)
 {
 	if(active)
@@ -1840,7 +1726,7 @@ void CHUD::ShowWeaponsOnGround()
 		{
 			EntityId id = *it;
 			IItem *pItem = g_pGame->GetIGameFramework()->GetIItemSystem()->GetItem(id);
-			if(pItem && pItem->GetIWeapon() /*&& !pItem->GetOwnerId()*/ && !pItem->GetEntity()->GetParent() && !pItem->GetEntity()->IsHidden())
+			if(pItem && pItem->GetIWeapon() && !pItem->GetEntity()->GetParent() && !pItem->GetEntity()->IsHidden())
 			{
 				float distance = (pItem->GetEntity()->GetWorldPos() - clientPos).len();
 				if(distance < 10.0f)
@@ -1857,9 +1743,6 @@ void CHUD::ShowWeaponsOnGround()
 						{
 							if (!hit.bTerrain && hit.pCollider==pPE)
 							{
-								//display
-//								UpdateMissionObjectiveIcon(id, 1, eOS_Bottom, true);
-
 								m_pHUDSilhouettes->SetSilhouette(pItem,0,0,1,1,-1);
 							}
 						}
@@ -1881,55 +1764,4 @@ void CHUD::FireModeSwitch(bool grenades /* = false */)
 		m_animPlayerStats.Invoke("switchFireMode");
 	else
 		m_animPlayerStats.Invoke("switchGrenades");
-}
-
-//-----------------------------------------------------------------------------------------------------
-
-void CHUD::DrawGroundCircle(Vec3 pos, float radius, float thickness /* = 1.0f */, float anglePerSection /* = 5.0f */, ColorB col, bool aligned /* = true */, float offset /* = 0.1f */, bool useSecondColor, ColorB colB)
-{
-	Vec3 p0,p1;
-	p0.x = pos.x + radius*sin(0.0f);
-	p0.y = pos.y + radius*cos(0.0f);
-	p0.z = pos.z;
-
-	if(aligned)
-	{
-		float terrainHeight = gEnv->p3DEngine->GetTerrainZ((int)p0.x, (int)p0.y);
-		p0.z = terrainHeight + 0.25f;
-	}
-
-	float step = anglePerSection/180*gf_PI;
-
-	bool switchColor = true;
-
-	for (float angle = 0; angle < 360.0f/180*gf_PI+step; angle += step)
-	{
-		p1.x = pos.x + radius*sin(angle);
-		p1.y = pos.y + radius*cos(angle);
-		if(aligned)
-		{
-			float terrainHeight = gEnv->p3DEngine->GetTerrainZ((int)p1.x, (int)p1.y);
-			p1.z = terrainHeight + offset;
-			if(p1.z - p0.z > 0.15f)
-				p1.z = (3.0f* p0.z + p1.z) * 0.25f;
-		}
-		else
-			p1.z = pos.z + offset;
-
-		if(angle == 0)
-			p0 = p1;
-
-		if(useSecondColor)
-		{
-			switchColor = !switchColor;
-			if(switchColor)
-				gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(p0,colB,p1,col,thickness);
-			else
-				gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(p0,col,p1,colB,thickness);
-		}
-		else
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(p0,col,p1,col,thickness);
-
-		p0 = p1;
-	}   
 }

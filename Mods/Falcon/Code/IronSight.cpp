@@ -819,13 +819,11 @@ void CIronSight::UpdateDepthOfField(CActor* pActor, float frameTime, float t)
 
 			Vec3 xOff = x * viewRotation.GetColumn0();
 			Vec3 yOff = y * viewRotation.GetColumn2();
-			
+
 			// jitter
-			if (true)
-			{
-				dir += xOff + yOff;
-				dir.Normalize();
-			}
+			dir += xOff + yOff;
+			dir.Normalize();
+
 			const static float minRelaxSpeed = 10.0f;
 			const static float maxRelaxSpeed = 1.0f;
 

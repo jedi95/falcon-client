@@ -40,7 +40,6 @@
 IEntitySystem *CItem::m_pEntitySystem=0;
 IItemSystem *CItem::m_pItemSystem=0;
 IGameFramework *CItem::m_pGameFramework=0;
-IGameplayRecorder*CItem::m_pGameplayRecorder=0;
 
 IEntityClass* CItem::sOffHandClass = 0;
 IEntityClass* CItem::sFistsClass = 0;
@@ -161,7 +160,6 @@ bool CItem::Init( IGameObject *pGameObject )
 	{
 		m_pEntitySystem = gEnv->pEntitySystem;
 		m_pGameFramework= gEnv->pGame->GetIGameFramework();
-		m_pGameplayRecorder = m_pGameFramework->GetIGameplayRecorder();
 		m_pItemSystem = m_pGameFramework->GetIItemSystem();
 		sOffHandClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass("OffHand");
 		sFistsClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass("Fists");

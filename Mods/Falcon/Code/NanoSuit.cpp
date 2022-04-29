@@ -829,8 +829,6 @@ bool CNanoSuit::SetMode(ENanoMode mode, bool forceUpdate, bool keepInvul)
 		else
 			PlaySound(ESound_AISuitHumming, 0.0f, true);
 
-		m_pGameFramework->GetIGameplayRecorder()->Event(m_pOwner->GetEntity(), GameplayEvent(eGE_SuitModeChanged, 0, (float)mode));
-
 		if (gEnv->bServer && !keepInvul)
 		{
 			if (m_invulnerable)

@@ -478,11 +478,6 @@ int CScriptBind_Weapon::GetAttachmentHelperPos(IFunctionHandler *pH, const char 
 
 	Vec3 pos = pWeapon->GetSlotHelperPos(CItem::eIGS_FirstPerson, helperName, false);
 	Vec3 tpos = pWeapon->GetSlotHelperPos(CItem::eIGS_FirstPerson, helperName, true);
-	//gEnv->pRenderer->DrawPoint(tpos.x, tpos.y, tpos.z, 10.0f);
-	//CryLogAlways("helperName: %s pos: x=%f y=%f z=%f", helperName, tpos.x, tpos.y, tpos.z);
-	//gEnv->pRenderer->DrawBall(tpos, 0.2f);
-	//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(tpos, 0.075f, ColorB( 255, 10, 10, 255 ));
-	//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(pWeapon->GetOwner()->GetWorldPos(), ColorB(0, 0, 255, 255), tpos, ColorB(255, 255, 0, 255));
 	return pH->EndFunction(tpos);
 }
 

@@ -1633,66 +1633,6 @@
 				>
 			</File>
 			<Filter
-				Name="Tweaks"
-				>
-				<File
-					RelativePath=".\HUD\Tweaks\HUDTweakMenu.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\HUD\Tweaks\HUDTweakMenu.h"
-					>
-				</File>
-				<File
-					RelativePath=".\HUD\Tweaks\TweakCommon.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\HUD\Tweaks\TweakCommon.h"
-					>
-				</File>
-				<File
-					RelativePath=".\HUD\Tweaks\TweakMenu.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\HUD\Tweaks\TweakMenu.h"
-					>
-				</File>
-				<File
-					RelativePath=".\HUD\Tweaks\TweakMetadata.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\HUD\Tweaks\TweakMetadata.h"
-					>
-				</File>
-				<File
-					RelativePath=".\HUD\Tweaks\TweakMetadataCVAR.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\HUD\Tweaks\TweakMetadataCVAR.h"
-					>
-				</File>
-				<File
-					RelativePath=".\HUD\Tweaks\TweakMetadataLUA.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\HUD\Tweaks\TweakMetadataLUA.h"
-					>
-				</File>
-				<File
-					RelativePath=".\HUD\Tweaks\TweakTraverser.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\HUD\Tweaks\TweakTraverser.h"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="Main"
 				>
 				<File

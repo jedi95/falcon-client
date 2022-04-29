@@ -486,22 +486,6 @@ void CTrooper::ProcessRotation(float frameTime)
 						}
 					}
 				}
-				/*
-					Matrix33 mrot(m_baseMtx);
-					Matrix33 mrot2(m_modelQuat);
-					Vec3 basepos = GetEntity()->GetWorldPos()+Vec3(0,0,0.7f);
-					gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(28,28,0,255), basepos + mrot.GetColumn(0) * 2.0f, ColorB(128,128,0,255));
-					gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(192,192,0,255), basepos + mrot.GetColumn(1)* 2.0f, ColorB(192,192,0,255));
-					gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(40,40,0,255), basepos + mrot.GetColumn(2) * 2.0f, ColorB(140,140,0,255));
-					basepos.z +=0.1f;
-					gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(38,0,0,255), basepos + mrot2.GetColumn(0) * 2.0f, ColorB(138,0,0,255));
-					gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(255,0,0,255), basepos + mrot2.GetColumn(1)* 2.0f, ColorB(255,0,0,255));
-					gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(70,0,0,255), basepos + mrot2.GetColumn(2) * 2.0f, ColorB(170,0,0,255));
-
-					basepos.z +=0.4f;
-					gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(255,255,255,255), basepos + forward * 3.0f, ColorB(255,255,255,255));
-
-				*/
 			}
 			else if(m_stats.inAir >0)
 			{
@@ -532,18 +516,6 @@ void CTrooper::ProcessRotation(float frameTime)
 
 				roll =  vXn*vXn *(accelStrafe/3 +  vX /6)*bankMultiplier;
 				roll = min(max(-DEG2RAD(15.0f),roll),DEG2RAD(15.0f));
-
-				/*	disabled banking around X (when moving forward/backward)
-				float vY = localVel.y;
-				float vYn = (l>0 ? vY/l : 0);
-				float accelFwd =  (vY - m_oldDirFwd)/frameTime;
-				vYn *= vYn;
-				m_oldDirFwd = vY;
-				rollx =  -vYn*vYn *(accelFwd/6 +  vY /6)*bankMultiplier;
-				if(rollx > 0)
-					rollx/=2;
-				rollx = min(max(-DEG2RAD(15.0f),rollx),DEG2RAD(7.5f));
-				*/
 
 				// tilt the trooper more like the ground
 				pe_status_living livStat;
@@ -631,7 +603,6 @@ void CTrooper::ProcessRotation(float frameTime)
 			Vec3 goal = (m_stats.isRagDoll?Vec3(0,0,0):GetStanceInfo(m_stance)->modelOffset);
 			Interpolate(m_modelOffset,goal,5.0f,frameTime);
 
-//			m_modelAddQuat.SetIdentity();
 			m_charLocalMtx.SetIdentity();
 			pe_player_dimensions params;
 			if(pPhysEnt->GetParams(&params))
@@ -642,42 +613,10 @@ void CTrooper::ProcessRotation(float frameTime)
 				Vec3 trans( m_charLocalMtx.TransformVector(pivot));
 				trans.z -= pivot.z;
 				m_charLocalMtx.SetTranslation(-trans + m_modelOffset+m_modelOffsetAdd);
-//				float transx = heightPivot * tan(m_Rollx);
-//				float transy = heightPivot * tan(m_Roll);
-//				m_modelAddQuat.SetTranslation(Vec3(-transy, -transx,0) + m_modelOffset+m_modelOffsetAdd);
 			}
-				//m_modelAddQuat = QuatT(Matrix33::CreateIdentity() * Matrix33::CreateRotationXYZ(Ang3(m_Rollx,m_Roll,0)));//goalQuat;
 
-			//m_charLocalMtx = Matrix34(m_modelAddQuat);
 			GetAnimatedCharacter()->SetExtraAnimationOffset(m_charLocalMtx);
-			//GetAnimatedCharacter()->SetExtraAnimationOffset(m_modelAddQuat);
-/*
-			m_modelQuat = Quat::CreateSlerp( GetEntity()->GetRotation().GetNormalized(), goalQuat, min(0.5f,frameTime * m_turnSpeed)  );
-			m_modelQuat.Normalize();
-			m_moveRequest.rotation = currRotation.GetInverted() * m_modelQuat;
-			m_moveRequest.rotation.Normalize();
-			Quat currQuat(m_baseMtx);
-			m_baseMtx = Matrix33(Quat::CreateSlerp( currQuat.GetNormalized(), m_modelQuat, frameTime * m_turnSpeed ));
-			m_baseMtx.OrthonormalizeFast();
-*/
-
-			/*	
-			Matrix33 mrot(m_charLocalMtx);
-			Matrix33 mrot2(m_modelQuat);
-			Vec3 basepos = GetEntity()->GetWorldPos()+Vec3(0,0,0.7f);
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(28,28,0,255), basepos + mrot.GetColumn(0) * 2.0f, ColorB(128,128,0,255));
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(192,192,0,255), basepos + mrot.GetColumn(1)* 2.0f, ColorB(192,192,0,255));
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(40,40,0,255), basepos + mrot.GetColumn(2) * 2.0f, ColorB(140,140,0,255));
-		
-			basepos.z +=0.1f;
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(38,0,0,255), basepos + mrot2.GetColumn(0) * 2.0f, ColorB(138,0,0,255));
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(255,0,0,255), basepos + mrot2.GetColumn(1)* 2.0f, ColorB(255,0,0,255));
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(70,0,0,255), basepos + mrot2.GetColumn(2) * 2.0f, ColorB(170,0,0,255));
-			
-			basepos.z +=0.4f;
-			gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(basepos, ColorB(255,255,255,255), basepos + forward * 3.0f, ColorB(255,255,255,255));
-			*/
-		}		
+		}
 		else
 			m_moveRequest.rotation.SetIdentity();
 	}
@@ -1227,25 +1166,13 @@ void CTrooper::SetActorMovement(SMovementRequestParams &control)
 	const SAnimationTarget * pAnimTarget = GetAnimationGraphState()->GetAnimationTarget();
 	if ((pAnimTarget != NULL) && pAnimTarget->preparing)
 	{
-		
 		float offset = 3.0f;
-		Vec3 bodyTarget = pAnimTarget->position + offset * (pAnimTarget->orientation * FORWARD_DIRECTION);// + Vec3(0, 0, 1.5);
+		Vec3 bodyTarget = pAnimTarget->position + offset * (pAnimTarget->orientation * FORWARD_DIRECTION);
 		Vec3 bodyDir(bodyTarget - mypos);
 		bodyDir.z=0;
 		bodyDir = bodyDir.GetNormalizedSafe(pAnimTarget->orientation * FORWARD_DIRECTION);
-		//gEnv->pRenderer->GetIRenderAuxGeom()->DrawLine(mypos, ColorB(255,128,128,255), mypos + bodyDir * 10.0f, ColorB(255,255,255,255), 5.0f);
-		//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(bodyTarget, 0.2f, ColorB(255, 255, 255, 255), true);
-		SetDesiredDirection(bodyDir);
-		/*
-		float dist = Distance::Point_Point(state.weaponPosition,pAnimTarget->position);
-		float coeff = pAnimTarget->maxRadius - dist;
-		if(coeff<0)
-			coeff = 0;
-		coeff *= 5*coeff;
-		Vec3 targetPos = pAnimTarget->position + coeff * (pAnimTarget->orientation * FORWARD_DIRECTION) + Vec3(0, 0, 1.5);
-		SetDesiredDirection((targetPos - state.weaponPosition).GetNormalizedSafe());
-		*/
 
+		SetDesiredDirection(bodyDir);
 		pAnimTarget->notAiControlledAnymore = true;
 	}
 	else if(!control.vAimTargetPos.IsZero())

@@ -5,22 +5,6 @@
 #include "GameCVars.h"
 
 
-/*
-moveto (P1);                            // move pen to startpoint
-for (int t=0; t < steps; t++)
-{
-float s = (float)t / (float)steps;    // scale s to go from 0 to 1
-float h1 =  2s^3 - 3s^2 + 1;          // calculate basis function 1
-float h2 = -2s^3 + 3s^2;              // calculate basis function 2
-float h3 =   s^3 - 2*s^2 + s;         // calculate basis function 3
-float h4 =   s^3 -  s^2;              // calculate basis function 4
-vector p = h1*P1 +                    // multiply and sum all funtions
-h2*P2 +                    // together to build the interpolated
-h3*T1 +                    // point along the curve.
-h4*T2;
-lineto (p)                            // draw to calculated point on the curve
-}*/
-
 static Vec3 HermiteInterpolate( float s, const Vec3& p1, const Vec3& t1, const Vec3& p2, const Vec3& t2 )
 {
 	float s2 = s*s;
@@ -31,13 +15,6 @@ static Vec3 HermiteInterpolate( float s, const Vec3& p1, const Vec3& t1, const V
 	float h4 = s3 - s2;
 	return h1*p1 + h2*p2 + h3*t1 + h4*t2;
 }
-
-
-
-
-
-
-
 
 CNetPlayerInput::CNetPlayerInput( CPlayer * pPlayer ) : m_pPlayer(pPlayer)
 {
@@ -111,9 +88,6 @@ void CNetPlayerInput::PreUpdate()
 			{
 				lookTarget = moveState.eyePosition + dir.GetNormalizedSafe();
 			}
-
-			// draw eye pos for comparison
-			//gEnv->pRenderer->GetIRenderAuxGeom()->DrawSphere(moveState.eyePosition, 0.04f, ColorF(0.3f,0.2f,0.7f,1.0f));
 		}
 
 		moveRequest.SetLookTarget( lookTarget );
