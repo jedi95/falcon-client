@@ -25,7 +25,6 @@ CSoundMoods::CSoundMoods()
 	if(gEnv->pSoundSystem)
 	{
 		m_pSoundMoodManager = gEnv->pSoundSystem->GetIMoodManager();
-		CRY_ASSERT(m_pSoundMoodManager);
 	}
 
 	m_vecSoundMoods.resize(32);
@@ -131,7 +130,6 @@ void CSoundMoods::AddSoundMood(ESOUNDMOOD eSoundMood,float fPercent)
 		AddSoundMood("low_health",0,3000.0f,1000,fPercent/100.0f);
 		break;
 	default:
-		CRY_ASSERT(0);
 		break;
 	}
 }

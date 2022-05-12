@@ -140,8 +140,6 @@ bool CGame::Init(IGameFramework *pFramework)
   LOADING_TIME_PROFILE_SECTION(GetISystem());
 
 	m_pFramework = pFramework;
-	assert(m_pFramework);
-
 	m_pConsole = gEnv->pConsole;
 
 	RegisterConsoleVars();
@@ -340,7 +338,7 @@ bool CGame::Init(IGameFramework *pFramework)
 			m_pLauncher = pGetILauncher();
 		}
 	}
-	
+
 	FalconLogInfo("Loaded Falcon Client version %s", Falcon::GetBuildVersion());
 	if (gEnv->pRenderer->GetRenderType() == eRT_DX10)
 	{
@@ -423,8 +421,6 @@ void CGame::ConfigureGameChannel(bool isServer, IProtocolBuilder *pBuilder)
 
 void CGame::EditorResetGame(bool bStart)
 {
-	CRY_ASSERT(gEnv->pSystem->IsEditor());
-
 	if(bStart)
 	{
 		IActionMapManager* pAM = m_pFramework->GetIActionMapManager();
@@ -435,7 +431,7 @@ void CGame::EditorResetGame(bool bStart)
 		}
 		m_pHUD = new CHUD;
 		m_pHUD->Init();
-		m_pHUD->PlayerIdSet(m_uiPlayerID);	
+		m_pHUD->PlayerIdSet(m_uiPlayerID);
 	}
 	else
 	{
@@ -449,7 +445,7 @@ void CGame::PlayerIdSet(EntityId playerId)
 	{
 		//this is NEVER allowed to come directly from a flash callback, if it is - change the callback
 		GetMenu()->DestroyIngameMenu();	//else the memory pool gets too big
-	GetMenu()->DestroyStartMenu();	//else the memory pool gets too big
+		GetMenu()->DestroyStartMenu();	//else the memory pool gets too big
 		if (m_pHUD == 0)
 		{
 			m_pHUD = new CHUD();
@@ -459,7 +455,7 @@ void CGame::PlayerIdSet(EntityId playerId)
 
 	if(m_pHUD)
 	{
-		m_pHUD->PlayerIdSet(playerId);	
+		m_pHUD->PlayerIdSet(playerId);
 	}
 	else
 	{

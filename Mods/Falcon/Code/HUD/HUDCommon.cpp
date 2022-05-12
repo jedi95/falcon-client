@@ -183,7 +183,6 @@ void CHUDCommon::SetGODMode(uint8 ucGodMode, bool forceUpdate)
 void CHUDCommon::CursorIncrementCounter()
 {
 	m_iCursorVisibilityCounter++;
-	assert(m_iCursorVisibilityCounter >= 0);
 
 	if(1 == m_iCursorVisibilityCounter)
 	{
@@ -204,7 +203,6 @@ void CHUDCommon::CursorIncrementCounter()
 void CHUDCommon::CursorDecrementCounter()
 {
 	m_iCursorVisibilityCounter--;
-	assert(m_iCursorVisibilityCounter >= 0);
 
 	if(0 == m_iCursorVisibilityCounter)
 	{

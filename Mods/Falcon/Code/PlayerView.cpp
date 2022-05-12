@@ -42,10 +42,6 @@ History:
 
 #include "HUD/HUD.h"
 
-
-//CPlayerView::SViewStateIn CPlayerView::m_in;
-//CPlayerView::SViewStateInOut CPlayerView::m_io;
-
 CPlayerView::CPlayerView(const CPlayer &rPlayer,SViewParams &viewParams) : m_in(m_viewStateIn_private)
 {
 	ViewPreProcess(rPlayer,viewParams,m_viewStateIn_private);
@@ -85,13 +81,6 @@ void CPlayerView::ViewPreProcess(const CPlayer &rPlayer,SViewParams &viewParams,
 		m_in.pVehicle=rPlayer.GetLinkedVehicle();
 		
 		m_in.bIsGrabbing=false;
-		/*if (rPlayer.m_grabStats.grabId>0)
-		{
-			m_in.bIsGrabbing=true;
-			// *****
-			viewParams.nearplane = 0.1f;
-			// *****
-		}*/
 		
 		m_in.stats_isRagDoll=rPlayer.m_stats.isRagDoll;
 		m_in.stats_isStandingUp=rPlayer.m_stats.isStandingUp;
@@ -165,23 +154,7 @@ void CPlayerView::ViewPreProcess(const CPlayer &rPlayer,SViewParams &viewParams,
 	
 	// SViewStateInOut -- temporaries and output
 	{
-		//--- temporaries - FirstThird shared
-		
-		//m_io.bUsePivot
-		//m_io.bobMul
-		//m_io.viewQuatForWeapon
-		//m_io.eyeOffsetGoal
-		
-		//--- temporaries - view shared
 		m_io.wAngles=Ang3(0,0,0);
-		//--- I/O
-		//m_io.m_lastPos=rPlayer.m_lastPos;
-		// Integ
-		//if (m_io.m_lastPos.len2()>0.01f)
-		//{
-		//	m_io.blendViewOffset = m_io.m_lastPos - rPlayer.GetEntity()->GetWorldPos(); 
-		//	m_io.m_lastPos.Set(0,0,0);
-		//}
 	}
 	
 	// *****
@@ -201,8 +174,6 @@ void CPlayerView::ViewPreProcess(const CPlayer &rPlayer,SViewParams &viewParams,
 
 	m_io.stats_FPSecWeaponAngles=rPlayer.m_stats.FPSecWeaponAngles;
 	m_io.stats_FPSecWeaponPos=rPlayer.m_stats.FPSecWeaponPos;
-
-	//m_io.viewShake=rPlayer.m_viewShake;
 
 	m_io.eyeOffsetView=rPlayer.m_eyeOffsetView;
 	m_io.baseQuat=rPlayer.m_baseQuat;
@@ -279,13 +250,6 @@ void CPlayerView::ViewProcess(SViewParams &viewParams)
 //--------------------------------------------------------------------------
 void CPlayerView::ViewPostProcess(CPlayer &rPlayer,SViewParams &viewParams)
 {
-	/*IEntity *pLinked = rPlayer.GetLinkedEntity();
-	if (pLinked && rPlayer.m_stats.linkedFreeLook)
-	{
-		viewParams.rotation = Quat(pLinked->GetWorldTM()) * viewParams.rotation;
-	}*/
-
-
 	// update the player rotation if view control is taken from somewhere else (e.g. animation or vehicle)
 	ViewExternalControlPostProcess(rPlayer,viewParams);
 
@@ -294,16 +258,9 @@ void CPlayerView::ViewPostProcess(CPlayer &rPlayer,SViewParams &viewParams)
 
 	ViewShakePostProcess(rPlayer,viewParams);
 
-
-	//--------------------------
-	// Output changed temporaries - debugging.
-	//--------------------------
-
 	//--------------------------
 	// Output changed state.
 	//--------------------------
-	//rPlayer.m_lastPos=m_io.m_lastPos;
-
 	rPlayer.m_viewQuat=m_io.viewQuat;
 	//FIXME:updating the baseMatrix due being in a vehicle or having a first person animations playing has to be moved somewhere else
 	rPlayer.m_baseQuat=m_io.baseQuat;
@@ -317,7 +274,6 @@ void CPlayerView::ViewPostProcess(CPlayer &rPlayer,SViewParams &viewParams)
 	rPlayer.m_stats.FPWeaponPos=m_io.stats_FPWeaponPos;
 	rPlayer.m_stats.FPSecWeaponAngles=m_io.stats_FPSecWeaponAngles;
 	rPlayer.m_stats.FPSecWeaponPos=m_io.stats_FPSecWeaponPos;
-	//rPlayer.m_viewShake=m_io.viewShake;
 
 	rPlayer.m_eyeOffsetView=m_io.eyeOffsetView;
 	rPlayer.m_stats.bobCycle=m_io.stats_bobCycle;
@@ -407,7 +363,6 @@ void CPlayerView::ViewFirstThirdSharedPost(SViewParams &viewParams)
 	//update first person weapon model position/angles
 	{
 		Quat wQuat(m_io.viewQuatForWeapon * Quat::CreateRotationXYZ(m_io.vFPWeaponAngleOffset * gf_PI/180.0f));
-		//wQuat *= Quat::CreateSlerp(viewParams.shakeQuat,IDENTITY,0.5f);
 		wQuat *= Quat::CreateSlerp(viewParams.currentShakeQuat,IDENTITY,0.5f);
 		wQuat.Normalize();
 
@@ -491,10 +446,6 @@ void CPlayerView::ViewThirdPerson(SViewParams &viewParams)
 				current.y = current.y * (hit.dist/oldLen);
 			}
 		}
-		
-		//viewParams.position += m_io.viewQuatFinal.GetColumn0() * current.x;		// right 
-		//viewParams.position += m_io.viewQuatFinal.GetColumn1() * current.y;	// back
-		//viewParams.position += m_io.viewQuatFinal.GetColumn2() * current.z;	// up
 		viewParams.position += offsetX + offsetY + offsetZ;
 	}
 	else
@@ -507,22 +458,6 @@ void CPlayerView::ViewThirdPerson(SViewParams &viewParams)
 }
 	}
 }
-
-#if 0
-void CPlayerView::ViewThirdPersonDirected(SViewParams &viewParams)
-{
-	if (m_in.thirdPersonYaw>0.001f)
-	{
-		viewParams.rotation *= Quat::CreateRotationXYZ(Ang3(0,0,m_in.thirdPersonYaw * gf_PI/180.0f));
-		m_io.viewQuatFinal = Matrix33(viewParams.rotation);
-	}
-
-	if (m_io.bUsePivot)			
-		viewParams.position += m_io.viewQuatFinal.GetColumn1() * m_in.params_viewDistance + m_io.viewQuatFinal.GetColumn2() * (0.25f + m_in.params_viewHeightOffset);
-	else
-		viewParams.position += m_io.viewQuatFinal.GetColumn1() * -m_in.thirdPersonDistance + m_io.viewQuatFinal.GetColumn2() * (0.25f + m_in.params_viewHeightOffset);
-}
-#endif
 
 // jump/land spring effect. Adjust the eye and weapon pos as required.
 void CPlayerView::FirstPersonJump(SViewParams &viewParams,Vec3 &weaponOffset, Ang3 &weaponAngleOffset)
@@ -557,8 +492,6 @@ void CPlayerView::ViewFirstPerson(SViewParams &viewParams)
 		// jump/land spring effect. Adjust the eye and weapon pos as required.
 		FirstPersonJump(viewParams,weaponOffset,weaponAngleOffset);
 
-		//float standSpeed(GetStanceMaxSpeed(STANCE_STAND));
-
 		Vec3 vSpeed(0,0,0);
 		if (m_in.standSpeed>0.001f)
 			vSpeed = (m_in.stats_velocity / m_in.standSpeed);
@@ -573,7 +506,7 @@ void CPlayerView::ViewFirstPerson(SViewParams &viewParams)
 
 		speedMul = min(1.5f,speedMul);
 
-		bool crawling(m_in.stance==STANCE_PRONE /*&& m_in.stats_flatSpeed>0.1f*/ && m_in.stats_onGround>0.1f);
+		bool crawling(m_in.stance==STANCE_PRONE && m_in.stats_onGround>0.1f);
 		bool weaponZoomed = false;
 		bool weaponZomming = false;
 
@@ -596,7 +529,7 @@ void CPlayerView::ViewFirstPerson(SViewParams &viewParams)
 		}
 	
 		// On the ground.
-		if (m_in.stats_inAir < 0.1f /*&& m_in.stats_inWater < 0.1f*/)
+		if (m_in.stats_inAir < 0.1f)
 		{
 			//--- Bobbing.
 			// bobCycle is a speed varying time step running (looping) from 0 to 1 
@@ -653,7 +586,6 @@ void CPlayerView::ViewFirstPerson(SViewParams &viewParams)
 
 				weaponAngleOffset.y += dot * 5.0f;		// kStrafeHorzScale
 			}
-			//CryLogAlways("bobDir.z: %f", bobDir.z);
 			if (bobDir.z < 0.0f)
 			{
 				bobDir.x *= 1.0f;
@@ -664,7 +596,6 @@ void CPlayerView::ViewFirstPerson(SViewParams &viewParams)
 			else
 				bobDir.z *= 1.85f;
 
-			//CryLogAlways("bobDir.z: %f after", bobDir.z);
 			weaponOffset += m_io.viewQuatFinal * bobDir;
 			weaponOffset -= m_io.baseQuat.GetColumn2() * 0.035f * speedMul;
 
@@ -701,12 +632,6 @@ void CPlayerView::ViewFirstPerson(SViewParams &viewParams)
 			{
 				weaponOffset.z	-= 0.07f;
 				weaponOffset.y	+=  m_io.viewQuatFinal.GetColumn1().y * 0.06f;
-			}
-			else
-			{
-				//angOffset.x *= 2.25f;
-				//angOffset.y += cry_sinf(m_io.stats_bobCycle*gf_PI*2.0f)*0.5f*speedMul;
-				//angOffset.z -= cry_sinf(m_io.stats_bobCycle*gf_PI*2.0f)*1.125f*speedMul;
 			}
 		}
 		else
@@ -793,9 +718,6 @@ void CPlayerView::ViewFirstPerson(SViewParams &viewParams)
 				weaponAngleOffset *= (1.0f-scale);
 				weaponOffset *= scale;
 			}
-			//if(vSpeedLen>0.1f)
-				//weaponAngleOffset += Ang3(-8.0f,0,-12.5f);
-			
 		}
 		else if (m_in.bSprinting && vSpeedLen>0.5f)
 		{
@@ -820,7 +742,6 @@ void CPlayerView::ViewFirstPerson(SViewParams &viewParams)
 		float bobSpeedMult(1.0f);
 		if(m_in.stats_inWater>0.1)
 			bobSpeedMult = 0.75f;
-//		m_io.viewQuatForWeapon *= Quat::CreateRotationXYZ(Ang3(rx,ry,rz));
 		
 		Interpolate(m_io.vFPWeaponOffset,weaponOffset,3.95f*bobSpeedMult,m_in.frameTime);
 		Interpolate(m_io.vFPWeaponAngleOffset,weaponAngleOffset,10.0f*bobSpeedMult,m_in.frameTime);
@@ -1176,16 +1097,13 @@ void CPlayerView::ViewFollowCharacterFirstPerson(SViewParams &viewParams)
 void CPlayerView::ViewExternalControlPostProcess(CPlayer &rPlayer,SViewParams &viewParams)
 {
 	// update the player rotation if view control is taken from somewhere else
-	if (m_in.health>0 && (/*m_in.pVehicle || */m_in.stats_followCharacterHead))
+	if (m_in.health>0 && m_in.stats_followCharacterHead)
 	{
 		Vec3 forward = viewParams.rotation.GetColumn1().GetNormalizedSafe();
 		Vec3 up = Vec3(0,0,1);
 
-		m_io.baseQuat = viewParams.rotation;//Quat(Matrix33::CreateFromVectors(forward % up,forward,up));
-		//m_baseQuat.NoScale();
-
+		m_io.baseQuat = viewParams.rotation;
 		m_io.viewQuat = m_io.viewQuatFinal = viewParams.rotation;
-		//m_input.viewVector = viewParams.rotation.GetColumn1();
 	}
 }
 
@@ -1195,7 +1113,7 @@ void CPlayerView::ViewFirstPersonOnLadder(SViewParams & viewParams)
 	viewParams.viewID = 3;
 
 	viewParams.nearplane = 0.12f;
-	viewParams.position = m_in.entityWorldMatrix * (m_in.localEyePos+Vec3(0.02f,0.0f,0.05f));// * (m_in.localEyePos+Vec3(0.1f,0.0f,0.0f));
+	viewParams.position = m_in.entityWorldMatrix * (m_in.localEyePos+Vec3(0.02f,0.0f,0.05f));
 	
 	m_io.viewQuat = m_io.viewQuatFinal = viewParams.rotation;
 
@@ -1230,46 +1148,9 @@ void CPlayerView::ViewShakePostProcess(CPlayer &rPlayer,SViewParams &viewParams)
 			if (rPlayer.m_stats.inFreefall.Value()==2)
 				dot *= 0.5f;
 
-			//float white[4] = {1,1,1,1};
-			//gEnv->pRenderer->Draw2dLabel( 100, 50, 2, white, false, "dot:%f vel:%f", dot, rPlayer.m_stats.velocity.len() );
-			
 			pView->SetViewShake(Ang3(0.0005f,0.001f,0.0005f)*dot,Vec3(0.003f,0.0f,0.003f)*dot,0.3f,0.015f,1.0f,2);
 		}
 	}
-
-#if 0
-	if (m_io.viewShake.amount>0.001f)
-	{
-		viewParams.shakeDuration = m_io.viewShake.duration;
-		viewParams.shakeFrequency = m_io.viewShake.frequency;
-		viewParams.shakeAmount = m_io.viewShake.angle;
-		viewParams.shakeID = 1;
-
-		memset(&m_io.viewShake,0,sizeof(SViewShake));
-	}
-	/*else if (IsZeroG() && m_stats.flatSpeed > 10.0f)
-	{
-	viewParams.shakeDuration = 0.1f;
-	viewParams.shakeFrequency = 0.1f;
-	viewParams.shakeAmount = Ang3(m_stats.flatSpeed*0.001f,0,0);
-	}*/
-	else if (m_in.stats_inAir < 0.1f && m_in.stats_flatSpeed > m_in.stand_MaxSpeed * 1.1f)
-	{
-		viewParams.shakeDuration = 0.1f ;/// (shake*shake);
-		viewParams.shakeFrequency = 0.1f ;/// (shake*shake);
-		viewParams.shakeAmount = Ang3(m_in.stats_flatSpeed*0.0015f,m_in.stats_flatSpeed*0.00035f,m_in.stats_flatSpeed*0.00035f) * m_in.shake;
-		viewParams.shakeID = 0;
-	}
-#endif
-	//testing code
-	/*if (m_stats.inAir < 0.1f && m_stats.flatSpeed > GetStanceInfo(STANCE_STAND)->maxSpeed * 1.1f)
-	{
-	float shake(g_pGameCVars->cl_sprintShake);
-
-	IView *pView = g_pGame->GetIGameFramework()->GetIViewSystem()->GetViewByEntityId(GetEntityId());
-	if (pView)
-	pView->SetViewShake(ZERO,Vec3(m_stats.flatSpeed*0.0035f,0,m_stats.flatSpeed*0.0035f) * shake,0.1f,0.05f,0.5f,1);
-	}*/
 }
 
 // If there are first person hands present, then position and orient them relative to the view

@@ -173,7 +173,6 @@ bool CVehicleMovementBase::Init(IVehicle* pVehicle, const SmartScriptTable &tabl
   }
   
   m_pEntitySoundsProxy = (IEntitySoundProxy*) m_pEntity->CreateProxy(ENTITY_PROXY_SOUND);
-  assert(m_pEntitySoundsProxy);
   if (gEnv->pSoundSystem && !GetSoundName(eSID_Run).empty())
   {	
     gEnv->pSoundSystem->Precache(GetSoundName(eSID_Run).c_str(), FLAG_SOUND_DEFAULT_3D, FLAG_SOUND_PRECACHE_EVENT_DEFAULT);
@@ -333,10 +332,7 @@ bool CVehicleMovementBase::RequestMovement(CMovementRequest& movementRequest)
 // NOTE: This function must be thread-safe. Before adding stuff contact MarcoC.
 void CVehicleMovementBase::ProcessMovement(const float deltaTime)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
 	IPhysicalEntity* pPhysics = GetPhysics();
-	assert(pPhysics);
 
 	m_movementAction.isAI = false;
 
@@ -383,9 +379,7 @@ void CVehicleMovementBase::UpdateSpeedRatio(const float deltaTime)
 
 //------------------------------------------------------------------------
 void CVehicleMovementBase::Update(const float deltaTime)
-{  
-  FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
+{
   IPhysicalEntity* pPhysics = GetPhysics();
   
   if (!(pPhysics && pPhysics->GetStatus(&m_statusDyn)))
@@ -964,21 +958,14 @@ void CVehicleMovementBase::ApplyAirDamp(float angleMin, float angVelMin, float d
       correction[i] += m_dampAngVel[i] * -localW[i];
 
     correction[i] *= m_PhysDyn.mass * deltaTime;
-  }      
+  }
 
   if (!correction.IsZero())
   {
-		// not thread-safe
-    //if (IsProfilingMovement())
-    //{
-    //  float color[] = {1,1,1,1};
-    //  gEnv->pRenderer->Draw2dLabel(300,500,1.4f,color,false,"corr: %.1f, %.1f", correction.x, correction.y);
-    //}
-
     pe_action_impulse imp;
     imp.angImpulse = worldTM.TransformVector(correction);
     GetPhysics()->Action(&imp, threadSafe);
-  }     
+  }
 }
 
 //------------------------------------------------------------------------
@@ -1104,8 +1091,6 @@ tSoundID CVehicleMovementBase::GetSoundId(EVehicleMovementSound eSID)
 //------------------------------------------------------------------------
 ISound* CVehicleMovementBase::GetSound(EVehicleMovementSound eSID)
 {
-  assert(eSID>=0 && eSID<eSID_Max);
-
   if (m_soundStats.sounds[eSID] == INVALID_SOUNDID)
     return 0;
 
@@ -1126,8 +1111,6 @@ void CVehicleMovementBase::StopSounds()
 //------------------------------------------------------------------------
 void CVehicleMovementBase::StopSound(EVehicleMovementSound eSID)
 {
-  assert(eSID>=0 && eSID<eSID_Max);
-
   if (m_soundStats.sounds[eSID] != INVALID_SOUNDID)
   {
     m_pEntitySoundsProxy->StopSound(m_soundStats.sounds[eSID]); 
@@ -1139,8 +1122,6 @@ void CVehicleMovementBase::StopSound(EVehicleMovementSound eSID)
 //------------------------------------------------------------------------
 ISound* CVehicleMovementBase::PlaySound(EVehicleMovementSound eSID, float pulse, const Vec3& offset, int soundFlags)
 {
-  assert(eSID>=0 && eSID<eSID_Max);
-
 	// verify - make all vehicle sound use obstruction and culling
 	uint32 nSoundFlags = soundFlags | FLAG_SOUND_DEFAULT_3D;
   
@@ -1167,8 +1148,6 @@ ISound* CVehicleMovementBase::PlaySound(EVehicleMovementSound eSID, float pulse,
 //------------------------------------------------------------------------
 ISound* CVehicleMovementBase::GetOrPlaySound(EVehicleMovementSound eSID, float pulse, const Vec3& offset, int soundFlags)
 {
-  assert(eSID>=0 && eSID<eSID_Max);
-
   if (ISound* pSound = GetSound(eSID))
   {
     if (pSound->IsPlaying())
@@ -1363,9 +1342,7 @@ void CVehicleMovementBase::EnableEnvEmitter(TEnvEmitter& emitter, bool enable)
 
 //------------------------------------------------------------------------
 void CVehicleMovementBase::UpdateExhaust(const float deltaTime)
-{ 
-  FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
+{
   if (!m_pVehicle->GetGameObject()->IsProbablyVisible() || m_pVehicle->GetGameObject()->IsProbablyDistant())
     return;
 
@@ -1669,8 +1646,6 @@ void CVehicleMovementBase::GetParticleScale(const SEnvironmentLayer& layer, floa
 //------------------------------------------------------------------------
 void CVehicleMovementBase::UpdateSurfaceEffects(const float deltaTime)
 {
-  FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-  
   if (0 == g_pGameCVars->v_pa_surface)
   {
     ResetParticles();
@@ -1697,7 +1672,6 @@ void CVehicleMovementBase::UpdateSurfaceEffects(const float deltaTime)
   { 
     if (emitterIt->layer < 0)
     {
-      assert(0);
       continue;
     }
 
@@ -1894,8 +1868,6 @@ void CVehicleMovementBase::SetAnimationSpeed(EVehicleMovementAnimation eAnim, fl
 //------------------------------------------------------------------------
 const string& CVehicleMovementBase::GetSoundName(EVehicleMovementSound eSID)
 {
-  assert(eSID>=0 && eSID<eSID_Max);
-
   return m_soundNames[eSID];
 }
 
@@ -1989,10 +1961,6 @@ void CVehicleMovementBase::ProcessEvent(SEntityEvent& event)
 
 DEFINE_VEHICLEOBJECT(CVehicleMovementBase)
 
-//------------------------------------------------------------------------
-
-#if !defined(_LIB)
-
 //--------------------------------------------------------------------------------------------
 SPID::SPID() :
 m_kP( 0 ),
@@ -2028,8 +1996,6 @@ float SPID::Update( float inputVal, float setPoint, float clampMin, float clampM
 
 	return output;
 }
-
-#endif // _LIB
 
 //--------------------------------------------------------------------------------------------
 void SPID::Serialize(TSerialize ser)

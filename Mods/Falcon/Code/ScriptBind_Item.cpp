@@ -193,8 +193,6 @@ int CScriptBind_Item::Select(IFunctionHandler *pH, bool select)
 	if (!pItem)
 		return pH->EndFunction();
 
-	assert(pItem);
-
 	pItem->Select(select);
 
 	return pH->EndFunction();

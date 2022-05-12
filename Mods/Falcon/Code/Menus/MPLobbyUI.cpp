@@ -750,7 +750,6 @@ struct CMPLobbyUI::SMPUserList
     case eVUT_ignore:
       return m_ignore[v.idx];
     }
-    assert(false);
     static SUserListItem dummy;
     return dummy;
   }
@@ -2113,39 +2112,6 @@ void  CMPLobbyUI::OpenPasswordDialog(int id)
 
 void CMPLobbyUI::TestChatUI()
 {
-/*  ClearChatList();
-  AddChatUser(1,"YoYo", eCC_buddy, false);
-  AddChatUser(2,"GYoYo2", eCC_global, false);
-  AddChatUser(3,"GYoYo4", eCC_global, true);
-  AddChatUser(4,"GYoYo8", eCC_global, false);
-  AddChatUser(5,"GYoYof1", eCC_ignored, true);
-  AddChatUser(6,"GYoYof2", eCC_ignored, true);
-  AddChatUser(7,"GYoYof3", eCC_ignored, true);
-  AddChatUser(8,"GYoYof4", eCC_ignored, true);
-  AddChatUser(9,"GYoYof5", eCC_ignored, true);
-  AddChatUser(10,"GYoYof6", eCC_ignored, true);
-  AddChatUser(11,"GYoYof7", eCC_ignored, true);
-  AddChatUser(12,"GYoYoh2", eCC_ignored, true);
-  AddChatUser(13,"GYoYoh3", eCC_ignored, true);
-  AddChatUser(14,"GYoYoh4", eCC_ignored, true);
-
-  AddChatUser(15,"GYoYof1", eCC_ignored, true);
-  AddChatUser(16,"GYoYof2", eCC_ignored, true);
-  AddChatUser(17,"GYoYof3", eCC_ignored, true);
-  AddChatUser(18,"GYoYof4", eCC_ignored, true);
-  AddChatUser(19,"GYoYof5", eCC_ignored, true);
-  AddChatUser(20,"GYoYof6", eCC_ignored, true);
-  AddChatUser(21,"GYoYof7", eCC_ignored, true);
-  AddChatUser(22,"GYoYoh2", eCC_ignored, true);
-  AddChatUser(23,"GYoYoh3", eCC_ignored, true);
-  AddChatUser(24,"GYoYoh4", eCC_ignored, true);
-
-  AddChatText("@ui_menu_DD");*/
-  /*ExpandCategory(eCC_global, true);
-  ExpandCategory(eCC_buddy, false);
-  SetChatHeader("Testing chat asset");
-  UpdateUsers();*/
-  
   BlinkChat(true);
   EnableTabs(false, false, true);
   m_player->Invoke1("setToolTipText","Bla bla bla");

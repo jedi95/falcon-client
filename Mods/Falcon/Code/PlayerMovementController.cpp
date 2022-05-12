@@ -8,17 +8,6 @@
 #include "GameCVars.h"
 #include "Item.h"
 
-#define ENABLE_NAN_CHECK
-
-#ifdef ENABLE_NAN_CHECK
-#define CHECKQNAN_FLT(x) \
-	assert(((*(unsigned*)&(x))&0xff000000) != 0xff000000u && (*(unsigned*)&(x) != 0x7fc00000))
-#else
-#define CHECKQNAN_FLT(x) (void*)0
-#endif
-
-#define CHECKQNAN_VEC(v) \
-	CHECKQNAN_FLT(v.x); CHECKQNAN_FLT(v.y); CHECKQNAN_FLT(v.z)
 
 // minimum desired speed accepted
 static const float MIN_DESIRED_SPEED = 0.00002f;
@@ -44,9 +33,6 @@ static const float MAX_AIM_AT_ANGULAR_VELOCITY = DEG2RAD(75.0f);
 static const float MAX_FIRE_TARGET_DELTA_ANGLE = DEG2RAD(10.0f);
 
 // IDLE Checking stuff from here on
-#define DEBUG_IDLE_CHECK
-#undef  DEBUG_IDLE_CHECK
-
 static const float IDLE_CHECK_TIME_TO_IDLE = 5.0f;
 static const float IDLE_CHECK_MOVEMENT_TIMEOUT = 3.0f;
 // ~IDLE Checking stuff
@@ -552,16 +538,6 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 			if (rayHitAny)
 			{
 				m_state.SetStance(STANCE_CROUCH);
-			}				
-
-			// also don't allow prone for hurricane/LAW type weapons.
-			if(g_pGameCVars->g_proneNotUsableWeapon_FixType == 2)
-			{
-				if(CItem* pItem = (CItem*)(m_pPlayer->GetCurrentItem()))
-				{
-					if(pItem->GetParams().prone_not_usable)
-						m_state.SetStance(STANCE_CROUCH);
-				}
 			}
 		}
 	}
@@ -681,12 +657,8 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 				float antiOscilationSpeedFraction = 1.0f - CLAMP(distance / 1.0f, 0.0f, 1.0f);
 				float antiOscilationSpeed = LERP(desiredSpeed, finalSpeed, antiOscilationSpeedFraction);
 				float approachSpeed = iszero(frameTime) ? 0.0f : (distance / frameTime) * 0.4f;
-/*
-				if (isNavigationalSO)
-					approachSpeed = max(approachSpeed, 2.0f);
-*/
+
 				desiredSpeed = std::min(desiredSpeed, approachSpeed);
-				//desiredSpeed = antiOscilationSpeed;
 			}
 			if (pAnimTarget && (pAnimTarget->activated || m_animTargetSpeedCounter) && m_animTargetSpeed >= 0.0f)
 			{
@@ -700,8 +672,7 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 			{
 				//calculate the desired speed amount (0-1 length) in world space
 				params.desiredVelocity = desiredMovement * desiredSpeed / stanceSpeed;
-				viewFollowMovement = 1.0f; //5.0f * desiredSpeed / stanceSpeed;
-				//
+				viewFollowMovement = 1.0f;
 				//and now, after used it for the viewFollowMovement convert it to the Actor local space
 				moveDirection = params.desiredVelocity.GetNormalizedSafe(ZERO);
 				params.desiredVelocity = m_pPlayer->GetEntity()->GetWorldRotation().GetInverted() * params.desiredVelocity;
@@ -921,60 +892,19 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 					bodyTargetType = "aim";
 				}
 			}
-		
-/*
-		if (!m_state.HasNoAiming() && m_aimInterpolator.HasTarget( now, AIM_TIME ) && !swimming)
-		{
-			params.aimIK = m_aimInterpolator.GetTarget( 
-				params.aimTarget, 
-				bodyTarget, 
-				Vec3( playerPos.x, playerPos.y, m_currentMovementState.weaponPosition.z ),
-				moveDirection, 
-				animBodyDirection, 
-				entDirection,
-				MAX_AIM_TURN_ANGLE, 
-				m_state.GetDistanceToPathEnd(), 
-				viewFollowMovement, 
-				pDbgClr,
-				&bodyTargetType );
-			ikType = "aim";
-		}
-		else if (m_lookInterpolator.HasTarget( now, LOOK_TIME ))	// Look IK
-		{
-			params.lookIK = m_lookInterpolator.GetTarget( 
-				params.lookTarget, 
-				bodyTarget, 
-				Vec3( playerPos.x, playerPos.y, m_currentMovementState.eyePosition.z ),
-				moveDirection, 
-				animBodyDirection, 
-				entDirection,
-				MAX_HEAD_TURN_ANGLE, 
-				m_state.GetDistanceToPathEnd(), 
-				viewFollowMovement, 
-				pDbgClr,
-				&bodyTargetType );
-			ikType = "look";
-		}
-*/
 		}	
 	}
-
 
 	Vec3 viewDir = ((bodyTarget - playerPos).GetNormalizedSafe(ZERO));
 	if (!m_pPlayer->IsClient() && viewDir.len2() > 0.01f)
 	{
-		//Vec3 localVDir(m_pPlayer->GetEntity()->GetWorldRotation().GetInverted() * viewDir);
 		Vec3 localVDir(m_pPlayer->GetViewQuat().GetInverted() * viewDir);
-		
-		CHECKQNAN_VEC(localVDir);
 
 		if ((pAnimTarget == NULL) || (!pAnimTarget->activated))
 		{
 			params.deltaAngles.x += asin(CLAMP(localVDir.z,-1,1));
 			params.deltaAngles.z += cry_atan2f(-localVDir.x,localVDir.y);
 		}
-
-		CHECKQNAN_VEC(params.deltaAngles);
 
 		static float maxDeltaAngleRateNormal = DEG2RAD(180.0f);
 		static float maxDeltaAngleRateAnimTarget = DEG2RAD(360.0f);
@@ -1001,13 +931,11 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 		for (int i=0; i<3; i++)
 			Limit(params.deltaAngles[i], -maxDeltaAngleRate * frameTime, maxDeltaAngleRate * frameTime);
 
-		CHECKQNAN_VEC(params.deltaAngles);
 	}
 
 	if (m_state.HasDeltaRotation())
 	{
 		params.deltaAngles += m_state.GetDeltaRotation();
-		CHECKQNAN_VEC(params.deltaAngles);
 		ikType = "mouse";
 	}
 
@@ -1150,7 +1078,6 @@ void CPlayerMovementController::UpdateMovementState( SMovementState& state )
 		Quat	orientation = pEntity->GetWorldRotation();
 		forward = orientation.GetColumn1();
 		Vec3	entityPos = pEntity->GetWorldPos();
-		assert( entityPos.IsValid() );
 		Vec3	constrainedLookDir = m_lookTarget - entityPos;
 		Vec3	constrainedAimDir = m_aimTarget - entityPos;
 		constrainedLookDir.z = 0.0f;
@@ -1221,27 +1148,6 @@ void CPlayerMovementController::UpdateMovementState( SMovementState& state )
 	state.desiredSpeed = m_desiredSpeed;
 	state.stance = m_pPlayer->GetStance();
 	state.upDirection = pEntity->GetWorldRotation().GetColumn2();
-//	state.minSpeed = MIN_DESIRED_SPEED;
-//	state.normalSpeed = m_pPlayer->GetStanceNormalSpeed(state.stance);
-//	state.maxSpeed = m_pPlayer->GetStanceMaxSpeed(state.stance); 
-
-	/*
-  Vec2 minmaxSpeed = Vec2(0, 0);
-	if(m_pPlayer->GetAnimationGraphState())	//might get here during loading before AG is serialized
-		minmaxSpeed = m_pPlayer->GetAnimationGraphState()->GetQueriedStateMinMaxSpeed();
-  state.minSpeed = minmaxSpeed[0];
-  state.maxSpeed = minmaxSpeed[1];
-  state.normalSpeed = 0.5f*(state.minSpeed + state.maxSpeed);
-	if (state.maxSpeed < state.minSpeed)
-	{
-//		assert(state.stance == STANCE_NULL);
-		state.maxSpeed = state.minSpeed;
-		//if (!g_pGame->GetIGameFramework()->IsEditing())
-		//	GameWarning("%s In STANCE_NULL - movement speed is clamped", pEntity->GetName());
-	}
-	if (state.normalSpeed < state.minSpeed)
-		state.normalSpeed = state.minSpeed;
-*/
 
 	state.minSpeed = -1.0f;
 	state.maxSpeed = -1.0f;
@@ -1264,11 +1170,6 @@ void CPlayerMovementController::UpdateMovementState( SMovementState& state )
 		state.isAiming = true;
 
 	state.isFiring = (m_pPlayer->GetActorStats()->inFiring>=10.f);
-
-	// TODO: remove this
-	//if (m_state.HasAimTarget())
-	//	state.aimDirection = (m_state.GetAimTarget() - state.handPosition).GetNormalizedSafe();
-
 	state.isAlive = (m_pPlayer->GetHealth()>0);
 
 	IVehicle *pVehicle = m_pPlayer->GetLinkedVehicle();
@@ -1401,64 +1302,20 @@ void CPlayerMovementController::CIdleChecker::Update(float frameTime)
 		}
 	}
 
-#if 0
-	if (m_bHaveInteresting)
-	{
-		m_timeToIdle = IDLE_CHECK_TIME_TO_IDLE;
-		m_bHaveInteresting = false;
-		wakeUp = true;
-	}
-	else
-	{
-		m_timeToIdle -= frameTime;
-		if (m_timeToIdle <= 0.0f)
-		{
-			goToIdle = true;
-		}
-	}
-#endif
-
 	if (goToIdle && !wakeUp && m_bInIdle == false)
 	{
 		// turn idle on
-#ifdef DEBUG_IDLE_CHECK
-		CryLogAlways("Turn Idle ON 0x%p %s", this, m_pMC->m_pPlayer->GetEntity()->GetName());
-#endif
 		m_bInIdle = true;
 	}
 	else if (wakeUp && m_bInIdle)
 	{
 		// turn idle off
-#ifdef DEBUG_IDLE_CHECK
-		CryLogAlways("Turn Idle OFF 0x%p %s", this, m_pMC->m_pPlayer->GetEntity()->GetName());
-#endif
 		m_bInIdle = false;
-	}
-
-	static int sCurFrame = -1;
-	static int sIdles = 0;
-	static int sAwake = 0;
-	static ICVar* pShowIdleStats = gEnv->pConsole->GetCVar("g_showIdleStats");
-	if (pShowIdleStats && pShowIdleStats->GetIVal() != 0)
-	{
-		int frameId = gEnv->pRenderer->GetFrameID(false);
-		if (frameId != sCurFrame)
-		{
-			float fColor[4] = {1,0,0,1};
-			gEnv->pRenderer->Draw2dLabel( 1,22, 1.3f, fColor, false,"Idles=%d Awake=%d", sIdles, sAwake );
-			sCurFrame = frameId;
-			sIdles = sAwake = 0;
-		}
-		if (m_bInIdle)
-			++sIdles;
-		else
-			++sAwake;
 	}
 }
 
-bool CPlayerMovementController::CIdleChecker::Process(SMovementState& movementState, 
-																										  CMovementRequest& currentReq,
-																										  CMovementRequest& newReq)
+bool CPlayerMovementController::CIdleChecker::Process(SMovementState& movementState,
+	CMovementRequest& currentReq, CMovementRequest& newReq)
 {
 	if (m_pMC->m_pPlayer->IsPlayer())
 		return false;
@@ -1481,13 +1338,7 @@ bool CPlayerMovementController::CIdleChecker::Process(SMovementState& movementSt
 	// no valid move request up to now (not in this frame)
 	m_bHaveValidMove = false;
 
-	// an empty moverequest 
-	if (currentReq.IsEmpty())
-	{
-		// CryLogAlways("IdleCheck: Req empty 0x%p %s", this, m_pMC->m_pPlayer->GetEntity()->GetName());
-		;
-	}
-	else if (newReq.HasDeltaMovement() && newReq.HasDeltaRotation())
+	if (newReq.HasDeltaMovement() && newReq.HasDeltaRotation())
 	{
 		m_bHaveValidMove = true;
 	}

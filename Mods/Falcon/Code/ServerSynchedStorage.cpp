@@ -94,7 +94,6 @@ void CServerSynchedStorage::AddToEntityQueue(EntityId entityId, TSynchedKey key)
 void CServerSynchedStorage::AddToChannelQueue(int channelId, TSynchedKey key)
 {
 	SChannel * pChannel = GetChannel(channelId);
-	assert(pChannel);
 	if (!pChannel || !pChannel->pNetChannel || pChannel->local)
 		return;
 
@@ -102,7 +101,6 @@ void CServerSynchedStorage::AddToChannelQueue(int channelId, TSynchedKey key)
 
 	TSynchedValue value; 
 	bool ok=GetChannelValue(channelId, key, value);
-	assert(ok);
 	if (!ok)
 		return;
 
@@ -129,17 +127,12 @@ void CServerSynchedStorage::AddToChannelQueue(int channelId, TSynchedKey key)
 
 	if (pMsg)
 		pChannel->pNetChannel->SubstituteSendable(pMsg, 1, &pChannel->lastOrderedMessage, &msgHdl);
-	else
-	{
-		assert(!"Invalid type!");
-	}
 }
 
 //------------------------------------------------------------------------
 void CServerSynchedStorage::AddToGlobalQueueFor(int channelId, TSynchedKey key)
 {
 	SChannel * pChannel = GetChannel(channelId);
-	assert(pChannel);
 	if (!pChannel || !pChannel->pNetChannel || pChannel->local)
 		return;
 
@@ -147,7 +140,6 @@ void CServerSynchedStorage::AddToGlobalQueueFor(int channelId, TSynchedKey key)
 
 	TSynchedValue value; 
 	bool ok=GetGlobalValue(key, value);
-	assert(ok);
 	if (!ok)
 		return;
 
@@ -174,17 +166,12 @@ void CServerSynchedStorage::AddToGlobalQueueFor(int channelId, TSynchedKey key)
 
 	if (pMsg)
 		pChannel->pNetChannel->SubstituteSendable(pMsg, 1, &pChannel->lastOrderedMessage, &msgHdl);
-	else
-	{
-		assert(!"Invalid type!");
-	}
 }
 
 //------------------------------------------------------------------------
 void CServerSynchedStorage::AddToEntityQueueFor(int channelId, EntityId entityId, TSynchedKey key)
 {
 	SChannel * pChannel = GetChannel(channelId);
-	assert(pChannel);
 	if (!pChannel || !pChannel->pNetChannel || pChannel->local)
 		return;
 
@@ -192,7 +179,6 @@ void CServerSynchedStorage::AddToEntityQueueFor(int channelId, EntityId entityId
 
 	TSynchedValue value; 
 	bool ok=GetEntityValue(entityId, key, value);
-	assert(ok);
 	if (!ok)
 		return;
 
@@ -219,10 +205,6 @@ void CServerSynchedStorage::AddToEntityQueueFor(int channelId, EntityId entityId
 
 	if (pMsg)
 		pChannel->pNetChannel->SubstituteSendable(pMsg, 1, &pChannel->lastOrderedMessage, &msgHdl);
-	else
-	{
-		assert(!"Invalid type!");
-	}
 }
 
 //------------------------------------------------------------------------

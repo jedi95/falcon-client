@@ -94,8 +94,6 @@ void CRapid::Activate(bool activate)
 //------------------------------------------------------------------------
 void CRapid::Update(float frameTime, uint frameId)
 {
-  FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
   CSingle::Update(frameTime, frameId);
 
 	if (m_speed <= 0.0f && m_acceleration < 0.0001f)

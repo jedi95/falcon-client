@@ -20,7 +20,6 @@ History:
 #include "IUIDraw.h"
 #include "IMusicSystem.h"
 #include "ISound.h"
-#include "IRenderer.h"
 #include "Game.h"
 #include "Menus/OptionsManager.h"
 #include <time.h>
@@ -51,24 +50,6 @@ void CFlashMenuObject::UpdateSingleplayerDifficulties()
 
 	string sGeneralPath = "Singleplayer.Difficulty";
 	int iDifficulties = 8;
-/*	for(int i=0; i<EDifficulty_END; ++i)
-	{
-		string sPath = sGeneralPath;
-		char c[5];
-		itoa(i, c, 10);
-		sPath.append(c);
-		sPath.append(".available");
-
-		TFlowInputData data;
-		pProfile->GetAttribute(sPath, data, false);
-		bool bDone = false;
-		data.GetValueWithConversion(bDone);
-		if(bDone)
-		{
-			iDifficulties += i*2;
-		}
-	}
-*/
 	int iDifficultiesDone = 0;
 	for(int i=0; i<EDifficulty_END; ++i)
 	{
@@ -369,7 +350,6 @@ const char* CFlashMenuObject::ValidateName(const char *fileName)
 	if(index>=0)
 	{
 		string check(sFileName.substr(index+1,sFileName.length()-(index+1)));
-		//if(!stricmp(check, "levelstart")) //because of the french law we can't do this ...
 		if(!stricmp(check, "crysis"))
 			return "@ui_error_levelstart";
 	}

@@ -435,7 +435,4 @@ public:
 	}
 };
 
-#define FUNCTION_PROFILER( pISystem,subsystem )
-#define FRAME_PROFILER( szProfilerName,pISystem,subsystem )
-
 #endif // __frameprofiler_h__

@@ -134,7 +134,6 @@ void CHUD::PlaySound(ESound eSound, bool play)
 		szSound = "sounds/interface:hud:hud_explo_feedback";
 		break;
 	default:
-		assert(0);
 		return;
 	}
 

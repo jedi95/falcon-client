@@ -44,7 +44,7 @@ CDebrisSpawner::~CDebrisSpawner()
  * (and a Lua table, maybe?) to a nice vector of IEntities, each of which
  * represents an individual piece of debris ready to be spawned.
  */
-bool CDebrisSpawner::Init(CAlien* alien /*, const SmartScriptTable & table*/)
+bool CDebrisSpawner::Init(CAlien* alien)
 {
 	m_pAlien = alien;
 
@@ -434,24 +434,7 @@ void CAlien::ProcessEvent(SEntityEvent& event)
 
 bool CAlien::CreateCodeEvent(SmartScriptTable &rTable)
 {
-	/*const char *event = NULL;
-	rTable->GetValue("event",event);
-
-	if (event && !strcmp(event,"beamStart"))
-	{
-		const char *effect = NULL;
-		ScriptHandle id;
-		id.n = 0;
-
-		if (rTable->GetValue("effect",effect) && rTable->GetValue("targetId",id))
-			m_pBeamEffect->Start(GetEntity(),effect,id.n);
-	}
-	else if (event && !strcmp(event,"beamStop"))
-	{
-		m_pBeamEffect->Stop(GetEntity());
-	}
-	else*/
-		return CActor::CreateCodeEvent(rTable);
+	return CActor::CreateCodeEvent(rTable);
 }
 
 bool CAlien::Init( IGameObject * pGameObject )
@@ -552,13 +535,6 @@ void CAlien::PostPhysicalize()
 	//FIXME:this disable the impulse, remove it
 	IPhysicalEntity *pPhysEnt = pCharacter->GetISkeletonPose()->GetCharacterPhysics(-1);
 
-	/*if (pPhysEnt)
-	{
-		pe_params_flags pFlags;
-		pFlags.flagsOR = pef_monitor_impulses;
-		//pPhysEnt->SetParams(&pFlags);
-	}*/
-
 	//set a default offset for the character, so in the editor the bbox is correct
 	m_charLocalMtx.SetIdentity();
 	m_charLocalMtx.SetTranslation(GetStanceInfo(STANCE_STAND)->modelOffset);
@@ -656,16 +632,6 @@ void CAlien::PrePhysicsUpdate()
 		if (m_input.posTarget.len2()>0.0f)
 		{ 
 			Vec3 desiredMovement(m_input.posTarget - pEnt->GetWorldPos());
-			
-			float distance = desiredMovement.len();
-
-	/*		if (distance > 0.01f)
-			{
-				// normalize it
-				desiredMovement /= distance;
-				desiredMovement *= m_input.speedTarget;
-				SetDesiredSpeed(desiredMovement);        		
-			}	    */
 		}
 
 		if (m_input.dirTarget.len2()>0.0f)
@@ -684,15 +650,9 @@ void CAlien::PrePhysicsUpdate()
 			m_pMovementController->Update(frameTime, params);
 		}
 
-		assert(m_moveRequest.rotation.IsValid());
-		assert(m_moveRequest.velocity.IsValid());
-
 		//rotation processing
 		if (m_linkStats.CanRotate())
 			ProcessRotation(frameTime);
-
-		assert(m_moveRequest.rotation.IsValid());
-		assert(m_moveRequest.velocity.IsValid());
 
 		//movement processing
 		if (m_linkStats.CanMove())
@@ -701,9 +661,6 @@ void CAlien::PrePhysicsUpdate()
 				ProcessSwimming(frameTime);
 			else
 				ProcessMovement(frameTime);
-
-			assert(m_moveRequest.rotation.IsValid());
-			assert(m_moveRequest.velocity.IsValid());
 
 			if (m_stats.inWaterTimer>0.1f)
 					SetStance(STANCE_SWIM);
@@ -726,9 +683,6 @@ void CAlien::PrePhysicsUpdate()
 				m_moveRequest.prediction.states[0].position = pEnt->GetWorldPos();
 				m_moveRequest.prediction.states[0].orientation = pEnt->GetWorldRotation();
 
-				assert(m_moveRequest.rotation.IsValid());
-				assert(m_moveRequest.velocity.IsValid());
-
 				m_pAnimatedCharacter->AddMovement(m_moveRequest);
 			}
 		}
@@ -740,8 +694,6 @@ void CAlien::Update(SEntityUpdateContext& ctx, int updateSlot)
 	IEntity* pEnt = GetEntity();
 	if (pEnt->IsHidden())
 		return;
-  
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
 
 	CActor::Update(ctx,updateSlot);
 
@@ -908,11 +860,6 @@ void CAlien::UpdateStats(float frameTime)
 		m_stats.speed = m_stats.speedFlat = 0.0f;
 		m_stats.inFiring = 0;		
 		m_stats.gravity = m_oldGravity;
-
-		/*pe_player_dynamics simParSet;
-		simParSet.bSwimming = true;
-		pPhysEnt->SetParams(&simParSet);*/
-
 		return;
 	}
 
@@ -930,7 +877,6 @@ void CAlien::UpdateStats(float frameTime)
 		simParSet.gravity.zero();
 		pPhysEnt->SetParams(&simParSet);
 	}
-	//
 
 	if( !pPhysEnt->GetStatus(&dynStat) ||
 			!pPhysEnt->GetStatus(&livStat) ||
@@ -979,14 +925,8 @@ void CAlien::UpdateStats(float frameTime)
 	m_oldGravity = simPar.gravity;
 	m_stats.gravity = simPar.gravity;
 	m_stats.velocity = m_stats.velocityUnconstrained = dynStat.v;
-  m_stats.angVelocity = dynStat.w;
+	m_stats.angVelocity = dynStat.w;
 	m_stats.speed = m_stats.speedFlat = m_stats.velocity.len();
-
-	// [Mikko] The velocity from the physics in some weird cases have been #INF because of the player
-	// Zero-G movement calculations. If this asserts triggers, the alien might have just collided with
-	// a play that is stuck in the geometry.
-	assert(NumberValid(m_stats.speed));
-
 	m_stats.mass = dynStat.mass;
 
 	//the alien is able to sprint for a bit right after being standing
@@ -1244,7 +1184,6 @@ void CAlien::ProcessMovement(float frameTime)
 	// Accelerate faster than slowdown.
 	float	target = speed * velScale;
 	float	s = 5.0f;
-	//	if( target > m_curSpeed || bExactPositioning )
 	if( m_input.posTarget.len2()>0.0f )
 		s *= 2.0f;
 	Interpolate( m_curSpeed, target, s, frameTime );
@@ -1260,14 +1199,9 @@ void CAlien::ProcessMovement(float frameTime)
 		Interpolate(m_velocity,move,m_params.speedInertia,frameTime);
 
 	Quat modelRot(m_baseMtx);
-	modelRot = Quat::CreateSlerp(GetEntity()->GetRotation().GetNormalized(), modelRot, min(frameTime * 6.6f/*m_turnSpeed*/ /** (m_stats.speed/GetStanceInfo(m_stance)->maxSpeed)*/, 1.0f));
+	modelRot = Quat::CreateSlerp(GetEntity()->GetRotation().GetNormalized(), modelRot, min(frameTime * 6.6f, 1.0f));
 
-	assert(GetEntity()->GetRotation().IsValid());
-	assert(GetEntity()->GetRotation().GetInverted().IsValid());
-	assert(modelRot.IsValid());
 	m_moveRequest.rotation = GetEntity()->GetRotation().GetInverted() * modelRot;
-	assert(m_moveRequest.rotation.IsValid());
-
 	m_moveRequest.velocity = m_velocity;
 	m_moveRequest.type = eCMT_Fly;
 
@@ -1304,7 +1238,7 @@ void CAlien::ProcessSwimming(float frameTime)
 	Interpolate(m_velocity,desiredVel,3.0f,frameTime);
 
 	Quat modelRot(m_baseMtx);
-	modelRot = Quat::CreateSlerp(GetEntity()->GetRotation().GetNormalized(), modelRot, min(frameTime * 6.6f/*m_turnSpeed*/ /** (m_stats.speed/GetStanceInfo(m_stance)->maxSpeed)*/, 1.0f));
+	modelRot = Quat::CreateSlerp(GetEntity()->GetRotation().GetNormalized(), modelRot, min(frameTime * 6.6f, 1.0f));
 
 	m_moveRequest.rotation = GetEntity()->GetRotation().GetInverted() * modelRot;
 	m_moveRequest.type = eCMT_Fly;
@@ -1343,10 +1277,6 @@ void CAlien::ProcessMovement2(float frameTime)
 
 	//FIXME:testing
 	Interpolate(m_stats.physicsAnimationRatio,min(moveModule*(g_pGameCVars->g_alienPhysicsAnimRatio),1.0f),3.3f,frameTime,1.0f);
-		
-	float color[] = {1,1,1,0.5f};
-	gEnv->pRenderer->Draw2dLabel(100,100,2,color,false,"moveModule:%f,physicsAnimationRatio:%f",moveModule,m_stats.physicsAnimationRatio);
-	//
 
 	Matrix33 velMtx;
 	Vec3 vecRefRoll;
@@ -1356,7 +1286,7 @@ void CAlien::ProcessMovement2(float frameTime)
 	if (m_input.dirTarget.len2()>0.0f)
 		tempVel = m_viewMtx.GetColumn(1);
 	else
-		tempVel = m_viewMtx.GetColumn(1)*max(0.1f,m_params.forceView) + m_stats.velocity;//move;
+		tempVel = m_viewMtx.GetColumn(1)*max(0.1f,m_params.forceView) + m_stats.velocity;
 
 	// A little bit more workaround, need to aling the alien to some up vector too.
 	Vec3 up;
@@ -1376,11 +1306,7 @@ void CAlien::ProcessMovement2(float frameTime)
 	vecRefRoll = tempVel;
 
 	//rollage
-	if (m_input.upTarget.len2()>0.0f)
-	{
-		// No rollage, when the up vector is forced!
-	}
-	else
+	if (!m_input.upTarget.len2()>0.0f)
 	{
 		float	rollAmt = 0.0f;
 		float dotRoll(vecRefRoll * m_baseMtx.GetColumn(0));
@@ -1388,7 +1314,6 @@ void CAlien::ProcessMovement2(float frameTime)
 			rollAmt = max(min(gf_PI*0.49f,dotRoll*m_params.rollAmount),-gf_PI*0.49f);
 
 		Interpolate(m_roll,rollAmt,m_params.rollSpeed,frameTime);
-
 		velMtx *= Matrix33::CreateRotationY(m_roll);
 	}
 
@@ -1400,16 +1325,10 @@ void CAlien::ProcessMovement2(float frameTime)
 	m_baseMtx = Matrix33(Quat::CreateSlerp( currQuat.GetNormalized(), m_desiredVeloctyQuat, min(frameTime * m_turnSpeed, 1.0f)));
 	m_baseMtx.OrthonormalizeFast();
 
-	//a bit workaround: needed when the alien is forced to move in some position
-/*	if (m_input.posTarget.len2()>0.0f)
-		move = m_desiredVelocity;
-	else*/
-	{
-		// Cap the speed to the ideal speed.
-		float	moveLen( move.len() );
-		if( moveLen > 0 && m_params.idealSpeed >= 0 && moveLen > m_params.idealSpeed )
-			move *= m_params.idealSpeed / moveLen;
-	}
+	// Cap the speed to the ideal speed.
+	float	moveLen( move.len() );
+	if( moveLen > 0 && m_params.idealSpeed >= 0 && moveLen > m_params.idealSpeed )
+		move *= m_params.idealSpeed / moveLen;
 
 	// make sure alien reaches destination, ignore speedInertia
 	if (m_input.posTarget.len2()>0.0f)
@@ -1424,7 +1343,7 @@ void CAlien::ProcessMovement2(float frameTime)
 	if(velScale > 0 )
 	{
 		Vec3	move = m_velocity / velScale;
-		Vec3	forw = GetEntity()->GetRotation().GetColumn1(); //m_viewMtx.GetColumn(1);
+		Vec3	forw = GetEntity()->GetRotation().GetColumn1();
 		float	dot = forw.Dot( move );
 		const float treshold = cosf(DEG2RAD(15.0));
 		if( dot > treshold )
@@ -1439,7 +1358,6 @@ void CAlien::ProcessMovement2(float frameTime)
 	// Accelerate faster than slowdown.
 	float	target = speed * velScale;
 	float	s = 5.0f;
-//	if( target > m_curSpeed || bExactPositioning )
 	if( m_input.posTarget.len2()>0.0f )
 		s *= 2.0f;
 	Interpolate( m_curSpeed, target, s, frameTime );
@@ -1449,12 +1367,11 @@ void CAlien::ProcessMovement2(float frameTime)
 
 	pe_action_move actionMove;
 	//FIXME:wip
-	actionMove.dir = m_velocity + m_stats.animationSpeedVec;// * velScale;
+	actionMove.dir = m_velocity + m_stats.animationSpeedVec;
 	actionMove.iJump = 3;
 
 	//FIXME:sometime
 	m_stats.desiredSpeed = m_stats.speed;
-//	m_stats.xDelta = m_stats.zDelta = 0.0f;
 
 	pPhysEnt->Action(&actionMove);
 }
@@ -1507,7 +1424,7 @@ void CAlien::ProcessBonesRotation(ICharacterInstance *pCharacter,float frameTime
 	return;
 
 	//flat desired view direction
-	Matrix33 modelMtx(GetEntity()->GetRotation()/* * Matrix33::CreateRotationZ(-gf_PI * 0.5)*/);
+	Matrix33 modelMtx(GetEntity()->GetRotation());
 
 	Vec3 viewFlat(m_viewMtx.GetColumn(1) - m_viewMtx.GetColumn(1) * (modelMtx * Matrix33::CreateScale(Vec3(0,0,1))));
 	viewFlat.NormalizeSafe();
@@ -1517,13 +1434,6 @@ void CAlien::ProcessBonesRotation(ICharacterInstance *pCharacter,float frameTime
 	float yawDiff(cry_atan2f(-dotSide,-dotForward));
 
 	float pitchDiff(0);
-	/*modelMtx = modelMtx * Matrix33::CreateRotationZ(yawDiff);
-
-	dotForward = m_viewMtx.GetColumn(1) * modelMtx.GetColumn(1);
-	float dotUp(m_viewMtx.GetColumn(1) * modelMtx.GetColumn(2));
-	float pitchDiff(cry_atan2f(dotUp,-dotForward));*/
-
-	//CryLogAlways("y:%.1f | p:%.1f",RAD2DEG(yawDiff),RAD2DEG(pitchDiff));
 
 	if (yawDiff>0.52f)
 		yawDiff = 0.52f;
@@ -1536,10 +1446,6 @@ void CAlien::ProcessBonesRotation(ICharacterInstance *pCharacter,float frameTime
 
 	if (pitchDiff<-1.04f)
 		pitchDiff = -1.04f;
-
-	//IJoint *pBones[2];
-	//pBones[0] = pCharacter->GetISkeleton()->GetIJointByName("head");
-	//pBones[1] = pCharacter->GetISkeleton()->GetIJointByName("neck");
 
 	int16 id[2];
 	id[0] = pCharacter->GetISkeletonPose()->GetJointIDByName("head");
@@ -1562,21 +1468,16 @@ void CAlien::ProcessBonesRotation(ICharacterInstance *pCharacter,float frameTime
 			qtH.SetRotationAA( yawDiff, Vec3(0.0f, 0.0f, 1.0f) );//yaw
 			qtV.SetRotationAA( pitchDiff, Vec3(1.0f, 0.0f, 0.0f) );//pitch
 			qtR.SetRotationAA( 0.0f,  Vec3(0.0f, 1.0f, 0.0f) );//roll
-			
-		//	IJoint* pIJoint = pBones[i]->GetParent();
+
 			int16 parentID = pCharacter->GetISkeletonPose()->GetParentIDByID(id[i]);
 			Quat wquat(IDENTITY);
 			if (parentID>=0)
-				//	wquat=!Quat(pCharacter->GetISkeleton()->GetAbsJMatrixByID(parentID));
 				wquat=!pCharacter->GetISkeletonPose()->GetAbsJointByID(parentID).q;
 
-			qtParent = wquat;//pBones[i]->GetParentWQuat();
+			qtParent = wquat;
 			qtParentCnj = qtParent;
 			qtParentCnj.w = -qtParentCnj.w;
 			qtTotal = qtParent*qtR*qtV*qtH*qtParentCnj;
-
-		//	pBones[i]->SetPlusRotation( qtTotal );
-			//pCharacter->GetISkeleton()->SetPlusRotation( id[i], qtTotal );
 		}
 	}
 }
@@ -1598,11 +1499,10 @@ void CAlien::SetTentacles(ICharacterInstance *pCharacter,float animStiffness,flo
 	else
 		pRope.jointLimit = DEG2RAD(m_params.tentaclesJointLimit);
 
-	//pRope.stiffnessDecayAnim = 10.1f;
 	if (bRagdolize)
 	{
 		pRope.bTargetPoseActive=2, pRope.collDist=m_params.tentaclesRadius;
-		pf.flagsOR = rope_target_vtx_rel0|rope_no_stiffness_when_colliding/*|rope_collides|rope_collides_with_terrain*/;
+		pf.flagsOR = rope_target_vtx_rel0|rope_no_stiffness_when_colliding;
 		pf.flagsAND = ~(rope_findiff_attached_vel | rope_no_solver);
 		sp.minEnergy = sqr(0.03f);
 	}
@@ -1660,7 +1560,6 @@ void CAlien::ResetAnimations()
 		if (m_pAnimatedCharacter)
 		{
 			m_pAnimatedCharacter->ClearForcedStates();
-			//m_pAnimatedCharacter->GetAnimationGraphState()->Pause(true, eAGP_StartGame);
 		}
 
 		character->GetISkeletonAnim()->StopAnimationsAllLayers();
@@ -1785,14 +1684,14 @@ void CAlien::Revive(bool fromInit)
 		{
 			IAttachmentManager* pAttachmentManager = pCharInstance->GetIAttachmentManager(); 
 			if (IAttachment* pAttachment = pAttachmentManager->GetInterfaceByName("health_trail_attachment"))
-			{ 
+			{
 				pAttachment->ClearBinding();
 				CEffectAttachment* pEffectAttachment = new CEffectAttachment(m_params.healthTrailEffect, Vec3(0,0,0), m_params.healthTrailEffectDir.GetNormalized(), 1);
 				pEffectAttachment->CreateEffect();
 				pAttachment->AddBinding(pEffectAttachment);
 				m_pHealthTrailAttachment = pAttachment;
 				m_healthTrailScale = 0.f;
-			} 
+			}
 			else
 				CryLog("[CAlien::Revive] %s: 'health_trail_attachment' not found.", GetEntity()->GetName());
 		}
@@ -1806,19 +1705,17 @@ void CAlien::Revive(bool fromInit)
 	}
 
 	if (m_pBeamEffect)
-		m_pBeamEffect->Stop();  
+		m_pBeamEffect->Stop();
 
-  m_searchbeam.goalQuat.SetIdentity();
+	m_searchbeam.goalQuat.SetIdentity();
 }
 
 void CAlien::RagDollize( bool fallAndPlay )
 {
-  if (m_stats.isRagDoll && !gEnv->pSystem->IsSerializingFile())
+	if (m_stats.isRagDoll && !gEnv->pSystem->IsSerializingFile())
 		return;
 
 	ResetAnimations();
-
-	assert(!fallAndPlay && "Fall and play not supported for aliens yet");
 
 	ICharacterInstance *pCharacter = GetEntity()->GetCharacter(0);
 	if (pCharacter)
@@ -1846,8 +1743,7 @@ void CAlien::RagDollize( bool fallAndPlay )
 		pPhysEnt->SetParams(&sp);
 
 		pe_params_articulated_body pa;
-		pa.dampingLyingMode = 5.5f;    
-		//pa.scaleBounceResponse = 0.1f;
+		pa.dampingLyingMode = 5.5f;
 		pPhysEnt->SetParams(&pa);
 	}
 
@@ -1857,7 +1753,7 @@ void CAlien::RagDollize( bool fallAndPlay )
 		PostPhysicalize();
 	}
 
-	pCharacter = GetEntity()->GetCharacter(0);	
+	pCharacter = GetEntity()->GetCharacter(0);
 	if (pCharacter)
 	{
 		pCharacter->EnableStartAnimation(false);
@@ -2472,18 +2368,6 @@ void CAlien::FullSerialize( TSerialize ser )
 void CAlien::PostSerialize()
 {
 	CActor::PostSerialize();
-
-	//temporary fix for non-physicalized scouts in fleet
-	/*SActorStats *pStats = GetActorStats();
-	if(pStats && pStats->isRagDoll)	//fixes "frozen" scouts in fleet if Anton doesn't
-	{
-		if(IItem* pItem = GetCurrentItem(false))
-		{
-			pItem->Drop(1.0f, false, true);
-			gEnv->pEntitySystem->RemoveEntity(pItem->GetEntityId()); //else firing effects could continue to render
-		}
-		Physicalize();
-	}*/
 }
 
 void CAlien::SerializeXML( XmlNodeRef& node, bool bLoading )

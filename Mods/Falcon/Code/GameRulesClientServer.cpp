@@ -60,8 +60,6 @@ void CGameRules::ClientSimpleHit(const SimpleHitInfo &simpleHitInfo)
 //------------------------------------------------------------------------
 void CGameRules::ClientHit(const HitInfo &hitInfo)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	IActor *pClientActor = g_pGame->GetIGameFramework()->GetClientActor();
 	IEntity *pTarget = m_pEntitySystem->GetEntity(hitInfo.targetId);
 	IEntity *pShooter =	m_pEntitySystem->GetEntity(hitInfo.shooterId);
@@ -77,18 +75,6 @@ void CGameRules::ClientHit(const HitInfo &hitInfo)
 
 	if(pActor == pClientActor)
 		if (gEnv->pInput) gEnv->pInput->ForceFeedbackEvent( SFFOutputEvent(eDI_XI, eFF_Rumble_Basic, 0.5f * hitInfo.damage * 0.01f, hitInfo.damage * 0.02f, 0.0f));
-
-/*	if (gEnv->pAISystem && !gEnv->bMultiplayer)
-	{
-		static int htMelee = GetHitTypeId("melee");
-		if (pShooter && hitInfo.type != htMelee)
-		{
-			ISurfaceType *pSurfaceType = GetHitMaterial(hitInfo.material);
-			const ISurfaceType::SSurfaceTypeAIParams* pParams = pSurfaceType ? pSurfaceType->GetAIParams() : 0;
-			const float radius = pParams ? pParams->fImpactRadius : 5.0f;
-			gEnv->pAISystem->BulletHitEvent(hitInfo.pos, radius, pShooter->GetAI());
-		}
-	}*/
 
 	CreateScriptHitInfo(m_scriptHitInfo, hitInfo);
 	CallScript(m_clientStateScript, "OnHit", m_scriptHitInfo);
@@ -113,12 +99,7 @@ void CGameRules::ServerSimpleHit(const SimpleHitInfo &simpleHitInfo)
 			if (!simpleHitInfo.targetId)
 				return;
 
-			// tagged entities are temporary in MP, not in SP.
-//			bool temp = gEnv->bMultiplayer;
-			//kirill: - not anymore - design says must stay on
-			bool temp = false;
-
-			AddTaggedEntity(simpleHitInfo.shooterId, simpleHitInfo.targetId, temp);
+			AddTaggedEntity(simpleHitInfo.shooterId, simpleHitInfo.targetId, false);
 		}
 		break;
 	case 1: // tac
@@ -185,7 +166,6 @@ void CGameRules::ServerSimpleHit(const SimpleHitInfo &simpleHitInfo)
 		break;
 	default:
 		break;
-		//assert(!"Unknown Simple Hit type!");
 	}
 }
 
@@ -836,7 +816,6 @@ IMPLEMENT_RMI(CGameRules, ClSetTeam)
 	if (isplayer && oldTeam)
 	{
 		TPlayerTeamIdMap::iterator pit=m_playerteams.find(oldTeam);
-		assert(pit!=m_playerteams.end());
 		stl::find_and_erase(pit->second, params.entityId);
 	}
 
@@ -846,7 +825,6 @@ IMPLEMENT_RMI(CGameRules, ClSetTeam)
 		if (isplayer)
 		{
 			TPlayerTeamIdMap::iterator pit=m_playerteams.find(params.teamId);
-			assert(pit!=m_playerteams.end());
 			pit->second.push_back(params.entityId);
 		}
 	}
@@ -951,10 +929,6 @@ IMPLEMENT_RMI(CGameRules, ClExplosion)
 //------------------------------------------------------------------------
 IMPLEMENT_RMI(CGameRules, ClFreezeEntity)
 {
-	//IEntity *pEntity=gEnv->pEntitySystem->GetEntity(params.entityId);
-
-	//CryLogAlways("ClFreezeEntity: %s %s", pEntity?pEntity->GetName():"<<null>>", params.freeze?"true":"false");
-
 	FreezeEntity(params.entityId, params.freeze, 0);
 
 	return true;
@@ -1154,44 +1128,23 @@ IMPLEMENT_RMI(CGameRules, ClDamageIndicator)
 
 IMPLEMENT_RMI(CGameRules, SvVote)
 {
-	/*
-	CActor* pActor = GetActorByChannelId(m_pGameFramework->GetGameChannelId(pNetChannel));
-	if(pActor)
-		Vote(pActor, true);
-
-	*/
 	return true;
 }
 
 IMPLEMENT_RMI(CGameRules, SvVoteNo)
 {
-	/*
-	CActor* pActor = GetActorByChannelId(m_pGameFramework->GetGameChannelId(pNetChannel));
-	if(pActor)
-		Vote(pActor, false);
-
-	*/
-
 	return true;
 }
 
 IMPLEMENT_RMI(CGameRules, SvStartVoting)
 {
-	/*
-  CActor* pActor = GetActorByChannelId(m_pGameFramework->GetGameChannelId(pNetChannel));
-  if(pActor)
-    StartVoting(pActor,params.vote_type,params.entityId,params.param);
-	*/
-
-  return true;
+	return true;
 }
 
 IMPLEMENT_RMI(CGameRules, ClVotingStatus)
 {
-	SAFE_HUD_FUNC(SetVotingState(params.state,params.timeout,params.entityId,params.description));
-  return true;
+	return true;
 }
-
 
 IMPLEMENT_RMI(CGameRules, ClEnteredGame)
 {
@@ -1203,6 +1156,7 @@ IMPLEMENT_RMI(CGameRules, ClEnteredGame)
 			int status[2];
 			status[0] = GetTeam(pActor->GetEntityId());
 			status[1] = pActor->GetSpectatorMode();
+			m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Connected, 0, 0, (void*)status));
 			gEnv->pScriptSystem->ExecuteFile("Scripts/init_falcon.lua", false, true);
 		}
 	}

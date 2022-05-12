@@ -363,7 +363,6 @@ void CFlashMenuObject::PlaySound(ESound eSound,bool bPlay)
 		eSoundSemantic = eSoundSemantic_Ambience;
 		break;
 	default:
-		assert(0);
 		return;
 	}
 
@@ -402,10 +401,6 @@ void CFlashMenuObject::PlaySound(ESound eSound,bool bPlay)
 
 SFlashKeyEvent CFlashMenuObject::MapToFlashKeyEvent(const SInputEvent &inputEvent)
 {
-	assert(inputEvent.deviceId == eDI_Keyboard);
-	// at some point we should also support eIS_Down to make text input more convenient (repeating cursor events, backspace, etc)!
-	assert(inputEvent.state == eIS_Pressed || inputEvent.state == eIS_Released || inputEvent.state == eIS_UI);
-
 	SFlashKeyEvent::EKeyCode keyCode(SFlashKeyEvent::VoidSymbol);
 	unsigned char asciiCode(0);
 
@@ -3729,12 +3724,8 @@ void CFlashMenuObject::OnSaveGame(ISaveGame* pSaveGame)
 			captureDestOffX = (imageWidth  - captureDestWidth) >> 1;
 			captureDestOffY = (imageHeight - captureDestHeight) >> 1;
 
-			// CryLogAlways("CXMLRichSaveGame: TEST_THUMBNAIL_AUTOCAPTURE: capWidth=%d capHeight=%d (off=%d,%d) thmbw=%d thmbh=%d rw=%d rh=%d", 
-			//	captureDestWidth, captureDestHeight, captureDestOffX, captureDestOffY, m_thumbnailWidth, m_thumbnailHeight, w,h);
-
 			if (captureDestWidth > imageWidth || captureDestHeight > imageHeight)
 			{
-				assert (false);
 				GameWarning("CFlashMenuObject::OnSaveGame: capWidth=%d capHeight=%d", captureDestWidth, captureDestHeight);
 				captureDestHeight = imageHeight;
 				captureDestWidth = imageWidth;
@@ -3771,27 +3762,6 @@ void CFlashMenuObject::OnSaveGame(ISaveGame* pSaveGame)
 void CFlashMenuObject::OnLoadGame(ILoadGame* pLoadGame)
 {
 	m_bClearScreen = false;
-
-	//patch last save game when loading different level
-	/*{
-		string lastSaveGameLevel;
-		const string& lastSaveGame = g_pGame->GetLastSaveGame(lastSaveGameLevel);
-
-		//if the current savegame level differs from the to be loaded level -> set current savegame to loaded one
-		if(lastSaveGame.size() != 0 && lastSaveGameLevel.size() != 0)
-		{
-			string currentLevel = " ";
-			if(ILevel * curLevel = g_pGame->GetIGameFramework()->GetILevelSystem()->GetCurrentLevel())
-				currentLevel = curLevel->GetLevelInfo()->GetName();
-
-			if(strcmp(lastSaveGameLevel.c_str(), currentLevel.c_str()))
-			{
-				const char* file = pLoadGame->GetFileName();
-				if(file && strlen(file) > 1)
-					m_sLastSaveGame = file;
-			}
-		}
-	}*/
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -3823,8 +3793,6 @@ void CFlashMenuObject::OnActionEvent(const SActionEvent& event)
 		break;
 	case eAE_disconnected:
 		if (m_multiplayerMenu) m_multiplayerMenu->OnUIEvent(SUIEvent(eUIE_disconnect,event.m_value,event.m_description));
-		//Kirill: setting menu to start state (can not keep it MENUSCREEN_FRONTENDINGAME, bug 46318)
-		//InitStartMenu();
 		break;
 	case eAE_channelCreated:
 		if (m_multiplayerMenu) m_multiplayerMenu->OnUIEvent(SUIEvent(eUIE_connect));
@@ -3833,20 +3801,17 @@ void CFlashMenuObject::OnActionEvent(const SActionEvent& event)
 		MP_ResetBegin();
 		if(g_pGame->GetIGameFramework()->IsGameStarted())
 			UnloadHUDMovies();
-//		OnLoadingStart(g_pGame->GetIGameFramework()->GetILevelSystem()->GetCurrentLevel()->GetLevelInfo());
 		m_bUpdate = true;
 		break;
 	case eAE_resetEnd:
 		if(g_pGame->GetIGameFramework()->IsGameStarted())
 		{
-			ReloadHUDMovies();		
+			ReloadHUDMovies();
 		}
 		MP_ResetEnd();
-//		OnLoadingComplete(g_pGame->GetIGameFramework()->GetILevelSystem()->GetCurrentLevel());
 		break;
 	case eAE_resetProgress:
 		MP_ResetProgress(event.m_value);
-//		OnLoadingProgress(NULL, event.m_value);
 		break;
 	case eAE_inGame:
 		if (!ShouldIgnoreInGameEvent() && m_apFlashMenuScreens[MENUSCREEN_FRONTENDLOADING] && m_apFlashMenuScreens[MENUSCREEN_FRONTENDLOADING]->IsLoaded())

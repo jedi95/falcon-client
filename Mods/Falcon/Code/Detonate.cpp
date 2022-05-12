@@ -126,7 +126,6 @@ bool CDetonate::Detonate(bool net)
 		if (CWeapon *pWeapon=static_cast<CWeapon*>(pOwner->GetItemByClass(CItem::sC4Class)))
 		{
 			IFireMode* pFM = pWeapon->GetFireMode(pWeapon->GetCurrentFireMode());
-			//assert(pFM && "Detonator has not fire mode! Can not detonate C4");
 			if(!pFM)
 				return false;
 			while(EntityId projectileId=pFM->RemoveProjectileId())

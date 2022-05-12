@@ -101,8 +101,6 @@ void CSingle::Init(IWeapon *pWeapon, const IItemParamsNode *params)
 //------------------------------------------------------------------------
 void CSingle::Update(float frameTime, uint frameId)
 {
-  FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
 	bool keepUpdating=false;
 
 	CActor *pActor = m_pWeapon->GetOwnerActor();
@@ -2526,7 +2524,6 @@ void CSingle::UpdateRecoil(float frameTime)
 
 			m_spread += (spread_add-spread_sub)*m_recoilMultiplier;
 			m_spread = CLAMP(m_spread, m_spreadparams.min, m_spreadparams.max*m_recoilMultiplier);
-			//gEnv->pRenderer->Draw2dLabel(50,75,2.0f,white,false,"Current Spread: %.2f (+ %.2f, - %.2f)", m_spread, spread_add, spread_sub);
 		}
 		else
 			m_spread = m_spreadparams.min;
@@ -2702,8 +2699,7 @@ void CSingle::NetShoot(const Vec3 &hit, int predictionHandle)
 void CSingle::InternalNetShootEx(IEntityClass* spawn_ammo, const Vec3 &pos, const Vec3 &dir, const Vec3 &vel, const Vec3 &hit, float extra, int predictionHandle)
 {
 	IEntityClass* ammo = m_fireparams.ammo_type_class;
-	
-	//assert(ammo && "NetShootEx: There's no ammo class type");
+
 	if(!ammo)
 		return;
 
@@ -2768,9 +2764,6 @@ void CSingle::InternalNetShootEx(IEntityClass* spawn_ammo, const Vec3 &pos, cons
     m_barrelId = 0;
 
 	ammoCount--;
-	
-	if(m_fireparams.clip_size!=-1) //Don't trigger the assert in this case
-		assert(ammoCount>=0);
 
 	//Hurricane fire rate fake
 	if(m_fireparams.fake_fire_rate && playerIsShooter )
@@ -2848,18 +2841,6 @@ void CSingle::RecoilImpulse(const Vec3& firingPos, const Vec3& firingDir)
 					impulse *= 0.75f;
 				pPhysicsProxy->AddImpulse(-1, impulsePos, impulseDir * impulse * 100.0f, true, 1.0f);
 			}
-
-/*
-			// Removed always clockwise banking for all weapons (was initially requested as hurricane spin effect).
-			if(m_recoilparams.angular_impulse > 0.0f)
-			{
-				float impulse = m_recoilparams.angular_impulse;
-				if(plr->GetNanoSuit() && plr->GetNanoSuit()->GetMode() == NANOMODE_STRENGTH)
-					impulse *= 0.5f;
-				pActor->AddAngularImpulse(Ang3(0,impulse,0), 1.0f);
-			}
-*/
-
 		}
 
 		if(pActor->IsClient())
@@ -2871,8 +2852,6 @@ void CSingle::RecoilImpulse(const Vec3& firingPos, const Vec3& firingDir)
 //------------------------------------------------------------------------
 void CSingle::CheckNearMisses(const Vec3 &probableHit, const Vec3 &pos, const Vec3 &dir, float range, float radius)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
 	if (!gEnv->pAISystem)
 		return;
 	if (!m_pWeapon->GetOwner())
@@ -3130,49 +3109,7 @@ EntityId CSingle::RemoveProjectileId()
 //----------------------------------------------------------------------------------
 void CSingle::AutoFire()
 {
-//	if(!m_pWeapon->IsDualWield())
-		Shoot(true);
-/*
-	else
-	{
-		if(m_pWeapon->IsDualWieldMaster())
-		{
-			IItem *slave = m_pWeapon->GetDualWieldSlave();
-			if(slave && slave->GetIWeapon())
-			{
-				CWeapon* dualWieldSlave = static_cast<CWeapon*>(slave);
-				{
-					if(!dualWieldSlave->IsWeaponRaised())
-					{
-						m_pWeapon->StopFire();
-						m_pWeapon->SetFireAlternation(!m_pWeapon->GetFireAlternation());
-						dualWieldSlave->StartFire();
-					}
-					else
-						Shoot(true);
-				}
-			}
-		}
-		else if(m_pWeapon->IsDualWieldSlave())
-		{
-			IItem *master = m_pWeapon->GetDualWieldMaster();
-			if(master && master->GetIWeapon())
-			{
-				CWeapon* dualWieldMaster = static_cast<CWeapon*>(master);
-				{
-					if(!dualWieldMaster->IsWeaponRaised())
-					{
-						m_pWeapon->StopFire();
-						dualWieldMaster->SetFireAlternation(!dualWieldMaster->GetFireAlternation());
-						dualWieldMaster->StartFire();
-					}
-					else
-						Shoot(true);
-				}
-			}
-		}
-	}
-*/
+	Shoot(true);
 }
 
 //--------------------------------------------------------------

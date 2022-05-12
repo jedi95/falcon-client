@@ -101,7 +101,6 @@ struct SEnvParticleStatus
     }
     else if (ser.IsReading())
     {
-      //assert(count == emitters.size());
       for (int i=0; i<count&&i<emitters.size(); ++i)
 			{
 				ser.BeginGroup("TEnvEmitterSlot");
@@ -123,12 +122,12 @@ struct SParticleStatus
   SEnvParticleStatus envStats;
 
   SParticleStatus()
-  { 
+  {
   }
 
   void Serialize(TSerialize ser, unsigned aspects)
   {
-    ser.BeginGroup("ExhaustStatus");   
+    ser.BeginGroup("ExhaustStatus");
     
     int count = exhaustStats.size();
     ser.Value("NumExhausts", count);
@@ -144,14 +143,13 @@ struct SParticleStatus
     }
     else if (ser.IsReading())
     {
-      //assert(count == exhaustStats.size());
       for (int i=0; i<count&&i<exhaustStats.size(); ++i)
 			{
 				ser.BeginGroup("ExhaustRunSlot");
         ser.Value("slot", exhaustStats[i].runSlot); 
 				ser.EndGroup();
 			}
-    }   
+    }
     ser.EndGroup();
 
     envStats.Serialize(ser, aspects);
@@ -183,7 +181,7 @@ struct SSurfaceSoundStatus
   void Serialize(TSerialize ser, unsigned aspects)
   {
     ser.BeginGroup("SurfaceSoundStats");
-    ser.Value("surfaceParam", surfaceParam);		
+    ser.Value("surfaceParam", surfaceParam);
     ser.EndGroup();
   }
 };

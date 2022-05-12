@@ -25,7 +25,6 @@
 #include "Scout.h"
 #include "Hunter.h"
 #include "Trooper.h"
-//#include "Observer.h"
 #include "Shark.h"
 //
 #include "Item.h"
@@ -126,8 +125,6 @@
 // Register the factory templates used to create classes from names. Called via CGame::Init()
 void InitGameFactory(IGameFramework *pFramework)
 {
-  assert(pFramework);
-
   REGISTER_FACTORY(pFramework, "Player", CPlayer, false);
   REGISTER_FACTORY(pFramework, "Grunt", CPlayer, true);
   REGISTER_FACTORY(pFramework, "Civilian", CPlayer, true);

@@ -35,8 +35,6 @@ CBullet::~CBullet()
 //------------------------------------------------------------------------
 void CBullet::HandleEvent(const SGameObjectEvent &event)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	CProjectile::HandleEvent(event);
 
 	if (event.event == eGFE_OnCollision)

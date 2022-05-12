@@ -7,7 +7,6 @@ CHUDObituary::CHUDObituary()
 :	m_deathHead(0), m_empty(true)
 {
 	m_pDefaultFont = GetISystem()->GetICryFont()->GetFont("default");
-	CRY_ASSERT(m_pDefaultFont);
 }
 
 CHUDObituary::~CHUDObituary()

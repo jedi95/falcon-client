@@ -118,7 +118,6 @@ void CC4Projectile::OnHit(const HitInfo& hit)
 //This function is only executed on the server
 void CC4Projectile::Stick(EventPhysCollision *pCollision)
 {
-	assert(pCollision);
 	int trgId = 1;
 	int srcId = 0;
 	IPhysicalEntity *pTarget = pCollision->pEntity[trgId];

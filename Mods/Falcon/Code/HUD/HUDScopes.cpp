@@ -142,12 +142,9 @@ void CHUDScopes::DisplayBinoculars(CPlayer* pPlayerActor)
 		if(pBinocularsWeapon)
 		{
 			IZoomMode *pZoomMode = pBinocularsWeapon->GetZoomMode("Scope");
-			CRY_ASSERT(pZoomMode);
-
 			if(pZoomMode)
 			{
 				int iMaxZoomSteps = pZoomMode->GetMaxZoomSteps();
-				CRY_ASSERT(3 == iMaxZoomSteps);
 
 				float fFov0 = pZoomMode->GetZoomFoVScale(0);
 				float fFov1 = pZoomMode->GetZoomFoVScale(1);

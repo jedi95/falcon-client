@@ -105,11 +105,6 @@ struct SCVars
 	float dt_time;
 	float dt_meleeTime;
 
-	int   sv_votingTimeout;
-  int   sv_votingCooldown;
-  float sv_votingRatio;
-  float sv_votingTeamRatio;
-
 	int   sv_input_timeout;
 
 	float hr_rotateFactor;
@@ -434,7 +429,6 @@ struct SCVars
 
 	int			g_PSTutorial_Enabled;
 
-	int			g_proneNotUsableWeapon_FixType;
 	int			g_proneAimAngleRestrict_Enable;
 	int			g_enableFriendlyFallAndPlay;
 

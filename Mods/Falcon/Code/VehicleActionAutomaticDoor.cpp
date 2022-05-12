@@ -221,14 +221,12 @@ void CVehicleActionAutomaticDoor::Update(const float deltaTime)
 //------------------------------------------------------------------------
 bool CVehicleActionAutomaticDoor::IsOpened()
 {
-	assert(m_pDoorAnim);
 	return m_pDoorAnim->GetState() == m_doorOpenedStateId;
 }
 
 //------------------------------------------------------------------------
 void CVehicleActionAutomaticDoor::OpenDoor(bool value)
 {
-	assert(m_pDoorAnim);
 	m_isOpenRequested = value;
 }
 

@@ -227,10 +227,6 @@ protected:
 	static void CmdLoadActionmap(IConsoleCmdArgs *pArgs);
   static void CmdReloadGameRules(IConsoleCmdArgs *pArgs);
   static void CmdNextLevel(IConsoleCmdArgs* pArgs);
-  static void CmdStartKickVoting(IConsoleCmdArgs* pArgs);
-  static void CmdStartNextMapVoting(IConsoleCmdArgs* pArgs);
-  static void CmdVote(IConsoleCmdArgs* pArgs);
-	static void CmdListPlayers(IConsoleCmdArgs* pArgs);
 
   static void CmdQuickGame(IConsoleCmdArgs* pArgs);
   static void CmdQuickGameStop(IConsoleCmdArgs* pArgs);

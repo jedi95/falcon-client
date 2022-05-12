@@ -235,8 +235,6 @@ bool CItem::Init( IGameObject *pGameObject )
 //------------------------------------------------------------------------
 void CItem::Reset()
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if (IsModifying())
 		ResetAccessoriesScreen(GetOwnerActor());
 
@@ -244,7 +242,6 @@ void CItem::Reset()
   m_scheduler.Reset();
   
 	m_params=SParams();
-//	m_mountparams=SMountParams();
 	m_enableAnimations = true;
 	// detach any effects
 	TEffectInfoMap temp = m_effects;
@@ -323,8 +320,6 @@ void CItem::Release()
 //------------------------------------------------------------------------
 void CItem::Update( SEntityUpdateContext& ctx, int slot )
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if(m_bPostPostSerialize)
 	{
 		PostPostSerialize();
@@ -352,8 +347,6 @@ void CItem::Update( SEntityUpdateContext& ctx, int slot )
 //------------------------------------------------------------------------
 bool CItem::SetAspectProfile( EEntityAspects aspect, uint8 profile )
 {
-	//CryLogAlways("%s::SetProfile(%d: %s)", GetEntity()->GetName(), profile, profile==eIPhys_Physicalized?"Physicalized":"NotPhysicalized");
-
 	if (aspect == eEA_Physics)
 	{
 		switch (profile)
@@ -447,8 +440,6 @@ void CItem::HandleEvent( const SGameObjectEvent &evt )
 //------------------------------------------------------------------------
 void CItem::ProcessEvent(SEntityEvent &event)
 {
-	FUNCTION_PROFILER(gEnv->pSystem, PROFILE_GAME);
-
 	switch (event.event)
 	{
 	case ENTITY_EVENT_TIMER:
@@ -610,7 +601,6 @@ bool CItem::NetSerialize( TSerialize ser, EEntityAspects aspect, uint8 profile, 
 //------------------------------------------------------------------------
 void CItem::FullSerialize( TSerialize ser )
 {
-	assert(ser.GetSerializationTarget() != eST_Network);
 	if(ser.IsReading())
 	{
 		AttachToBack(false);
@@ -743,7 +733,6 @@ void CItem::FullSerialize( TSerialize ser )
 			if(ser.IsReading())
 			{
 				IEntityClass* pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(name);
-				assert(pClass);
 				if(pClass)
 					m_bonusAccessoryAmmo[pClass] = amount;
 			}
@@ -760,43 +749,38 @@ void CItem::PostSerialize()
 	if(m_ownerId)
 	{
 		EntityId owner = m_ownerId;
-		//Select(m_stats.selected);
 		if(pOwner)
 		{
+			if (!m_stats.mounted && !IsDualWield())
+			{
+				EntityId holstered = pOwner->GetInventory()->GetHolsteredItem();
 
-			//if(pOwner->GetActorClass() == CPlayer::GetActorClassType())
-			//{
-				if (!m_stats.mounted && !IsDualWield())
-				{
-					EntityId holstered = pOwner->GetInventory()->GetHolsteredItem();
+				if(GetEntity()->GetClass() != CItem::sBinocularsClass &&
+					GetEntity()->GetClass() != CItem::sOffHandClass)
+				{			  
+					if(m_stats.selected)
+					{
+						m_bPostPostSerialize = true;
 
-					if(GetEntity()->GetClass() != CItem::sBinocularsClass &&
-						GetEntity()->GetClass() != CItem::sOffHandClass)
-					{			  
-						if(m_stats.selected)
+						if(holstered != GetEntityId())
 						{
-							m_bPostPostSerialize = true;
-
-							if(holstered != GetEntityId())
-							{
-								Drop(0,false,false);
-								PickUp(owner, false, true, false);
-								if(pOwner->GetEntity()->IsHidden())
-									Hide(true); //Some AI is hidden in the levels by designers
-							}      
-						}
-						else
-						{ 
-							if(holstered != GetEntityId())
-								AttachToHand(false, true);
-						}
+							Drop(0,false,false);
+							PickUp(owner, false, true, false);
+							if(pOwner->GetEntity()->IsHidden())
+								Hide(true); //Some AI is hidden in the levels by designers
+						}      
+					}
+					else
+					{ 
+						if(holstered != GetEntityId())
+							AttachToHand(false, true);
 					}
 				}
-				else if (IsDualWield())
-				{
-					m_bPostPostSerialize = true;
-				}
-			//}
+			}
+			else if (IsDualWield())
+			{
+				m_bPostPostSerialize = true;
+			}
 		}
 		else
 			CryWarning(VALIDATOR_MODULE_GAME, VALIDATOR_WARNING, "Item %s has ownerId %i but owner actor does not exist!", GetEntity()->GetName(), m_ownerId);
@@ -814,13 +798,6 @@ void CItem::PostSerialize()
 
 	ReAttachAccessories();
 	AccessoriesChanged();
-
-	//this fix breaks holding NPC serialization, when "use" was pressed during saving
-	/*if(pOwner && this == pOwner->GetCurrentItem() && !pOwner->GetLinkedVehicle())
-	{
-		pOwner->HolsterItem(true);	//this "fixes" old attachments that are not replaced still showing up in the model ..
-		pOwner->HolsterItem(false);
-	}*/
 
 	//Fix incorrect view mode (in same cases) and not physicalized item after dropping/picking (in same cases too)
 	if(!pOwner && m_stats.dropped)
@@ -861,7 +838,6 @@ void CItem::PostSerialize()
 			m_ownerId = m_postSerializeMountedOwner;
 			StopUse(pPlayer->GetEntityId());
 			pPlayer->UseItem(GetEntityId());
-			assert(m_ownerId);
 		}
 		m_postSerializeMountedOwner = 0;		
 	}
@@ -925,7 +901,6 @@ void CItem::SerializeLTL( TSerialize ser )
 		{
 			RemoveAccessory((m_accessories.begin())->first);
 		}
-		assert(m_accessories.size() == 0);
 
 		string name;
 		CActor *pActor = GetOwnerActor();
@@ -1904,7 +1879,6 @@ bool CItem::InitRespawn()
 	if (IsServer() && m_respawnprops.respawn)
 	{
 		CGameRules *pGameRules=g_pGame->GetGameRules();
-		assert(pGameRules);
 		if (pGameRules)
 			pGameRules->CreateEntityRespawnData(GetEntityId());
 
@@ -1922,9 +1896,7 @@ void CItem::TriggerRespawn()
 	
 	if (m_respawnprops.respawn)
 	{
-
 		CGameRules *pGameRules=g_pGame->GetGameRules();
-		assert(pGameRules);
 		if (pGameRules)
 			pGameRules->ScheduleEntityRespawn(GetEntityId(), m_respawnprops.unique, false, m_respawnprops.timer);
 	}
@@ -1939,9 +1911,8 @@ void CItem::EnableSelect(bool enable)
 //------------------------------------------------------------------------
 bool CItem::CanSelect() const
 {
-	if(g_pGameCVars->g_proneNotUsableWeapon_FixType == 1)
-		if(GetOwnerActor() && GetOwnerActor()->GetStance() == STANCE_PRONE && GetParams().prone_not_usable)
-			return false;
+	if(GetOwnerActor() && GetOwnerActor()->GetStance() == STANCE_PRONE && GetParams().prone_not_usable)
+		return false;
 
 	return m_params.selectable && m_stats.selectable;
 }

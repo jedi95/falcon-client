@@ -23,11 +23,6 @@ History:
 #include "GameCVars.h"
 
 
-#include "IRenderer.h"
-
-
-//std::vector<Vec3> g_points;
-
 //------------------------------------------------------------------------
 CMelee::CMelee()
 {
@@ -59,8 +54,6 @@ void CMelee::Init(IWeapon *pWeapon, const struct IItemParamsNode *params)
 //------------------------------------------------------------------------
 void CMelee::Update(float frameTime, uint frameId)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
 	bool requireUpdate = false;
 	
 	if (m_attacking)
@@ -88,7 +81,7 @@ void CMelee::Update(float frameTime, uint frameId)
 				if (!pMC)
 					return;
 
-				float strength = 1.0f;//pActor->GetActorStrength();
+				float strength = 1.0f;
 				if (pActor->GetActorClass() == CPlayer::GetActorClassType())
 				{
 					CPlayer *pPlayer = (CPlayer *)pActor;
@@ -177,12 +170,6 @@ struct CMelee::StopAttackingAction
 		_this->m_delayTimer = 0.0f;
 		_this->m_durationTimer = 0.0f;
 		pItem->SetBusy(false);
-		// this allows us to blend into the idle animation (for swimming) -- johnn
-		//pItem->ResetAnimation();
-		//pItem->ReAttachAccessories();
-		//pItem->PlayAction(ItemStrings::idle, 0, false, CItem::eIPAF_CleanBlending | CItem::eIPAF_NoBlend | CItem::eIPAF_Default);
-		//pItem->PlayAction(pItem->GetDefaultIdleAnimation(0), 0, false, CItem::eIPAF_CleanBlending | CItem::eIPAF_Default);
-
 	}
 };
 
@@ -781,7 +768,7 @@ float CMelee::GetOwnerStrength() const
 	if (!pMC)
 		return 1.0f;
 
-	float strength = 1.0f;//pActor->GetActorStrength();
+	float strength = 1.0f;
 	if (pActor->GetActorClass() == CPlayer::GetActorClassType())
 	{
 		CPlayer *pPlayer = (CPlayer *)pActor;

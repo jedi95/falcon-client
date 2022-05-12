@@ -24,7 +24,7 @@ History:
 #include "Game.h"
 #include "Menus/OptionsManager.h"
 
-static const char* uiControlCodePrefix = "@cc_"; // "@cc_"; // AlexL 03/04/2007: enable this when keys/controls are fully localized
+static const char* uiControlCodePrefix = "@cc_";
 static const size_t uiControlCodePrefixLen = strlen(uiControlCodePrefix);
 
 //-----------------------------------------------------------------------------------------------------
@@ -43,8 +43,7 @@ void CFlashMenuObject::SaveActionToMap(const char* actionmap, const char* action
 		const char* key = uiKey;
 		if (strstr(key, uiControlCodePrefix) == key)
 			key+=uiControlCodePrefixLen;
-		// else
-		// 	assert(false);
+
 		pMap->BindAction(action, key, 0);
 
 //START workarounds

@@ -456,7 +456,6 @@ public:
 
 	void erase(int idx)
 	{
-		assert(idx<size());
 		int r_idx = 0;
 		for(int i=0;i<m_array.size();++i)
 		{
@@ -471,7 +470,6 @@ public:
 			}
 			++r_idx;
 		}
-		assert(false);
 	}
 
 	bool empty()const
@@ -486,7 +484,6 @@ public:
 
 	const T& operator[](int idx)const
 	{
-		assert(idx<size());
 		int r_idx = 0;
 		for(int i=0;i<m_array.size();++i)
 		{
@@ -498,7 +495,6 @@ public:
 			}
 			++r_idx;
 		}
-		assert(false);
 		return m_array[0].first;
 	}
 
@@ -1040,9 +1036,7 @@ struct CGameNetworkProfile::SBuddies  : public INetworkProfileListener
 
   void ExecuteOperation(int idx)
   {
-    assert(0 <= idx && idx < m_operations.size());
     SPendingOperation &o = m_operations[idx];
-    assert(!o.m_nick.empty() && o.m_id);
 
     switch(o.m_type)
     {
@@ -1080,7 +1074,7 @@ struct CGameNetworkProfile::SBuddies  : public INetworkProfileListener
 						}
 						else
 						{
-							o.m_param = "@ui_menu_auto_invite";								
+							o.m_param = "@ui_menu_auto_invite";
 						}
 				}
 				m_requests.insert(std::make_pair(o.m_id,SBuddyRequest(o.m_nick,o.m_param)));
@@ -1468,7 +1462,6 @@ void CGameNetworkProfile::LoginProfile(const char* email, const char* password, 
 
 void CGameNetworkProfile::Register(const char* login, const char* email, const char* pass, const char* country, SRegisterDayOfBirth dob)
 {
-	assert(m_profile);
   m_login = login;
 	m_password = pass;
 	m_loggingIn = true;
@@ -1480,8 +1473,6 @@ void CGameNetworkProfile::Register(const char* login, const char* email, const c
 
 void CGameNetworkProfile::Logoff()
 {
-  assert(m_profile);
-
   //cancel pending storage queries..
   //TODO: wait for important queries to finish.
   CleanUpQueries();
@@ -1661,7 +1652,6 @@ void CGameNetworkProfile::SetPlayingStatus(uint ip, ushort port, ushort publicpo
 
 void CGameNetworkProfile::SetChattingStatus()
 {
-	assert(m_profile);
 	if(m_profile)
 		m_profile->SetStatus(eUS_chatting,"/?chatting");
 }

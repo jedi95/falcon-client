@@ -87,9 +87,6 @@ void CHomingMissile::Launch(const Vec3 &pos, const Vec3 &dir, const Vec3 &veloci
 //------------------------------------------------------------------------
 void CHomingMissile::Update(SEntityUpdateContext &ctx, int updateSlot)
 {
-
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
   CRocket::Update(ctx, updateSlot);
 
   // update destination if required
@@ -252,9 +249,6 @@ void CHomingMissile::UpdateControlledMissile(float frameTime)
 			Vec3 currentPos = pos.pos;
 			Vec3 goalDir(ZERO);
 
-			assert(!_isnan(currentSpeed));
-			assert(!_isnan(currentVel.x) && !_isnan(currentVel.y) && !_isnan(currentVel.z));
-
 			//Just a security check
 			if((currentPos-m_destination).len2()<(m_detonationRadius*m_detonationRadius))
 			{
@@ -273,16 +267,12 @@ void CHomingMissile::UpdateControlledMissile(float frameTime)
 			cosine = CLAMP(cosine,-1.0f,1.0f);
 			float totalAngle = RAD2DEG(cry_acosf(cosine));
 
-			assert(totalAngle>=0);
-
 			if (cosine<0.99)
 			{
 				float maxAngle = m_turnSpeed*frameTime;
 				if (maxAngle>totalAngle)
 					maxAngle=totalAngle;
 				float t=(maxAngle/totalAngle)*m_lazyness;
-
-				assert(t>=0.0 && t<=1.0);
 
 				goalDir = Vec3::CreateSlerp(currentVel, goalDir, t);
 				goalDir.Normalize();

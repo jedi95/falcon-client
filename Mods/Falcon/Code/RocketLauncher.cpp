@@ -68,8 +68,6 @@ void CRocketLauncher::OnReset()
 //=========================================
 void CRocketLauncher::ProcessEvent(SEntityEvent &event)
 {
-	FUNCTION_PROFILER(gEnv->pSystem, PROFILE_GAME);
-
 	CWeapon::ProcessEvent(event);
 
 	if(event.event == ENTITY_EVENT_RESET)
@@ -283,8 +281,6 @@ void CRocketLauncher::UpdateFPView(float frameTime)
 //=======================================
 void CRocketLauncher::Update(SEntityUpdateContext& ctx, int slot)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	CWeapon::Update(ctx,slot);
 
 	if(slot==eIUS_General && m_laserTPOn)

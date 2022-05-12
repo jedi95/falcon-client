@@ -377,7 +377,6 @@ public:
 	void AddToScoreBoard(EntityId player, int kills, int deaths, int ping, int teamKills);
 	void ForceScoreBoard(bool force);
 	void ResetScoreBoard();
-  void SetVotingState(EVotingState state, int timeout, EntityId id, const char* descr);
 
 	//RadioButtons & Chat
 	void SetRadioButtons(bool active, int buttonNo = 0);

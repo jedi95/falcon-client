@@ -73,7 +73,6 @@ CFlowVehicleEntityAttachment::CFlowVehicleEntityAttachment(SActivationInfo* pAct
 	if (IEntity* pEntity = pActivationInfo->pEntity)
 	{
 		IVehicleSystem* pVehicleSystem = gEnv->pGame->GetIGameFramework()->GetIVehicleSystem();
-		assert(pVehicleSystem);
 
 		if (pVehicleSystem->GetVehicle(pEntity->GetId()))
 			m_vehicleId = pEntity->GetId();
@@ -124,7 +123,6 @@ void CFlowVehicleEntityAttachment::ProcessEvent(EFlowEvent flowEvent, SActivatio
 		if (IEntity* pEntity = pActivationInfo->pEntity)
 		{
 			IVehicleSystem* pVehicleSystem = gEnv->pGame->GetIGameFramework()->GetIVehicleSystem();
-			assert(pVehicleSystem);
 
 			if (pEntity->GetId() != m_vehicleId)
 				m_vehicleId = 0;
@@ -162,7 +160,6 @@ IVehicle* CFlowVehicleEntityAttachment::GetVehicle()
 		return NULL;
 
 	IVehicleSystem* pVehicleSystem = gEnv->pGame->GetIGameFramework()->GetIVehicleSystem();
-	assert(pVehicleSystem);
 
 	return pVehicleSystem->GetVehicle(m_vehicleId);
 }
@@ -174,14 +171,12 @@ CVehicleActionEntityAttachment* CFlowVehicleEntityAttachment::GetVehicleAction()
 		return NULL;
 
 	IVehicleSystem* pVehicleSystem = gEnv->pGame->GetIGameFramework()->GetIVehicleSystem();
-	assert(pVehicleSystem);
 
 	if (IVehicle* pVehicle = pVehicleSystem->GetVehicle(m_vehicleId))
 	{
 		for (int i = 1; i < pVehicle->GetActionCount(); i++)
 		{
 			IVehicleAction* pAction = pVehicle->GetAction(i);
-			assert(pAction);
 
 			if (CVehicleActionEntityAttachment* pAttachment = 
 				CAST_VEHICLEOBJECT(CVehicleActionEntityAttachment, pAction))

@@ -36,7 +36,6 @@ namespace SharedString
 			{
 				unsigned int h = 0; 
 				const char *s = stl::constchar_cast(key);
-				assert (s);
 				for (; *s; ++s) h = 5*h + tolower(*(unsigned char*)s);
 				return size_t(h);
 			};
@@ -111,14 +110,7 @@ namespace SharedString
 		}
 
 		// Release existing name table entry.
-		void Release( SNameEntry *pEntry )
-		{
-/*
-			assert(pEntry);
-			m_nameMap.erase( pEntry->GetStr() );
-			free(pEntry);
-*/
-		}
+		void Release( SNameEntry *pEntry ) {}
 	private:
 		typedef stl::hash_map<const char*,SNameEntry*,hash_strcmp<const char*> > NameMap;
 		NameMap m_nameMap;
@@ -175,7 +167,7 @@ namespace SharedString
 		}
 
 
-		SNameEntry* _entry( const char *pBuffer ) const { assert(pBuffer); return ((SNameEntry*)pBuffer)-1; }
+		SNameEntry* _entry( const char *pBuffer ) const { return ((SNameEntry*)pBuffer)-1; }
 		int  _length() const { return (m_str) ? _entry(m_str)->nLength : 0; };
 		void _addref( const char *pBuffer ) { if (pBuffer) _entry(pBuffer)->AddRef(); }
 		void _release( const char *pBuffer )
@@ -213,7 +205,6 @@ namespace SharedString
 	//////////////////////////////////////////////////////////////////////////
 	inline CSharedString::CSharedString( const char *s,bool bOnlyFind )
 	{
-		assert(s);
 		m_str = 0;
 		const char *pBuf = 0;
 		if (*s) // if not empty
@@ -247,7 +238,6 @@ namespace SharedString
 	//////////////////////////////////////////////////////////////////////////
 	inline CSharedString&	CSharedString::operator=( const char *s )
 	{
-		//assert(s); // AlexL: we currenly allow 0 assignment because Items currently do this a lot
 		const char *pBuf = 0;
 		if (s && *s) // if not empty
 		{

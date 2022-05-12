@@ -278,7 +278,6 @@ void CItem::UpdateMounted(float frameTime)
 			vGunXAxis=tm.GetColumn0();
 			Vec3 vInitialAimDirection = m_stats.mount_dir;
 			Matrix33 vInitialPlayerOrientation = Matrix33::CreateRotationVDir(vInitialAimDirection);
-			assert( vInitialAimDirection.IsUnit() );
 
 	  		Vec3 newp;
 			if (pActor->IsThirdPerson())
@@ -308,7 +307,6 @@ void CItem::UpdateMounted(float frameTime)
 			if (ICharacterInstance *pCharacter = pActor->GetEntity()->GetCharacter(0))
 			{
 				ISkeletonAnim *pSkeletonAnim = pCharacter->GetISkeletonAnim();
-				assert(pSkeletonAnim);
 
 				uint32 numAnimsLayer = pSkeletonAnim->GetNumAnimsInFIFO(0);
 				for(uint32 i=0; i<numAnimsLayer; i++)

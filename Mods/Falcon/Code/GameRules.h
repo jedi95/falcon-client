@@ -22,6 +22,7 @@
 #include <IGameObject.h>
 #include <IGameRulesSystem.h>
 #include <IViewSystem.h>
+#include <IGameplayRecorder.h>
 #include "Actor.h"
 #include "SynchedStorage.h"
 #include <queue>
@@ -249,7 +250,6 @@ public:
 		return 0;
 	}
 	ILINE const char *GetActorName(CActor *pActor) const { return pActor->GetEntity()->GetName(); };
-	ILINE CVotingSystem* GetVotingSystem() const { return m_pVotingSystem; };
 	int GetChannelId(EntityId entityId) const;
 	bool IsDead(EntityId entityId) const;
 	bool IsSpectator(EntityId entityId) const;
@@ -278,9 +278,6 @@ public:
 	virtual bool IsPlayerInGame(EntityId playerId) const;
 	virtual bool IsPlayerActivelyPlaying(EntityId playerId, bool mustBeAlive=false) const;	// [playing / dead / waiting to respawn (inc spectating while dead): true] [not yet joined game / selected Spectate: false]
 	virtual bool IsChannelInGame(int channelId) const;
-  virtual void StartVoting(CActor *pActor, EVotingState t, EntityId id, const char* param);
-  virtual void Vote(CActor *pActor, bool yes);
-  virtual void EndVoting(bool success);
 	int GetTotalAlivePlayerCount( const EntityId skipPlayerId ) const;
 
 	//------------------------------------------------------------------------
@@ -454,7 +451,6 @@ public:
 	template<typename T>
 	void SetSynchedGlobalValue(TSynchedKey key, const T &value)
 	{
-		assert(gEnv->bServer);
 		g_pGame->GetSynchedStorage()->SetGlobalValue(key, value);
 	};
 
@@ -476,7 +472,6 @@ public:
 	template<typename T>
 	void SetSynchedEntityValue(EntityId id, TSynchedKey key, const T &value)
 	{
-		assert(gEnv->bServer);
 		g_pGame->GetSynchedStorage()->SetEntityValue(id, key, value);
 	}
 	template<typename T>
@@ -1088,6 +1083,7 @@ protected:
 	};
 
 	IGameFramework			*m_pGameFramework;
+	IGameplayRecorder		*m_pGameplayRecorder;
 	ISystem							*m_pSystem;
 	IActorSystem				*m_pActorSystem;
 	IEntitySystem				*m_pEntitySystem;
@@ -1159,7 +1155,6 @@ protected:
 
 	CBattleDust					*m_pBattleDust;
 	CMPTutorial					*m_pMPTutorial;
-  CVotingSystem       *m_pVotingSystem;
 
 	TGameRulesListenerVec	m_rulesListeners;
 	static int					s_invulnID;

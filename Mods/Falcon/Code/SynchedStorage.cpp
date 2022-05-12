@@ -82,7 +82,6 @@ void CSynchedStorage::SerializeValue(TSerialize ser, TSynchedKey &key, TSynchedV
 		}
 	break;
 	default:
-		assert(0);
 		break;
 	}
 }
@@ -145,7 +144,6 @@ void CSynchedStorage::SerializeEntityValue(TSerialize ser, EntityId id, TSynched
 		}
 		break;
 	default:
-		assert(0);
 		break;
 	}
 }

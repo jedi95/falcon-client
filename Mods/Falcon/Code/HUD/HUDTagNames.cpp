@@ -180,7 +180,6 @@ void CHUDTagNames::AddEnemyTagName(EntityId uiEntityId)
 
 void CHUDTagNames::DrawTagName(IActor *pActor,bool bLocalVehicle)
 {
-	CRY_ASSERT(pActor);
 	if(!pActor)
 		return;
 
@@ -281,7 +280,6 @@ void CHUDTagNames::DrawTagName(IActor *pActor,bool bLocalVehicle)
 
 void CHUDTagNames::DrawTagName(IVehicle *pVehicle)
 {
-	CRY_ASSERT(pVehicle);
 	if(!pVehicle)
 		return;
 

@@ -805,7 +805,6 @@ bool CNanoSuit::SetMode(ENanoMode mode, bool forceUpdate, bool keepInvul)
 			effectName = "suit_cloakmode";
 			break;
 		default:
-			assert(0);
 			GameWarning("Non existing NANOMODE selected: %d", mode);
 			return false;
 	}

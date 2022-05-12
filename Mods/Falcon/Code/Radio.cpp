@@ -8,14 +8,13 @@
 
 static const int RADIO_GROUPS=4;
 static const int RADIO_GROUP_SIZE=5;
-const int CRadio::RADIO_MESSAGE_NUM=RADIO_GROUPS*RADIO_GROUP_SIZE;//sizeof(RadioMessages)/sizeof(RadioMessage_s);
+const int CRadio::RADIO_MESSAGE_NUM=RADIO_GROUPS*RADIO_GROUP_SIZE;
 static const int RADIO_AUTOCLOSE_TIME = 5;
 
 //------------------------------------------------------------------------
 
 CRadio::CRadio(CGameRules* gr):m_currentGroup(-1),m_pGameRules(gr),m_lastMessageTime(0.0f),m_menuOpenTime(0.0f)
 {
-//	gEnv->pInput->AddEventListener(this);
 	for (int i = 0; i < 10; ++i)
 	{
 		m_keyState[i] = false;
@@ -129,8 +128,6 @@ bool CRadio::OnAction(const ActionId& actionId, int activationMode, float value)
 	if(!GetTeamRadioTable(g_pGame->GetGameRules(), m_TeamName, radioTable))
 		return false;
 
-	//CryLogAlways("RADIO: Action[%3.2f] %s", gEnv->pTimer->GetCurrTime(), m_ignoreMenuThisFrame ? "ignored" : "");
-
 	// not sure why this is needed, maybe not anymore (but it works regardless).
 	if (m_inputEventConsumedKey)
 		return false;
@@ -233,8 +230,6 @@ bool CRadio::OnInputEvent( const SInputEvent &event )
 	if (!gEnv->bMultiplayer)
 		return false;
 
-	//CryLogAlways("RADIO: Input[%3.2f] %s %d", gEnv->pTimer->GetCurrTime(), event.keyName.c_str(), event.state);
-
 	// Signal that input events have been processed and sent to all listeners.
 	m_waitForInputEvents = false;
 
@@ -290,8 +285,6 @@ bool CRadio::OnInputEvent( const SInputEvent &event )
 	// prevent spamming radio messages
 	m_lastMessageTime = gEnv->pTimer->GetCurrTime();
 
-	//PlayVoice(pSoundName);
-
 	int id=(m_currentGroup*RADIO_GROUP_SIZE+iKey)-1;
 	m_pGameRules->SendRadioMessage(gEnv->pGame->GetIGameFramework()->GetClientActor()->GetEntityId(),id);
 
@@ -315,9 +308,7 @@ void CRadio::OnRadioMessage(int id, EntityId fromId)
 
 	char *pSoundName,*pSoundText;
 	int variations = 1;
-	bool result=GetRadioSoundName(m_pGameRules,m_TeamName,groupId+1,keyId+1,&pSoundName,&pSoundText, &variations);
-
-	assert(result);
+	GetRadioSoundName(m_pGameRules,m_TeamName,groupId+1,keyId+1,&pSoundName,&pSoundText, &variations);
 
 	if(g_pGame->GetGameRules() && g_pGame->GetHUD())
 	{		
@@ -343,13 +334,9 @@ void CRadio::OnRadioMessage(int id, EntityId fromId)
 		}
 		completeMsg += wSoundText;
 
-
-		//pLocalizationMan->FormatStringMessage(localizedString, completeMsg, "@mp_radio", pSoundText);
-
 		CHUDTextChat* pChat = g_pGame->GetHUD()->GetMPChat();
 		if(pChat)
 			pChat->AddChatMessage(fromId, completeMsg.c_str(), 1, true);	// hardcoded to 'same team'
-		//g_pGame->GetGameRules()->OnChatMessage(eChatToTeam, fromId, 0, completeMsg.c_str());
 
 		string sound = pSoundName;
 		if(variations > 1)
@@ -385,12 +372,6 @@ void CRadio::Update()
 	// close menu if there has been no relevent userinput for more than 5s
 	float timeNow = gEnv->pTimer->GetCurrTime();
 
-/*
-	CryLogAlways("RADIO: Update[%3.2f] state=[%d %d %d %d] ignore=[%d %d %d %d]", gEnv->pTimer->GetCurrTime(), 
-							m_keyState[1], m_keyState[2], m_keyState[3], m_keyState[4],
-							m_keyIgnored[1], m_keyIgnored[2], m_keyIgnored[3], m_keyIgnored[4]);
-*/
-
 	// This is where the menu request is actually processed.
 	// m_requestedGroup, m_inputEventConsumedKey and m_waitForInputEvents are needed to ensure a certain update order.
 	// Without this the order or action, input and update events are somewhat random.
@@ -410,9 +391,7 @@ void CRadio::CloseRadioMenu()
 		g_pGame->GetHUD()->SetRadioButtons(false);
 
 	g_pGameActions->FilterMPRadio()->Enable(false);
-#if !defined(CRY_USE_GCM_HUD)
 	if (gEnv->pInput) gEnv->pInput->RemoveEventListener(this);
-#endif
 
 	m_menuOpenTime = 0.0f;
 }

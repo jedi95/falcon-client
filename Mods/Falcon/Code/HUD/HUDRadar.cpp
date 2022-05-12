@@ -139,8 +139,6 @@ CHUDRadar::CHUDRadar()
 	m_pCarCiv				= pEntityClassRegistry->FindClass( "Civ_car1" );
 	m_pParachute		= pEntityClassRegistry->FindClass( "Parachute" );
 	m_pUSASV				= pEntityClassRegistry->FindClass( "US_asv" );
-
-	assert ( m_pLTVA && m_pLTVUS && m_pTankA && m_pTankUS && m_pWarrior && m_pHunter && m_pAlien && m_pScout && m_pGrunt && m_pHeli && m_pVTOL && m_pAAA && m_pTruck && m_pAPCUS && m_pAPCA && m_pBoatCiv && m_pHover && m_pBoatUS && m_pBoatA && m_pCarCiv && m_pParachute && m_pUSASV);
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -316,8 +314,6 @@ int FillUpDoubleArray(ArrayFillHelper<T,flashType,NUM_VALS> *fillHelper,
 
 void CHUDRadar::Update(float fDeltaTime)
 {
-	FUNCTION_PROFILER(GetISystem(),PROFILE_GAME);
-
 	if(!m_flashRadar)
 		return; //we require the flash radar now
 
@@ -1272,7 +1268,6 @@ void CHUDRadar::AddToRadar(EntityId id)
 						break;
 					}
 				}
-				else { assert(false); }
 			}
 		}
 	}
@@ -1327,8 +1322,6 @@ bool CHUDRadar::ScanObject(EntityId id)
 
 void CHUDRadar::UpdateScanner(float frameTime)
 {
-	FUNCTION_PROFILER(GetISystem(),PROFILE_GAME);
-
 	if (m_scannerTimer>0.0f)
 	{
 		m_scannerTimer-=frameTime;

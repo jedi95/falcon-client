@@ -151,13 +151,6 @@ public:
   {
   }
 
-	/*
-  IFlowNodePtr Clone( SActivationInfo * pActInfo )
-  {
-    return this;
-  }
-	*/
-
   virtual void GetConfiguration(SFlowNodeConfig& config)
   {
     T::GetConfiguration(config);
@@ -173,16 +166,13 @@ public:
     I3DEngine* pEngine = gEnv->p3DEngine;
     for (int i = 0; config.pInputPorts[i].name; ++i)
     {
-      if (true || IsPortActive(pActInfo, i))
+      const TFlowInputData& anyVal = GetPortAny(pActInfo, i);
+      float fVal;
+      bool ok = anyVal.GetValueWithConversion(fVal);
+      if (ok)
       {
-        const TFlowInputData& anyVal = GetPortAny(pActInfo, i);
-        float fVal;
-        bool ok = anyVal.GetValueWithConversion(fVal);
-        if (ok)
-        {
-          // set postfx param
-          pEngine->SetPostEffectParam(config.pInputPorts[i].name, fVal);
-        }
+        // set postfx param
+        pEngine->SetPostEffectParam(config.pInputPorts[i].name, fVal);
       }
     }
   }

@@ -318,8 +318,6 @@ void CProjectile::Release()
 //------------------------------------------------------------------------
 void CProjectile::FullSerialize(TSerialize ser)
 {
-	assert(ser.GetSerializationTarget() != eST_Network);
-
 	ser.Value("Remote", m_remote);
 	// m_tracerpath should be serialized but the template-template stuff doesn't work under VS2005
 	ser.Value("Owner", m_ownerId, 'eid');
@@ -352,8 +350,6 @@ void CProjectile::FullSerialize(TSerialize ser)
 //------------------------------------------------------------------------
 void CProjectile::Update(SEntityUpdateContext &ctx, int updateSlot)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if (updateSlot!=0)
 		return;
 
@@ -410,8 +406,6 @@ void CProjectile::HandleEvent(const SGameObjectEvent &event)
 {
 	if (m_destroying)
 		return;
-
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
 
 	if (event.event == eGFE_OnCollision)
 	{
@@ -920,8 +914,6 @@ IEntitySoundProxy *CProjectile::GetSoundProxy()
 	if (!pSoundProxy)
 		pSoundProxy=static_cast<IEntitySoundProxy *>(GetEntity()->CreateProxy(ENTITY_PROXY_SOUND));
 
-	assert(pSoundProxy);
-
 	return pSoundProxy;
 }
 
@@ -933,70 +925,6 @@ void CProjectile::FlashbangEffect(const SFlashbangParams* flashbang)
 	const float radius = flashbang->maxRadius;
 	IEntity* pOwnerEntity = gEnv->pEntitySystem->GetEntity(m_ownerId);
 	gEnv->pAISystem->GrenadeEvent(GetEntity()->GetWorldPos(), radius, AIGE_FLASH_BANG, GetEntity(), pOwnerEntity);
-
-/*
-	// collect nearby players and enemies
-	SEntityProximityQuery query;
-	Vec3 center = GetEntity()->GetWorldPos();
-	AABB queryBox(Vec3(center.x - radius, center.y - radius, center.z - radius), Vec3(center.x + radius, center.y + radius, center.z + radius));
-	query.box = queryBox;
-	gEnv->pEntitySystem->QueryProximity(query);
-	
-	for (int i = 0; i < query.nCount; i++)
-	{
-		IEntity *ent = query.pEntities[i];
-		if (ent)
-		{
-			//CryLogAlways("found: %s in box", ent->GetName());
-			// cull based on geom
-			IActor *trgActor = gEnv->pGame->GetIGameFramework()->GetIActorSystem()->GetActor(ent->GetId());
-			if (trgActor)
-			{
-				IActor *clientActor = gEnv->pGame->GetIGameFramework()->GetClientActor();
-
-				//We don't need it for clientActor
-				if(clientActor && clientActor->GetEntityId() == trgActor->GetEntityId())
-					continue;
-
-				AABB bbox;
-				ent->GetWorldBounds(bbox);
-				Vec3 eyePos = bbox.GetCenter();
-				Vec3 dir = (Vec3)ent->GetWorldAngles();
-
-				SMovementState state;
-				if (IMovementController *pMV = trgActor->GetMovementController())
-				{
-					pMV->GetMovementState(state);
-					eyePos = state.eyePosition;
-					dir = state.aimDirection;
-				}
-
-				Vec3 dirToTrg = eyePos - GetEntity()->GetWorldPos();
-				ray_hit hit;
-				static const int objTypes = ent_static | ent_terrain | ent_rigid | ent_sleeping_rigid;
-				static const unsigned int flags = rwi_stop_at_pierceable|rwi_colltype_any;
-				int col = gEnv->pPhysicalWorld->RayWorldIntersection(GetEntity()->GetWorldPos(), dirToTrg, objTypes, flags, &hit, 1, GetEntity()->GetPhysics());
-
-				if (col)
-				{
-					continue; // hit geom between ent and flashbang
-				}
-
-				// Signal the AI to react to the flash bang.
-				// The view angle is not being checked as it feels like a bug if
-				// the AI does not react to the flash.
-				if (ent->GetAI())
-				{
-					IAISignalExtraData* pExtraData = gEnv->pAISystem->CreateSignalExtraData();
-					pExtraData->iValue = 0;
-					gEnv->pAISystem->SendSignal(SIGNALFILTER_SENDER, 1, "OnExposedToFlashBang", ent->GetAI(), pExtraData);
-				}
-			}
-
-		}
-	}
-
-*/
 }
 //------------------------------------------------------------------------
 void CProjectile::ScaledEffect(const SScaledEffectParams* pScaledEffect)

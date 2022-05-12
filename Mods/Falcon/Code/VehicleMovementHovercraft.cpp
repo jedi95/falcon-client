@@ -229,8 +229,6 @@ bool CVehicleMovementHovercraft::InitThrusters(SmartScriptTable table)
   if (!m_bSampleByHelpers)
   {
     // distribute thrusters
-    assert(m_numThrusters >= 1 && m_numThrusters <= 9);    
-
     if (m_numThrusters >= 4)
     {
       // min & max
@@ -331,8 +329,6 @@ bool CVehicleMovementHovercraft::InitThrusters(SmartScriptTable table)
         thruster->GetValue("pushing", m_vecThrusters[i]->pushing);
       }      
     }
-
-    assert(m_vecThrusters.size() == m_numThrusters);
   }
 
   // tilt thruster direction to outside   
@@ -375,12 +371,9 @@ bool CVehicleMovementHovercraft::InitThrusters(SmartScriptTable table)
   m_Inertia.z = mass * (sqr(width) + sqr(length)) / 12;
 
   m_massOffset = bbox.GetCenter();
-  //CryLog("[Hovercraft movement]: got mass offset (%f, %f, %f)", m_massOffset.x, m_massOffset.y, m_massOffset.z);
 
   float gravity = m_gravity.IsZero() ? 9.81f : m_gravity.len();
   m_liftForce = mass * gravity;
-
-  assert(m_numThrusters == m_vecThrusters.size());
 
   int pushingThrusters = 0;
   for (int i=0; i<m_numThrusters; ++i)
@@ -431,9 +424,6 @@ void CVehicleMovementHovercraft::StopEngine()
 // NOTE: This function must be thread-safe. Before adding stuff contact MarcoC.
 void CVehicleMovementHovercraft::ProcessMovement(const float deltaTime)
 { 
-
-#define OPTIMIZE_HOVERCRAFT_PROCESSMOVEMENT 1
-
   static const Vec3 thrusterForceDir(0,0,1); 
 
   m_netActionSync.UpdateObject(this);
@@ -453,10 +443,8 @@ void CVehicleMovementHovercraft::ProcessMovement(const float deltaTime)
   IEntity* pEntity = m_pVehicle->GetEntity();
 
   IPhysicalEntity* pPhysics = pEntity->GetPhysics(); 
-  assert(pPhysics);
 
   IPhysicalEntity *pSkip = GetPhysics();  
-  assert(pSkip);
 
   pe_action_impulse linearImp, angularImp, dampImp, stabImp;    
     
@@ -480,16 +468,6 @@ void CVehicleMovementHovercraft::ProcessMovement(const float deltaTime)
   
   const float minContacts = 0.33f*m_numThrusters;  
 
-  // update hovering height  
-#ifndef OPTIMIZE_HOVERCRAFT_PROCESSMOVEMENT
-  if (m_hoverFrequency > 0.f)
-  {
-    m_hoverTimer += dt*m_hoverFrequency;
-    if (m_hoverTimer > 2*gf_PI)
-      m_hoverTimer -= 2*gf_PI;    
-  }
-#endif
-
     if (bThrusterUpdate)
     {
       pe_action_impulse thrusterImp;        
@@ -504,40 +482,7 @@ void CVehicleMovementHovercraft::ProcessMovement(const float deltaTime)
         if (!pThruster->enabled)
           continue;
 
-#ifndef OPTIMIZE_HOVERCRAFT_PROCESSMOVEMENT
-
-		if (m_bSampleByHelpers)
-        {
-          // update thruster positions        
-          if (pThruster->pHelper)
-						pThruster->pos = pThruster->pHelper->GetVehicleTM().GetTranslation();
-					else
-						pThruster->pos.zero();
-        }
-
-
-		// thruster-dependent hover height alternation
-        float hoverHeight = pThruster->hoverHeight;
-        if (pThruster->hoverVariance > 0.f && bStartComplete)
-        {
-          if (abs(m_movementAction.power) > 0.1f)
-          {
-            // commented the below, use default height during moving
-            //hoverHeight += pThruster->hoverVariance*pThruster->hoverHeight;
-          }
-          else
-          {
-            if (abs(m_prevAction.power) > 0.1f)
-            {
-              m_hoverTimer = 0.f;
-            }
-            hoverHeight += sin(m_hoverTimer)*(pThruster->hoverVariance*pThruster->hoverHeight);
-          }
-        }
-#else
 		float hoverHeight = pThruster->hoverHeight;
-#endif
-
 
         Vec3 thrusterPos = wTM.TransformPoint( pThruster->pos );
         Vec3 thrusterDir = wTM.TransformVector( pThruster->dir );
@@ -582,9 +527,8 @@ void CVehicleMovementHovercraft::ProcessMovement(const float deltaTime)
             }
           }
 
-#ifdef OPTIMIZE_HOVERCRAFT_PROCESSMOVEMENT
-          if (false && !pThruster->hit)
-          {        
+          if (!pThruster->hit)
+          {
             float delta = thrusterPos.z - gEnv->p3DEngine->GetWaterLevel( &thrusterPos );
             if ( delta > 0.f && delta < m_thrusterMaxHeightCoeff * hoverHeight )
             {
@@ -593,8 +537,7 @@ void CVehicleMovementHovercraft::ProcessMovement(const float deltaTime)
               pThruster->prevHit = thrusterPos - Vec3(0,0,delta);
             }
           }
-        }      
-#endif
+        }
 
         // neutral pos
         float hoverError = 0.f;
@@ -625,15 +568,10 @@ void CVehicleMovementHovercraft::ProcessMovement(const float deltaTime)
             thrusterImp.point = thrusterPos; 
             thrusterImp.iApplyTime = 0;
             pPhysics->Action(&thrusterImp, PE_ACTION_THREAD_SAFE);        
-
           }        
         } 
-
-        pThruster->prevDist = hitDist;               
-
+        pThruster->prevDist = hitDist;
 	}
-
-
       if (bThrusterUpdate)
         m_thrusterTimer = (m_thrusterUpdate == 0.f) ? 0.f : m_thrusterTimer-m_thrusterUpdate;
     }
@@ -743,7 +681,6 @@ void CVehicleMovementHovercraft::ProcessMovement(const float deltaTime)
 //------------------------------------------------------------------------
 void CVehicleMovementHovercraft::Update(const float deltaTime)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
 	CVehicleMovementBase::Update(deltaTime);
 	m_netActionSync.UpdateObject(this);
 

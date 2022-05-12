@@ -443,8 +443,6 @@ void CLam::CreateLaserEntity()
 		spawnParams.nFlags = (GetEntity()->GetFlags() | ENTITY_FLAG_NO_SAVE) & ~ENTITY_FLAG_CASTSHADOW;
 
 		IEntity *pNewEntity =gEnv->pEntitySystem->SpawnEntity(spawnParams);
-		//assert(pNewEntity && "Laser entity could no be spawned!!");
-
 		if(pNewEntity)
 		{
 			pNewEntity->FreeSlot(0);
@@ -477,7 +475,6 @@ void CLam::DestroyLaserEntity()
 void CLam::SetLaserGeometry(const char *name)
 {
 	IEntity *pEntity = m_pEntitySystem->GetEntity(m_pLaserEntityId);
-	//assert(pEntity && "CLam::SetLaserGeometry : Laser entity not found in entity system");
 	if(pEntity)
 		m_laserEffectSlot = pEntity->LoadGeometry(-1, name);
 }
@@ -490,7 +487,6 @@ void CLam::CreateLaserDot(const char *name, eGeometrySlot slot)
 	if(pEffect)
 	{
 		IEntity *pEntity = m_pEntitySystem->GetEntity(m_pLaserEntityId);
-		//assert(pEntity && "CLam::CreateLaserDot : Laser entity not found!!");
 		if(pEntity)
 			m_dotEffectSlot = pEntity->LoadParticleEmitter(-1,pEffect);
 	}
@@ -530,19 +526,11 @@ void CLam::UpdateAILightAndLaser(const Vec3& pos, const Vec3& dir, float lightRa
 		gEnv->pAISystem->DynSpotLightEvent(pos, dir, lightRange, DEG2RAD(fov)/2, AILE_FLASH_LIGHT, pUserAI, 1.0f);
 		gEnv->pAISystem->DynOmniLightEvent(pUserAI->GetPos() + dir*0.75f, 1.5f, AILE_FLASH_LIGHT, pUserAI, 2.0f);
 	}
-
-	// [Mikko] 4.10.2007 Removed as per design request.
-/*	if (laserRange > 0.0001f)
-	{
-		gEnv->pAISystem->DynSpotLightEvent(pos, dir, max(0.0f, laserRange - 0.1f), DEG2RAD(0.25f), AILE_LASER, pUserAI, 2.0f);
-	}*/
 }
 
 //------------------------------------------------------------------
 void CLam::UpdateTPLaser(float frameTime, CItem* parent)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	const int frameId = gEnv->pRenderer->GetFrameID();
 
 	if (s_lastUpdateFrameId != frameId)

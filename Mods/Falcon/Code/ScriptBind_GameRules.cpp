@@ -1977,7 +1977,7 @@ int CScriptBind_GameRules::SetSynchedGlobalValue(IFunctionHandler *pH, int key)
 			}
 			break;
 		default:
-			assert(0);
+			break;
 		}
 	}
 
@@ -2031,7 +2031,7 @@ int CScriptBind_GameRules::GetSynchedGlobalValue(IFunctionHandler *pH, int key)
 		}
 		break;
 	default:
-		assert(0);
+		break;
 	}
 
 	return pH->EndFunction();
@@ -2082,7 +2082,7 @@ int CScriptBind_GameRules::SetSynchedEntityValue(IFunctionHandler *pH, ScriptHan
 			}
 			break;
 		default:
-			assert(0);
+			break;
 		}
 	}
 	return pH->EndFunction();
@@ -2136,7 +2136,7 @@ int CScriptBind_GameRules::GetSynchedEntityValue(IFunctionHandler *pH, ScriptHan
 		}
 		break;
 	default:
-		assert(0);
+		break;
 	}
 
 	return pH->EndFunction();

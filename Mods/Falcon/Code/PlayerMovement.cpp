@@ -55,13 +55,11 @@ CPlayerMovement::CPlayerMovement(CPlayer& player, const SActorFrameMovementParam
 
 void CPlayerMovement::Process(CPlayer& player)
 {
-	//FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if (m_stats.spectatorMode || m_stats.flyMode)
 		ProcessFlyMode();
 	else if (m_stats.isOnLadder)
 			ProcessMovementOnLadder(player);
-	else if (/*m_stats.inAir &&*/ m_stats.inZeroG)
+	else if (m_stats.inZeroG)
 		ProcessFlyingZeroG();
 	else if (m_stats.inFreefall.Value()==1)
 	{
@@ -75,7 +73,6 @@ void CPlayerMovement::Process(CPlayer& player)
 	else
 		ProcessOnGroundOrJumping(player);
 
-	// if (!m_player.GetLinkedEntity() && !m_player.GetEntity()->GetParent()) // Leipzig hotfix, these can get out of sync
 	if (player.m_linkStats.CanRotate())
 		ProcessTurning();
 }
@@ -285,7 +282,7 @@ void CPlayerMovement::ProcessFlyingZeroG()
 			float energy = (pSuit != NULL) ? pSuit->GetSuitEnergy() : 0.0f;
 
 			if ((m_zgDashTimer <= 0.0f) && m_zgDashWorldDir.IsZero() && 
-					(m_actions & ACTION_SPRINT) && /*!desiredWorldVelocity.IsZero() && */
+					(m_actions & ACTION_SPRINT) &&
 					(fabs(desiredLocalNormalizedVelocity.x) > 0.9f))
 			{
 				if (energy >= dashEnergyConsumption)
@@ -322,13 +319,11 @@ void CPlayerMovement::ProcessFlyingZeroG()
 				if (!m_zgDashWorldDir.IsZero())
 				{
 					m_zgDashWorldDir.zero();
-					//m_player.PlaySound(CPlayer::ESound_ThrustersDash, false);
 					m_player.PlaySound(CPlayer::ESound_ThrustersDashRecharged, true);
-					//m_player.PlaySound(CPlayer::ESound_ThrustersDashRecharged02, true);
 				}
 
 				if ((m_zgDashTimer >= (dashDuration + dashRechargeDuration)) && 
-						(!(m_actions & ACTION_SPRINT) || /*desiredWorldVelocity.IsZero()*/
+						(!(m_actions & ACTION_SPRINT) ||
 						(fabs(desiredLocalNormalizedVelocity.x) < 0.7f)))
 				{
 					m_zgDashTimer = 0.0f;
@@ -371,13 +366,11 @@ void CPlayerMovement::ProcessFlyingZeroG()
 		damping.y = abs(m_velocity.y);
 		damping.z = abs(m_velocity.z);
 
-//*
 		if (!m_zgDashWorldDir.IsZero())
 		{
 			float dashFraction = CLAMP(m_zgDashTimer / dashDuration, 0.0f, 1.0f);
 			damping *= 1.0f + 1.0f * CLAMP((dashFraction - 0.5f) / 0.5f, 0.0f, 1.0f);
 		}
-/**/
 
 		float stopDelay = g_pGameCVars->pl_zeroGFloatDuration;
 		if (!desiredWorldVelocity.IsZero())
@@ -499,16 +492,6 @@ void CPlayerMovement::ProcessSwimming()
 	{
 		m_swimJumping = true;
 	}
-
-	//--------------------
-
-/*
-	// Apply automatic float up towards surface when not in conflict with desired movement (if in water for long enough).
-	if ((m_velocity.z > -0.1f) && (m_velocity.z < 0.2f) && (m_stats.relativeWaterLevel < -0.1f) && (m_stats.inWaterTimer > 0.5f))
-		acceleration.z += (1.0f - sqr(1.0f - CLAMP(-m_stats.relativeWaterLevel, 0.0f, 1.0f))) * 0.08f;
-*/
-
-	//--------------------
 
 	// Apply desired movement
 	Vec3 desiredLocalNormalizedVelocity(ZERO);
@@ -649,17 +632,15 @@ void CPlayerMovement::ProcessSwimming()
 //-----------------------------------------------------------------------------------------------
 void CPlayerMovement::ProcessParachute()
 {
-	//Vec3 desiredVelocity(m_stats.velocity);
 	float desiredZ(-1.5f + ((m_actions & ACTION_JUMP)?3.0f:0.0f));
-	//desiredVelocity.z += (desiredZ - desiredVelocity.z)*min(1.0f,m_frameTime*1.5f);
 	
 	m_request.type = eCMT_Impulse;//eCMT_Fly;
-	m_request.velocity = (Vec3(0,0,desiredZ)-m_stats.velocity) * m_stats.mass/* * m_frameTime*/;//desiredVelocity;
+	m_request.velocity = (Vec3(0,0,desiredZ)-m_stats.velocity) * m_stats.mass;//desiredVelocity;
 
 	Vec3 forwardComp(m_baseQuat.GetColumn1() * 10.0f);
 	forwardComp.z = 0.0f;
 
-	m_request.velocity += forwardComp * m_stats.mass;// * m_frameTime;//desiredVelocity;
+	m_request.velocity += forwardComp * m_stats.mass;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -806,7 +787,6 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 	{
  		if ((m_stats.onGround > 0.2f || dt_jumpCondition) && m_player.GetStance() != STANCE_PRONE)
 		{
-			//float verticalMult(max(0.75f,1.0f-min(1.0f,m_stats.flatSpeed / GetStanceMaxSpeed(STANCE_STAND) * m_params.sprintMultiplier)));
 			//mul * gravity * jump height
 			float mult = 1.0f;
 			//this is used to easily find steep ground
@@ -828,14 +808,9 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 				{
 					// marcok: always perform strength jump
 					mult = 4.7f;
+				}
 			}
-			}
-			
-/*
-			if(m_stats.inZeroG)
-				m_request.type = eCMT_Impulse;//eCMT_JumpAccumulate;
-			else
-*/
+
 			{
  				m_request.type = eCMT_JumpAccumulate;//eCMT_Fly;
 				float g = m_stats.gravity.len();
@@ -844,7 +819,7 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 				{
 					t = cry_sqrtf( 2.0f * g * m_params.jumpHeight * mult)/g - m_stats.inAir*0.5f;
 				}
- 				jumpVec += m_baseQuat.GetColumn2() * g * t;// * verticalMult;
+ 				jumpVec += m_baseQuat.GetColumn2() * g * t;
 
 				if (m_stats.groundNormal.len2() > 0.0f)
 				{
@@ -855,7 +830,6 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 			}
 
 			// Don't speed up...
-			//move = m_stats.velocityUnconstrained * 1.0f;
 			move -= move * baseMtxZ;
 
 			//with gravity boots on, jumping will disable them for a bit.
@@ -905,7 +879,7 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 
 			if(pSuit && pSuit->GetMode() == NANOMODE_SPEED)
 			{
-				if((m_actions & ACTION_SPRINT) && !m_player.m_stats.bIgnoreSprinting /*&& m_stats.speedFlat > 0.5f*//* && slopeDelta < 0.7f*/)
+				if((m_actions & ACTION_SPRINT) && !m_player.m_stats.bIgnoreSprinting)
 				{
 					pSuit->SetSuitEnergy(pSuit->GetSuitEnergy()-10.0f);
 				}
@@ -928,8 +902,6 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 	if(m_player.IsClient() && !gEnv->bMultiplayer)
 		move *= g_pGameCVars->g_walkMultiplier; //global speed adjuster used by level design
 
-	//CryLogAlways("%s speed: %.1f  stanceMaxSpeed: %.1f  sprintMult: %.1f  suitSprintMult: %.1f", m_player.GetEntity()->GetName(), move.len(), scale, m_params.sprintMultiplier, sprintMult);
-
 	//apply movement
 	Vec3 desiredVel(0,0,0);
 
@@ -939,12 +911,6 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 	if (m_stats.onGround || dt_jumpCondition)
 	{
 		desiredVel = move;
-
-/*
-		// This was causing the vertical jumping speed to be much slower.
-		if (m_stats.jumpLock>0.001f)
-			desiredVel *= 0.3f;
-/**/
 
 		{ // Shallow water speed slowdown
 			float shallowWaterMultiplier = 1.0f;
@@ -1026,21 +992,11 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 		modifiedSlopeNormal.Normalize();
 		float alignment = modifiedSlopeNormal * desiredVel;
 		alignment = min(0.0f, alignment);
-
-		// VADER: No..... Just no.......
-		// Also affect air control (but not as much), to prevent jumping up against steep slopes.
-		//if (m_stats.onGround == 0.0f)
-		//{
-			//float noControlBlend = 1.0f - CLAMP(modifiedSlopeNormal.z / 0.01f, 0.0f, 1.0f);
-			//alignment *= LERP(0.7f, 1.0f, noControlBlend);
-		//}
-
 		desiredVel -= modifiedSlopeNormal * alignment;
 
 		//be sure desired velocity is flat to the ground
-		Vec3 vz = desiredVel * baseMtxZ;
+		Vec3 vz = (1.0f - g_pGameCVars->fn_circleJump) * desiredVel * baseMtxZ;
 		desiredVel -= vz;
-
 	}
 
 	m_request.velocity = desiredVel + jumpVec;
@@ -1094,7 +1050,7 @@ void CPlayerMovement::AdjustMovementForEnvironment( Vec3& move, bool sprinting )
 //-----------------------------------------------------------------------------------------------
 void CPlayerMovement::ProcessTurning()
 {
-	if (m_stats.isRagDoll || (m_player.m_stats.isFrozen.Value() || m_stats.isOnLadder/*&& !m_player.IsPlayer()*/))
+	if (m_stats.isRagDoll || (m_player.m_stats.isFrozen.Value() || m_stats.isOnLadder))
 		return;
 
 	static const bool ROTATION_AFFECTS_THIRD_PERSON_MODEL = true;
@@ -1127,7 +1083,7 @@ void CPlayerMovement::ProcessTurning()
 	}
 	else
 	{
-		m_request.rotation = inverseEntityRot * m_baseQuat;//(m_turnTarget * Quat::CreateRotationZ(turn));
+		m_request.rotation = inverseEntityRot * m_baseQuat;
 		m_request.rotation.Normalize();
 	}
 

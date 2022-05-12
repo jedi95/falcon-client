@@ -49,13 +49,11 @@ namespace
 
   ILINE float To2PI(float a) 
   {
-    assert(a >= -gf_PI && a <= gf_PI);
-    return (a < 0.f) ? a+gf_PI2 : a; 
-  }  
+    return (a < 0.f) ? a+gf_PI2 : a;
+  }
 
   ILINE float ToPlusMinusPI(float a)
   {
-    assert(a >= 0.f && a <= gf_PI2);
     return (a > gf_PI) ? a-gf_PI2 : a;
   }
 }
@@ -1072,13 +1070,9 @@ float CGunTurret::GetBurstTime() const
 //------------------------------------------------------------------------
 void CGunTurret::UpdateOrientation(float deltaTime)
 { 
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
-	bool changed = false;  
-  bool searching = (m_targetId==0 && m_turretparams.searching);
-  float speed	= searching ? m_turretparams.search_speed : m_turretparams.turn_speed;  	
-  
-  assert(m_goalYaw >= 0.f && m_goalYaw <= gf_PI2);
+	bool changed = false;
+	bool searching = (m_targetId==0 && m_turretparams.searching);
+	float speed	= searching ? m_turretparams.search_speed : m_turretparams.turn_speed;
 
 	// update turret
 	Matrix34 turretTM = GetEntity()->GetSlotLocalTM(eIGS_Aux0, false);
@@ -1088,7 +1082,7 @@ void CGunTurret::UpdateOrientation(float deltaTime)
 		turretAngles.z+=gf_PI2;
 
 	if (cry_fabsf(m_goalYaw-turretAngles.z) > gf_PI)
-	{    
+	{
 		if (m_goalYaw >= gf_PI)
 			turretAngles.z += gf_PI2;
 		else
@@ -1101,11 +1095,11 @@ void CGunTurret::UpdateOrientation(float deltaTime)
     if (m_goalYaw > gf_PI && turretAngles.z < gf_PI)
       turretAngles.z += gf_PI2;
     else if (m_goalYaw < gf_PI && turretAngles.z > gf_PI)
-      turretAngles.z -= gf_PI2;    
+      turretAngles.z -= gf_PI2;
   }
-  
+
 	if(cry_fabsf(turretAngles.z-m_goalYaw) > 0.001f)
-	{        
+	{
     Interp(turretAngles.z, m_goalYaw, speed, deltaTime, 0.25*speed);    
 
 		if(m_turretSound == INVALID_SOUNDID && gEnv->bClient)
@@ -1598,8 +1592,6 @@ void CGunTurret::UpdateEntityProperties()
 //------------------------------------------------------------------------
 void CGunTurret::Update( SEntityUpdateContext& ctx, int update)
 {  
-	FUNCTION_PROFILER(gEnv->pSystem, PROFILE_GAME);
-
 	if (m_frozen)
 		return;
 

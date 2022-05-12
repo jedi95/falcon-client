@@ -4,27 +4,6 @@
 #include "GameCVars.h"
 #include "Item.h"
 
-#define ENABLE_NAN_CHECK
-
-#ifdef ENABLE_NAN_CHECK
-#define CHECKQNAN_FLT(x) \
-	assert(((*(unsigned*)&(x))&0xff000000) != 0xff000000u && (*(unsigned*)&(x) != 0x7fc00000))
-#else
-#define CHECKQNAN_FLT(x) (void*)0
-#endif
-
-#define CHECKQNAN_VEC(v) \
-	CHECKQNAN_FLT(v.x); CHECKQNAN_FLT(v.y); CHECKQNAN_FLT(v.z)
-
-#define CHECKQNAN_MAT33(v) \
-	CHECKQNAN_VEC(v.GetColumn(0)); \
-	CHECKQNAN_VEC(v.GetColumn(1)); \
-	CHECKQNAN_VEC(v.GetColumn(2))
-
-#define CHECKQNAN_QUAT(q) \
-	CHECKQNAN_VEC(q.v); \
-	CHECKQNAN_FLT(q.w)
-
 //-----------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------
 CPlayerRotation::CPlayerRotation( const CPlayer& player, const SActorFrameMovementParams& movement, float m_frameTime ) : 
@@ -50,14 +29,10 @@ CPlayerRotation::CPlayerRotation( const CPlayer& player, const SActorFrameMoveme
 	m_desiredLeanAmount(movement.desiredLean)
 {
 	m_deltaAngles = movement.deltaAngles;
-	CHECKQNAN_FLT(m_deltaAngles);
 }
 
 void CPlayerRotation::Process()
 {
-	//FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
-	//
 	float forceLookLen2(m_player.m_stats.forceLookVector.len2());
 	if (forceLookLen2>0.001f)
 	{
@@ -69,12 +44,9 @@ void CPlayerRotation::Process()
 		float smoothSpeed(6.6f * forceLookLen);
 		m_deltaAngles.x += asin(forceLook.z) * min(1.0f,m_frameTime*smoothSpeed);
 		m_deltaAngles.z += cry_atan2f(-forceLook.x,forceLook.y) * min(1.0f,m_frameTime*smoothSpeed);
-
-		CHECKQNAN_VEC(m_deltaAngles);
 	}
 
 	ProcessAngularImpulses();
-
 	ProcessLean();
 	
 	if (m_stats.inAir && m_stats.inZeroG)
@@ -89,8 +61,6 @@ void CPlayerRotation::Process()
 		ClampAngles();
 		ProcessNormal();
 	}
-
-	//CHECKQNAN_MAT33(m_viewMtx);
 
 	//update freelook when linked to an entity
 	SLinkStats *pLinkStats = &m_player.m_linkStats;
@@ -107,7 +77,6 @@ void CPlayerRotation::Process()
 			m_viewQuat = pLinked->GetRotation() * m_viewQuatLinked;
 		}
 	}
-	//
 
 	m_viewQuatFinal = m_viewQuat * Quat::CreateRotationXYZ(m_player.m_viewAnglesOffset);
 }
@@ -116,13 +85,8 @@ void CPlayerRotation::Commit( CPlayer& player )
 {
 	player.m_baseQuat = m_baseQuat.GetNormalized();
 	player.m_viewQuat = m_viewQuat.GetNormalized();
-
-	CHECKQNAN_QUAT(m_baseQuat);
-	CHECKQNAN_QUAT(m_viewQuat);
 	if (!player.IsTimeDemo())
 	{
-		//CHECKQNAN_MAT33(m_baseMtx);
-		//CHECKQNAN_MAT33(m_viewMtx);
 		player.m_viewQuatFinal = m_viewQuatFinal.GetNormalized();
 	}
 
@@ -299,8 +263,6 @@ void CPlayerRotation::ProcessFlyingZeroG()
 		}
 
 		desiredAngVel.y += alignAngle.y * speedFade * gyroFade * m_frameTime * g_pGameCVars->pl_zeroGGyroStrength;
-
-		//rotInertia = 3.0f;
 	}
 
 	m_absRoll = fabs(desiredAngVel.y);
@@ -311,15 +273,6 @@ void CPlayerRotation::ProcessFlyingZeroG()
 	m_baseQuat *= Quat::CreateRotationZ(finalAngle.z) * Quat::CreateRotationX(finalAngle.x) * Quat::CreateRotationY(finalAngle.y);
 	m_baseQuat.Normalize();
 
-	/*IEntity *pEnt = m_player.GetEntity();
-	Vec3 offsetToCenter(Vec3(0,0,m_player.GetStanceInfo(m_player.GetStance())->heightCollider));
-	Vec3 finalPos(pEnt->GetWorldTM() * offsetToCenter);
-	Quat newBaseQuat(m_baseQuat * Quat::CreateRotationZ(finalAngle.z) * Quat::CreateRotationX(finalAngle.x) * Quat::CreateRotationY(finalAngle.y));
-	Vec3 newPos(pEnt->GetWorldPos() + m_baseQuat * offsetToCenter);
-	pEnt->SetPos(pEnt->GetWorldPos() + (finalPos - newPos),ENTITY_XFORM_USER);*/
-	
-	//CHECKQNAN_MAT33(m_baseMtx);
-
 	m_viewQuat = m_baseQuat;
 	m_viewRoll = 0;
 	m_upVector = m_baseQuat.GetColumn2();
@@ -328,9 +281,7 @@ void CPlayerRotation::ProcessFlyingZeroG()
 void CPlayerRotation::ProcessFreeFall()
 {
 	//thats necessary when passing from groundG to normalG
-	//m_baseQuat = m_viewQuat;
-	
-	Ang3 desiredAngVel(m_deltaAngles.x,m_deltaAngles.y*0.5f/*+m_deltaAngles.z*0.5f*/,m_deltaAngles.z);
+	Ang3 desiredAngVel(m_deltaAngles.x,m_deltaAngles.y*0.5f,m_deltaAngles.z);
 
 	float rotInertia(5.5f);
 
@@ -357,16 +308,12 @@ void CPlayerRotation::ProcessFreeFall()
 	Vec3 forward((up % right).GetNormalized());
 	m_baseQuat = Quat(Matrix33::CreateFromVectors(forward % up,forward,up));
 
-	//m_viewQuat = m_baseQuat;
 	m_viewRoll = 0;
 	m_upVector = m_baseQuat.GetColumn2();
 }
 
 void CPlayerRotation::ProcessParachute()
 {
-	//thats necessary when passing from groundG to normalG
-	//m_baseQuat = m_viewQuat;
-	
 	Ang3 desiredAngVel(m_deltaAngles.x,m_deltaAngles.y*0.5f-m_deltaAngles.z*1.0f,m_deltaAngles.z);
 
 	float rotInertia(7.7f);
@@ -572,21 +519,12 @@ void CPlayerRotation::ProcessNormal()
 	Vec3 right(m_baseQuat.GetColumn0());
 	Vec3 forward((up % right).GetNormalized());
 
-	CHECKQNAN_VEC(up);
-	CHECKQNAN_VEC(right);
-	CHECKQNAN_VEC(forward);
-
 	m_baseQuat = Quat(Matrix33::CreateFromVectors(forward % up,forward,up));
-	//CHECKQNAN_MAT33(m_baseMtx);
 	m_baseQuat *= Quat::CreateRotationZ(m_deltaAngles.z);
-	//m_baseQuat.Normalize();
 
 	m_viewQuat = m_baseQuat * 
 		Quat::CreateRotationX(GetLocalPitch() + m_deltaAngles.x) * 
 		Quat::CreateRotationY(m_viewRoll);
-	//m_viewQuat.Normalize();
-
-	//CHECKQNAN_MAT33(m_viewMtx);
 }
 
 void CPlayerRotation::ProcessLean()
@@ -623,7 +561,7 @@ void CPlayerRotation::ProcessLean()
 		Vec3 newPos(m_player.GetEntity()->GetWorldPos() + m_baseQuat * m_player.GetStanceViewOffset(stance,&m_leanAmount));
 
 		ray_hit hit;
-		int rayFlags(rwi_stop_at_pierceable|rwi_colltype_any);//COLLISION_RAY_PIERCABILITY & rwi_pierceability_mask);
+		int rayFlags(rwi_stop_at_pierceable|rwi_colltype_any);
 		IPhysicalEntity *pSkip(m_player.GetEntity()->GetPhysics());
 
 		float distMult(3.0f);

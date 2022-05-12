@@ -1007,7 +1007,6 @@ static ILINE string EncodeStr(const char * x, int len)
 		out += hexchars[c >> 4];
 		out += hexchars[c & 0xf];
 	}
-	assert(out.size()>=64);
 	return out;
 }
 
@@ -1169,11 +1168,10 @@ void CMPHub::CDialog::Show(CMPHub* hub)
 
 void CMPHub::CDialog::Close()
 {
-  if(!m_hub)//m_hub !=0 
+  if(!m_hub)
     return;
   OnClose();
   //hide in UI
-  assert(m_hub->m_dialogs.back() == this);
   m_hub->m_dialogs.pop_back();
   m_hub = 0;
 }
@@ -1356,8 +1354,6 @@ void CMPHub::MapDownloadBegin()
 		if(pDT)
 			pDT->StartMapDownload(dl, 1, this);
 	}
-	else
-		assert(false);
 }
 
 
@@ -1509,7 +1505,6 @@ void CMPHub::OnDownloadFinished(int result, const char* fileName)
 	case eDS_None:
 	case eDS_Downloading:
 	default:
-		assert(false);
 		break;
 	}
 

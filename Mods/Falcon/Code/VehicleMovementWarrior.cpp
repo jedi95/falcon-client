@@ -125,9 +125,6 @@ void CVehicleMovementWarrior::Reset()
 //------------------------------------------------------------------------
 void CVehicleMovementWarrior::ResetThrusters()
 {
-  assert(m_vecThrusters.size() == m_thrustersInit.size());
-  assert(m_numThrusters == m_thrustersInit.size());
-
   for (int i=0; i<m_numThrusters; ++i)
   { 
     SThruster* curr = m_vecThrusters[i];
@@ -311,8 +308,6 @@ void CVehicleMovementWarrior::Collapsed(bool collapsed)
 //------------------------------------------------------------------------
 float CVehicleMovementWarrior::RotatePart(IVehiclePart* pPart, float angleGoal, int axis, float speed, float deltaTime, float maxDelta)
 {
-  assert (axis >= AXIS_X && axis <= AXIS_Z);
-
   if (!pPart)
     return 0.f;
 
@@ -401,8 +396,6 @@ void CVehicleMovementWarrior::Serialize(TSerialize ser, unsigned aspects)
 //------------------------------------------------------------------------
 void CVehicleMovementWarrior::Update(const float deltaTime)
 {  
-  FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
   if (!IsCollapsing())
     CVehicleMovementHovercraft::Update(deltaTime);
   else

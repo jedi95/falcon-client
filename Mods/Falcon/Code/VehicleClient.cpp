@@ -99,7 +99,6 @@ void CVehicleClient::Reset()
 //------------------------------------------------------------------------
 void CVehicleClient::OnAction(IVehicle* pVehicle, EntityId actorId, const ActionId& actionId, int activationMode, float value)
 {
-	assert(pVehicle);
  	if (!pVehicle)
 		return;
 	
@@ -314,10 +313,7 @@ void CVehicleClient::OnEnterVehicleSeat(IVehicleSeat* pSeat)
   m_fLeftRight = m_fForwardBackward = 0.f;
 
 	IVehicle* pVehicle = pSeat->GetVehicle();
-	assert(pVehicle);
-
 	IActorSystem* pActorSystem = gEnv->pGame->GetIGameFramework()->GetIActorSystem();
-	assert(pActorSystem);
 
 	IActor* pActor = pActorSystem->GetActor(pSeat->GetPassenger());
 	bool isThirdPerson = pActor->IsThirdPerson() || m_tp;
@@ -344,7 +340,6 @@ void CVehicleClient::OnEnterVehicleSeat(IVehicleSeat* pSeat)
 		pSeat->SetView(viewId);
 
 	IActionMapManager* pMapManager = gEnv->pGame->GetIGameFramework()->GetIActionMapManager();
-	assert(pMapManager);
 
 	pMapManager->EnableActionMap("landvehicle", false);
 	pMapManager->EnableActionMap("seavehicle", false);
@@ -405,9 +400,6 @@ CVehicleClient::SVehicleClientInfo& CVehicleClient::GetVehicleClientInfo(IVehicl
 		ite = m_vehiclesInfo.find(pClass);
 	}
 
-	// this will never happen
-	assert(ite != m_vehiclesInfo.end());
-	
 	return ite->second;
 }
 
@@ -424,9 +416,5 @@ CVehicleClient::SVehicleSeatClientInfo&
 		if (seatClientInfo.seatId == seatId)
 			return *seatInfoIte;
 	}
-
-	// will never happen, unless the vehicle has new seat created after the 
-	// game started
-	assert(0);
 	return vehicleClientInfo.seats[0];
 }

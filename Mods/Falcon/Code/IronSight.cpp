@@ -18,8 +18,6 @@ History:
 #include "BulletTime.h"
 #include "IPlayerInput.h"
 
-#define PHYS_FOREIGN_ID_DOF_QUERY PHYS_FOREIGN_ID_USER+3
-
 //------------------------------------------------------------------------
 CIronSight::CIronSight()
 : m_pWeapon(0), 
@@ -958,14 +956,12 @@ float CIronSight::GetRecoilFromFoVScale(float scale) const
 //------------------------------------------------------------------------
 float CIronSight::GetMagFromFoVScale(float scale) const
 {
-	assert(scale>0.0f);
 	return 1.0f/scale;
 }
 
 //------------------------------------------------------------------------
 float CIronSight::GetFoVScaleFromMag(float mag) const
 {
-	assert(mag>0.0f);
 	if (mag >= 1.0f)
 		return 1.0f/mag;
 	else

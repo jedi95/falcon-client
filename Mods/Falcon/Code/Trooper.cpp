@@ -44,7 +44,6 @@ void CTrooper::Revive(bool fromInit)
 	CAlien::Revive(fromInit);
 
 	m_modelQuat.SetIdentity();
-	//m_modelAddQuat.SetIdentity();
 
 	if (m_pAnimatedCharacter)
 	{
@@ -97,17 +96,6 @@ void CTrooper::Revive(bool fromInit)
 	IScriptTable* scriptTable = GetEntity()->GetScriptTable();
 	if (scriptTable)
 		scriptTable->GetValue("landPreparationTime", m_jumpParams.defaultLandPreparationTime);
-
-
-/*
-	m_CollSize.clear();
-	//m_CollSize.insert(std::make_pair(STANCE_NULL,GetStanceInfo(STANCE_NULL)->size));
-	m_CollSize.insert(std::make_pair(STANCE_STAND,GetStanceInfo(STANCE_STAND)->size));
-	m_CollSize.insert(std::make_pair(STANCE_STEALTH,GetStanceInfo(STANCE_STEALTH)->size));
-	m_CollSize.insert(std::make_pair(STANCE_CROUCH,GetStanceInfo(STANCE_CROUCH)->size));
-	m_CollSize.insert(std::make_pair(STANCE_RELAXED,GetStanceInfo(STANCE_RELAXED)->size));
-	//m_CollSize.insert(std::make_pair(STANCE_PRONE,GetStanceInfo(STANCE_PRONE)->size));
-	*/
 }
 
 void CTrooper::SetParams(SmartScriptTable &rTable,bool resetFirst)
@@ -154,9 +142,7 @@ void CTrooper::SetParams(SmartScriptTable &rTable,bool resetFirst)
 	
 		m_jumpParams.landPreparationTime = m_jumpParams.defaultLandPreparationTime;
 
-		//m_input.actions |= ACTION_JUMP;
 		m_jumpParams.bTrigger = true;
-		//m_jumpParams.state = JS_None;
 		m_jumpParams.bFreeFall = false;
 		m_jumpParams.bPlayingSpecialAnim = false;
 	}
@@ -182,9 +168,6 @@ void CTrooper::InitHeightVariance(SmartScriptTable &rTable)
 	if(rTable->GetValue("heightVarianceLow",m_heightVarianceLow) && rTable->GetValue("heightVarianceHigh",m_heightVarianceHigh))
 	{
 		m_heightVarianceRandomize = cry_rand () / (float )RAND_MAX;
-/*		float range = m_heightVarianceHigh - m_heightVarianceLow;
-		m_heightVarianceLow = m_heightVarianceLow-range/2;
-		m_heightVarianceHigh = m_heightVarianceLow+range/2;*/
 	}
 	if(rTable->GetValue("heightVarianceOscMin",freqMin) && rTable->GetValue("heightVarianceOscMax",freqMax))
 		m_heightVarianceFreq = freqMin + (cry_rand () / (float )RAND_MAX) * (freqMax - freqMin);
@@ -196,8 +179,6 @@ void CTrooper::Update(SEntityUpdateContext& ctx, int updateSlot)
 	IEntity* pEnt = GetEntity();
 	if (pEnt->IsHidden())
 		return;
-
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
 
 	CActor::Update(ctx,updateSlot);
 
@@ -226,8 +207,7 @@ void CTrooper::Update(SEntityUpdateContext& ctx, int updateSlot)
 			animStiff = 1.0f + (ratio) * m_tentacleBlendRatio;
 		}
 
-		//SetTentacles(pCharacter,animStiff);
-		//CryLogAlways("%.1f",animStiff);
+
 		if (gEnv->bClient)
 		{
 			float dist2 = (gEnv->pRenderer->GetCamera().GetPosition() - GetEntity()->GetWorldPos()).GetLengthSquared();
@@ -250,7 +230,7 @@ void CTrooper::Update(SEntityUpdateContext& ctx, int updateSlot)
 				}
 
 				m_pGroundEffect->SetBaseScale(sizeScale, countScale, speedScale);
-				m_pGroundEffect->Update();       
+				m_pGroundEffect->Update();
 			}
 
 			if (m_pTrailAttachment)
@@ -260,16 +240,9 @@ void CTrooper::Update(SEntityUpdateContext& ctx, int updateSlot)
 				{
 					float goalspeed = max(1.f, m_stats.speed - m_params.trailEffectMinSpeed);
 					Interpolate(m_trailSpeedScale, goalspeed, 3.f, frameTime);
-
-					SpawnParams sp;          
-					//if (m_params.trailEffectMaxSpeedSize != 0.f)
-						sp.fSizeScale = max(0.01f, div_min(m_trailSpeedScale,m_params.trailEffectMaxSpeedSize,1.f));
-						//sp.fSizeScale = min(1.f, max(0.01f, m_trailSpeedScale/m_params.trailEffectMaxSpeedSize));
-
-					//if (m_params.trailEffectMaxSpeedCount != 0.f)
-						sp.fCountScale = div_min(m_trailSpeedScale, m_params.trailEffectMaxSpeedCount, 1.f);
-						//sp.fCountScale = min(1.f, m_trailSpeedScale / m_params.trailEffectMaxSpeedCount);
-
+					SpawnParams sp;
+					sp.fSizeScale = max(0.01f, div_min(m_trailSpeedScale,m_params.trailEffectMaxSpeedSize,1.f));
+					sp.fCountScale = div_min(m_trailSpeedScale, m_params.trailEffectMaxSpeedCount, 1.f);
 					pEffectAttachment->SetSpawnParams(sp);
 				}
 			}
@@ -308,18 +281,14 @@ void CTrooper::Update(SEntityUpdateContext& ctx, int updateSlot)
 
 						IEntitySoundProxy* pSoundProxy = (IEntitySoundProxy*)GetEntity()->CreateProxy(ENTITY_PROXY_SOUND);
 						int nIndex = m_pTurnSound->SetParam("acceleration", speedRel);
-						pSoundProxy->PlaySound(m_pTurnSound);        
+						pSoundProxy->PlaySound(m_pTurnSound);
 						pSoundProxy->SetStaticSound(m_pTurnSound->GetId(), true);
-						//CryLog("angSpeed %.2f (rel %.2f)", dyn.w.len(), speedRel);
-					} 
-				}    
+					}
+				}
 			}
 		}
 	}
-
-
 	m_oldSpeed = m_stats.speed;
-
 }
 
 
@@ -356,7 +325,6 @@ void CTrooper::UpdateStats(float frameTime)
 
 void CTrooper::ProcessRotation(float frameTime)
 {
-
 	IPhysicalEntity *pPhysEnt = GetEntity()->GetPhysics();
 
 	if (!pPhysEnt)
@@ -366,51 +334,6 @@ void CTrooper::ProcessRotation(float frameTime)
 		frameTime = 0.2f;
 
 	float rotSpeed(10.5f);
-/*
-	if (m_input.viewVector.len2()>0.0f)
-	{
-		m_eyeMtx.SetRotationVDir(m_input.viewVector.GetNormalizedSafe());
-	}
-*/
-	if (m_input.viewVector.len2()>0.0f )
-	{
-		/*const SAnimationTarget * pAnimTarget = GetAnimationGraphState()->GetAnimationTarget();
-		if (!(pAnimTarget != NULL ))
-			m_viewMtx.SetRotationVDir(m_input.viewVector.GetNormalizedSafe());*/
-	}
-	else
-	{
-		/* TODO: check, rotation is done in SetDesiredDirection
-		Ang3 desiredAngVel(m_input.deltaRotation.x * rotSpeed,0,m_input.deltaRotation.z * rotSpeed);
-
-		//rollage
-		if (m_input.actions & ACTION_LEANLEFT)
-			desiredAngVel.y -= 10.0f * rotSpeed;
-		if (m_input.actions & ACTION_LEANRIGHT)
-			desiredAngVel.y += 10.0f * rotSpeed;
-
-		Interpolate(m_angularVel,desiredAngVel,3.5f,frameTime);
-
-		Matrix33 yawMtx;
-		Matrix33 pitchMtx;
-		Matrix33 rollMtx;
-
-		//yaw
-		yawMtx.SetRotationZ(m_angularVel.z * gf_PI/180.0f);
-		//pitch
-		pitchMtx.SetRotationX(m_angularVel.x * gf_PI/180.0f);
-		//roll
-		if (fabs(m_angularVel.y) > 0.001f)
-			rollMtx.SetRotationY(m_angularVel.y * gf_PI/180.0f);
-		else
-			rollMtx.SetIdentity();
-		//
-
-		m_viewMtx = m_viewMtx * yawMtx * pitchMtx * rollMtx;
-		m_viewMtx.OrthonormalizeFast();
-		*/
-
-	}
 
 	//now build the base matrix
 	Vec3 forward(m_viewMtx.GetColumn(1));
@@ -428,20 +351,14 @@ void CTrooper::ProcessRotation(float frameTime)
 
 		float roll = 0;
 		float rollx = 0;
-		/*
-		IPhysicalEntity *phys = GetEntity()->GetPhysics();
-		pe_status_dynamics	dyn;
-		if(phys)
-			phys->GetStatus(&dyn);
-		*/
+
 		Vec3 up(m_viewMtx.GetColumn2());
-		
+
 		int oldDir = m_stats.movementDir;
 
 		if ((forward-up).len2()>0.001f)
 		{
 			float dotY(forwardMoveXY * m_viewMtx.GetColumn(1));
-			//float dotX(forwardMoveXY * m_viewMtx.GetColumn(0));
 			if (dotY<-0.6f)
 			{
 				m_stats.movementDir = 1;	//moving backwards 
@@ -450,7 +367,6 @@ void CTrooper::ProcessRotation(float frameTime)
 			{
 				m_stats.movementDir = 0;
 			}
-
 
 			IEntity* pEntity = GetEntity();
 			IAIObject* pAIObject;
@@ -464,8 +380,6 @@ void CTrooper::ProcessRotation(float frameTime)
 					pAGState->SetInput( m_idMovementInput, m_stats.movementDir );
 				}
 			}
-			//if (m_stats.inAir<0.2f)
-//			forward = m_viewMtx.GetColumn(1);
 
 			IPhysicalEntity *pPhysEnt = GetEntity()->GetPhysics();
 			if(m_bExactPositioning)
@@ -550,14 +464,9 @@ void CTrooper::ProcessRotation(float frameTime)
 					//y =angley;
 					rollx += anglex;
 					roll += angley;
-
 				}
-
-
 			}
 
-			//bool bRollYMatch = InterpolatePrecise(m_Roll, roll,2.0f,frameTime,0.001f,3.0f);
-			//bool bRollXMatch = InterpolatePrecise(m_Rollx, rollx,2.0f,frameTime,0.001f,3.0f);
 			Interpolate(m_Roll, roll,2.0f,frameTime,3.0f);
 			Interpolate(m_Rollx, rollx,2.0f,frameTime,3.0f);
 
@@ -569,14 +478,9 @@ void CTrooper::ProcessRotation(float frameTime)
 			Quat currQuat(Matrix33::CreateFromVectors(right,up%right,up));
 			currQuat.Normalize();
 
-//			Quat goalQuat(Matrix33::CreateIdentity() * Matrix33::CreateRotationXYZ(Ang3(m_Rollx,m_Roll,0)));
-//			goalQuat.Normalize();
-
 			float maxSpeed = GetStanceInfo( m_stance )->maxSpeed;
-			float rotSpeed;// = m_params.rotSpeed_min + (1.0f - (max(maxSpeed - max(m_stats.speed - m_params.speed_min,0.0f),0.0f) / maxSpeed)) * (m_params.rotSpeed_max - m_params.rotSpeed_min);
+			float rotSpeed;
 
-		//	SMovementState state;
-		//	GetMovementController()->GetMovementState(state);
 			SActorStats *pStats = GetActorStats();
 
 			if(pStats && pStats->inFiring > 8.5f)
@@ -637,19 +541,13 @@ void CTrooper::SetAnimTentacleParams(pe_params_rope& pRope, float physicBlend)
 {
 
 	float stiffnessOverride  = g_pGameCVars->g_trooperTentacleAnimBlend;
-	if (/*m_bExactPositioning ||*/ stiffnessOverride < 0 || physicBlend<0.001f)
+	if (stiffnessOverride < 0 || physicBlend<0.001f)
 	{
 		pRope.stiffnessAnim = 0;	// Special case, use full animation.
 		pRope.dampingAnim = 1.0f;	// When stiffness is zero, this value does not really matter, set it to sane value anyway.
 	}
 	else
 	{
-		/*
-		IPhysicalEntity *phys = GetEntity()->GetPhysics();
-		pe_status_dynamics	dyn;
-		if(phys)
-			phys->GetStatus(&dyn);
-		*/
 		float coeff = 1-sqrt(physicBlend< 0 ? 0 : physicBlend);
 
 		float frameTime = gEnv->pSystem->GetITimer()->GetFrameTime();
@@ -672,15 +570,12 @@ void CTrooper::SetAnimTentacleParams(pe_params_rope& pRope, float physicBlend)
 				if(m_fTtentacleBlendRotation <0)
 					m_fTtentacleBlendRotation =0;
 		}
-		//Vec3 velocity = (phys ? dyn.v : m_moveRequest.velocity);
-		//float speed = velocity.GetLength();
 		float vertSpeed = fabs(m_stats.velocity.z);
 		coeff *= (vertSpeed/10+1);
 		if(m_stats.speed>0.03f) //moving either backward or forward, increase stiffness
 		{
 			Vec3 forward = m_stats.velocity.GetNormalizedSafe();
 			float dotX = forward * m_viewMtx.GetColumn(1);
-			//coeff *= (2 - fabs(dotX));
 			if(dotX>0.5f)
 				coeff *= (1 + 2*(dotX-0.5f));
 		} 
@@ -739,17 +634,13 @@ void CTrooper::ProcessMovement(float frameTime)
 	IAnimationGraphState* pAGState = GetAnimationGraphState();
 	IPhysicalEntity *phys = GetEntity()->GetPhysics();
 
-	if (!m_bExactPositioning)// && 
-		//(gEnv->pSystem->GetITimer()->GetFrameStartTime() - m_lastExactPositioningTime).GetSeconds() > 0.5f)
+	if (!m_bExactPositioning)
 	{
-
-
 		if(m_jumpParams.bTrigger)
 		{
 			m_jumpParams.bTrigger = false;
 			m_jumpParams.state = JS_JumpStart;
 			m_jumpParams.startTime = currTime;
-			//m_moveRequest.type = eCMT_JumpAccumulate;
 			IAnimationGraphState* pAGState = GetAnimationGraphState();
 			if ( pAGState && m_jumpParams.bUseStartAnim )
 			{
@@ -762,21 +653,18 @@ void CTrooper::ProcessMovement(float frameTime)
 				float anglex = RAD2DEG(cry_acosf(CLAMP(dot,-1.f,1.f)));
 				if(m_viewMtx.GetColumn1().Dot(m_jumpParams.velocity) <-0.001) // jump backwards
 					anglex = 180 - anglex;
-					
-				pAGState->SetInput( m_idAngleXInput, anglex);
 
+				pAGState->SetInput( m_idAngleXInput, anglex);
 				Vec3 viewDir(m_viewMtx.GetColumn(1));
 				dot = vNx.Dot(viewDir);
 				float anglez = RAD2DEG(cry_acosf(CLAMP(dot,-1.f,1.f))*sgn(vNx.Cross(viewDir).z));
 				pAGState->SetInput( m_idAngleZInput, anglez);
-		
+
 				if(m_jumpParams.bUseSpecialAnim && m_jumpParams.specialAnimType == JUMP_ANIM_FLY)
 					pAGState->SetInput( m_idActionInput, m_jumpParams.specialAnimAGInputValue );
 				else
 					pAGState->SetInput( m_idActionInput, "fly" );
 			}
-
-
 		}
 
 		if(m_jumpParams.state == JS_JumpStart )
@@ -829,10 +717,8 @@ void CTrooper::ProcessMovement(float frameTime)
 			//check free fall
 			if((currTime - m_lastTimeOnGround).GetSeconds()>0.1f)
 			{
-
-				if( m_jumpParams.state == JS_None || /*m_jumpParams.state ==JS_Landing ||*/ m_jumpParams.state ==JS_Landed)
+				if( m_jumpParams.state == JS_None || m_jumpParams.state ==JS_Landed)
 				{
-					//IAnimationGraphState* pAGState = GetAnimationGraphState();
 					bool bUseSpecialFlyAnim = (m_bOverrideFlyActionAnim || m_jumpParams.bUseSpecialAnim && m_jumpParams.specialAnimType == JUMP_ANIM_FLY);
 					if ( pAGState && !bUseSpecialFlyAnim)
 					{
@@ -844,7 +730,6 @@ void CTrooper::ProcessMovement(float frameTime)
 					m_jumpParams.bFreeFall= true;
 				}
 
-				//IPhysicalEntity *phys = GetEntity()->GetPhysics();
 				if(phys)
 				{
 					if(m_jumpParams.bUseLandAnim)
@@ -897,7 +782,6 @@ void CTrooper::ProcessMovement(float frameTime)
 						}
 						if(t>=0 && t< m_jumpParams.landPreparationTime && !m_bOverrideFlyActionAnim)
 						{
-							//IAnimationGraphState* pAGState = GetAnimationGraphState();
 							if ( pAGState )
 							{
 								Vec3 vNx(vN);
@@ -928,25 +812,20 @@ void CTrooper::ProcessMovement(float frameTime)
 								}
 								else
 									pAGState->SetInput( m_idActionInput, "idle" );
-
 							}
 
-							//m_bOverrideFlyActionAnim = false;
 							m_jumpParams.bFreeFall= false;
 							m_jumpParams.bUseLandAnim = false;
-							//if(m_jumpParams.state !=JS_Landing)
-								m_jumpParams.state = JS_ApproachLanding;
+							m_jumpParams.state = JS_ApproachLanding;
 						}
 					}
 				}
 			}
 		}
 
-		//if (m_stats.inAir == 0 && !InZeroG() && (m_jumpParams.state == JS_Flying || m_jumpParams.state==JS_ApproachLanding ))
 		if (m_stats.inAir == 0 && m_jumpParams.prevInAir > 0.3f)
 		{
 			m_jumpParams.bFreeFall= false;
-			//m_bOverrideFlyActionAnim = false;
 			IAISignalExtraData* pData=NULL;
 			if(m_jumpParams.bUseSpecialAnim && m_jumpParams.specialAnimType == JUMP_ANIM_LAND 
 					&& !m_jumpParams.bPlayingSpecialAnim)
@@ -955,7 +834,7 @@ void CTrooper::ProcessMovement(float frameTime)
 				pData = gEnv->pAISystem->CreateSignalExtraData();
 				pData->iValue = 1;
 			}
-			// send land event/signal			
+			// send land event/signal
 			gEnv->pAISystem->SendSignal(SIGNALFILTER_SENDER,1,"OnLand",GetEntity()->GetAI(),pData);
 			if(m_jumpParams.bUseLandEvent)
 			{
@@ -1069,7 +948,6 @@ void CTrooper::ProcessAnimation(ICharacterInstance *pCharacter,float frameTime)
 			if(landTime>= ClandDuration)
 			{
 				m_landModelOffset = ZERO;
-				//m_stats.dynModelOffset = ZERO;
 				m_jumpParams.state = JS_None;
 			}
 			else
@@ -1079,11 +957,6 @@ void CTrooper::ProcessAnimation(ICharacterInstance *pCharacter,float frameTime)
 				if(m_jumpParams.curVelocity.z< -0.01f) // going down
 				{
 					m_jumpParams.curVelocity -= m_jumpParams.initLandVelocity * frameTime * (ClandDuration - timeToZero) * ClandStiffnessMultiplier;
-					//Interpolate(m_jumpParams.curVelocity,ZERO,1/(m_landDuration - timeToZero),gEnv->pSystem->GetITimer()->GetFrameTime());
-/*					char b[1000];
-					sprintf(b,"%f\n",m_jumpParams.curVelocity.z);
-					OutputDebugString(b);
-*/
 					m_landModelOffset+= m_baseMtx.GetInverted()*m_jumpParams.curVelocity*frameTime;
 				}
 				else
@@ -1145,9 +1018,6 @@ void CTrooper::ProcessAnimation(ICharacterInstance *pCharacter,float frameTime)
 		else
 			pCharacter->GetISkeletonPose()->SetLookIK(true,gf_PI*0.9f,m_stats.lookTargetSmooth);//,m_customLookIKBlends);
 	}
-
-	//m_oldSpeed = speed;
-
 }
 
 //---------------------------------
@@ -1186,7 +1056,6 @@ void CTrooper::SetActorMovement(SMovementRequestParams &control)
 
 	SetDesiredSpeed(control.vMoveDir*control.fDesiredSpeed);
 
-	//	m_input.actions = control.m_desiredActions;
 	int actions;
 	switch(control.bodystate)
 	{
@@ -1206,11 +1075,6 @@ void CTrooper::SetActorMovement(SMovementRequestParams &control)
 		actions = 0;
 		break;
 	}
-
-	// Override the stance based on special behavior.
-	//SetActorStance(control, actions);
-
-	//	SetTilt(control,actions);
 
 	m_input.actions = actions;
 
@@ -1250,38 +1114,6 @@ void CTrooper::SetActorStance(SMovementRequestParams &control, int& actions)
 		}
 	}
 }
-/*
-bool CTrooper::UpdateStance()
-{
-	if (m_stance != GetStance() || m_forceUpdateStanceCollider)
-	{
-		EStance oldStance = m_stance;
-		m_stance = GetStance();
-		StanceChanged( oldStance );
-
-		IPhysicalEntity *pPhysEnt = GetEntity()->GetPhysics();
-		if (pPhysEnt)
-		{
-			pe_player_dimensions playerDim;
-			const SStanceInfo *sInfo = GetStanceInfo(m_stance);
-
-			playerDim.heightEye = 0.0f;
-			playerDim.heightCollider = sInfo->heightCollider;
-			playerDim.sizeCollider = sInfo->size;
-//			playerDim.heightPivot = m_bExactPositioning ? 0 : m_heightVariance;
-			playerDim.maxUnproj = max(0.0f,sInfo->heightPivot);
-			playerDim.bUseCapsule = sInfo->useCapsule;
-
-			int result(pPhysEnt->SetParams(&playerDim));
-
-			pe_action_awake aa;
-			aa.bAwake = 1;
-			pPhysEnt->Action(&aa);
-		}
-	}
-	return true;
-}
-*/
 
 
 void CTrooper::GetMemoryStatistics(ICrySizer * s)
@@ -1320,7 +1152,6 @@ void CTrooper::AnimationEvent(ICharacterInstance *pCharacter, const AnimEventIns
 {
 	if(stricmp(event.m_EventName, "jump") == 0 && m_jumpParams.state != JS_Flying) 
 		Jump();
-	//else
 	CAlien::AnimationEvent (pCharacter,event);
 }
 
@@ -1334,11 +1165,10 @@ void CTrooper::ResetAnimations()
 		if (m_pAnimatedCharacter)
 		{
 			m_pAnimatedCharacter->ClearForcedStates();
-			//m_pAnimatedCharacter->GetAnimationGraphState()->Pause(true, eAGP_StartGame);
 		}
 
 		character->GetISkeletonAnim()->StopAnimationsAllLayers();
-		character->GetISkeletonPose()->SetLookIK(false,gf_PI*0.9f,m_stats.lookTargetSmooth);//,m_customLookIKBlends);
+		character->GetISkeletonPose()->SetLookIK(false,gf_PI*0.9f,m_stats.lookTargetSmooth);
 	}
 }
 

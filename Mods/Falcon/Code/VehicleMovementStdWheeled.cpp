@@ -93,8 +93,7 @@ bool CVehicleMovementStdWheeled::Init(IVehicle* pVehicle, const SmartScriptTable
 {
 	if (!CVehicleMovementBase::Init(pVehicle, table))
 	{
-		assert(0);
-    return false;
+        return false;
 	}
 
   m_carParams.enginePower = 0.f;
@@ -261,7 +260,6 @@ void CVehicleMovementStdWheeled::PostInit()
       m_wheelStats[m_wheelParts.size()-1].friction = pPart->GetIWheel()->GetCarGeomParams()->kLatFriction;
     }
   }
-  assert(m_wheelParts.size() == numWheels);
 }
 
 //------------------------------------------------------------------------
@@ -644,21 +642,15 @@ void CVehicleMovementStdWheeled::ApplyBoost(float speed, float maxSpeed, float s
 		imp.iApplyTime = 0;
 
 		GetPhysics()->Action(&imp, THREAD_SAFE);
-
-    //const static float color[] = {1,1,1,1};
-    //gEnv->pRenderer->Draw2dLabel(400, 400, 1.4f, color, false, "fBoost: %.2f", fraction);
   }
 }
 
 //------------------------------------------------------------------------
 void CVehicleMovementStdWheeled::Update(const float deltaTime)
 {
-  FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
   IPhysicalEntity* pPhysics = GetPhysics();
 	if(!pPhysics)
 	{
-    assert(0 && "[CVehicleMovementStdWheeled::Update]: PhysicalEntity NULL!");
 		return;
 	}
 
@@ -700,8 +692,6 @@ void CVehicleMovementStdWheeled::UpdateGameTokens(const float deltaTime)
 //------------------------------------------------------------------------
 void CVehicleMovementStdWheeled::UpdateSounds(const float deltaTime)
 { 
-  FUNCTION_PROFILER( gEnv->pSystem, PROFILE_GAME );
-
   // engine load  
   float loadTarget = -1.f;
   
@@ -716,10 +706,6 @@ void CVehicleMovementStdWheeled::UpdateSounds(const float deltaTime)
       rpmScale = min(GetMinRPMSoundRatio(), max(m_action.pedal, rpmScale));
     }
 
-    // scale rpm down when in backward gear
-    //if (m_currentGear == 0)
-      //rpmScale *= 0.8; 
-        
     if (m_vehicleStatus.bHandBrake)
     {
       Interpolate(m_rpmScale, rpmScale, 2.5f, deltaTime);
@@ -808,14 +794,12 @@ void CVehicleMovementStdWheeled::UpdateSounds(const float deltaTime)
     m_load = 0.f;
   }
 
-  //SetSoundParam(eSID_Run, "load", m_load);
   SetSoundParam(eSID_Run, "surface", m_surfaceSoundStats.surfaceParam);  
-  //SetSoundParam(eSID_Run, "scratch", m_surfaceSoundStats.scratching);  // removed there is no "scratch" parameter in the run event [Tomas]
 
   // tire slip sound
   if (m_maxSoundSlipSpeed > 0.f)
   {
-    ISound* pSound = GetSound(eSID_Slip);    
+    ISound* pSound = GetSound(eSID_Slip);
 
     if (m_surfaceSoundStats.slipRatio > 0.08f)
     { 
@@ -854,8 +838,6 @@ void CVehicleMovementStdWheeled::UpdateSounds(const float deltaTime)
 //------------------------------------------------------------------------
 void CVehicleMovementStdWheeled::UpdateSuspension(const float deltaTime)
 {
-  FUNCTION_PROFILER( gEnv->pSystem, PROFILE_GAME );
-
   float dt = max( deltaTime, 0.005f);
 
   IPhysicalEntity* pPhysics = GetPhysics();
@@ -871,8 +853,6 @@ void CVehicleMovementStdWheeled::UpdateSuspension(const float deltaTime)
 
   Matrix34 worldTM( m_PhysPos.q );
   worldTM.AddTranslation( m_PhysPos.pos );
-
-  assert(m_wheelParts.size() == m_pVehicle->GetWheelCount());
 
   float diffSusp = m_suspDampingMax - m_suspDampingMin;    
   float diffStabi = m_stabiMax - m_stabiMin;
@@ -1143,8 +1123,6 @@ void CVehicleMovementStdWheeled::UpdateBrakes(const float deltaTime)
 //------------------------------------------------------------------------
 void CVehicleMovementStdWheeled::UpdateSuspensionSound(const float deltaTime)
 {
-  FUNCTION_PROFILER( gEnv->pSystem, PROFILE_GAME );
-
   if (m_pVehicle->GetStatus().health <= 0.f)
     return;
 
@@ -1232,8 +1210,6 @@ void CVehicleMovementStdWheeled::UpdateSuspensionSound(const float deltaTime)
 // NOTE: This function must be thread-safe. Before adding stuff contact MarcoC.
 void CVehicleMovementStdWheeled::ProcessAI(const float deltaTime)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
 	float dt = max( deltaTime,0.005f);
 
 	m_movementAction.brake = false;
@@ -1340,8 +1316,6 @@ void CVehicleMovementStdWheeled::ProcessAI(const float deltaTime)
 // NOTE: This function must be thread-safe. Before adding stuff contact MarcoC.
 void CVehicleMovementStdWheeled::ProcessMovement(const float deltaTime)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-  
 	m_netActionSync.UpdateObject(this);
 
 	CryAutoLock<CryFastLock> lk(m_lock);
@@ -1517,8 +1491,6 @@ void CVehicleMovementStdWheeled::Boost(bool enable)
 //------------------------------------------------------------------------
 bool CVehicleMovementStdWheeled::RequestMovement(CMovementRequest& movementRequest)
 {
-	FUNCTION_PROFILER( gEnv->pSystem, PROFILE_GAME );
- 
 	m_movementAction.isAI = true;
 	if (!m_isEnginePowered)
 		return false;
@@ -1611,8 +1583,6 @@ void CVehicleMovementStdWheeled::Serialize(TSerialize ser, unsigned aspects)
 //------------------------------------------------------------------------
 void CVehicleMovementStdWheeled::UpdateSurfaceEffects(const float deltaTime)
 { 
-  FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-  
   if (0 == g_pGameCVars->v_pa_surface)
   {
     ResetParticles();
@@ -1648,7 +1618,6 @@ void CVehicleMovementStdWheeled::UpdateSurfaceEffects(const float deltaTime)
   { 
     if (emitterIt->layer < 0)
     {
-      assert(0);
       continue;
     }
 

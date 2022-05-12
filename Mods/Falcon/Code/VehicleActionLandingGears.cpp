@@ -127,13 +127,9 @@ void CVehicleActionLandingGears::OnVehicleEvent(EVehicleEvent eventType, const S
 	if (eventType == eVE_PassengerEnter || eventType == eVE_PassengerChangeSeat)
 	{
 		IVehicleSeat* pSeat = m_pVehicle->GetSeatById(params.iParam);
-		assert(pSeat);
-
 		if (pSeat->IsDriver())
 		{
 			IActorSystem* pActorSystem = gEnv->pGame->GetIGameFramework()->GetIActorSystem();
-			assert(pActorSystem);
-
 			if (IActor* pActor = pActorSystem->GetActor(pSeat->GetPassenger(false)))
 			{
 				m_isDriverPlayer = pActor->IsPlayer();

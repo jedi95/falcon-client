@@ -268,7 +268,6 @@ void CScout::ProcessRotation(float frameTime)
 }
 void CScout::ProcessMovementNew(float frameTime)
 {
-
 	frameTime = min( 1.0f, frameTime );
 	if ( m_params.forceView < 50.0 )
 	{	// normal action
@@ -318,14 +317,8 @@ void CScout::ProcessMovementNew(float frameTime)
 		modelRot = Quat::CreateSlerp( modelRot, m_desiredVeloctyQuat, cofRot );
 
 		// commit the result interpolation
-		assert(GetEntity()->GetRotation().IsValid());
-		assert(GetEntity()->GetRotation().GetInverted().IsValid());
-		assert(modelRot.IsValid());
-
 		m_moveRequest.rotation = GetEntity()->GetRotation().GetInverted() * modelRot;
 		m_moveRequest.rotation.Normalize();
-
-		assert(m_moveRequest.rotation.IsValid());
 
 		m_moveRequest.velocity = m_velocity;
 		m_moveRequest.type = eCMT_Fly;

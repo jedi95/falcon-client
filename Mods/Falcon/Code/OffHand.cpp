@@ -522,8 +522,6 @@ void COffHand::Select(bool select)
 //=============================================================
 void COffHand::Update(SEntityUpdateContext &ctx, int slot)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
 	bool keepUpdating = false;
 
 	CWeapon::Update(ctx, slot);
@@ -610,8 +608,6 @@ void COffHand::Update(SEntityUpdateContext &ctx, int slot)
 //=============================================================
 void COffHand::UpdateFPView(float frameTime)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-	
 	if (m_stats.selected)
 	{
 		CItem::UpdateFPView(frameTime);
@@ -1056,11 +1052,9 @@ void COffHand::UpdateGrabbedNPCWorldPos(IEntity *pEntity, struct SViewParams *vi
 			neckFinal.SetTranslation(itemAttachmentPos);
 
 			ICharacterInstance *pCharacter=pEntity->GetCharacter(0);
-			assert(pCharacter && "COffHand::UpdateGrabbedNPCWorldPos --> Actor entity has no character!!");
 			if(!pCharacter)
 				return;
 			ISkeletonPose *pSkeletonPose=pCharacter->GetISkeletonPose();
-			assert(pSkeletonPose && "COffHand::UpdateGrabbedNPCWorldPos --> Actor entity has no skeleton!!");
 			if(!pSkeletonPose)
 				return;
 
@@ -1094,7 +1088,6 @@ void COffHand::UpdateGrabbedNPCWorldPos(IEntity *pEntity, struct SViewParams *vi
 			if(ICharacterInstance *pCharacter=pEntity->GetCharacter(0))
 			{
 				ISkeletonPose *pSkeletonPose=pCharacter->GetISkeletonPose();
-				assert(pSkeletonPose && "COffHand::UpdateGrabbedNPCWorldPos --> Actor entity has no skeleton!!");
 				if(!pSkeletonPose)
 					return;
 
@@ -2254,7 +2247,6 @@ void COffHand::IgnoreCollisions(bool ignore, EntityId entityId /*=0*/)
 			{
 				pItem->Physicalize(true,true);
 				pPE = pEntity->GetPhysics();
-				assert(pPE);
 			}
 		}
 
@@ -2328,8 +2320,6 @@ void COffHand::SelectGrabType(IEntity* pEntity)
 		return;
 
 	CActor *pActor=GetOwnerActor();
-
-	assert(pActor && "COffHand::SelectGrabType: No OwnerActor, probably something bad happened");
 	if (!pActor)
 		return;
 
@@ -2427,7 +2417,6 @@ void COffHand::SelectGrabType(IEntity* pEntity)
 void COffHand::StartPickUpItem()
 {	
 	CPlayer *pPlayer = static_cast<CPlayer*>(GetOwnerActor());
-	assert(pPlayer && "COffHand::StartPickUpItem -> No player found!!");
 
 	bool drop_success=false;
 
@@ -2735,10 +2724,7 @@ void COffHand::ThrowObject(int activationMode, bool isLivingEnt /*= false*/)
 //==========================================================================================
 bool COffHand::GrabNPC()
 {
-
 	CActor  *pPlayer = GetOwnerActor();
-
-	assert(pPlayer && "COffHand::GrabNPC --> Offhand has no owner actor (player)!");
 	if(!pPlayer)
 		return false;
 
@@ -2748,13 +2734,10 @@ bool COffHand::GrabNPC()
 	
 	//Get actor
 	CActor  *pActor  = static_cast<CActor*>(g_pGame->GetIGameFramework()->GetIActorSystem()->GetActor(m_preHeldEntityId));
-	
-	assert(pActor && "COffHand::GrabNPC -> No actor found!");
 	if(!pActor)
 		return false;
 
 	IEntity *pEntity = pActor->GetEntity();
-	assert(pEntity && "COffHand::GrabNPC -> Actor has no Entity");
 	if(!pEntity || !pEntity->GetCharacter(0))
 		return false;
 
@@ -2860,12 +2843,10 @@ void COffHand::ThrowNPC(bool kill /*= true*/)
 	//Get actor
  	CActor  *pActor  = static_cast<CActor*>(g_pGame->GetIGameFramework()->GetIActorSystem()->GetActor(m_heldEntityId));
 
-	assert(pActor && "COffHand::Throw -> No actor found!");
 	if(!pActor)
 		return;
 
 	IEntity *pEntity = pActor->GetEntity();
-	assert(pEntity && "COffHand::Throw -> Actor has no Entity");
 	if(!pEntity)
 		return;
 
@@ -3214,7 +3195,6 @@ EntityId COffHand::SpawnRockProjectile(IRenderNode* pRenderNode)
 {
 	Matrix34 statObjMtx;
 	IStatObj *pStatObj=pRenderNode->GetEntityStatObj(0,0,&statObjMtx);
-	assert(pStatObj);
 	if (!pStatObj)
 		return 0;
 
@@ -3227,11 +3207,9 @@ EntityId COffHand::SpawnRockProjectile(IRenderNode* pRenderNode)
 	if(!pClass)
 		return 0;
 	CProjectile *pRock=g_pGame->GetWeaponSystem()->SpawnAmmo(pClass);
-	assert(pRock);
 	if(!pRock)
 		return 0;
 	IEntity* pEntity = pRock->GetEntity();
-	assert(pEntity);
 	if (!pEntity)
 		return 0;
 

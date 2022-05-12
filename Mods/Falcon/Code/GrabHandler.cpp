@@ -21,8 +21,6 @@
 
 void SGrabStats::Serialize(TSerialize ser)
 {
-	assert(ser.GetSerializationTarget() != eST_Network);
-
 	if (ser.BeginOptionalGroup("SGrabStats", true))
 	{
 		//when reading, reset the structure first.
@@ -153,8 +151,6 @@ bool CBaseGrabHandler::SetGrab(SmartScriptTable &rParams)
 
 			return true;
 		}
-	} else {
-		assert (0);
 	}
 	return false;
 }
@@ -389,15 +385,9 @@ Vec3 CBaseGrabHandler::GetGrabWPos()
 
 void CBaseGrabHandler::Serialize(TSerialize ser)
 {
-	assert(ser.GetSerializationTarget() != eST_Network);
-
 	if (ser.BeginOptionalGroup("CBaseGrabHandler", true))
 	{
 		m_grabStats.Serialize(ser);
-
-		// NOTE Apr 11, 2007: <pvl> for reading, m_pActor has already been taken
-		// care of in the constructor.
-		
 		ser.EndGroup();
 	}
 }
@@ -415,9 +405,6 @@ void CBaseGrabHandler::DisableGrabbedAnimatedCharacter (bool enable) const
 	IAnimatedCharacter * pGrabbedAC = pGrabbedActor->GetAnimatedCharacter();
 	if (pGrabbedAC)
 		pGrabbedAC->SetNoMovementOverride (enable);
-
-//	SActorStats *stats = static_cast<SActorStats*>(pGrabbedActor->GetActorStats());
-//	stats->isGrabbed = enable;
 
 	if(pGrabbedActor->IsClient())
 	{

@@ -36,8 +36,8 @@ aimLook (false),
 bodystate (0),
 fDesiredSpeed (1.0f),
 eActorTargetPhase (eATP_None),
-bExactPositioning (false)    
-{	
+bExactPositioning (false)
+{
 	aimLook = false;
 
 	vMoveDir.zero();
@@ -180,8 +180,8 @@ void CShark::ResetValues()
 
 	m_lastSpawnPoint.zero();
 	
-	m_baseMtx.SetIdentity();// = Matrix33(GetEntity()->GetRotation());
-	m_modelQuat.SetIdentity();// = GetEntity()->GetRotation();
+	m_baseMtx.SetIdentity();
+	m_modelQuat.SetIdentity();
 	m_viewMtx.SetIdentity();
 	m_eyeMtx.SetIdentity();
 	m_charLocalMtx.SetIdentity();
@@ -190,8 +190,6 @@ void CShark::ResetValues()
 	m_AABBMaxZCache = 0;
 
 	m_input.movementVector.zero();
-
-	//m_trailSpeedScale = 0;
 
 	m_animationSpeedAttack = m_animationSpeed = 1;
 
@@ -310,24 +308,14 @@ void CShark::PrePhysicsUpdate()
 			m_pMovementController->Update(frameTime, params);
 		}
 
-		assert(m_moveRequest.rotation.IsValid());
-		assert(m_moveRequest.velocity.IsValid());
-
 		//rotation processing
 		if (m_linkStats.CanRotate())
 			ProcessRotation(frameTime);
-
-		assert(m_moveRequest.rotation.IsValid());
-		assert(m_moveRequest.velocity.IsValid());
 
 		//movement processing
 		if (m_linkStats.CanMove())
 		{
 			ProcessMovement(frameTime);
-
-			assert(m_moveRequest.rotation.IsValid());
-			assert(m_moveRequest.velocity.IsValid());
-
 
 			//send the movement request to the animated character
 			if (m_pAnimatedCharacter)
@@ -338,10 +326,6 @@ void CShark::PrePhysicsUpdate()
 				m_moveRequest.prediction.states[0].velocity = m_moveRequest.velocity;
 				m_moveRequest.prediction.states[0].position = pEnt->GetWorldPos();
 				m_moveRequest.prediction.states[0].orientation = pEnt->GetWorldRotation();
-				//m_moveRequest.prediction.states[0].rotation.SetIdentity();
-
-				assert(m_moveRequest.rotation.IsValid());
-				assert(m_moveRequest.velocity.IsValid());
 
 				m_pAnimatedCharacter->AddMovement(m_moveRequest);
 			}
@@ -353,89 +337,34 @@ void CShark::Update(SEntityUpdateContext& ctx, int updateSlot)
 {
 	float frameTime = ctx.fFrameTime;
 
-	if(frameTime == 0.f)
+	if (frameTime == 0.f)
 		frameTime = 0.01f;
 
-	if(m_targetId)
+	if (m_targetId)
 	{
 		IEntity* pTarget = gEnv->pEntitySystem->GetEntity(m_targetId);
-		if(pTarget)
-			UpdateStatus(frameTime,pTarget);
+		if (pTarget)
+			UpdateStatus(frameTime, pTarget);
 	}
 
 	IEntity* pEnt = GetEntity();
 	if (pEnt->IsHidden())
 		return;
 
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
+	CActor::Update(ctx, updateSlot);
 
-	CActor::Update(ctx,updateSlot);
-
-
-	if (!m_stats.isRagDoll && GetHealth()>0)
+	if (!m_stats.isRagDoll && GetHealth() > 0)
 	{
 		//animation processing
-		ProcessAnimation(pEnt->GetCharacter(0),frameTime);
+		ProcessAnimation(pEnt->GetCharacter(0), frameTime);
 
 		//reset the input for the next frame
 		if (IsClient())
 			m_input.ResetDeltas();
-
-
-		if (gEnv->bClient)
-		{
-/*			float dist2 = (gEnv->pRenderer->GetCamera().GetPosition() - GetEntity()->GetWorldPos()).GetLengthSquared();
-
-			if (m_pTrailAttachment)
-			{ 
-				CEffectAttachment* pEffectAttachment = (CEffectAttachment*)m_pTrailAttachment->GetIAttachmentObject();
-				if (pEffectAttachment)
-				{
-					float goalspeed = max(0.f, m_stats.speed - m_params.trailEffectMinSpeed);
-					Interpolate(m_trailSpeedScale, goalspeed, 3.f, frameTime);
-
-					SpawnParams sp;          
-					if (m_params.trailEffectMaxSpeedSize != 0.f)
-						sp.fSizeScale = min(1.f, max(0.01f, m_trailSpeedScale/m_params.trailEffectMaxSpeedSize));
-
-					if (m_params.trailEffectMaxSpeedCount != 0.f)
-						sp.fCountScale = min(1.f, m_trailSpeedScale / m_params.trailEffectMaxSpeedCount);
-
-					pEffectAttachment->SetSpawnParams(sp);
-				}
-			}
-
-			if (m_pTurnSound && m_params.turnSoundMaxVel != 0.f && m_params.turnSoundBoneId != -1 && !m_pTurnSound->IsPlaying() && dist2<sqr(60.f))
-			{ 
-				if (IPhysicalEntity *pPhysics = GetEntity()->GetPhysics())
-				{
-					pe_status_dynamics dyn;
-					dyn.partid = m_params.turnSoundBoneId;
-					if (pPhysics->GetStatus(&dyn) && dyn.v.len2() > sqr(0.01f) && dyn.w.len2() > sqr(0.5f*m_params.turnSoundMaxVel))
-					{
-						float speedRel = min(1.f, dyn.w.len()/m_params.turnSoundMaxVel); 
-
-						IEntitySoundProxy* pSoundProxy = (IEntitySoundProxy*)GetEntity()->CreateProxy(ENTITY_PROXY_SOUND);
-						pSoundProxy->PlaySound(m_pTurnSound);        
-						m_pTurnSound->SetParam("acceleration", speedRel);
-						//CryLog("angSpeed %.2f (rel %.2f)", dyn.w.len(), speedRel);
-					} 
-				}    
-			}
-*/
-		}
 	}
-/*
-	//update the character offset
-	Vec3 goal = (m_stats.isRagDoll?Vec3(0,0,0):GetStanceInfo(m_stance)->modelOffset);
-	//if(!m_stats.isRagDoll)
-	//	goal += m_stats.dynModelOffset;
-	Interpolate(m_modelOffset,goal,5.0f,frameTime);
-*/
 
 	m_charLocalMtx.SetTranslation(ZERO);
 	GetAnimatedCharacter()->SetExtraAnimationOffset(m_charLocalMtx);
-
 }
 
 void CShark::SetStartPos(const Vec3& targetPos)
@@ -495,8 +424,8 @@ float CShark::GetDistHeadTarget(const Vec3& targetPos, const Vec3& targetDirN,fl
 			QuatT jointQuat2 = pSkeletonPose->GetAbsJointByID(jointid2);
 			Vec3 bonePos2(worldTM * jointQuat2.t);
 
-			Vec3 v0(headBonePos - bonePos1);//.GetNormalizedSafe());
-			Vec3 v1(bonePos1 - bonePos2);//.GetNormalizedSafe());
+			Vec3 v0(headBonePos - bonePos1);
+			Vec3 v1(bonePos1 - bonePos2);
 
 			Vec3 boneDir = (v0+v0-v1 ).GetNormalizedSafe();
 			dotMouth = targetDirN.Dot(boneDir);
@@ -636,15 +565,9 @@ void CShark::UpdateStatus(float frameTime, const IEntity* pTarget)
 				// enough far, move directly towards target
 				if (!gEnv->pPhysicalWorld->RayWorldIntersection(myPos, targetDir*(distTarget - 3)/distTarget, objTypes, flags, &ray, 1))
 				{
-					// skip drivable boats in collision check
-//					if(ray.pCollider)
-//					{
-//						IEntity* pColliderEntity = (IEntity*)ray.pCollider->GetForeignData(PHYS_FOREIGN_ID_ENTITY);
-//						if(!pColliderEntity || !pColliderEntity->GetAI() || pColliderEntity->GetAI()->GetAIType()!=AIOBJECT_VEHICLE)
-//					}
 					SetMoveTarget(moveTarget, force, m_params.minDistForUpdatingMoveTarget);
 				} // else keep previous moveTarget
-				break; 
+				break;
 			}
 			else
 			{
@@ -709,8 +632,7 @@ void CShark::UpdateStatus(float frameTime, const IEntity* pTarget)
 					if(dotMouth > 0.9f)
 					{
 						//shark is aligned, attack
-
-						Attack(true);	
+						Attack(true);
 						break;
 					}
 				}
@@ -729,9 +651,6 @@ void CShark::UpdateStatus(float frameTime, const IEntity* pTarget)
 				}
 				if(moveDistTarget<2 || moveDistTarget <6.f && moveTargetDir.Dot(m_stats.velocity.GetNormalizedSafe())<0)
 				{
-
-//					m_numHalfCircles --;
-					
 					const float angle = DEG2RAD(360/float(numCircleSteps)) * sgn(CrossZ(myBodyDir, targetDir2DN));
 					Vec3 radius = - targetDir2DN * m_circleRadius;
 					m_circleDisplacement = radius.GetRotated(ZERO,Vec3Constants<float>::fVec3_OneZ,angle);
@@ -768,7 +687,7 @@ void CShark::UpdateStatus(float frameTime, const IEntity* pTarget)
 
 				SetMoveTarget(targetPos + m_circleDisplacement, force, m_params.minDistForUpdatingMoveTarget); 
 				Interpolate(m_circleRadius,m_params.minDistanceCircle * 1.1f,0.1f,frameTime);
-			}			
+			}
 		}
 			break;
 		case S_FinalAttackAlign:
@@ -783,17 +702,13 @@ void CShark::UpdateStatus(float frameTime, const IEntity* pTarget)
 			SetMoveTarget(targetPos,true);
 			if(dotMouth >0.8f)
 			{
-
 				if(distHeadTarget >= m_params.meleeDistance)
 				{
-//					IAnimationGraphState* pAGState = GetAnimationGraphState();
-//					if ( pAGState)
-	//					pAGState->SetInput( m_idSignalInput, "meleeSprint" );
 					m_state = S_FinalAttack;
 					m_remainingAttackTime = 5.0f;
 				}
 				else if(distHeadTarget>=0)
-					Attack();	
+					Attack();
 			}
 		}
 			break;
@@ -899,81 +814,7 @@ void CShark::UpdateStatus(float frameTime, const IEntity* pTarget)
 	AdjustMoveTarget(maxHeight,pTarget);
 }
 
-/*
-void CShark::UpdateSpawning()
-{
-	if(distTarget < 110 && !GetEntity()->IsHidden() && m_params.bSpawned)
-	{
-		SetReaching(targetPos);
-		break;
-	}
-	int escapePointSize = m_EscapePoints.size();
-	const int numTriesRadialDirections = 8;
 
-	for(int i=0;i<2;i++)
-	{
-		if(m_tryCount >= numTriesRadialDirections + escapePointSize)
-		{
-			if(m_startPos.IsZero())
-			{
-				// retry another cycle
-				m_tryCount = 0;
-				break;
-			}
-			SetStartPos(targetPos);
-			SetReaching(targetPos);
-			break;
-		}
-		Vec3 currentStartPos;
-		if(m_tryCount < escapePointSize)
-		{
-			currentStartPos = m_EscapePoints[m_tryCount];
-			if(m_tryCount < escapePointSize -1 && currentStartPos.x==m_lastSpawnPoint.x && currentStartPos.y==m_lastSpawnPoint.y)
-			{
-				//low priority to last used spawn point - swap it with the last
-				Vec3 swap(currentStartPos);
-				currentStartPos = m_EscapePoints[escapePointSize -1 ];
-				m_EscapePoints[escapePointSize -1 ] = swap;
-			}
-			m_escapeDir = currentStartPos - targetPos;
-		}
-		else
-		{
-			if(m_tryCount == escapePointSize)
-				m_escapeDir = Vec3(70,0,0);
-			m_escapeDir = m_escapeDir.GetRotated(ZERO,Vec3Constants<float>::fVec3_OneZ,2 * gf_PI / float(numTriesRadialDirections));
-			currentStartPos = targetPos + m_escapeDir;
-		}
-		//find escape direction
-		static const int objTypes = ent_terrain|ent_static|ent_sleeping_rigid;  // |ent_rigid;
-		static const unsigned int flags = rwi_stop_at_pierceable|rwi_colltype_any;
-		ray_hit ray;
-		Vec3 startPos(myPos+Vec3(0,0,1));
-		if (gEnv->pPhysicalWorld->RayWorldIntersection(targetPos, m_escapeDir, objTypes, flags, &ray, 1))
-		{
-			Vec3 hitDir(ray.pt - targetPos);
-			if(hitDir.GetLengthSquared() > m_chosenEscapeDir.GetLengthSquared())
-			{
-				m_chosenEscapeDir = hitDir;
-				m_startPos = targetPos + hitDir*(ray.dist - 4)/ray.dist;
-			}
-		}
-		else
-		{
-			m_startPos = currentStartPos;
-			SetStartPos(targetPos);
-			SetReaching(targetPos);
-			break;
-		}
-
-		m_tryCount++;
-	}
-	maxHeight = waterLevel - 1;
-
-
-}
-
-*/
 void CShark::SetReaching(const Vec3& targetPos)
 {
 	SetMoveTarget(targetPos, true, m_params.minDistForUpdatingMoveTarget);
@@ -990,8 +831,7 @@ void CShark::AdjustMoveTarget(float maxHeight, const IEntity* pTargetEntity)
 	// check for possible collisions with floating entities
 	if(Distance::Point_Point2DSq(myPos, m_lastCheckedPos) > 4*4)
 	{
-		SEntityProximityQuery query;	
-		//query.nEntityFlags = ENTITY_FLAG_HAS_AI;
+		SEntityProximityQuery query;
 		query.pEntityClass = NULL;
 		float dimxy = 10;
 		float dimz = 3;
@@ -1028,23 +868,18 @@ void CShark::AdjustMoveTarget(float maxHeight, const IEntity* pTargetEntity)
 			}
 		}
 		m_lastCheckedPos = myPos;
-
 	}
 }
 
 void CShark::GoAway()
 {
 	m_state = S_PrepareEscape;
-	//m_escapeDir = Vec3(500,0,0);
 	m_tryCount =0;
 	m_chosenEscapeDir.zero();
 }
 
 void CShark::Attack(bool fast)
 {
-//	IAnimationGraphState* pAGState = GetAnimationGraphState();
-	//if ( pAGState)
-		//pAGState->SetInput( m_idSignalInput, "melee" );
 	m_state = S_Attack;
 	m_remainingAttackTime = 3.0f;
 	MeleeAnimation();
@@ -1065,20 +900,13 @@ void CShark::UpdateStats(float frameTime)
 	{
 		m_stats.velocity = m_stats.velocityUnconstrained.zero();
 		m_stats.speed = m_stats.speedFlat = 0.0f;
-		m_stats.inFiring = 0;		
-
-		/*pe_player_dynamics simParSet;
-		simParSet.bSwimming = true;
-		pPhysEnt->SetParams(&simParSet);*/
-
+		m_stats.inFiring = 0;
 		return;
 	}
 
 	//retrieve some information about the status of the player
 	pe_status_dynamics dynStat;
 	pe_status_living livStat;
-
-
 
 	if( !pPhysEnt->GetStatus(&dynStat) ||
 		!pPhysEnt->GetStatus(&livStat) ||
@@ -1100,13 +928,7 @@ void CShark::UpdateStats(float frameTime)
 	if(m_stats.turnRadius< m_params.minTurnRadius)
 		m_stats.turnRadius = m_params.minTurnRadius;
 
-	// [Mikko] The velocity from the physics in some weird cases have been #INF because of the player
-	// Zero-G movement calculations. If this asserts triggers, the alien might have just collided with
-	// a play that is stuck in the geometry.
-	assert(NumberValid(m_stats.speed));
-
 	m_stats.mass = dynStat.mass;
-
 }
 
 void CShark::ProcessRotation(float frameTime)
@@ -1125,29 +947,6 @@ void CShark::ProcessRotation(float frameTime)
 	//TODO:use radians
 	float rotSpeed(0.5f);
 
-
-	// Mikko: Separated the look and movement directions. This is a workaround! The reason is below (moved from the SetActorMovement):
-	// >> Danny - old code had desired direction using vLookDir but this caused spinning behaviour
-	// >> when it was significantly different to vMoveDir
-
-	/*if (m_input.viewVector.len2()>0.0f)
-	{
-		//			m_eyeMtx.SetRotationVDir(m_input.viewVector.GetNormalizedSafe());
-		Matrix33	eyeTarget;
-		eyeTarget.SetRotationVDir(m_input.viewVector.GetNormalizedSafe());
-		Quat	eyeTargetQuat(eyeTarget);
-		Quat	currQuat(m_eyeMtx);
-		m_eyeMtx = Matrix33(Quat::CreateSlerp( currQuat.GetNormalized(), eyeTargetQuat, min(frameTime * 12.0f, 1.0f)));
-	}
-	
-
-//		if (m_input.viewVector.len2()>0.0f)
-	{
-		Vec3	lookat = m_eyeMtx.GetColumn(1);
-		Vec3	orient = m_viewMtx.GetColumn(1);
-		m_viewMtx.SetRotationVDir(m_input.viewVector.GetNormalizedSafe());
-	}
-	*/
 	m_eyeMtx =m_baseMtx ;
 	m_viewMtx = m_baseMtx ;
 	
@@ -1177,12 +976,7 @@ void CShark::GetMovementVector(Vec3& move, float& speed, float& maxSpeed)
 
 	// AI Movement
 	move = m_input.movementVector;
-	// Player movement
-/*	// For controlling an alien as if it was a player (dbg stuff)
-	move += m_viewMtx.GetColumn(0) * m_input.deltaMovement.x * maxSpeed;
-	move += m_viewMtx.GetColumn(1) * m_input.deltaMovement.y * maxSpeed;
-	move += m_viewMtx.GetColumn(2) * m_input.deltaMovement.z * maxSpeed;
-*/
+
 	// Cap the speed to stance max stance speed.
 	speed = move.len();
 	if(speed > maxSpeed)
@@ -1213,16 +1007,7 @@ void CShark::ProcessMovement(float frameTime)
 		forward = (m_moveTarget - myPos).GetNormalizedSafe();
 	else
 		forward = m_baseMtx.GetColumn(1);
-/*
-	const SStanceInfo* pStanceInfo = GetStanceInfo(m_stance);
-	float rotScale = 1.0f;
-	if (pStanceInfo)
-	{
-		const float speedRange = max(1.0f, pStanceInfo->normalSpeed - m_params.speed_min);
-		rotScale = (m_stats.speed - m_params.speed_min) / speedRange;
-	}
-	float rotSpeed = m_params.rotSpeed_min + (1.0f - rotScale) * (m_params.rotSpeed_max - m_params.rotSpeed_min);
-*/
+
 	float desiredTurnRadius;
 	float desiredSpeed;
 	float rotSpeed;
@@ -1337,7 +1122,7 @@ void CShark::ProcessMovement(float frameTime)
 	m_modelQuat.Normalize();
 
 	Quat currQuat(m_baseMtx);
-	m_baseMtx = Matrix33(m_modelQuat);//Quat::CreateSlerp( currQuat.GetNormalized(), m_modelQuat, min(frameTime *  m_turnSpeed , 2.0f)));
+	m_baseMtx = Matrix33(m_modelQuat);
 	m_baseMtx.OrthonormalizeFast();
 
 	// using a class member m_modelAddQuat probably deprecated (needed for Slerp/blending)
@@ -1346,12 +1131,9 @@ void CShark::ProcessMovement(float frameTime)
 	m_charLocalMtx.OrthonormalizeFast();
 
 	m_velocity = move.GetNormalizedSafe()*m_curSpeed;
-	assert(GetEntity()->GetRotation().IsValid());
-	assert(GetEntity()->GetRotation().GetInverted().IsValid());
 
 	m_moveRequest.rotation = currRotation.GetInverted() * m_modelQuat;
 	m_moveRequest.rotation.Normalize();
-	assert(m_moveRequest.rotation.IsValid());
 
 	m_moveRequest.velocity = m_velocity;
 	m_moveRequest.type = eCMT_Fly;
@@ -1363,11 +1145,10 @@ void CShark::ProcessMovement(float frameTime)
 void CShark::ProcessAnimation(ICharacterInstance *pCharacter,float frameTime)
 {
 	float turnAnimBlend;
-//	float angVel = m_stats.angVelocity.z;
 	Vec3 curRot = GetEntity()->GetRotation().GetColumn1();
 	curRot.z = 0;
 	curRot.NormalizeSafe();
-	float	angVel = m_stats.angVelocity.z;//cry_acosf(curRot.Dot(m_lastRot))/frameTime;
+	float	angVel = m_stats.angVelocity.z;
 
 	if(angVel==0)
 		turnAnimBlend = 0.5;
@@ -1421,20 +1202,14 @@ void CShark::ResetAnimations()
 	ICharacterInstance *character = GetEntity()->GetCharacter(0);
 	
 	SmartScriptTable entityTable = GetEntity()->GetScriptTable();
-	//m_idleAnimationName = ""; 
-	
+
 	if (m_pAnimatedCharacter)
 		m_pAnimatedCharacter->ClearForcedStates();
 	ISkeletonAnim* pSkeleton;
 	if(character && (pSkeleton=character->GetISkeletonAnim()))
 	{
-
 		pSkeleton->StopAnimationsAllLayers();
-
-		//if( entityTable.GetPtr() && entityTable->GetValue("idleAnimation",m_idleAnimationName))
-		{
-			pSkeleton->SetBlendSpaceOverride(eMotionParamID_TurnSpeed,0.5f,true);
-		}
+		pSkeleton->SetBlendSpaceOverride(eMotionParamID_TurnSpeed,0.5f,true);
 	}
 	m_animationSpeedAttack = m_animationSpeed = 1;
 }
@@ -1450,9 +1225,6 @@ void CShark::Kill()
 	CActor::Kill();
 
 	ResetAnimations();
-
-	/*if (m_pTrailAttachment)  
-		m_pTrailAttachment->ClearBinding();    */
 }
 
 void CShark::Revive(bool fromInit)
@@ -1474,28 +1246,6 @@ void CShark::Revive(bool fromInit)
 
 	ResetAnimations();
 
-	//initialize the ground effect
-	/*
-	if (m_params.trailEffect[0] && gEnv->p3DEngine->FindParticleEffect(m_params.trailEffect))
-	{
-		if (ICharacterInstance* pCharInstance = GetEntity()->GetCharacter(0))
-		{
-			IAttachmentManager* pAttachmentManager = pCharInstance->GetIAttachmentManager(); 
-			if (IAttachment* pAttachment = pAttachmentManager->GetInterfaceByName("trail_attachment"))
-			{ 
-				pAttachment->ClearBinding();
-				CEffectAttachment* pEffectAttachment = new CEffectAttachment(m_params.trailEffect, Vec3(0,0,0), m_params.trailEffectDir.GetNormalized(), 1);
-				pEffectAttachment->CreateEffect();
-				pAttachment->AddBinding(pEffectAttachment);
-				m_pTrailAttachment = pAttachment;
-				m_trailSpeedScale = 0.f;
-			} 
-			else
-				CryLog("[CShark::Revive] %s: 'trail_attachment' not found.", GetEntity()->GetName());
-		}
-	}
-	*/
-
 	if (m_pAnimatedCharacter)
 	{
 		SAnimatedCharacterParams params = m_pAnimatedCharacter->GetParams();
@@ -1516,13 +1266,10 @@ void CShark::RagDollize( bool fallAndPlay )
 
 	ResetAnimations();
 
-//	assert(!fallAndPlay && "Fall and play not supported for aliens yet");
-
 	ICharacterInstance *pCharacter = GetEntity()->GetCharacter(0);
 	if (pCharacter)
 		pCharacter->GetISkeletonPose()->SetRagdollDefaultPose();
 
-	//CActor::RagDollize( fallAndPlay );
 	CActor::RagDollize( false );
 
 	IPhysicalEntity *pPhysEnt = GetEntity()->GetPhysics();
@@ -1540,12 +1287,11 @@ void CShark::RagDollize( bool fallAndPlay )
 		pPhysEnt->SetParams(&sp);
 
 		pe_params_articulated_body pa;
-		pa.dampingLyingMode = 5.5f;    
-		//pa.scaleBounceResponse = 0.1f;
+		pa.dampingLyingMode = 5.5f;
 		pPhysEnt->SetParams(&pa);
 	}
 
-	pCharacter = GetEntity()->GetCharacter(0);	
+	pCharacter = GetEntity()->GetCharacter(0);
 	if (pCharacter)
 	{
 		pCharacter->EnableStartAnimation(false);
@@ -1676,37 +1422,6 @@ void CShark::SetParams(SmartScriptTable &rTable,bool resetFirst)
 	}
 	
 	rTable->GetValue("escapeAnchorType",m_params.escapeAnchorType);
-		
-
-	/*m_params.trailEffect = "";
-	const char *str;
-	if (rTable->GetValue("trailEffect",str))
-	{
-		
-		m_params.trailEffect = str;
-
-		rTable->GetValue("trailEffectMinSpeed",m_params.trailEffectMinSpeed);
-		rTable->GetValue("trailEffectMaxSpeedSize",m_params.trailEffectMaxSpeedSize);
-		rTable->GetValue("trailEffectMaxSpeedCount",m_params.trailEffectMaxSpeedCount);
-		rTable->GetValue("trailEffectDir",m_params.trailEffectDir);
-	}
-	*/
-/*	if (rTable->GetValue("turnSound",str) && gEnv->pSoundSystem)
-	{ 
-		m_pTurnSound = gEnv->pSoundSystem->CreateSound(str, FLAG_SOUND_DEFAULT_3D);  
-
-		if (m_pTurnSound)
-			m_pTurnSound->SetSemantic(eSoundSemantic_Living_Entity);
-
-		if (rTable->GetValue("turnSoundBone",str))
-		{ 
-			if (ICharacterInstance *pCharacter = GetEntity()->GetCharacter(0))      
-				m_params.turnSoundBoneId = pCharacter->GetISkeletonPose()->GetJointIDByName(str);
-		}
-
-		rTable->GetValue("turnSoundMaxVel", m_params.turnSoundMaxVel);
-	}  
-*/
 }
 
 void CShark::SetDesiredSpeed(const Vec3 &desiredSpeed)
@@ -1721,8 +1436,6 @@ void CShark::SetDesiredDirection(const Vec3 &desiredDir)
 		m_viewMtx.SetRotationVDir(desiredDir.GetNormalizedSafe());
 		m_eyeMtx = m_viewMtx;
 	}
-
-	//m_input.viewVector = desiredDir;
 }
 
 // common functionality can go in here and called from subclasses that override SetActorMovement
@@ -1762,21 +1475,20 @@ void CShark::SetActorMovement(SMovementRequestParams &control)
 
 	// overrides AI (which doesn't request movement
 	// shark always moves
-	SetDesiredSpeed(bodyDir*m_curSpeed);//(control.vMoveDir * control.fDesiredSpeed);
+	SetDesiredSpeed(bodyDir*m_curSpeed);
 }
 
 
 void CShark::GetActorInfo(SBodyInfo& bodyInfo)
 {
-	bodyInfo.vEyePos = GetEntity()->GetWorldPos();//GetEntity()->GetSlotWorldTM(0) * m_eyeOffset;
-	bodyInfo.vFirePos = GetEntity()->GetWorldPos();//GetEntity()->GetSlotWorldTM(0) * m_weaponOffset;
+	bodyInfo.vEyePos = GetEntity()->GetWorldPos();
+	bodyInfo.vFirePos = GetEntity()->GetWorldPos();
 
-	bodyInfo.vEyeDir = m_viewMtx.GetColumn(1);//m_eyeMtx.GetColumn(1);
+	bodyInfo.vEyeDir = m_viewMtx.GetColumn(1);
 
 	int headBoneID = GetBoneID(BONE_HEAD);
 	if (headBoneID>-1 && GetEntity()->GetCharacter(0))
 	{
-		//Matrix33 HeadMat(GetEntity()->GetCharacter(0)->GetISkeleton()->GetAbsJMatrixByID(headBoneID));
 		Matrix33 HeadMat( Matrix33(GetEntity()->GetCharacter(0)->GetISkeletonPose()->GetAbsJointByID(headBoneID).q) );
 		bodyInfo.vEyeDirAnim = Matrix33(GetEntity()->GetSlotWorldTM(0) * HeadMat).GetColumn(1);
 	} else {
@@ -1906,7 +1618,6 @@ void CShark::FullSerialize( TSerialize ser )
 	ser.EndGroup();
 
 	m_input.Serialize(ser);
-//	m_stats.Serialize(ser);
 	m_params.Serialize(ser);
 }
 
@@ -1932,10 +1643,6 @@ void SSharkInput::Serialize( TSerialize ser )
 	ser.Value("actions", actions);
 	ser.Value("movementVector", movementVector);
 	ser.Value("viewVector", viewVector);
-/*	ser.Value("posTarget", posTarget);
-	ser.Value("dirTarget", dirTarget);
-	ser.Value("upTarget", upTarget);
-	ser.Value("speedTarget", speedTarget);*/
 	ser.EndGroup();
 }
 
@@ -1971,20 +1678,3 @@ void SSharkParams::Serialize( TSerialize ser )
 
 	ser.EndGroup();
 }
-/*
-void SSharkStats::Serialize( TSerialize ser )
-{
-	ser.BeginGroup("SSharkStats");
-	ser.Value("inAir", inAir);
-	ser.Value("onGround", onGround);
-	ser.Value("speedModule", speed);
-	ser.Value("mass", mass);
-	ser.Value("bobCycle", bobCycle);
-	ser.Value("isRagdoll", isRagDoll);
-	ser.Value("velocity", velocity);
-//	ser.Value("eyePos", eyePos);
-	//ser.Value("eyeAngles", eyeAngles);
-	//ser.Value("dynModelOffset",dynModelOffset);
-	ser.EndGroup();
-}
-*/

@@ -46,7 +46,6 @@ bool CCompatibilityAlienMovementController::RequestMovement( CMovementRequest& r
 	}
 
 	IAnimationGraphState *pAnimationGraphState = m_pAlien->GetAnimationGraphState();
-	//CRY_ASSERT(pAnimationGraphState); // Hey, we can't assume we get a state!
 
 	if(pAnimationGraphState)
 	{
@@ -89,20 +88,6 @@ bool CCompatibilityAlienMovementController::RequestMovement( CMovementRequest& r
 				{
 					os.fDesiredSpeed *= max(distance/2,0.f);
 				}
-				/*if(distance>0)
-				{
-					if ( !b3D )
-						targetDisp.z=0;
-					targetDisp.NormalizeSafe(FORWARD_DIRECTION);
-					float diffDisp = targetDir.Dot(targetDisp);
-					if(diffDisp<0.9f)
-					{
-						os.vMoveDir = (pTarget->position - targetDir*0.3f) - currentPos;
-						if ( !b3D )
-							os.vMoveDir.z = 0;
-						os.vMoveDir.NormalizeSafe(FORWARD_DIRECTION);
-					}
-				}*/
 			}
 
 			float frameTime = gEnv->pTimer->GetFrameTime();
@@ -124,9 +109,6 @@ bool CCompatibilityAlienMovementController::RequestMovement( CMovementRequest& r
 	{
 		if (request.HasActorTarget())
 		{
-			// clear any action which might mess up the incoming exact positioning related AG states
-			//pAnimationGraphState->SetInput("Action","idle");
-
 			const SActorTargetParams& p = request.GetActorTarget();
 			SAnimationTargetRequest req;
 			req.position = p.location;
@@ -174,9 +156,6 @@ void CCompatibilityAlienMovementController::UpdateCurMovementState(const SActorF
 	SMovementState& state(m_currentMovementState);
 	CAlien::SBodyInfo bodyInfo;
 	m_pAlien->GetActorInfo( bodyInfo );
-	//state.maxSpeed = bodyInfo.maxSpeed;
-	//state.minSpeed = bodyInfo.minSpeed;
-	//state.normalSpeed = bodyInfo.normalSpeed;
 	state.stance = bodyInfo.stance;
 	state.m_StanceSize		= bodyInfo.m_stanceSizeAABB;
 	state.m_ColliderSize	= bodyInfo.m_colliderSizeAABB;
@@ -188,9 +167,6 @@ void CCompatibilityAlienMovementController::UpdateCurMovementState(const SActorF
 	state.upDirection = bodyInfo.vUpDir;
 	state.atMoveTarget = m_atTarget;
 	state.bodyDirection = m_pAlien->GetEntity()->GetWorldRotation() * Vec3(0,1,0);
-	/*	if (IItem * pItem = gEnv->pGame->GetIGameFramework()->GetIItemSystem()->GetItem( itemEntity ))
-	if (const IWeapon * pWeapon = pItem->GetIWeapon())
-	state.weaponPosition = pWeapon->GetFiringPos(Vec3(0,0,0));*/
 
 	if(m_currentMovementRequest.HasAimTarget())
 		state.aimDirection = (m_currentMovementRequest.GetAimTarget()-state.weaponPosition).GetNormalizedSafe();
@@ -213,10 +189,6 @@ void CCompatibilityAlienMovementController::UpdateCurMovementState(const SActorF
 	//---------------------------------------------
 	//FIXME
 	state.isAiming = true;
-	/*Vec3	fireDir(outShootTargetPos - m_pShooter->GetFirePos());
-	fireDir.normalize();
-	if(fireDir.Dot(bodyInfo.vFireDir) < cry_cosf(DEG2RAD(10.0)) )*/
-
 	state.isFiring = (m_pAlien->GetActorStats()->inFiring>0.001f);
 
 	if(m_currentMovementRequest.HasFireTarget())

@@ -73,11 +73,6 @@ private:
 	virtual void Insert(const char *key);
 	virtual void VirtualKeyboardInput(const char* direction);
 	virtual bool ProcessCommands(const string& text);
-	virtual bool Vote(const char* type=NULL, const char* kickuser=NULL);
-	virtual bool VoteYes(const char* param1=NULL, const char* param2=NULL);
-	virtual bool VoteNo(const char* param1=NULL, const char* param2=NULL);
-	virtual bool Lowtec(const char* param1=NULL, const char* param2=NULL);
-	virtual bool Quarantine(const char* param1=NULL, const char* param2=NULL);
 
 	//option-function mapper
 	typedef std::map<string, OpFuncPtr> TOpFuncMap;

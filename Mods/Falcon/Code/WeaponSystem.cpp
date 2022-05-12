@@ -524,7 +524,6 @@ bool CWeaponSystem::ScanXML(XmlNodeRef &root, const char *xmlFile)
 	{
 		m_pGame->GetIGameFramework()->GetIGameObjectSystem()->RegisterExtension(name, it->second, &classDesc);
 		pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(name);
-		assert(pClass);
 	}
 
 

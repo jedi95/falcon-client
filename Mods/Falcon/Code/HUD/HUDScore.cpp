@@ -337,7 +337,6 @@ void CHUDScore::Render()
 		ScoreEntry player = *it;
 
 		IEntity *pPlayer=gEnv->pEntitySystem->GetEntity(player.m_entityId);
-		//assert(pPlayer);
 		if (!pPlayer)
 			continue;
 

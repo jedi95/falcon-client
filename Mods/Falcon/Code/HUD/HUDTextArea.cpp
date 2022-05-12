@@ -7,8 +7,6 @@
 CHUDTextArea::CHUDTextArea() : m_pos(0, 0), m_fadetime (4.0f)
 {
 	m_pDefaultFont = GetISystem()->GetICryFont()->GetFont("default");
-	CRY_ASSERT(m_pDefaultFont);
-
 	m_pTimer = gEnv->pTimer;
 }
 

@@ -58,23 +58,10 @@ SStanceInfo CActor::m_defaultStance;
 	} \
 	}
 
-//int AnimEventCallback(ICharacterInstance *pCharacter, void *userdata)
-//{
-//	CActor *pInstance=static_cast<CActor *>(userdata);
-//	if (pInstance)
-//		pInstance->AnimationEvent(pCharacter, pCharacter->GetISkeleton()->GetLastAnimEvent());
-//
-//	return 1;
-//}
-
 //------------------------------------------------------------------------
 // "W" stands for "world"
 void SIKLimb::SetWPos(IEntity *pOwner,const Vec3 &pos,const Vec3 &normal,float blend,float recover,int requestID)
 {
-  assert(!_isnan(pos.len2()));
-  assert(!_isnan(normal.len2()));
-  assert(pos.len()<25000.f);
-
 	// NOTE Dez 13, 2006: <pvl> request ID's work like priorities - if
 	// the new request has an ID lower than the one currently being performed,
 	// nothing happens. 
@@ -104,17 +91,13 @@ void SIKLimb::SetWPos(IEntity *pOwner,const Vec3 &pos,const Vec3 &normal,float b
 
 void SIKLimb::Update(IEntity *pOwner,float frameTime)
 {	
-  ICharacterInstance *pCharacter = pOwner->GetCharacter(characterSlot);
+	ICharacterInstance *pCharacter = pOwner->GetCharacter(characterSlot);
 
 	lAnimPosLast = lAnimPos;
-	// pvl: the correction for translation is to be removed once character offsets are redone
-//	lAnimPos = pCharacter->GetISkeleton()->GetAbsJointByID(endBoneID).t - pOwner->GetSlotLocalTM (characterSlot, false).GetTranslation ();
 
-	Vec3 vRootBone = pCharacter->GetISkeletonPose()->GetAbsJointByID(0).t; // - pOwner->GetSlotLocalTM (characterSlot, false).GetTranslation ();
+	Vec3 vRootBone = pCharacter->GetISkeletonPose()->GetAbsJointByID(0).t;
 	vRootBone.z=0;
-	lAnimPos = pCharacter->GetISkeletonPose()->GetAbsJointByID(endBoneID).t-vRootBone;// - pOwner->GetSlotLocalTM (characterSlot, false).GetTranslation ();
-  
-  assert(!_isnan(lAnimPos.len2()));
+	lAnimPos = pCharacter->GetISkeletonPose()->GetAbsJointByID(endBoneID).t-vRootBone;
 
 	bool setLimbPos(true);
 	Vec3 finalPos=Vec3(ZERO);
@@ -124,10 +107,8 @@ void SIKLimb::Update(IEntity *pOwner,float frameTime)
 		Vec3 limbWPos = currentWPos;
 		finalPos = goalWPos;
 
-		//float middle(0.5f-fabs(0.5f - (blendTime / blendTimeMax)));
-		//finalPos.z += middle * 2.0f * 5.0f;
-
-		if (blendTime == 0.0011f) blendTime = 0.0f;
+		if (blendTime == 0.0011f)
+			blendTime = 0.0f;
 
 		finalPos -= (finalPos - limbWPos) * min(blendTime / blendTimeMax,1.0f);
 		currentWPos = finalPos;
@@ -154,15 +135,12 @@ void SIKLimb::Update(IEntity *pOwner,float frameTime)
 		setLimbPos = false;
 	}
 
-  assert(!_isnan(finalPos.len2()));
-  assert(!_isnan(goalNormal.len2()));
-
 	if (setLimbPos)
 	{
 		if (flags & IKLIMB_RIGHTHAND)
-			pCharacter->GetISkeletonPose()->SetHumanLimbIK(finalPos,CA_ARM_RIGHT); //SetRArmIK(finalPos);
+			pCharacter->GetISkeletonPose()->SetHumanLimbIK(finalPos,CA_ARM_RIGHT);
 		else if (flags & IKLIMB_LEFTHAND)
-			pCharacter->GetISkeletonPose()->SetHumanLimbIK(finalPos,CA_ARM_LEFT);  //SetLArmIK(finalPos);
+			pCharacter->GetISkeletonPose()->SetHumanLimbIK(finalPos,CA_ARM_LEFT);
 		else if (middleBoneID>-1)
 		{
 			pCharacter->GetISkeletonPose()->SetCustomArmIK(finalPos,rootBoneID,middleBoneID,endBoneID);
@@ -205,8 +183,6 @@ IVehicle *SLinkStats::GetLinkedVehicle()
 
 void SLinkStats::Serialize(TSerialize ser)
 {
-	assert(ser.GetSerializationTarget() != eST_Network);
-
 	ser.BeginGroup("PlayerLinkStats");
 
 	//when reading, reset the structure first.
@@ -305,7 +281,7 @@ void CActor::ClearExtensionCache()
 	}
 }
 //------------------------------------------------------------------------
-void CActor::CrapDollize(bool enable /*= true*/)
+void CActor::CrapDollize(bool enable)
 {
 	// make sure dead AI is not affected by explosions
 #ifdef CRAPDOLLS
@@ -444,10 +420,6 @@ void CActor::ReviveInPlace(Vec3 pos, Ang3 angles)
 	GetEntity()->SetWorldTM(Matrix34::Create(Vec3(1, 1, 1), rot, pos));
 
 	m_reviveNoReactionTime = .1f;
-	//m_dropWpnPendingId = 0;
-	//m_dropWpnWaitTime = 0.f;
-	//m_suicideDelay = -1.f;
-	//ClearExtensionCache();
 
 	//set the actor game parameters
 	SmartScriptTable gameParams;
@@ -460,7 +432,6 @@ void CActor::ReviveInPlace(Vec3 pos, Ang3 angles)
 
 	if (currentItemId && gEnv->bClient && !gEnv->bServer)
 	{
-		//		CryLogAlways("GAME: Item selected before model updated!!1");
 		m_pItemSystem->SetActorItem(this, (EntityId)0, false);
 		SelectItem(currentItemId, false);
 	}
@@ -507,7 +478,6 @@ void CActor::ReviveInPlace(Vec3 pos, Ang3 angles)
 	m_inCombat = false;
 	m_enterCombat = false;
 	m_combatTimer = 0.0f;
-	//	m_lastFootStepPos = ZERO;
 	m_rightFoot = true;
 	m_pReplacementMaterial = 0;
 
@@ -545,7 +515,6 @@ void CActor::NetReviveInPlaceInVehicle()
 		Physicalize();
 
 	IVehicle* pVehicle = GetLinkedVehicle();
-	assert(pVehicle);
 	if (pVehicle)
 	{
 		IVehicleSeat* pSeat = pVehicle->GetSeatForPassenger(GetEntityId());
@@ -590,7 +559,6 @@ void CActor::Revive( bool fromInit )
 	
 	if (currentItemId && gEnv->bClient && !gEnv->bServer)
 	{
-//		CryLogAlways("GAME: Item selected before model updated!!1");
 		m_pItemSystem->SetActorItem(this, (EntityId)0, false);
 		SelectItem(currentItemId, false);
 	}
@@ -637,7 +605,6 @@ void CActor::Revive( bool fromInit )
 	m_inCombat = false;
 	m_enterCombat = false;
 	m_combatTimer = 0.0f;
-//	m_lastFootStepPos = ZERO;
 	m_rightFoot = true;
 	m_pReplacementMaterial = 0;
 
@@ -646,8 +613,8 @@ void CActor::Revive( bool fromInit )
 	if (m_screenEffects)
 		m_screenEffects->ClearAllBlendGroups(true);
 
-  if (IsClient())
-    gEnv->p3DEngine->ResetPostEffects();
+	if (IsClient())
+		gEnv->p3DEngine->ResetPostEffects();
 
 	//reset some AG inputs
 	if (m_pAnimatedCharacter)
@@ -658,8 +625,6 @@ void CActor::Revive( bool fromInit )
 		m_pAnimatedCharacter->SetParams( m_pAnimatedCharacter->GetParams().ModifyFlags(eACF_EnableMovementProcessing,0));
 		m_pAnimatedCharacter->GetAnimationGraphState()->SetInput( m_inputHealth, GetMaxHealth() );
 	}
-
-//	m_footstepAccumDistance = 0.0f;
 
 	ResetHelmetAttachment();
 
@@ -681,17 +646,12 @@ void CActor::Physicalize(EStance stance)
 {
 	//FIXME:this code is duplicated from scriptBind_Entity.cpp, there should be a function that fill a SEntityPhysicalizeParams struct from a script table.
 	IScriptTable* pScriptTable = GetEntity()->GetScriptTable();
-  assert(pScriptTable);
-  if (!pScriptTable)
-    return;
+	if (!pScriptTable)
+		return;
 
-  SmartScriptTable physicsParams;
-  if (pScriptTable->GetValue("physicsParams", physicsParams))
+	SmartScriptTable physicsParams;
+	if (pScriptTable->GetValue("physicsParams", physicsParams))
 	{
-		//first, the actor model has to be loaded, this is still using lua for the moment.
-		//ICharacterInstance *pChar = GetEntity()->GetCharacter(0);
-		//pChar->GetModelFilePath()
-
 		SetActorModel();
 
 		pe_player_dimensions playerDim;
@@ -709,7 +669,6 @@ void CActor::Physicalize(EStance stance)
 		physicsParams->GetValue("flags",pp.nFlagsOR);
 		physicsParams->GetValue("partid",pp.nAttachToPart);
 		physicsParams->GetValue("stiffness_scale",pp.fStiffnessScale);
-
 
 		SmartScriptTable props;
 		if(GetEntity()->GetScriptTable()->GetValue("Properties", props))
@@ -764,7 +723,6 @@ void CActor::Physicalize(EStance stance)
 
 			SActorParams* params = GetActorParams();
 
-
 			if(!is_unused(playerDyn.timeImpulseRecover))
 				m_timeImpulseRecover = playerDyn.timeImpulseRecover;
 			else
@@ -800,7 +758,6 @@ void CActor::Physicalize(EStance stance)
 			nop.type = PE_NONE;
 			GetEntity()->Physicalize(nop);
 		}
-
 		GetEntity()->Physicalize(pp);
 	}
 
@@ -830,8 +787,8 @@ void CActor::Physicalize(EStance stance)
 void CActor::SetActorModel()
 {
 	// this should be pure-virtual, but for the moment to support alien scripts
-  if (IScriptTable* pScriptTable = GetEntity()->GetScriptTable())
-	  Script::CallMethod(pScriptTable, "SetActorModel", IsClient());
+	if (IScriptTable* pScriptTable = GetEntity()->GetScriptTable())
+		Script::CallMethod(pScriptTable, "SetActorModel", IsClient());
 }
 
 //------------------------------------------------------------------------
@@ -842,9 +799,6 @@ void CActor::PostPhysicalize()
 	SetStance(STANCE_STAND);
 
 	GetGameObject()->RequestRemoteUpdate(eEA_Physics | eEA_GameClientDynamic | eEA_GameServerDynamic | eEA_GameClientStatic | eEA_GameServerStatic);
-
-//	if (m_pAnimatedCharacter)
-//		m_pAnimatedCharacter->ResetState();
 
 	if (IsPlayer())
 	{
@@ -965,7 +919,7 @@ int CActor::GetFallenTime() const
 }
 
 //------------------------------------------------------------------------
-void CActor::Fall(Vec3 hitPos, bool forceFall, float sleepTime /*=0.0f*/)
+void CActor::Fall(Vec3 hitPos, bool forceFall, float sleepTime)
 {
 	// player doesn't fall in single-player for now
 	if(IsPlayer() && !gEnv->bMultiplayer)
@@ -1195,18 +1149,6 @@ void CActor::SetStance(EStance desiredStance)
 		m_stanceChangeTime = gEnv->pTimer->GetCurrTime();
 		m_previousStance = m_stance;
 	}
-
-/*
-	//Player should not change stance if the physical cylinder collider can not change too
-	if (desiredStance != m_stance)
-	{
-		if (!TrySetStance(desiredStance))
-			return;
-	}
-
-	if (m_pAnimatedCharacter && !m_pAnimatedCharacter->InStanceTransition() && (desiredStance != m_stance))
-		m_pAnimatedCharacter->RequestStance( desiredStance, GetStanceInfo(desiredStance)->name );
-*/
 }
 
 //------------------------------------------------------
@@ -1227,12 +1169,10 @@ IEntity *CActor::LinkToVehicle(EntityId vehicleId)
 		bool enabled = pLinked?true:false;
 		if (enabled)
 		{
-//			params.flags &= ~eACF_EnableMovementProcessing;
 			params.flags |= eACF_NoLMErrorCorrection;
 		}
 		else
 		{
-//			params.flags |= eACF_EnableMovementProcessing;
 			params.flags &= ~eACF_NoLMErrorCorrection;
 		}
 		
@@ -1261,7 +1201,7 @@ IEntity *CActor::LinkToVehicle(EntityId vehicleId)
   if (pLinked)  
     pLinked->AttachChild(GetEntity(), ENTITY_XFORM_USER|IEntity::ATTACHMENT_KEEP_TRANSFORMATION);
   else
-    GetEntity()->DetachThis(IEntity::ATTACHMENT_KEEP_TRANSFORMATION,/*ENTITY_XFORM_USER*/0);
+    GetEntity()->DetachThis(IEntity::ATTACHMENT_KEEP_TRANSFORMATION, 0);
   
 	return pLinked;
 }
@@ -1375,8 +1315,6 @@ void CActor::SetDropWeaponTimer( EntityId weaponId, float delay )
 void CActor::Update(SEntityUpdateContext& ctx, int slot)
 {
 	Vec3 cp=GetEntity()->GetWorldPos();
-	//CryLogAlways("%s::Update(current: %.2f,%.2f,%.2f)", GetEntity()->GetName(), cp.x,cp.y,cp.z);
-	// ScreenFX only on client actor
 	if (IsClient() && m_screenEffects == 0)
 	{
 		m_screenEffects = new CScreenEffects(this);
@@ -1431,7 +1369,6 @@ void CActor::Update(SEntityUpdateContext& ctx, int slot)
 				} else
 					m_sleepTimer = 0;
 		}
-		//float waterLevel = gEnv->p3DEngine->GetWaterLevel(cp);
 		if (m_sleepTimer<=0.0f)
 		{
 			m_sleepTimer=0.0f;
@@ -1464,22 +1401,10 @@ void CActor::Update(SEntityUpdateContext& ctx, int slot)
 	if (m_frozenAmount>0.f && !IsFrozen())
 		SetFrozenAmount(m_frozenAmount - g_pGameCVars->g_frostDecay*ctx.fFrameTime);
   
-/*
-	// remove this if AI is not supposed to unfreeze
-	if (m_frozenAmount>0.0f && m_pGameFramework->IsServer() && !IsPlayer())
-	{
-		m_frozenAmount=CLAMP(m_frozenAmount-ctx.fFrameTime/5.0f, 0.0f, 1.0f); // max 3secs frozen (will be reduced by shaking mouse)
-		if (m_frozenAmount<=0.0f)
-			g_pGame->GetGameRules()->FreezeEntity(GetEntityId(), false, false);
-	}
-*/
 	UpdateZeroG(ctx.fFrameTime);
 	
 	if (GetHealth() > 0.0f)
 		UpdateFootSteps(ctx.fFrameTime);
-	
-	//if (!m_pAnimatedCharacter)
-	//	GameWarning("%s has no AnimatedCharacter!", GetEntity()->GetName());
 
 	if (GetHealth() > 0.0f || (gEnv->bMultiplayer && GetSpectatorMode() != eASM_None))
 	{
@@ -1511,14 +1436,6 @@ void CActor::Update(SEntityUpdateContext& ctx, int slot)
 		{
 			m_enterCombat = false;
 			m_inCombat = true;
-			//// Entered combat, do an effect if we're the client
-			//if (IsClient() && GetScreenEffects() != 0)
-			//{
-			//	CWaveBlend *blend = new CWaveBlend();
-			//	CPostProcessEffect *effect = new CPostProcessEffect(GetEntityId(),"Global_Saturation", .8f);
-			//	GetScreenEffects()->ClearBlendGroup(m_saturationID, false);
-			//	GetScreenEffects()->StartBlend(effect, blend, 1.0f/15.0f, m_saturationID);
-			//}
 		}
 		
 		m_combatTimer -= ctx.fFrameTime;
@@ -1528,14 +1445,6 @@ void CActor::Update(SEntityUpdateContext& ctx, int slot)
 	{
 		m_combatTimer = 0.0f;
 		m_inCombat = false;
-		//// Not in combat
-		//if (IsClient() && GetScreenEffects() != 0)
-		//{
-		//	CWaveBlend *blend = new CWaveBlend();
-		//	CPostProcessEffect *effect = new CPostProcessEffect(GetEntityId(), "Global_Saturation", 1.0f);
-		//	GetScreenEffects()->ClearBlendGroup(m_saturationID, false);
-		//	GetScreenEffects()->StartBlend(effect, blend, 1.0f/5.0f, m_saturationID);
-		//}
 	}
 	//should be this at the end of the update loop?
 	//if yes, a PostUpdate function should be created.
@@ -1642,9 +1551,6 @@ bool CActor::UpdateStance()
 
 bool CActor::TrySetStance(EStance stance)
 {
-	//  if (stance == STANCE_NULL)
-	//	  return true;
-
 	IPhysicalEntity *pPhysEnt = GetEntity()->GetPhysics();
 	int result = 0;
 	if (pPhysEnt)
@@ -1690,7 +1596,7 @@ void CActor::OnAction(const ActionId& actionId, int activationMode, float value)
 void CActor::CreateScriptEvent(const char *event,float value,const char *str)
 {
 	IEntity *pEntity = GetEntity(); 
-  IScriptTable* pScriptTable = pEntity ? pEntity->GetScriptTable() : 0;
+	IScriptTable* pScriptTable = pEntity ? pEntity->GetScriptTable() : 0;
 
 	if (pScriptTable)
 	{
@@ -1746,7 +1652,7 @@ void CActor::AnimationEvent(ICharacterInstance *pCharacter, const AnimEventInsta
 }
 
 
-void CActor::RequestFacialExpression(const char* pExpressionName /* = NULL */) 
+void CActor::RequestFacialExpression(const char* pExpressionName) 
 {
 	ICharacterInstance* pCharacter = GetEntity()->GetCharacter(0);
 	IFacialInstance* pFacialInstance = (pCharacter ? pCharacter->GetFacialInstance() : 0);
@@ -1765,8 +1671,6 @@ void CActor::PrecacheFacialExpression(const char* pExpressionName)
 
 void CActor::FullSerialize( TSerialize ser )
 {	
-	assert(ser.GetSerializationTarget() != eST_Network);
-
 	ser.BeginGroup("CActor");
 	int oldHealth = (int)m_health;
 	ser.Value("health", m_health);		
@@ -1876,12 +1780,6 @@ void CActor::SetHealth( int health )
 		if (IsGod() > 0) // handled in CPlayer
 			return;
 
-		if (IsClient() == false)
-		{
-			if (gEnv->pAISystem && GetEntity() && GetEntity()->GetAI())
-				gEnv->pAISystem->DebugReportDeath(GetEntity()->GetAI());
-		}
-
 		SActorStats *pStats = GetActorStats();
 
 		if (pStats && pStats->isRagDoll)
@@ -1945,11 +1843,6 @@ void CActor::DamageInfo(EntityId shooterID, EntityId weaponID, float damage, con
 					CLinearBlend *blendIn = new CLinearBlend(1);
 					float speed = 1.0f/fovtime;
 
-					//float speed = (1.0f/fovtime) * (newFOV - m_screenEffects->GetCurrentFOV())/(newFOV - 1.0f);
-					//speed = 1.0f/fabs(speed);
-	
-					//if (m_screenEffects->HasJobs(m_hitReactionID))
-					//	speed = m_screenEffects->GetAdjustedSpeed(m_hitReactionID);
 					m_screenEffects->ClearBlendGroup(m_hitReactionID);
 					m_screenEffects->ClearBlendGroup(m_autoZoomInID);
 					m_screenEffects->StartBlend(zOut, blendOut, speed, m_hitReactionID);
@@ -1958,11 +1851,6 @@ void CActor::DamageInfo(EntityId shooterID, EntityId weaponID, float damage, con
 			}
 		}
 	}  
-	/*
-	else if (!strcmp("fall", damageType))
-	{
-	}
-	*/
 }
 
 void CActor::SetFrozenAmount(float amount)
@@ -2082,10 +1970,6 @@ bool CActor::SetAspectProfile( EEntityAspects aspect, uint8 profile )
 
 	if (aspect == eEA_Physics)
 	{
-		/*CryLog("%s::SetProfile(%d): %s (was: %d %s)", GetEntity()->GetName(),
-		profile, profile==eAP_Alive?"alive":(profile==eAP_Ragdoll?"ragdoll":(profile==eAP_Spectator?"spectator":(profile==eAP_Frozen?"frozen":"unknown"))),
-			m_currentPhysProfile, m_currentPhysProfile==eAP_Alive?"alive":(m_currentPhysProfile==eAP_Ragdoll?"ragdoll":(m_currentPhysProfile==eAP_Spectator?"spectator":(m_currentPhysProfile==eAP_Frozen?"frozen":"unknown"))));
-*/
 		if (m_currentPhysProfile==profile && !gEnv->pSystem->IsSerializingFile()) //rephysicalize when loading savegame
 			return true;
 
@@ -2364,16 +2248,9 @@ void CActor::HandleEvent( const SGameObjectEvent& event )
 
 		const float recoilDuration = 0.2f;
 		const float recoilDistance = 0.1f;
-/*
-		if (event.param != NULL)
-		{
-			recoilDuration = *((float*)(event.param)) * 0.1f;
-			recoilDistance = *((float*)(event.param)) * 0.01f;
-		}
-*/
 		m_pAnimatedCharacter->TriggerRecoil(recoilDuration, recoilDistance);
 	}
-	else	if (event.event == eCGE_OnShoot)
+	else if (event.event == eCGE_OnShoot)
 	{
 		SActorStats *pStats = GetActorStats();
 		if (pStats)
@@ -2386,10 +2263,6 @@ void CActor::HandleEvent( const SGameObjectEvent& event )
 	else if (event.event == eCGE_EnableFallAndPlay)
 	{
 		RagDollize(true);
-	}
-	else if (event.event == eCGE_DisableFallAndPlay)
-	{
-		assert(false);
 	}
 	else if (event.event == eCGE_EnablePhysicalCollider)
 	{
@@ -2455,11 +2328,6 @@ void CActor::UpdateAnimGraph( IAnimationGraphState * pState )
 			// NOTE: freefall & parachute was moved to ChangeParachuteState() in Player.cpp.
 		}
 	}
-
-	//state.pHealth = &m_health;
-
-	//const char * p = GetStanceInfo(m_stance)->name;
-	//state.pStance = &p;
 }
 
 void CActor::QueueAnimationState( const char * state )
@@ -2541,8 +2409,7 @@ Vec3 CActor::GetLocalEyePos2(int slot) const
 
 		Vec3 PelvisPos=Vec3(ZERO);
 		if (id_pelvis>-1)
-		//	PelvisPos = Quat::CreateRotationZ(-gf_PI/2)*pCharacter->GetISkeleton()->GetAbsJointByID(id_pelvis).t;
-		PelvisPos = pCharacter->GetISkeletonPose()->GetAbsJointByID(id_pelvis).t;
+			PelvisPos = pCharacter->GetISkeletonPose()->GetAbsJointByID(id_pelvis).t;
 
 		if (id_right>-1 && id_left>-1)
 		{
@@ -2572,8 +2439,6 @@ void CActor::UpdateZeroG(float frameTime)
 	else
 		pStats->nextZeroGCheck = 1.0f + (cry_rand()/(float)RAND_MAX)*0.5f;
 
-	//CryLogAlways("next ZeroG check:%.1f",pStats->nextZeroGCheck);
-
 	Vec3 wpos(GetEntity()->GetWorldPos());
 	Vec3 checkOffset(1,1,1);
 
@@ -2596,27 +2461,13 @@ void CActor::UpdateZeroG(float frameTime)
 				//check for all zeroG areas to compute the average up vector for the gyroscope.
 				if (fd.iForeignData == ZEROG_AREA_ID)
 				{
-/*
-					pe_simulation_params simpar;
-					if ((ppList[i]->GetParams(&simpar) != 0) && simpar.gravity.IsZero())
+					pe_status_pos sp;
+					if (ppList[i]->GetStatus(&sp) != 0)
 					{
-*/
-						pe_status_pos sp;
-						if (ppList[i]->GetStatus(&sp) != 0)
-						{
-							//AABB bbox(sp.BBox);
-
-							pStats->zeroGUp += sp.q.GetColumn2();
-							pStats->zeroGUp.NormalizeSafe(Vec3(0,0,1));
-							pStats->inZeroG = true;
-						}
-/*
+						pStats->zeroGUp += sp.q.GetColumn2();
+						pStats->zeroGUp.NormalizeSafe(Vec3(0,0,1));
+						pStats->inZeroG = true;
 					}
-					else
-					{
-						pStats->inZeroG = false;
-					}
-*/
 				}
 			}
 		}
@@ -2719,9 +2570,6 @@ bool CActor::CanPickUpObject(IEntity *obj, float& heavyness, float& volume)
 	pe_status_dynamics dynStat;
 	if (pEnt->GetStatus(&dynStat))
 		mass = dynStat.mass;
-	/*pe_simulation_params sp;	
-	if (pEnt->GetParams(&sp))
-		mass = sp.mass;	*/
 	
 	AABB lBounds;
 	obj->GetLocalBounds(lBounds);
@@ -2948,7 +2796,7 @@ CWeapon *CActor::GetWeaponByClass(IEntityClass* pClass) const
 
 
 //------------------------------------------------------------------------
-void CActor::SelectLastItem(bool keepHistory, bool forceNext /* = false */)
+void CActor::SelectLastItem(bool keepHistory, bool forceNext)
 {
 	IInventory *pInventory = GetInventory();
 	if (!pInventory)
@@ -3178,7 +3026,7 @@ void CActor::DropAttachedItems()
 	}
 }
 //------------------------------------------------------------------------
-IItem *CActor::GetCurrentItem(bool includeVehicle/*=false*/) const
+IItem *CActor::GetCurrentItem(bool includeVehicle) const
 {
   if (EntityId itemId = GetCurrentItemId(includeVehicle))
 	  return m_pItemSystem->GetItem(itemId);
@@ -3187,7 +3035,7 @@ IItem *CActor::GetCurrentItem(bool includeVehicle/*=false*/) const
 }
 
 //------------------------------------------------------------------------
-EntityId CActor::GetCurrentItemId(bool includeVehicle/*=false*/) const
+EntityId CActor::GetCurrentItemId(bool includeVehicle) const
 {
   if (includeVehicle)
   {
@@ -3350,9 +3198,8 @@ void CActor::SetMaterialRecursive(ICharacterInstance *charInst, bool undo, IMate
 			if (obj)
 			{
 				SetMaterialRecursive(obj->GetICharacterInstance(), undo, newMat);
-				if (/*!obj->GetICharacterInstance() &&*/ ((!undo && m_attchObjMats.find(obj) == m_attchObjMats.end()) || undo && m_attchObjMats.find(obj) != m_attchObjMats.end()))
+				if ((!undo && m_attchObjMats.find(obj) == m_attchObjMats.end()) || undo && m_attchObjMats.find(obj) != m_attchObjMats.end())
 				{
-
 					if (undo)
 						obj->SetMaterial(NULL);
 					else
@@ -3442,11 +3289,7 @@ IMPLEMENT_RMI(CActor, SvRequestPickUpItem)
 
 	if (GetHealth()<=0)
 		return true;
-/*
-	// probably should check for ownerId==clientChannelOwnerId
-	IActor *pChannelActor=m_pGameFramework->GetIActorSystem()->GetActorByChannelId(m_pGameFramework->GetGameChannelId(pNetChannel));
-	assert(pChannelActor);
-*/
+
 	EntityId ownerId=pItem->GetOwnerId();
 	if (!ownerId)
 		pItem->PickUp(GetEntityId(), true);
@@ -3545,7 +3388,6 @@ void CActor::NetReviveInVehicle(EntityId vehicleId, int seatId, int teamId)
 		Physicalize();
 
 	IVehicle *pVehicle=m_pGameFramework->GetIVehicleSystem()->GetVehicle(vehicleId);
-	assert(pVehicle);
 	if(pVehicle)
 	{
 		IVehicleSeat *pSeat=pVehicle->GetSeatById(seatId);
@@ -3617,68 +3459,6 @@ void CActor::NetKill(EntityId shooterId, uint16 weaponClassId, int damage, int m
 				ToggleThirdPerson();
 		}
 	}
-
-/*	if (IsClient())
-	{
-		IActor *pActor=shooterId?m_pGameFramework->GetIActorSystem()->GetActor(shooterId):0;
-		if (!pActor || shooterId==GetEntityId())
-			pHUD->BattleLogEvent(eBLE_Warning, "@mp_BLYouDied");
-		else if (IGameRules *pGameRules = g_pGame->GetGameRules())
-		{
-			IActor *pActor=m_pGameFramework->GetIActorSystem()->GetActor(shooterId);
-			if (pActor && ranked)
-				g_pGame->GetHUD()->BattleLogEvent(eBLE_Warning, "@mp_BLKilledYouRank", pActor->GetEntity()->GetName(), pHUD->GetPlayerRank(shooterId, true));
-			else
-				g_pGame->GetHUD()->BattleLogEvent(eBLE_Warning, "@mp_BLKilledYou", pActor?pActor->GetEntity()->GetName():weaponClassName);
-		}
-	}
-	else
-	{
-		bool display=true;
-		bool clientShooter=(shooterId == m_pGameFramework->GetClientActorId());
-
-		if (!clientShooter)
-		{
-			display=false;
-
-			IActor *pClientActor=m_pGameFramework->GetClientActor();
-			if (pClientActor)
-			{
-				float distSq=(pClientActor->GetEntity()->GetWorldPos()-GetEntity()->GetWorldPos()).len2();
-				if (distSq<=40.0f*40.0f)
-					display=true;
-			}
-		}
-
-		if (display)
-		{
-			IActor *pActor=shooterId?m_pGameFramework->GetIActorSystem()->GetActor(shooterId):0;
-
-			if (clientShooter)
-			{
-				if (ranked)
-					pHUD->BattleLogEvent(eBLE_Information, "@mp_BLYouKilledRank", GetEntity()->GetName(), pHUD->GetPlayerRank(GetEntityId(), true));
-				else
-					pHUD->BattleLogEvent(eBLE_Information, "@mp_BLYouKilled", GetEntity()->GetName());
-			}
-			else if (pActor && shooterId!=GetEntityId())
-			{
-				IEntity *pEntity=gEnv->pEntitySystem->GetEntity(shooterId);
-				if (ranked)
-					pHUD->BattleLogEvent(eBLE_Information, "@mp_BLPlayerKilledRank", pEntity->GetName(), pHUD->GetPlayerRank(shooterId, true), GetEntity()->GetName(), pHUD->GetPlayerRank(GetEntityId(), true));
-				else
-					pHUD->BattleLogEvent(eBLE_Information, "@mp_BLPlayerKilled", pEntity->GetName(), GetEntity()->GetName());
-			}
-			else
-			{
-				if (ranked)
-					pHUD->BattleLogEvent(eBLE_Information, "@mp_BLPlayerDiedRank", GetEntity()->GetName(), pHUD->GetPlayerRank(GetEntityId(), true));
-				else
-					pHUD->BattleLogEvent(eBLE_Information, "@mp_BLPlayerDied", GetEntity()->GetName());
-			}
-		}
-	}
-*/
 }
 
 //------------------------------------------------------------------------
@@ -3963,7 +3743,6 @@ IMPLEMENT_RMI(CActor, ClSetAmmo)
 	if (pInventory)
 	{
 		IEntityClass* pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(params.ammo.c_str());
-		assert(pClass);
 
 		int capacity = pInventory->GetAmmoCapacity(pClass);
 		int current = pInventory->GetAmmoCount(pClass);
@@ -3975,9 +3754,6 @@ IMPLEMENT_RMI(CActor, ClSetAmmo)
 				pInventory->SetAmmoCount(pClass,capacity);
 				if(IsClient() && g_pGame->GetHUD() && capacity - current > 0)
 				{
-					//char buffer[5];
-					//itoa(capacity - current, buffer, 10);
-					//g_pGame->GetHUD()->DisplayFlashMessage("@grab_ammo", 3, Col_Wheat, true, (string("@")+pClass->GetName()).c_str(), buffer);
 					if(g_pGame->GetHUD())
 					{
 						g_pGame->GetHUD()->DisplayAmmoPickup(pClass->GetName(), capacity - current);
@@ -3997,9 +3773,6 @@ IMPLEMENT_RMI(CActor, ClSetAmmo)
 			pInventory->SetAmmoCount(pClass, params.count);
 			if(IsClient() && g_pGame->GetHUD() && params.count - current > 0)
 			{
-				/*char buffer[5];
-				itoa(params.count - current, buffer, 10);
-				g_pGame->GetHUD()->DisplayFlashMessage("@grab_ammo", 3, Col_Wheat, true, (string("@")+pClass->GetName()).c_str(), buffer);*/
 				if(g_pGame->GetHUD())
 				{
 					g_pGame->GetHUD()->DisplayAmmoPickup(pClass->GetName(), params.count - current);
@@ -4020,7 +3793,6 @@ IMPLEMENT_RMI(CActor, ClAddAmmo)
 	if (pInventory)
 	{
 		IEntityClass* pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(params.ammo.c_str());
-		assert(pClass);
 
 		int capacity = pInventory->GetAmmoCapacity(pClass);
 		int current = pInventory->GetAmmoCount(pClass);
@@ -4033,9 +3805,6 @@ IMPLEMENT_RMI(CActor, ClAddAmmo)
 			pInventory->SetAmmoCount(pClass,capacity);
 			if(capacity != current && IsClient() && g_pGame->GetHUD() && capacity - current > 0)
 			{
-				/*char buffer[5];
-				itoa(capacity - current, buffer, 10);
-				g_pGame->GetHUD()->DisplayFlashMessage("@grab_ammo", 3, Col_Wheat, true, (string("@")+pClass->GetName()).c_str(), buffer);*/
 				if(g_pGame->GetHUD())
 					g_pGame->GetHUD()->DisplayAmmoPickup(pClass->GetName(), capacity - current);
 			}
@@ -4045,9 +3814,6 @@ IMPLEMENT_RMI(CActor, ClAddAmmo)
 			pInventory->SetAmmoCount(pClass, pInventory->GetAmmoCount(pClass)+params.count);
 			if(IsClient() && g_pGame->GetHUD() && params.count - current > 0)
 			{
-				/*char buffer[5];
-				itoa(params.count - current, buffer, 10);
-				g_pGame->GetHUD()->DisplayFlashMessage("@grab_ammo", 3, Col_Wheat, true, (string("@")+pClass->GetName()).c_str(), buffer);*/
 				if(g_pGame->GetHUD())
 					g_pGame->GetHUD()->DisplayAmmoPickup(pClass->GetName(), params.count - current);
 			}
@@ -4161,9 +3927,6 @@ void CActor::NotifyInventoryAmmoChange(IEntityClass* pAmmoClass, int amount)
 	if(!pAmmoClass)
 		return;
 
-	/*char buffer[5];
-	itoa(amount, buffer, 10);
-	SAFE_HUD_FUNC(DisplayFlashMessage("@grab_ammo", 3, Col_Wheat, true, (string("@")+pAmmoClass->GetName()).c_str(), buffer));*/
 	if(g_pGame->GetHUD())
 		g_pGame->GetHUD()->DisplayAmmoPickup(pAmmoClass->GetName(), amount);
 }

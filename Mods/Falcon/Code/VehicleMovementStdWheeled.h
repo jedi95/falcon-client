@@ -32,7 +32,6 @@ public:
 
 	bool operator == (const CNetworkMovementStdWheeled &rhs)
 	{
-		//return (abs(m_steer-rhs.m_steer)<0.001f) && (abs(m_pedal-rhs.m_pedal)<0.001f) && (m_brake==rhs.m_brake);
 		return false;
 	};
 

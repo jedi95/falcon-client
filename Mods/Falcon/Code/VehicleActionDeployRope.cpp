@@ -117,12 +117,10 @@ void CVehicleActionDeployRope::OnVehicleEvent(EVehicleEvent event, const SVehicl
 	if (event == eVE_PassengerExit && params.iParam == m_seatId)
 	{
 		IActorSystem* pActorSystem = gEnv->pGame->GetIGameFramework()->GetIActorSystem();
-		assert(pActorSystem);
 
 		IActor* pActor = pActorSystem->GetActor(params.entityId);
 		if (!pActor)
 		{
-			assert(pActor);
 			return;
 		}
 
@@ -154,7 +152,6 @@ void CVehicleActionDeployRope::Update(const float deltaTime)
 		return;
 
 	IActorSystem* pActorSystem = gEnv->pGame->GetIGameFramework()->GetIActorSystem();
-	assert(pActorSystem);
 
 	IActor* pActor = pActorSystem->GetActor(m_actorId);
 	if (!pActor)
@@ -187,7 +184,6 @@ void CVehicleActionDeployRope::Update(const float deltaTime)
 bool CVehicleActionDeployRope::DeployRope()
 {
 	IActorSystem* pActorSystem = gEnv->pGame->GetIGameFramework()->GetIActorSystem();
-	assert(pActorSystem);
 
 	IActor* pActor = pActorSystem->GetActor(m_actorId);
 	if (!pActor)
@@ -207,7 +203,6 @@ bool CVehicleActionDeployRope::DeployRope()
 //------------------------------------------------------------------------
 void CVehicleActionDeployRope::AttachOnRope(IEntity* pEntity)
 {
-	assert(pEntity);
 	if (!pEntity)
 		return;
 
@@ -215,10 +210,7 @@ void CVehicleActionDeployRope::AttachOnRope(IEntity* pEntity)
 	if (!pRopeUpper)
 		return;
 
-	assert(pRopeUpper->GetPointsCount() >= 2);
-
 	IPhysicalEntity* pRopePhys = pRopeUpper->GetPhysics();
-	assert(pRopePhys);
 
 	typedef std::vector <Vec3> TVec3Vector;
 	TVec3Vector points;
@@ -253,7 +245,6 @@ void CVehicleActionDeployRope::AttachOnRope(IEntity* pEntity)
 EntityId CVehicleActionDeployRope::CreateRope(IPhysicalEntity* pLinkedEntity, const Vec3& highPos, const Vec3& lowPos)
 {
 	IEntitySystem* pEntitySystem = gEnv->pEntitySystem;
-	assert(pEntitySystem);
 
 	char pRopeName[256];
 	_snprintf(pRopeName, 256, "%s_rope_%d", m_pVehicle->GetEntity()->GetName(), m_seatId);
@@ -280,7 +271,6 @@ EntityId CVehicleActionDeployRope::CreateRope(IPhysicalEntity* pLinkedEntity, co
 	}
 
 	IRopeRenderNode* pRopeNode = pEntityRopeProxy->GetRopeRendeNode();
-	assert(pRopeNode);
 
 	Vec3 ropePoints[2];
 	ropePoints[0] = highPos;

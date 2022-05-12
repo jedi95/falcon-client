@@ -13,8 +13,6 @@ public:
 	CHUDFader()
 	{
 		m_pRenderer = gEnv->pRenderer;
-		assert (m_pRenderer != 0);
-
 		m_currentColor = Col_Black;
 		m_targetColor = Col_Black;
 		m_drawColor = Col_Black;

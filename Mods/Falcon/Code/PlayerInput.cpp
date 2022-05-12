@@ -64,12 +64,10 @@ CPlayerInput::CPlayerInput( CPlayer * pPlayer ) :
 		ADD_HANDLER(sprint, OnActionSprint);
 		ADD_HANDLER(togglestance, OnActionToggleStance);
 		ADD_HANDLER(prone, OnActionProne);
-		//ADD_HANDLER(zerogbrake, OnActionZeroGBrake);
 		ADD_HANDLER(gyroscope, OnActionGyroscope);
 		ADD_HANDLER(gboots, OnActionGBoots);
 		ADD_HANDLER(leanleft, OnActionLeanLeft);
 		ADD_HANDLER(leanright, OnActionLeanRight);
-		//ADD_HANDLER(holsteritem, OnActionHolsterItem);
 		ADD_HANDLER(use, OnActionUse);
 
 		ADD_HANDLER(speedmode, OnActionSpeedMode);
@@ -129,19 +127,13 @@ void CPlayerInput::DisableXI(bool disabled)
 
 void CPlayerInput::ApplyMovement(Vec3 delta)
 {
-	//m_deltaMovement += delta;
 	m_deltaMovement.x = clamp_tpl(m_deltaMovement.x+delta.x,-1.0f,1.0f);
 	m_deltaMovement.y = clamp_tpl(m_deltaMovement.y+delta.y,-1.0f,1.0f);
 	m_deltaMovement.z = 0;
-
-	//static float color[] = {1,1,1,1};
-	//gEnv->pRenderer->Draw2dLabel(100,50,1.5,color,false,"m_deltaMovement:%f,%f (requested:%f,%f", m_deltaMovement.x, m_deltaMovement.y,delta.x,delta.y);
 }
 
 void CPlayerInput::OnAction( const ActionId& actionId, int activationMode, float value )
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	m_pPlayer->GetGameObject()->ChangedNetworkState( INPUT_ASPECT );
 
 	m_lastActions=m_actions;
@@ -159,255 +151,158 @@ void CPlayerInput::OnAction( const ActionId& actionId, int activationMode, float
 		m_deltaMovement.zero();
 
 	// try to dispatch action to OnActionHandlers
-	bool handled;
+	bool handled = s_actionHandler.Dispatch(this, m_pPlayer->GetEntityId(), actionId, activationMode, value, filterOut);
 
+	if (!handled)
 	{
-		FRAME_PROFILER("New Action Processing", GetISystem(), PROFILE_GAME);
-		handled = s_actionHandler.Dispatch(this, m_pPlayer->GetEntityId(), actionId, activationMode, value, filterOut);
+		filterOut = true;
+		if (!m_pPlayer->m_stats.spectatorMode)
+		{
+			if (actions.ulammo==actionId && m_pPlayer->m_pGameFramework->CanCheat() && gEnv->pSystem->IsDevMode())
+			{
+				g_pGameCVars->i_unlimitedammo = 1;
+			}
+			else if (actions.debug_ag_step == actionId)
+			{
+				gEnv->pConsole->ExecuteString("ag_step");
+			}
+			else if(actions.voice_chat_talk == actionId)
+			{
+				if(gEnv->bMultiplayer)
+				{
+					if(activationMode == eAAM_OnPress)
+						g_pGame->GetIGameFramework()->EnableVoiceRecording(true);
+					else if(activationMode == eAAM_OnRelease)
+						g_pGame->GetIGameFramework()->EnableVoiceRecording(false);
+				}
+			}
+			else if(actions.xi_voice_chat_talk == actionId)
+			{
+				IInventory* pInventory = m_pPlayer->GetInventory();
+				bool binoculars = false;
+				bool scope = false;
+				if (pInventory)
+				{
+					EntityId itemId = pInventory->GetCurrentItem();
+					CWeapon *pWeapon = 0;
+					if (itemId)
+					{
+						pWeapon = m_pPlayer->GetWeapon(itemId);
+						if (pWeapon)
+						{
+							binoculars = (pWeapon->GetEntity()->GetClass() == CItem::sBinocularsClass);
+							scope = (pWeapon->IsZoomed() && pWeapon->GetMaxZoomSteps()>1);
+						}
+					}
+				}
+
+				if(activationMode == eAAM_OnPress)
+				{
+					m_binocularsTime = 0.5f;
+				}
+				else if(activationMode == eAAM_OnRelease)
+				{
+					if(m_binocularsTime>0.0f)
+					{
+						m_binocularsTime = 0.0f;
+						COffHand* pOffHand = static_cast<COffHand*>(m_pPlayer->GetWeaponByClass(CItem::sOffHandClass));
+						if (binoculars)
+							m_pPlayer->SelectLastItem(false,true);
+						else if(!m_pPlayer->m_stats.mountedWeaponID && (!pOffHand || (pOffHand->GetOffHandState()==eOHS_INIT_STATE) && !(m_pPlayer->GetNanoSuit() && !m_pPlayer->GetNanoSuit()->IsActive())) && !SAFE_HUD_FUNC_RET(IsInitializing()))
+						{
+							m_pPlayer->SelectItemByName("Binoculars", true);
+						}
+						DisableXI(false);
+					}
+					else
+					{
+						if(gEnv->bMultiplayer)
+						{
+							g_pGame->GetIGameFramework()->EnableVoiceRecording(false);
+						}
+					}
+				}
+				DisableXI(false);
+			}
+		}
 	}
 
+	if (!m_pPlayer->m_stats.spectatorMode)
 	{
-		FRAME_PROFILER("Regular Action Processing", GetISystem(), PROFILE_GAME);
+		IInventory* pInventory = m_pPlayer->GetInventory();
+		if (!pInventory)
+			return;
 
-		if (!handled)
+		bool binoculars = false;
+		bool scope = false;
+		EntityId itemId = pInventory->GetCurrentItem();
+		CWeapon *pWeapon = 0;
+		if (itemId)
 		{
-			filterOut = true;
-			if (!m_pPlayer->m_stats.spectatorMode)
+			pWeapon = m_pPlayer->GetWeapon(itemId);
+			if (pWeapon)
 			{
-				if (actions.ulammo==actionId && m_pPlayer->m_pGameFramework->CanCheat() && gEnv->pSystem->IsDevMode())
-				{
-					g_pGameCVars->i_unlimitedammo = 1;
-				}
-				else if (actions.debug_ag_step == actionId)
-				{
-					gEnv->pConsole->ExecuteString("ag_step");
-				}
-				else if(actions.voice_chat_talk == actionId)
-				{
-					if(gEnv->bMultiplayer)
-					{
-						if(activationMode == eAAM_OnPress)
-							g_pGame->GetIGameFramework()->EnableVoiceRecording(true);
-						else if(activationMode == eAAM_OnRelease)
-							g_pGame->GetIGameFramework()->EnableVoiceRecording(false);
-					}
-				}
-				else if(actions.xi_voice_chat_talk == actionId)
-				{
-					IInventory* pInventory = m_pPlayer->GetInventory();
-					bool binoculars = false;
-					bool scope = false;
-					if (pInventory)
-					{
-						EntityId itemId = pInventory->GetCurrentItem();
-						CWeapon *pWeapon = 0;
-						if (itemId)
-						{
-							pWeapon = m_pPlayer->GetWeapon(itemId);
-							if (pWeapon)
-							{
-								binoculars = (pWeapon->GetEntity()->GetClass() == CItem::sBinocularsClass);
-								scope = (pWeapon->IsZoomed() && pWeapon->GetMaxZoomSteps()>1);
-							}
-						}
-					}
-
-					if(activationMode == eAAM_OnPress)
-					{
-						m_binocularsTime = 0.5f;
-					}
-					else if(activationMode == eAAM_OnRelease)
-					{
-						if(m_binocularsTime>0.0f)
-						{
-							m_binocularsTime = 0.0f;
-							COffHand* pOffHand = static_cast<COffHand*>(m_pPlayer->GetWeaponByClass(CItem::sOffHandClass));
-							if (binoculars)
-								m_pPlayer->SelectLastItem(false,true);
-							else if(!m_pPlayer->m_stats.mountedWeaponID && (!pOffHand || (pOffHand->GetOffHandState()==eOHS_INIT_STATE) && !(m_pPlayer->GetNanoSuit() && !m_pPlayer->GetNanoSuit()->IsActive())) && !SAFE_HUD_FUNC_RET(IsInitializing()))
-							{
-								m_pPlayer->SelectItemByName("Binoculars", true);
-							}
-							DisableXI(false);
-						}
-						else
-						{
-							if(gEnv->bMultiplayer)
-							{
-								g_pGame->GetIGameFramework()->EnableVoiceRecording(false);
-							}
-						}
-					}
-					DisableXI(false);
-				}
+				binoculars = (pWeapon->GetEntity()->GetClass() == CItem::sBinocularsClass);
+				scope = (pWeapon->IsZoomed() && pWeapon->GetMaxZoomSteps()>1);
 			}
 		}
 
-		if (!m_pPlayer->m_stats.spectatorMode)
+		if (pVehicle)
 		{
-			IInventory* pInventory = m_pPlayer->GetInventory();
-			if (!pInventory)
-				return;
+			if (m_pPlayer->m_pVehicleClient && !m_pPlayer->IsFrozen())
+				m_pPlayer->m_pVehicleClient->OnAction(pVehicle, m_pPlayer->GetEntityId(), actionId, activationMode, value);
 
-			bool binoculars = false;
-			bool scope = false;
-			EntityId itemId = pInventory->GetCurrentItem();
-			CWeapon *pWeapon = 0;
-			if (itemId)
+			m_actions = 0;
+			m_deltaMovement.Set(0,0,0);
+		}
+		else if (m_pPlayer->GetHealth() > 0 && !m_pPlayer->m_stats.isFrozen.Value() && !m_pPlayer->m_stats.inFreefall.Value() && !m_pPlayer->m_stats.isOnLadder
+			&& !m_pPlayer->m_stats.isStandingUp && m_pPlayer->GetGameObject()->GetAspectProfile(eEA_Physics)!=eAP_Sleep)
+		{
+			m_pPlayer->CActor::OnAction(actionId, activationMode, value);
+
+			if (!binoculars && (!scope || actionId == actions.use))
 			{
-				pWeapon = m_pPlayer->GetWeapon(itemId);
-				if (pWeapon)
+				COffHand* pOffHand = static_cast<COffHand*>(m_pPlayer->GetWeaponByClass(CItem::sOffHandClass));
+				if (pOffHand)
 				{
-					binoculars = (pWeapon->GetEntity()->GetClass() == CItem::sBinocularsClass);
-					scope = (pWeapon->IsZoomed() && pWeapon->GetMaxZoomSteps()>1);
-				}
-			}
-
-			if (pVehicle)
-			{
-				// 06/06/2007: Bernd took the (good) decision to remove the ability to use binoculars from inside a vehicle
-				// Let's keep the (buggy in third person) code for now and remove it once it's validated by everyone else!
-
-/*				if (binoculars)
-				{
-					// This is needed to forward action like v_zoom_in/v_zoom_out to Binoculars
-					// FIXME?: Does it produce some conflicts with others things?
-					m_pPlayer->CActor::OnAction(actionId, activationMode, value);
-				}*/
-
-				if (m_pPlayer->m_pVehicleClient && !m_pPlayer->IsFrozen())
-					m_pPlayer->m_pVehicleClient->OnAction(pVehicle, m_pPlayer->GetEntityId(), actionId, activationMode, value);
-
-/*				if (actions.binoculars == actionId)
-				{
-					COffHand* pOffHand = static_cast<COffHand*>(m_pPlayer->GetWeaponByClass(CItem::sOffHandClass));
-					if (binoculars)
-					{
-						m_pPlayer->SelectLastItem(false);
-						g_pGame->GetIGameFramework()->GetIItemSystem()->GetItem(itemId)->Select(false);
-						if(m_pPlayer->GetCurrentItem(false))
-						{
-							m_pPlayer->GetInventory()->HolsterItem(false);
-							m_pPlayer->GetInventory()->HolsterItem(true);
-						}
-					}
-					else if(!m_pPlayer->m_stats.mountedWeaponID && (!pOffHand || (pOffHand->GetOffHandState()==eOHS_INIT_STATE)))
-					{
-						if(IVehicleSeat *pSeat = pVehicle->GetSeatForPassenger(m_pPlayer->GetEntityId()))
-						{
-							if(pSeat->IsGunner() && !pSeat->IsDriver())
-							{
-								m_pPlayer->SelectItemByName("Binoculars", true);
-								// If we open Binoculars while we are shooting, we need to simulate a release of the shooting key
-								pVehicle->OnAction(eVAI_Attack1,eAAM_OnRelease,1.0f,m_pPlayer->GetEntityId());
-							}
-						}
-					}
+					pOffHand->OnAction(m_pPlayer->GetEntityId(), actionId, activationMode, value);
 				}
 
-				if (actions.xi_binoculars == actionId)
+				if ((!pWeapon || !pWeapon->IsMounted()))
 				{
-					if(activationMode == eAAM_OnPress)
+					if ((actions.drop==actionId) && itemId)
 					{
-						if(IVehicleSeat *pSeat = pVehicle->GetSeatForPassenger(m_pPlayer->GetEntityId()))
+						float impulseScale=1.0f;
+						if (activationMode==eAAM_OnPress)
+							m_buttonPressure=2.5f;
+						if (activationMode==eAAM_OnRelease)
 						{
-							if(pSeat->IsGunner() && !pSeat->IsDriver())
+							m_buttonPressure=CLAMP(m_buttonPressure, 0.0f, 2.5f);
+							impulseScale=1.0f+(1.0f-m_buttonPressure/2.5f)*15.0f;
+							bool dual=pWeapon ? pWeapon->IsDualWield() : false;
+
+							if (m_pPlayer->DropItem(itemId, impulseScale, true) && pOffHand && pOffHand->IsSelected())
 							{
-								m_pPlayer->SelectItemByName("Binoculars", true);
-								// If we open Binoculars while we are shooting, we need to simulate a release of the shooting key
-								pVehicle->OnAction(eVAI_Attack1,eAAM_OnRelease,1.0f,m_pPlayer->GetEntityId());
-							}
-						}
-					}
-					else if(activationMode == eAAM_OnRelease)
-					{
-						if(binoculars)
-							m_pPlayer->SelectLastItem(false);
-					}
-				}*/
-
-				//FIXME:not really good
-				m_actions = 0;
-//			m_deltaRotation.Set(0,0,0);
-				m_deltaMovement.Set(0,0,0);
-			}
-			else if (m_pPlayer->GetHealth() > 0 && !m_pPlayer->m_stats.isFrozen.Value() && !m_pPlayer->m_stats.inFreefall.Value() && !m_pPlayer->m_stats.isOnLadder 
-				&& !m_pPlayer->m_stats.isStandingUp && m_pPlayer->GetGameObject()->GetAspectProfile(eEA_Physics)!=eAP_Sleep)
-			{
-				m_pPlayer->CActor::OnAction(actionId, activationMode, value);
-
-				if (!binoculars && (!scope || actionId == actions.use))
-				{
-					COffHand* pOffHand = static_cast<COffHand*>(m_pPlayer->GetWeaponByClass(CItem::sOffHandClass));
-					if (pOffHand)
-					{
-						pOffHand->OnAction(m_pPlayer->GetEntityId(), actionId, activationMode, value);
-					}
-
-					if ((!pWeapon || !pWeapon->IsMounted()))
-					{
-						if ((actions.drop==actionId) && itemId)
-						{
-							float impulseScale=1.0f;
-							if (activationMode==eAAM_OnPress)
-								m_buttonPressure=2.5f;
-							if (activationMode==eAAM_OnRelease)
-							{
-								m_buttonPressure=CLAMP(m_buttonPressure, 0.0f, 2.5f);
-								impulseScale=1.0f+(1.0f-m_buttonPressure/2.5f)*15.0f;
-								bool dual=pWeapon ? pWeapon->IsDualWield() : false;
-
-								if (m_pPlayer->DropItem(itemId, impulseScale, true) && pOffHand && pOffHand->IsSelected())
-								{		
-									EntityId fistsId = pInventory->GetItemByClass(CItem::sFistsClass);
-									if (!dual && fistsId)
-									{
-										m_pPlayer->SelectItem(fistsId, false);
-									}
-									pOffHand->PreExecuteAction(eOHA_REINIT_WEAPON, eAAM_OnPress);
-									CItem* pItem = static_cast<CItem*>(m_pPlayer->GetCurrentItem());
-									if (pItem)
-									{
-										pItem->SetActionSuffix("akimbo_");
-										pItem->PlayAction(g_pItemStrings->idle);
-									}
+								EntityId fistsId = pInventory->GetItemByClass(CItem::sFistsClass);
+								if (!dual && fistsId)
+								{
+									m_pPlayer->SelectItem(fistsId, false);
+								}
+								pOffHand->PreExecuteAction(eOHA_REINIT_WEAPON, eAAM_OnPress);
+								CItem* pItem = static_cast<CItem*>(m_pPlayer->GetCurrentItem());
+								if (pItem)
+								{
+									pItem->SetActionSuffix("akimbo_");
+									pItem->PlayAction(g_pItemStrings->idle);
 								}
 							}
 						}
-						else if (actions.nextitem==actionId)
-							m_pPlayer->SelectNextItem(1, true, 0);
-						else if (actions.previtem==actionId)
-							m_pPlayer->SelectNextItem(-1, true, 0);
-						else if (actions.handgrenade==actionId)
-							m_pPlayer->SelectNextItem(1, true, actionId.c_str());
-						else if (actions.explosive==actionId)
-							m_pPlayer->SelectNextItem(1, true, actionId.c_str());
-						else if (actions.utility==actionId)
-							m_pPlayer->SelectNextItem(1, true, actionId.c_str());
-						else if (actions.small==actionId)
-							m_pPlayer->SelectNextItem(1, true, actionId.c_str());
-						else if (actions.medium==actionId)
-							m_pPlayer->SelectNextItem(1, true, actionId.c_str());
-						else if (actions.heavy==actionId)
-							m_pPlayer->SelectNextItem(1, true, actionId.c_str());
-						else if (actions.debug==actionId)
-						{
-							if (g_pGame)
-							{							
-								if (!m_pPlayer->GetInventory()->GetItemByClass(CItem::sDebugGunClass))
-									g_pGame->GetWeaponSystem()->DebugGun(0);				
-								if (!m_pPlayer->GetInventory()->GetItemByClass(CItem::sRefWeaponClass))
-									g_pGame->GetWeaponSystem()->RefGun(0);
-							}
-
-							m_pPlayer->SelectNextItem(1, true, actionId.c_str());
-						}
 					}
-
-				}
-				else 
-				{
-					if (actions.handgrenade==actionId)
+					else if (actions.nextitem==actionId)
+						m_pPlayer->SelectNextItem(1, true, 0);
+					else if (actions.previtem==actionId)
+						m_pPlayer->SelectNextItem(-1, true, 0);
+					else if (actions.handgrenade==actionId)
 						m_pPlayer->SelectNextItem(1, true, actionId.c_str());
 					else if (actions.explosive==actionId)
 						m_pPlayer->SelectNextItem(1, true, actionId.c_str());
@@ -419,92 +314,117 @@ void CPlayerInput::OnAction( const ActionId& actionId, int activationMode, float
 						m_pPlayer->SelectNextItem(1, true, actionId.c_str());
 					else if (actions.heavy==actionId)
 						m_pPlayer->SelectNextItem(1, true, actionId.c_str());
-					else if (actions.drop==actionId && activationMode == eAAM_OnRelease && itemId)
-						m_pPlayer->DropItem(itemId, 1.0f, true);
-				}
-
-				if (actions.binoculars == actionId)
-				{
-					COffHand* pOffHand = static_cast<COffHand*>(m_pPlayer->GetWeaponByClass(CItem::sOffHandClass));
-					if (binoculars)
-						m_pPlayer->SelectLastItem(false,true);
-					else if(!m_pPlayer->m_stats.mountedWeaponID && (!pOffHand || (pOffHand->GetOffHandState()==eOHS_INIT_STATE) && !(m_pPlayer->GetNanoSuit() && !m_pPlayer->GetNanoSuit()->IsActive())) && !SAFE_HUD_FUNC_RET(IsInitializing()))
+					else if (actions.debug==actionId)
 					{
-						m_pPlayer->SelectItemByName("Binoculars", true);
+						if (g_pGame)
+						{
+							if (!m_pPlayer->GetInventory()->GetItemByClass(CItem::sDebugGunClass))
+								g_pGame->GetWeaponSystem()->DebugGun(0);
+							if (!m_pPlayer->GetInventory()->GetItemByClass(CItem::sRefWeaponClass))
+								g_pGame->GetWeaponSystem()->RefGun(0);
+						}
+						m_pPlayer->SelectNextItem(1, true, actionId.c_str());
 					}
-					DisableXI(false);
-				}
-				else if (actions.xi_binoculars == actionId)
-				{
-					if(activationMode == eAAM_OnPress)
-					{
-						m_pPlayer->SelectItemByName("Binoculars", true);
-					}
-					else if(activationMode == eAAM_OnRelease)
-					{
-						if(binoculars)
-							m_pPlayer->SelectLastItem(false);
-					}
-					DisableXI(false);
-				}
-
-				// suit shortcut keys
-				if(CNanoSuit* pSuit = m_pPlayer->GetNanoSuit())
-				{
-					if(actionId == actions.suit_shortcut_strength)
-						pSuit->SetMode(NANOMODE_STRENGTH);
-					else if(actionId == actions.suit_shortcut_speed)
-						pSuit->SetMode(NANOMODE_SPEED);
-					else if(actionId == actions.suit_shortcut_cloak)
-						pSuit->SetMode(NANOMODE_CLOAK);
-					else if(actionId == actions.suit_shortcut_armor)
-						pSuit->SetMode(NANOMODE_DEFENSE);
 				}
 			}
-
-			if (m_checkZoom)
+			else
 			{
-				IItem* pCurItem = m_pPlayer->GetCurrentItem();
-				IWeapon* pWeapon = 0;
-				if(pCurItem)
-					pWeapon = pCurItem->GetIWeapon();
-				if (pWeapon)
+				if (actions.handgrenade==actionId)
+					m_pPlayer->SelectNextItem(1, true, actionId.c_str());
+				else if (actions.explosive==actionId)
+					m_pPlayer->SelectNextItem(1, true, actionId.c_str());
+				else if (actions.utility==actionId)
+					m_pPlayer->SelectNextItem(1, true, actionId.c_str());
+				else if (actions.small==actionId)
+					m_pPlayer->SelectNextItem(1, true, actionId.c_str());
+				else if (actions.medium==actionId)
+					m_pPlayer->SelectNextItem(1, true, actionId.c_str());
+				else if (actions.heavy==actionId)
+					m_pPlayer->SelectNextItem(1, true, actionId.c_str());
+				else if (actions.drop==actionId && activationMode == eAAM_OnRelease && itemId)
+					m_pPlayer->DropItem(itemId, 1.0f, true);
+			}
+
+			if (actions.binoculars == actionId)
+			{
+				COffHand* pOffHand = static_cast<COffHand*>(m_pPlayer->GetWeaponByClass(CItem::sOffHandClass));
+				if (binoculars)
+					m_pPlayer->SelectLastItem(false,true);
+				else if(!m_pPlayer->m_stats.mountedWeaponID && (!pOffHand || (pOffHand->GetOffHandState()==eOHS_INIT_STATE) && !(m_pPlayer->GetNanoSuit() && !m_pPlayer->GetNanoSuit()->IsActive())) && !SAFE_HUD_FUNC_RET(IsInitializing()))
 				{
-					IZoomMode *zm = pWeapon->GetZoomMode(pWeapon->GetCurrentZoomMode());
-					CScreenEffects* pScreenEffects = m_pPlayer->GetScreenEffects();
-					if (zm && !zm->IsZooming() && !zm->IsZoomed() && pScreenEffects != 0)
-					{
-						if (!m_moveButtonState && m_pPlayer->IsClient())
-						{
-							CFOVEffect *fovEffect = new CFOVEffect(m_pPlayer->GetEntityId(), 1.0f);
-							CLinearBlend *blend = new CLinearBlend(1);
-							pScreenEffects->ClearBlendGroup(m_pPlayer->m_autoZoomInID, false);
-							pScreenEffects->ClearBlendGroup(m_pPlayer->m_autoZoomOutID, false);
-							pScreenEffects->StartBlend(fovEffect, blend, 1.0f/.25f, m_pPlayer->m_autoZoomOutID);
-						}
-						else
-						{
-							pScreenEffects->EnableBlends(true, m_pPlayer->m_autoZoomInID);
-							pScreenEffects->EnableBlends(true, m_pPlayer->m_autoZoomOutID);
-							pScreenEffects->EnableBlends(true, m_pPlayer->m_hitReactionID);
-						}
-					}
+					m_pPlayer->SelectItemByName("Binoculars", true);
 				}
+				DisableXI(false);
+			}
+			else if (actions.xi_binoculars == actionId)
+			{
+				if(activationMode == eAAM_OnPress)
+				{
+					m_pPlayer->SelectItemByName("Binoculars", true);
+				}
+				else if(activationMode == eAAM_OnRelease)
+				{
+					if(binoculars)
+						m_pPlayer->SelectLastItem(false);
+				}
+				DisableXI(false);
+			}
+
+			// suit shortcut keys
+			if(CNanoSuit* pSuit = m_pPlayer->GetNanoSuit())
+			{
+				if(actionId == actions.suit_shortcut_strength)
+					pSuit->SetMode(NANOMODE_STRENGTH);
+				else if(actionId == actions.suit_shortcut_speed)
+					pSuit->SetMode(NANOMODE_SPEED);
+				else if(actionId == actions.suit_shortcut_cloak)
+					pSuit->SetMode(NANOMODE_CLOAK);
+				else if(actionId == actions.suit_shortcut_armor)
+					pSuit->SetMode(NANOMODE_DEFENSE);
 			}
 		}
-		else if(gEnv->bMultiplayer && m_pPlayer->GetSpectatorMode() == CActor::eASM_Follow && g_pGame->GetHUD() && !g_pGame->GetHUD()->IsPDAActive())
+
+		if (m_checkZoom)
 		{
-			if(actions.zoom_in == actionId)
+			IItem* pCurItem = m_pPlayer->GetCurrentItem();
+			IWeapon* pWeapon = 0;
+			if(pCurItem)
+				pWeapon = pCurItem->GetIWeapon();
+			if (pWeapon)
 			{
-				m_pPlayer->ChangeSpectatorZoom(-1);
-			}
-			else if(actions.zoom_out == actionId)
-			{
-				m_pPlayer->ChangeSpectatorZoom(1);
+				IZoomMode *zm = pWeapon->GetZoomMode(pWeapon->GetCurrentZoomMode());
+				CScreenEffects* pScreenEffects = m_pPlayer->GetScreenEffects();
+				if (zm && !zm->IsZooming() && !zm->IsZoomed() && pScreenEffects != 0)
+				{
+					if (!m_moveButtonState && m_pPlayer->IsClient())
+					{
+						CFOVEffect *fovEffect = new CFOVEffect(m_pPlayer->GetEntityId(), 1.0f);
+						CLinearBlend *blend = new CLinearBlend(1);
+						pScreenEffects->ClearBlendGroup(m_pPlayer->m_autoZoomInID, false);
+						pScreenEffects->ClearBlendGroup(m_pPlayer->m_autoZoomOutID, false);
+						pScreenEffects->StartBlend(fovEffect, blend, 1.0f/.25f, m_pPlayer->m_autoZoomOutID);
+					}
+					else
+					{
+						pScreenEffects->EnableBlends(true, m_pPlayer->m_autoZoomInID);
+						pScreenEffects->EnableBlends(true, m_pPlayer->m_autoZoomOutID);
+						pScreenEffects->EnableBlends(true, m_pPlayer->m_hitReactionID);
+					}
+				}
 			}
 		}
 	}
-
+	else if(gEnv->bMultiplayer && m_pPlayer->GetSpectatorMode() == CActor::eASM_Follow && g_pGame->GetHUD() && !g_pGame->GetHUD()->IsPDAActive())
+	{
+		if(actions.zoom_in == actionId)
+		{
+			m_pPlayer->ChangeSpectatorZoom(-1);
+		}
+		else if(actions.zoom_out == actionId)
+		{
+			m_pPlayer->ChangeSpectatorZoom(1);
+		}
+	}
 
 	bool hudFilterOut = true;
 
@@ -519,7 +439,6 @@ void CPlayerInput::OnAction( const ActionId& actionId, int activationMode, float
 	//send the onAction to scripts, after filter the range of actions. for now just use and hold
 	if (filterOut && hudFilterOut)
 	{
-		FRAME_PROFILER("Script Processing", GetISystem(), PROFILE_GAME);
 		HSCRIPTFUNCTION scriptOnAction(NULL);
 
 		IScriptTable *scriptTbl = m_pPlayer->GetEntity()->GetScriptTable();
@@ -555,12 +474,8 @@ void CPlayerInput::OnAction( const ActionId& actionId, int activationMode, float
 		gEnv->pScriptSystem->ReleaseFunc(scriptOnAction);
 	}
 
-	{
-		FRAME_PROFILER("Final Action Processing", GetISystem(), PROFILE_GAME);
-
-		if(IsDemoPlayback() && actionId == g_pGame->Actions().hud_show_multiplayer_scoreboard && activationMode == eAAM_OnPress)
-			g_pGame->GetIGameFramework()->GetIActorSystem()->SwitchDemoSpectator();
-	}
+	if(g_pGame && IsDemoPlayback() && actionId == g_pGame->Actions().hud_show_multiplayer_scoreboard && activationMode == eAAM_OnPress)
+		g_pGame->GetIGameFramework()->GetIActorSystem()->SwitchDemoSpectator();
 }
 
 void CPlayerInput::OnObjectGrabbed(IActor* pActor, bool bIsGrab, EntityId objectId, bool bIsNPC, bool bIsTwoHanded)
@@ -642,33 +557,6 @@ void CPlayerInput::PreUpdate()
 	{
 		controllerSensitivity *= m_pPlayer->GetMassFactor();
 	}
-
-	
-	//VADER MOD: sensitivity should be static at all times!
-	/*
-	COffHand * pOffHand=static_cast<COffHand*>(m_pPlayer->GetWeaponByClass(CItem::sOffHandClass));
-	if(pOffHand && (pOffHand->GetOffHandState()&eOHS_HOLDING_NPC))
-	{
-		mouseSensitivity *= pOffHand->GetObjectMassScale();
-		controllerSensitivity *= pOffHand->GetObjectMassScale();
-	}
-
-	// When carrying object/enemy, adapt mouse sensitiviy to feel the weight
-	// Designers requested we ignore single-handed objects (1 == m_iCarryingObject)
-	if(2 == m_iCarryingObject)
-	{
-		if(NANOMODE_STRENGTH == m_pPlayer->GetNanoSuit()->GetMode())
-		{
-			mouseSensitivity /= 1.6f;
-			controllerSensitivity /= 1.6f;
-		}
-		else
-		{
-			mouseSensitivity /= 2.0f;
-			controllerSensitivity /= 2.0f;
-		}
-	}
-	*/
 
 	if(m_binocularsTime>0.0f)
 	{
@@ -768,8 +656,6 @@ void CPlayerInput::PreUpdate()
 	if ((m_lastSerializeFrameID + 2) > gEnv->pRenderer->GetFrameID())
 		deltaRotation.Set(0,0,0);
 
-	//if(m_pPlayer->m_stats.isOnLadder)
-		//deltaRotation.z = 0.0f;
 	IPhysicalEntity *pPhys;
 	pe_status_living sl;
 	if ((pPhys=m_pPlayer->GetEntity()->GetPhysics()) && pPhys->GetStatus(&sl))
@@ -791,7 +677,7 @@ void CPlayerInput::PreUpdate()
 	if (!m_pStats->isFrozen.Value() && !animControlled)  
 		request.AddDeltaMovement( FilterMovement(m_deltaMovement) );
 
-  m_deltaMovementPrev = m_deltaMovement;
+	m_deltaMovementPrev = m_deltaMovement;
 
 	// handle actions
 	if (m_actions & ACTION_JUMP)
@@ -800,18 +686,6 @@ void CPlayerInput::PreUpdate()
 			request.SetJump();
 		else
 			m_actions &= ~ACTION_JUMP;
-
-		//m_actions &= ~ACTION_PRONE;
-
-		/*if (m_pPlayer->GetStance() != STANCE_PRONE)
-		{
-			if(m_pPlayer->GetStance() == STANCE_STAND || m_pPlayer->TrySetStance(STANCE_STAND))
- 				request.SetJump();
-		}
-		else if(!m_pPlayer->TrySetStance(STANCE_STAND))
-			m_actions &= ~ACTION_JUMP;
-		else
-			m_actions &= ~ACTION_PRONE;*/
 	}
 
 	if (m_pPlayer->m_stats.isOnLadder)
@@ -827,15 +701,6 @@ void CPlayerInput::PreUpdate()
 	{
 		pseudoSpeed = m_pPlayer->CalculatePseudoSpeed(m_pPlayer->m_stats.bSprinting);
 	}
-	/* design changed: sprinting with controller is removed from full stick up to Left Bumper
-	if(m_bUseXIInput && m_xi_deltaMovement.len2() > 0.999f)
-	{
-		m_actions |= ACTION_SPRINT;
-	}
-	else if(m_bUseXIInput)
-	{
-		m_actions &= ~ACTION_SPRINT;
-	}*/
 	request.SetPseudoSpeed(pseudoSpeed);
 
 	if (m_deltaMovement.GetLength() > 0.1f)
@@ -854,9 +719,6 @@ void CPlayerInput::PreUpdate()
 
 	// reset things for next frame that need to be
 	m_deltaRotation = Ang3(0,0,0);
-
-	//static float color[] = {1,1,1,1};    
-  //gEnv->pRenderer->Draw2dLabel(100,50,1.5,color,false,"deltaMovement:%f,%f", m_deltaMovement.x,m_deltaMovement.y);
 }
 
 EStance CPlayerInput::FigureOutStance()
@@ -1107,19 +969,6 @@ bool CPlayerInput::OnActionRotateYaw(EntityId entityId, const ActionId& actionId
 
 bool CPlayerInput::OnActionRotatePitch(EntityId entityId, const ActionId& actionId, int activationMode, float value)
 {
-	/*if(m_pPlayer->GetActorStats()->inZeroG)	//check for flip over in zeroG .. this makes no sense
-	{
-	SPlayerStats *stats = static_cast<SPlayerStats*> (m_pPlayer->GetActorStats());
-	float absAngle = fabsf(acos_tpl(stats->upVector.Dot(stats->zeroGUp)));
-	if(absAngle > 1.57f) //90
-	{
-	if(value > 0)
-	m_deltaRotation.x -= value;
-	}
-	else
-	m_deltaRotation.x -= value;
-	}
-	else*/
 	m_deltaRotation.x -= value;
 	if(g_pGameCVars->cl_invertMouse)
 		m_deltaRotation.x*=-1.0f;
@@ -1331,16 +1180,7 @@ bool CPlayerInput::OnActionProne(EntityId entityId, const ActionId& actionId, in
 			if(activationMode == eAAM_OnPress)
 			{
 				CItem *curItem = static_cast<CItem*>(gEnv->pGame->GetIGameFramework()->GetIItemSystem()->GetItem(m_pPlayer->GetInventory()->GetCurrentItem()));
-				if(curItem && curItem->GetParams().prone_not_usable)
-				{
-					// go crouched instead.
-					// Nope, actually do nothing
-					// 				if (!(m_actions & ACTION_CROUCH))
-					// 					m_actions |= ACTION_CROUCH;
-					// 				else
-					// 					m_actions &= ~ACTION_CROUCH;
-				}
-				else
+				if(!curItem || !curItem->GetParams().prone_not_usable)
 				{
 					if (!(m_actions & ACTION_PRONE))
 					{
@@ -1356,18 +1196,6 @@ bool CPlayerInput::OnActionProne(EntityId entityId, const ActionId& actionId, in
 	
 	return false;
 }
-
-/*bool CPlayerInput::OnActionZeroGBrake(EntityId entityId, const ActionId& actionId, int activationMode, float value)
-{
-	if(!m_pPlayer->m_stats.spectatorMode && m_pPlayer->GetActorStats()->inZeroG)
-	{
-		if(activationMode == eAAM_OnPress)
-			m_pPlayer->Stabilize(true);
-		else if(activationMode == eAAM_OnRelease)
-			m_pPlayer->Stabilize(false);
-	}
-	return false;
-}*/
 
 bool CPlayerInput::OnActionGyroscope(EntityId entityId, const ActionId& actionId, int activationMode, float value)
 {
@@ -1391,27 +1219,6 @@ bool CPlayerInput::OnActionGyroscope(EntityId entityId, const ActionId& actionId
 
 bool CPlayerInput::OnActionGBoots(EntityId entityId, const ActionId& actionId, int activationMode, float value)
 {
-	//FIXME:makes more sense a ExosuitActive()
-	/*if (!m_pPlayer->m_stats.spectatorMode && m_pPlayer->InZeroG() && g_pGameCVars->v_zeroGEnableGBoots)
-	{
-		if (m_actions & ACTION_GRAVITYBOOTS)
-			m_actions &= ~ACTION_GRAVITYBOOTS;
-		else
-			m_actions |= ACTION_GRAVITYBOOTS;
-
-		m_pPlayer->CreateScriptEvent("gravityboots",(m_actions & ACTION_GRAVITYBOOTS)?1.0f:0.0f);
-
-		if(m_actions & ACTION_GRAVITYBOOTS)
-		{
-			SAFE_HUD_FUNC(TextMessage("gravity_boots_on"));
-			m_pPlayer->GetNanoSuit()->PlaySound(ESound_GBootsActivated);
-		}
-		else
-		{
-			SAFE_HUD_FUNC(TextMessage("gravity_boots_off"));
-			m_pPlayer->GetNanoSuit()->PlaySound(ESound_GBootsDeactivated);
-		}
-	}*/
 	return false;
 }
 
@@ -1436,28 +1243,6 @@ bool CPlayerInput::OnActionLeanRight(EntityId entityId, const ActionId& actionId
 	}
 	return false;
 }
-
-/************************NO HOLSTER****************
-bool CPlayerInput::OnActionHolsterItem(EntityId entityId, const ActionId& actionId, int activationMode, float value)
-{
-	if (!m_pPlayer->m_stats.spectatorMode)
-	{
-		//Don't holster mounted weapons
-		if(CItem *pItem = static_cast<CItem*>(m_pPlayer->GetCurrentItem()))
-			if(pItem->IsMounted())
-				return false;
-
-		COffHand* pOffHand = static_cast<COffHand*>(m_pPlayer->GetWeaponByClass(CItem::sOffHandClass));
-		if(pOffHand && (pOffHand->GetOffHandState()==eOHS_INIT_STATE))
-		{
-			//If offHand was doing something don't holster/unholster item
-			bool holster = (m_pPlayer->GetInventory()->GetHolsteredItem())?false:true;
-			m_pPlayer->HolsterItem(holster);
-		}
-	}
-	return false;
-}
-*********************************************************/
 
 bool CPlayerInput::OnActionUse(EntityId entityId, const ActionId& actionId, int activationMode, float value)
 {

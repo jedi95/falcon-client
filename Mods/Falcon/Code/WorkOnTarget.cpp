@@ -51,8 +51,6 @@ void CWorkOnTarget::Init(IWeapon *pWeapon, const struct IItemParamsNode *params)
 //------------------------------------------------------------------------
 void CWorkOnTarget::Update(float frameTime, uint frameId)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
 	if (!m_firing)
 		return;
 
@@ -295,10 +293,6 @@ IEntity *CWorkOnTarget::CanWork()
 				pos = pPlayer->GetViewMatrix().GetTranslation();
 			}
 		}
-	}
-	else
-	{ 
-		assert(0);
 	}
 
 	primitives::sphere sphere;

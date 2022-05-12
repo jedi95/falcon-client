@@ -85,22 +85,6 @@ void CmdGOCMode( IConsoleCmdArgs* cmdArgs)
 	}
 }
 
-void CmdListInvisiblePlayers(IConsoleCmdArgs* cmdArgs)
-{
-	IActorIteratorPtr it = g_pGame->GetIGameFramework()->GetIActorSystem()->CreateActorIterator();
-	while (IActor* pActor = it->Next())
-	{
-		if(pActor->IsPlayer() && !pActor->IsClient())
-		{
-			IEntityRenderProxy* pProxy = static_cast<IEntityRenderProxy*>(pActor->GetEntity()->GetProxy(ENTITY_PROXY_RENDER));
-			if(pProxy )
-			{
-				CryLogAlways("Player %s is %s", pActor->GetEntity()->GetName(), pProxy->IsRenderProxyVisAreaVisible() ? "visible" : "invisible");
-			}
-		}
-	}
-}
-
 // FOV
 void OnFOVUpdated(ICVar* cvar)
 {
@@ -289,8 +273,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("cl_shallowWaterDepthLo", &cl_shallowWaterDepthLo, 0.3f, VF_CHEAT, "Shallow water depth low (below has zero slowdown)");
 	pConsole->Register("cl_shallowWaterDepthHi", &cl_shallowWaterDepthHi, 1.0f, VF_CHEAT, "Shallow water depth high (above has full slowdown)");
 
-	pConsole->RegisterInt("g_grabLog", 0, 0, "verbosity for grab logging (0-2)");
-
 	pConsole->Register("pl_inputAccel", &pl_inputAccel, 30.0f, 0, "Movement input acceleration");
 
 	pConsole->RegisterInt("cl_actorsafemode", 0, VF_CHEAT, "Enable/disable actor safe mode", BroadcastChangeSafeMode);
@@ -437,14 +419,11 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_cutsceneSkipDelay", &g_cutsceneSkipDelay, 0.0f, 0, "Skip Delay for Cutscenes.");
 	pConsole->Register("g_enableAutoSave", &g_enableAutoSave, 1, 0, "Switches all savegames created by Flowgraph (checkpoints). Does not affect user generated saves or levelstart savegames.");
 
-	//
-  pConsole->Register("g_godMode", &g_godMode, 0, VF_CHEAT, "God Mode");
-  pConsole->Register("g_detachCamera", &g_detachCamera, 0, VF_CHEAT, "Detach camera");
-  pConsole->Register("g_suicideDelay", &g_suicideDelay, 2, VF_CHEAT, "delay in sec before executing kill command");
+	pConsole->Register("g_godMode", &g_godMode, 0, VF_CHEAT, "God Mode");
+	pConsole->Register("g_detachCamera", &g_detachCamera, 0, VF_CHEAT, "Detach camera");
+	pConsole->Register("g_suicideDelay", &g_suicideDelay, 2, VF_CHEAT, "delay in sec before executing kill command");
 
-  pConsole->Register("g_trooperProneMinDistance", &g_trooperProneMinDistance, 10, VF_DUMPTODISK, "Distance to move for trooper to switch to prone stance");
-//	pConsole->Register("g_trooperMaxPhysicsAnimBlend", &g_trooperMaxPhysicAnimBlend, 0, VF_DUMPTODISK, "Max value for trooper tentacle dynamic physics/anim blending");
-//	pConsole->Register("g_trooperPhysicsAnimBlendSpeed", &g_trooperPhysicAnimBlendSpeed, 100.f, VF_DUMPTODISK, "Trooper tentacle dynamic physics/anim blending speed");
+	pConsole->Register("g_trooperProneMinDistance", &g_trooperProneMinDistance, 10, VF_DUMPTODISK, "Distance to move for trooper to switch to prone stance");
 	pConsole->Register("g_trooperTentacleAnimBlend", &g_trooperTentacleAnimBlend, 0, VF_DUMPTODISK, "Trooper tentacle physic_anim blend (0..1) - overrides the physic_blend AG parameter when it's not 0");
 	pConsole->Register("g_trooperBankingMultiplier", &g_trooperBankingMultiplier, 1, VF_DUMPTODISK, "Trooper banking multiplier coeff (0..x)");
 	pConsole->Register("g_alienPhysicsAnimRatio", &g_alienPhysicsAnimRatio, 0.0f, VF_CHEAT ); 
@@ -618,21 +597,13 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_displayIgnoreList",&g_displayIgnoreList,1,VF_DUMPTODISK,"Display ignore list in chat tab.");
   pConsole->Register("g_buddyMessagesIngame",&g_buddyMessagesIngame,1,VF_DUMPTODISK,"Output incoming buddy messages in chat while playing game.");
 
-	pConsole->RegisterInt("g_showIdleStats", 0, 0);
-
 	// battledust
 	pConsole->Register("g_battleDust_enable", &g_battleDust_enable, 1, 0, "Enable/Disable battledust");
 	g_battleDust_effect = pConsole->RegisterString("g_battleDust_effect", "misc.battledust.light", 0, "Sets the effect to use for battledust");
 	
 	pConsole->Register("g_PSTutorial_Enabled", &g_PSTutorial_Enabled, 1, 0, "Enable/disable powerstruggle tutorial");
 
-	pConsole->Register("g_proneNotUsableWeapon_FixType", &g_proneNotUsableWeapon_FixType, 1, 0, "Test various fixes for not selecting hurricane while prone");
 	pConsole->Register("g_proneAimAngleRestrict_Enable", &g_proneAimAngleRestrict_Enable, 1, 0, "Test fix for matching aim restrictions between 1st and 3rd person");
-
-  pConsole->Register("sv_voting_timeout", &sv_votingTimeout, 60, 0, "Voting timeout");
-  pConsole->Register("sv_voting_cooldown", &sv_votingCooldown, 180, 0, "Voting cooldown");
-  pConsole->Register("sv_voting_ratio",&sv_votingRatio, 0.51f, 0, "Part of player's votes needed for successful vote.");
-	pConsole->Register("sv_voting_team_ratio",&sv_votingTeamRatio, 0.67f, 0, "Part of team member's votes needed for successful vote.");
 
 	pConsole->Register("sv_input_timeout",&sv_input_timeout, 0, 0, "Experimental timeout in ms to stop interpolating client inputs since last update.");
 
@@ -653,16 +624,14 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_MPDeathEffects", &g_deathEffects, 0, 0, "Enables / disables the MP death screen-effects");
 
 	pConsole->Register("sv_pacifist", &sv_pacifist, 0, 0, "Pacifist mode (only works on dedicated server)");
- 
-	pVehicleQuality = pConsole->GetCVar("v_vehicle_quality");		assert(pVehicleQuality);
+
+	pVehicleQuality = pConsole->GetCVar("v_vehicle_quality");
 
 	i_restrictItems = pConsole->RegisterString("i_restrictItems", "", 0, "List of items to restrict for this MP round", RestrictedItemsChanged );
 	pConsole->Register("g_spawnProtectionTime", &g_spawnProtectionTime, 2, 0, "Number of seconds of invulnerability after a respawn in MP");
 	pConsole->Register("g_roundRestartTime", &g_roundRestartTime, 30, 0, "Time until round start after minimum people join");
 
 	net_mapDownloadURL = pConsole->RegisterString("net_mapDownloadURL", "", 0, "URL for clients to download the current map");
-
-	pConsole->AddCommand("g_listVisiblePlayers", CmdListInvisiblePlayers, 0, "List all players and their visible status");
 
 	pConsole->Register("g_painSoundGap", &g_painSoundGap, 0.1f, 0, "Minimum time gap between local player pain sounds");
 	pConsole->Register("g_explosionScreenShakeMultiplier", &g_explosionScreenShakeMultiplier, 0.25f, 0, "Multiplier for explosion screenshake");
@@ -866,9 +835,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("player_NoIK", true);
 	pConsole->UnregisterVariable("g_enableIdleCheck", true);
 
-	// variables from CPlayerMovementController
-	pConsole->UnregisterVariable("g_showIdleStats", true);
-
 	// variables from CHUD
 	pConsole->UnregisterVariable("hud_mpNamesNearDistance", true);
 	pConsole->UnregisterVariable("hud_mpNamesFarDistance", true);
@@ -973,7 +939,6 @@ void SCVars::ReleaseCVars()
 
   pConsole->UnregisterVariable("g_PSTutorial_Enabled", true);
 
-  pConsole->UnregisterVariable("g_proneNotUsableWeapon_FixType", true);
 	pConsole->UnregisterVariable("g_proneAimAngleRestrict_Enable", true);
 
   pConsole->UnregisterVariable("sv_voting_timeout",true);
@@ -1000,19 +965,15 @@ void SCVars::ReleaseCVars()
 //------------------------------------------------------------------------
 void CGame::RegisterConsoleVars()
 {
-	assert(m_pConsole);
-
 	if (m_pCVars)
 	{
-		m_pCVars->InitCVars(m_pConsole);    
+		m_pCVars->InitCVars(m_pConsole);
 	}
 }
 
 //------------------------------------------------------------------------
 void CGame::RegisterConsoleCommands()
 {
-	assert(m_pConsole);
-
 	m_pConsole->AddCommand("quit", "System.Quit()", VF_RESTRICTEDMODE, "Quits the game");
 	m_pConsole->AddCommand("goto", "g_localActor:SetWorldPos({x=%1, y=%2, z=%3})", VF_CHEAT, "Sets current player position.");
 	m_pConsole->AddCommand("gotoe", "local e=System.GetEntityByName(%1); if (e) then g_localActor:SetWorldPos(e:GetWorldPos()); end", VF_CHEAT, "Sets current player position.");
@@ -1037,10 +998,6 @@ void CGame::RegisterConsoleCommands()
   m_pConsole->AddCommand("g_quickGameStop", CmdQuickGameStop, 0, "Cancel quick game search.");
 
   m_pConsole->AddCommand("g_nextlevel", CmdNextLevel,0,"Switch to next level in rotation or restart current one.");
-  m_pConsole->AddCommand("vote", CmdVote, VF_RESTRICTEDMODE, "Vote on current topic.");
-  m_pConsole->AddCommand("startKickVoting",CmdStartKickVoting, VF_RESTRICTEDMODE, "Initiate voting.");
-	m_pConsole->AddCommand("listplayers",CmdListPlayers, VF_RESTRICTEDMODE, "Initiate voting.");
-  m_pConsole->AddCommand("startNextMapVoting",CmdStartNextMapVoting, VF_RESTRICTEDMODE, "Initiate voting.");
 
 	m_pConsole->AddCommand("g_battleDust_reload", CmdBattleDustReload, 0, "Reload the battle dust parameters xml");
 	m_pConsole->AddCommand("login",CmdLogin, 0, "Log in to GameSpy using nickname and password as arguments");
@@ -1061,8 +1018,6 @@ void CGame::RegisterConsoleCommands()
 //------------------------------------------------------------------------
 void CGame::UnregisterConsoleCommands()
 {
-	assert(m_pConsole);
-
 	m_pConsole->RemoveCommand("quit");
 	m_pConsole->RemoveCommand("goto");
 	m_pConsole->RemoveCommand("freeze");
@@ -1082,11 +1037,6 @@ void CGame::UnregisterConsoleCommands()
   m_pConsole->RemoveCommand("g_quickGameStop");
 
   m_pConsole->RemoveCommand("g_nextlevel");
-  m_pConsole->RemoveCommand("vote");
-  m_pConsole->RemoveCommand("startKickVoting");
-  m_pConsole->RemoveCommand("startNextMapVoting");
-	m_pConsole->RemoveCommand("listplayers");
-
 
 	m_pConsole->RemoveCommand("g_battleDust_reload");
 	m_pConsole->RemoveCommand("bulletTimeMode");
@@ -1493,74 +1443,6 @@ void CGame::CmdNextLevel(IConsoleCmdArgs* pArgs)
   ILevelRotation *pLevelRotation = g_pGame->GetIGameFramework()->GetILevelSystem()->GetLevelRotation();
   if (pLevelRotation->GetLength())
     pLevelRotation->ChangeLevel(pArgs);
-}
-
-void CGame::CmdStartKickVoting(IConsoleCmdArgs* pArgs)
-{
-  if (!gEnv->bClient)
-    return;
-
-  if (pArgs->GetArgCount() < 2)
-  {
-    CryLogAlways("Usage: startKickVoting player_id");
-		CryLogAlways("Use listplayers to get a list of player ids.");
-
-    return;
-  }
-
-  IActor *pClientActor=g_pGame->GetIGameFramework()->GetClientActor();
-  if (!pClientActor)
-    return;
-
-  if (CGameRules *pGameRules = g_pGame->GetGameRules())
-	{
-		if (CActor *pActor=pGameRules->GetActorByChannelId(atoi(pArgs->GetArg(1))))
-			pGameRules->StartVoting(static_cast<CActor *>(pClientActor), eVS_kick, pActor->GetEntityId(), pActor->GetEntity()->GetName());
-	}
-}
-
-void CGame::CmdStartNextMapVoting(IConsoleCmdArgs* pArgs)
-{
-	IActor *pClientActor=NULL;
-  if (gEnv->bClient)
-		pClientActor=g_pGame->GetIGameFramework()->GetClientActor();
-
-  if (CGameRules *pGameRules = g_pGame->GetGameRules())
-    pGameRules->StartVoting(static_cast<CActor *>(pClientActor), eVS_nextMap, 0, "");
-}
-
-
-void CGame::CmdVote(IConsoleCmdArgs* pArgs)
-{
-  if (!gEnv->bClient)
-    return;
-
-  IActor *pClientActor=g_pGame->GetIGameFramework()->GetClientActor();
-  if (!pClientActor)
-    return;
-
-  if (CGameRules *pGameRules = g_pGame->GetGameRules())
-    pGameRules->Vote(pGameRules->GetActorByEntityId(pClientActor->GetEntityId()), true);
-}
-
-void CGame::CmdListPlayers(IConsoleCmdArgs* pArgs)
-{
-	if (CGameRules *pGameRules = g_pGame->GetGameRules())
-	{
-		CGameRules::TPlayers players;
-		pGameRules->GetPlayers(players);
-
-		if (!players.empty())
-		{
-			CryLogAlways("  [id]  [name]");
-
-			for (CGameRules::TPlayers::iterator it=players.begin(); it!=players.end(); ++it)
-			{
-				if (CActor *pActor=pGameRules->GetActorByEntityId(*it))
-					CryLogAlways(" %5d  %s", pActor->GetChannelId(), pActor->GetEntity()->GetName());
-			}
-		}
-	}
 }
 
 void CGame::CmdQuickGame(IConsoleCmdArgs* pArgs)

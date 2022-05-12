@@ -45,7 +45,6 @@ bool CItem::CreateCharacterAttachment(int slot, const char *name, int type, cons
 
 	if (pAttachment)
 	{
-//		GameWarning("Item '%s' trying to create attachment '%s' which already exists!", GetEntity()->GetName(), name);
 		return false;
 	}
 
@@ -957,8 +956,6 @@ void CItem::PlayAnimationEx(const char* animationName, int slot, int layer, bool
 			params.m_nFlags = (loop?CA_LOOP_ANIMATION:0)|(flags&eIPAF_RestartAnimation?CA_ALLOW_ANIM_RESTART:0)|(flags&eIPAF_RepeatLastFrame?CA_REPEAT_LAST_KEY:0);
 			pSkeletonAnim->StartAnimation(animationName, 0, 0,0,  params);
 			pSkeletonAnim->SetLayerUpdateMultiplier(layer, speed);
-
-			//pCharacter->GetISkeleton()->SetDebugging( true );
 		}
 
 		float duration=0.0f;

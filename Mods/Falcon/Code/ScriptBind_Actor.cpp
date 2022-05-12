@@ -745,7 +745,6 @@ int CScriptBind_Actor::SetInventoryAmmo(IFunctionHandler *pH, const char *ammo, 
 	bool doServerSide = (serClientMode & SERVER_SIDE)!=0;
 
 	IEntityClass* pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(ammo);
-	assert(pClass);
 
 	int capacity = pInventory->GetAmmoCapacity(pClass);
 	int current = pInventory->GetAmmoCount(pClass);
@@ -761,9 +760,6 @@ int CScriptBind_Actor::SetInventoryAmmo(IFunctionHandler *pH, const char *ammo, 
 				pInventory->SetAmmoCount(pClass,capacity);
 			if(doClientSide && pActor->IsClient() && capacity - current > 0)
 			{
-				/*char buffer[5];
-				itoa(capacity - current, buffer, 10);
-				SAFE_HUD_FUNC(DisplayFlashMessage("@grab_ammo", 3, Col_Wheat, true, (string("@")+pClass->GetName()).c_str(), buffer));*/
 				if(g_pGame->GetHUD())
 					g_pGame->GetHUD()->DisplayAmmoPickup(pClass->GetName(), capacity - current);
 			}
@@ -777,9 +773,6 @@ int CScriptBind_Actor::SetInventoryAmmo(IFunctionHandler *pH, const char *ammo, 
 			pInventory->SetAmmoCount(pClass, amount);
 		if(doClientSide && pActor->IsClient() && amount - current > 0)
 		{
-			/*char buffer[5];
-			itoa(amount - current, buffer, 10);
-			SAFE_HUD_FUNC(DisplayFlashMessage("@grab_ammo", 3, Col_Wheat, true, (string("@")+pClass->GetName()).c_str(), buffer));*/
 			if(g_pGame->GetHUD())
 				g_pGame->GetHUD()->DisplayAmmoPickup(pClass->GetName(), amount - current);
 		}
@@ -802,7 +795,6 @@ int CScriptBind_Actor::AddInventoryAmmo(IFunctionHandler *pH, const char *ammo, 
 		return pH->EndFunction();
 
 	IEntityClass* pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(ammo);
-	assert(pClass);
 
 	int capacity = pInventory->GetAmmoCapacity(pClass);
 	int current = pInventory->GetAmmoCount(pClass);
@@ -812,15 +804,11 @@ int CScriptBind_Actor::AddInventoryAmmo(IFunctionHandler *pH, const char *ammo, 
 			SAFE_HUD_FUNC(DisplayFlashMessage("@ammo_maxed_out", 2, ColorF(1.0f, 0,0), true, (string("@")+pClass->GetName()).c_str()));
 
 		//If still there's some place, full inventory to maximum...
-
 		if(current<capacity)
 		{
 			pInventory->SetAmmoCount(pClass,capacity);
 			if(pActor->IsClient() && capacity - current > 0)
 			{
-				/*char buffer[5];
-				itoa(capacity - current, buffer, 10);
-				SAFE_HUD_FUNC(DisplayFlashMessage("@grab_ammo", 3, Col_Wheat, true, (string("@")+pClass->GetName()).c_str(), buffer));*/
 				if(g_pGame->GetHUD())
 					g_pGame->GetHUD()->DisplayAmmoPickup(pClass->GetName(), capacity - current);
 			}
@@ -833,9 +821,6 @@ int CScriptBind_Actor::AddInventoryAmmo(IFunctionHandler *pH, const char *ammo, 
 		pInventory->SetAmmoCount(pClass, amount);
 		if(pActor->IsClient() && amount - current > 0)
 		{
-			/*char buffer[5];
-			itoa(amount - current, buffer, 10);
-			SAFE_HUD_FUNC(DisplayFlashMessage("@grab_ammo", 3, Col_Wheat, true, (string("@")+pClass->GetName()).c_str(), buffer));*/
 			if(g_pGame->GetHUD())
 				g_pGame->GetHUD()->DisplayAmmoPickup(pClass->GetName(), amount - current);
 		}
@@ -858,7 +843,6 @@ int CScriptBind_Actor::GetInventoryAmmo(IFunctionHandler *pH, const char *ammo)
 		return pH->EndFunction();
 
 	IEntityClass* pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(ammo);
-	assert(pClass);
 	return pH->EndFunction(pInventory->GetAmmoCount(pClass));
 }
 

@@ -35,8 +35,6 @@ CBeam::~CBeam()
 {
 }
 
-//std::vector<Vec3> gpoints;
-
 //------------------------------------------------------------------------
 void CBeam::Update(float frameTime, uint frameId)
 {
@@ -214,25 +212,10 @@ void CBeam::Update(float frameTime, uint frameId)
 				ISound *pSound = m_pWeapon->GetISound(m_hitSoundId);
 				if (pSound)
 				{
-          float angle = RAD2DEG(acos_tpl(rayhit.n.Dot(dir)));
-					pSound->SetParam("angle", angle, false);				          
-					pSound->SetPosition(hit);					
-
-          //float color[] = {1,1,1,1};
-          //gEnv->pRenderer->Draw2dLabel(200,300,1.5f,color,false,"angle: %.2f", angle);
+					float angle = RAD2DEG(acos_tpl(rayhit.n.Dot(dir)));
+					pSound->SetParam("angle", angle, false);
+					pSound->SetPosition(hit);
 				}
-			}
-
-			if (!m_beamparams.hit_decal.empty())
-			{
-				//if (!m_lastHitValid)
-				//if (!rayhit.pCollider || !gEnv->pEntitySystem->GetEntityFromPhysics(rayhit.pCollider))
-					Decal(rayhit, dir);
-				//else
-				//{
-					//Decal(rayhit, dir);
-					//DecalLine(m_lastOrg, pos, m_lastHit, rayhit.pt, m_beamparams.hit_decal_size*0.1f);
-				//}
 			}
 
 			if (!m_beamparams.hit_effect.empty())
@@ -359,18 +342,6 @@ void CBeam::Activate(bool activate)
 	m_tickTimer = m_beamparams.tick;
 	m_ammoTimer = m_beamparams.ammo_tick;
 }
-
-//------------------------------------------------------------------------
-//bool CBeam::OutOfAmmo() const
-//{
-	//return false;
-//}
-
-//------------------------------------------------------------------------
-//bool CBeam::CanReload() const
-//{
-	//return false;
-//}
 
 //------------------------------------------------------------------------
 bool CBeam::CanFire(bool considerAmmo) const
@@ -509,8 +480,6 @@ void CBeam::DecalLine(const Vec3 &org0, const Vec3 &org1, const Vec3 &hit0, cons
 	Vec3 org=org0;
 	Vec3 hit=hit0;
 
-//	CryLogAlways("line decals: %d (dist: %.3f)", steps, dist);
-
 	while(steps--)
 	{
 		hit=hit0+hitStepDir*hitCurrStep;
@@ -526,7 +495,6 @@ void CBeam::DecalLine(const Vec3 &org0, const Vec3 &org1, const Vec3 &hit0, cons
 			rwi_stop_at_pierceable|rwi_colltype_any, &rayhit, 1, pSkipEnts, nSkip))
 		{
 			Decal(rayhit, dir);
-			//CryLogAlways("decal: %.3f, %.3f, %.3f", rayhit.pt.x, rayhit.pt.y, rayhit.pt.z);
 		}
 
 		hitCurrStep += step;
@@ -540,7 +508,6 @@ void CBeam::Decal(const ray_hit &rayhit, const Vec3 &dir)
 {
 	CryEngineDecalInfo decal;
 
-	//	gpoints.push_back(rayhit.pt);
 	decal.vPos = rayhit.pt;
 	decal.vNormal = rayhit.n;
 	decal.fSize = m_beamparams.hit_decal_size;

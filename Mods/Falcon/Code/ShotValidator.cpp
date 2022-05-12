@@ -33,8 +33,6 @@ CShotValidator::~CShotValidator()
 //------------------------------------------------------------------------
 void CShotValidator::AddShot(EntityId playerId, EntityId weaponId, uint16 seq, uint8 seqr)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if (!playerId || !weaponId)
 		return;
 
@@ -48,7 +46,6 @@ void CShotValidator::AddShot(EntityId playerId, EntityId weaponId, uint16 seq, u
 
 	TShot shot(seq, weaponId, now, shotLife);
 
-	assert(chit!=m_pendinghits.end());
 	THits &hits=chit->second;
 	THits::iterator hit=hits.find(shot);
 
@@ -68,7 +65,6 @@ void CShotValidator::AddShot(EntityId playerId, EntityId weaponId, uint16 seq, u
 	if (shot.life>0)
 	{
 		TChannelShots::iterator csit=m_shots.find(channelId);
-		assert(csit!=m_shots.end());
 		TShots &shots=csit->second;
 		shots.insert(shot);
 	}
@@ -89,8 +85,6 @@ void CShotValidator::AddShot(EntityId playerId, EntityId weaponId, uint16 seq, u
 //------------------------------------------------------------------------
 bool CShotValidator::ProcessHit(const HitInfo &hitInfo)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if (CanHit(hitInfo))
 		return true;
 
@@ -122,7 +116,6 @@ bool CShotValidator::ProcessHit(const HitInfo &hitInfo)
 	}
 
 	TChannelHits::iterator chit=m_pendinghits.find(channelId);
-	assert(chit!=m_pendinghits.end());
 	THits &hits=chit->second;
 	hits.insert(THits::value_type(shot, THit(hitInfo, now)));
 
@@ -165,8 +158,6 @@ void CShotValidator::Reset()
 //------------------------------------------------------------------------
 void CShotValidator::Update()
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	CTimeValue now=gEnv->pTimer->GetFrameStartTime();
 
 	TChannelShots::iterator csend=m_shots.end();

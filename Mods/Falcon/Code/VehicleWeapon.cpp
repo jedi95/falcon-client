@@ -72,8 +72,6 @@ void CVehicleWeapon::StartUse(EntityId userId)
   if (GetEntity()->GetParent())
   { 
     m_pVehicle = gEnv->pGame->GetIGameFramework()->GetIVehicleSystem()->GetVehicle(GetEntity()->GetParent()->GetId());
-    assert(m_pVehicle && "Using VehicleWeapons on non-vehicles may lead to unexpected behavior.");
-
     if (m_pVehicle)
     {   
       m_pPart = m_pVehicle->GetWeaponParentPart(GetEntityId()); 

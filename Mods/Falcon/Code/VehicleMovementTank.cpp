@@ -93,8 +93,6 @@ void CVehicleMovementTank::PostInit()
       m_drivingWheels[m_wheelParts[i]->GetLocalTM(false).GetTranslation().x > 0.f] = m_wheelParts[i];
   }
 
-  assert(m_drivingWheels[0] && m_drivingWheels[1]);
-
 	m_treadParts.clear();
 	int nParts = m_pVehicle->GetPartCount();
 	for (int i=0; i<nParts; ++i)
@@ -137,8 +135,6 @@ void CVehicleMovementTank::SetLatFriction(float latFric)
 // NOTE: This function must be thread-safe. Before adding stuff contact MarcoC.
 void CVehicleMovementTank::ProcessMovement(const float deltaTime)
 { 
-  FUNCTION_PROFILER( gEnv->pSystem, PROFILE_GAME );
-  
   m_netActionSync.UpdateObject(this);
 
   CryAutoLock<CryFastLock> lk(m_lock);
@@ -396,8 +392,6 @@ float CVehicleMovementTank::GetWheelCondition() const
 //------------------------------------------------------------------------
 bool CVehicleMovementTank::RequestMovement(CMovementRequest& movementRequest)
 {
-	FUNCTION_PROFILER( gEnv->pSystem, PROFILE_GAME );
- 
 	m_movementAction.isAI = true;
 	if (!m_isEnginePowered)
 		return false;
@@ -444,8 +438,6 @@ bool CVehicleMovementTank::RequestMovement(CMovementRequest& movementRequest)
 // NOTE: This function must be thread-safe. Before adding stuff contact MarcoC.
 void CVehicleMovementTank::ProcessAI(const float deltaTime)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
 	float dt = max( deltaTime, 0.005f);
 
 	m_movementAction.brake = false;

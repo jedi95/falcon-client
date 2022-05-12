@@ -53,6 +53,7 @@ int CGameRules::s_barbWireID = 0;
 //------------------------------------------------------------------------
 CGameRules::CGameRules()
 : m_pGameFramework(0),
+	m_pGameplayRecorder(0),
 	m_pSystem(0),
 	m_pActorSystem(0),
 	m_pEntitySystem(0),
@@ -71,7 +72,6 @@ CGameRules::CGameRules()
 	m_pRadio(0),
 	m_pBattleDust(0),
 	m_pMPTutorial(0),
-	m_pVotingSystem(0),
 	m_ignoreEntityNextCollision(0),
 	m_timeOfDayInitialized(false),
 	m_processingHit(0),
@@ -98,7 +98,6 @@ CGameRules::~CGameRules()
 	delete m_pShotValidator;
 	delete m_pRadio;
 	delete m_pBattleDust;
-	delete m_pVotingSystem;
 }
 
 //------------------------------------------------------------------------
@@ -112,6 +111,7 @@ bool CGameRules::Init( IGameObject * pGameObject )
 	GetGameObject()->EnablePostUpdates(this);
 
 	m_pGameFramework = g_pGame->GetIGameFramework();
+	m_pGameplayRecorder = m_pGameFramework->GetIGameplayRecorder();
 	m_pSystem = m_pGameFramework->GetISystem();
 	m_pActorSystem = m_pGameFramework->GetIActorSystem();
 	m_pEntitySystem = m_pSystem->GetIEntitySystem();
@@ -168,10 +168,7 @@ bool CGameRules::Init( IGameObject * pGameObject )
 		{
 			am=pActionMapMan->GetActionMap("singleplayer");
 		}
-
-		bool b=GetGameObject()->CaptureActions(this);
-		assert(b);
-
+		GetGameObject()->CaptureActions(this);
 		if(am)
 		{
 			am->SetActionListener(GetEntity()->GetId());
@@ -190,9 +187,6 @@ bool CGameRules::Init( IGameObject * pGameObject )
 	}
 
 	SAFE_HUD_FUNC(GameRulesSet(GetEntity()->GetClass()->GetName()));
-
-  if(isMultiplayer && gEnv->bServer)
-    m_pVotingSystem = new CVotingSystem;
 
 	// create restricted items list for MP (may have been initialised when gamerules didn't exist)
 	// NB: should be done on all machines (client + server)
@@ -244,10 +238,6 @@ void CGameRules::PostInitClient(int channelId)
 		GetGameObject()->InvokeRMI(ClSetGameStartTimer(), SetGameTimeParams(m_gameStartTime), eRMI_ToClientChannel, channelId);
 
 	// update team status on the client
-	/*
-	for (TEntityTeamIdMap::const_iterator tit=m_entityteams.begin(); tit!=m_entityteams.end(); ++tit)
-		GetGameObject()->InvokeRMIWithDependentObject(ClSetTeam(), SetTeamParams(tit->first, tit->second), eRMI_ToClientChannel, tit->first, channelId);
-	*/
 	//Xertok
 	for (TEntityTeamIdMap::const_iterator tit=m_entityteams.begin(); tit!=m_entityteams.end(); ++tit)
 	{
@@ -270,16 +260,6 @@ void CGameRules::PostInitClient(int channelId)
 	// freeze stuff on the clients
 	for (TFrozenEntities::const_iterator fit=m_frozen.begin(); fit!=m_frozen.end(); ++fit)
 		GetGameObject()->InvokeRMIWithDependentObject(ClFreezeEntity(), FreezeEntityParams(fit->first, true, false), eRMI_ToClientChannel, fit->first, channelId);
-
-	if(m_pVotingSystem && m_pVotingSystem->IsInProgress())
-	{
-		int time_left = g_pGame->GetCVars()->sv_votingTimeout - int(m_pVotingSystem->GetVotingTime().GetSeconds());
-		VotingStatusParams params(m_pVotingSystem->GetType(),time_left,m_pVotingSystem->GetEntityId(),m_pVotingSystem->GetSubject());
-		if(m_pVotingSystem->GetEntityId()!=0)
-			GetGameObject()->InvokeRMIWithDependentObject(ClVotingStatus(),params,eRMI_ToClientChannel,m_pVotingSystem->GetEntityId(),channelId);
-		else
-			GetGameObject()->InvokeRMI(ClVotingStatus(),params,eRMI_ToClientChannel,channelId);
-	}
 }
 
 //------------------------------------------------------------------------
@@ -413,8 +393,6 @@ void CGameRules::HandleEvent( const SGameObjectEvent& event)
 //------------------------------------------------------------------------
 void CGameRules::ProcessEvent( SEntityEvent& event)
 {
-	FUNCTION_PROFILER(gEnv->pSystem, PROFILE_GAME);
-
 	static ICVar* pTOD = gEnv->pConsole->GetCVar("sv_timeofdayenable");
 
 	switch(event.event)
@@ -479,26 +457,6 @@ void CGameRules::SetAuthority( bool auth )
 //------------------------------------------------------------------------
 void CGameRules::PostUpdate( float frameTime )
 {
-  if(m_pVotingSystem && m_pVotingSystem->IsInProgress())
-  {
-    int need_votes = int(ceilf(GetPlayerCount(false)*g_pGame->GetCVars()->sv_votingRatio));
-    if(need_votes && m_pVotingSystem->GetNumVotes() >= need_votes)
-    {
-      EndVoting(true);
-    }
-    if(int team = m_pVotingSystem->GetTeam())
-    {
-      int team_votes = int(ceilf(GetTeamPlayerCount(team,false)*g_pGame->GetCVars()->sv_votingRatio));
-      if(team_votes && m_pVotingSystem->GetNumTeamVotes() >= team_votes)
-      {
-        EndVoting(true);
-      }
-    }
-    if(m_pVotingSystem->GetVotingTime().GetSeconds() > g_pGame->GetCVars()->sv_votingTimeout)    
-    {
-      EndVoting(false);
-    }
-  }
 }
 
 //------------------------------------------------------------------------
@@ -620,6 +578,13 @@ bool CGameRules::OnClientConnect(int channelId, bool isReset)
 	CActor *pActor=GetActorByChannelId(channelId);
 	if (pActor)
 	{
+		//we need to pass team somehow so it will be reported correctly
+		int status[2];
+		status[0] = GetTeam(pActor->GetEntityId());
+		status[1] = pActor->GetSpectatorMode();
+		m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Connected, 0, m_pGameFramework->IsChannelOnHold(channelId) ? 1.0f : 0.0f, (void*)status));
+
+
 		//notify client he has entered the game
 		GetGameObject()->InvokeRMIWithDependentObject(ClEnteredGame(), NoParams(), eRMI_ToClientChannel, pActor->GetEntityId(), channelId);
 		
@@ -641,7 +606,6 @@ void CGameRules::OnClientDisconnect(int channelId, EDisconnectionCause cause, co
 	}
 
 	CActor *pActor=GetActorByChannelId(channelId);
-	//assert(pActor);
 
 	if (!pActor || !keepClient)
 		if (g_pGame->GetServerSynchedStorage())
@@ -649,6 +613,9 @@ void CGameRules::OnClientDisconnect(int channelId, EDisconnectionCause cause, co
 
 	if (!pActor)
 		return;
+
+	if (pActor)
+		m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Disconnected, "", keepClient ? 1.0f : 0.0f));
 
 	if (keepClient)
 	{
@@ -1102,6 +1069,8 @@ void CGameRules::RenamePlayer(CActor *pActor, const char *name)
 
 		if (INetChannel* pNetChannel = pActor->GetGameObject()->GetNetChannel())
 			pNetChannel->SetNickname(fixed.c_str());
+
+		m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Renamed, fixed.c_str()));
 	}
 	else if (pActor->GetEntityId() == m_pGameFramework->GetClientActor()->GetEntityId())
 		GetGameObject()->InvokeRMIWithDependentObject(SvRequestRename(), params, eRMI_ToServer, params.entityId);
@@ -1192,7 +1161,6 @@ void CGameRules::KillPlayer(CActor *pActor, bool dropItem, bool ragdoll, EntityI
 	{
 		weaponClassName=pEntity->GetClass()->GetName();
 		m_pGameFramework->GetNetworkSafeClassId(weaponClassId, weaponClassName);
-		assert(weaponClassId!=0);
 	}
 
 	pActor->GetGameObject()->InvokeRMI(CActor::ClClearInventory(), CActor::NoParams(), 
@@ -1238,6 +1206,7 @@ void CGameRules::ChangeSpectatorMode(CActor *pActor, uint8 mode, EntityId target
 		ScriptHandle handle(params.entityId);
 		ScriptHandle target(targetId);
 		CallScript(m_serverStateScript, "OnChangeSpectatorMode", handle, mode, target, resetAll);
+		m_pGameplayRecorder->Event(pActor->GetEntity(), GameplayEvent(eGE_Spectator, 0, (float)mode));
 	}
 	else if (pActor->GetEntityId() == m_pGameFramework->GetClientActor()->GetEntityId())
 		GetGameObject()->InvokeRMIWithDependentObject(SvRequestSpectatorMode(), params, eRMI_ToServer, params.entityId);
@@ -1395,127 +1364,6 @@ bool CGameRules::IsChannelInGame(int channelId) const
 	if (pNetChannel && pNetChannel->GetContextViewState()>=eCVS_InGame)
 		return true;
 	return false;
-}
-
-//------------------------------------------------------------------------
-void CGameRules::StartVoting(CActor *pActor, EVotingState t, EntityId id, const char* param)
-{
-  StartVotingParams params(t,id,param);
-  EntityId entityId = 0;
-	if(pActor)
-		entityId = pActor->GetEntityId();
-  
-  if (gEnv->bServer)
-  {
-    if(!m_pVotingSystem)
-      return;
-
-		// check the player being voted for is not the local actor on the server...
-		if(g_pGame->GetIGameFramework()->GetClientActorId() == id)
-		{
-			return;
-		}
-
-    CTimeValue st;
-    CTimeValue curr_time = gEnv->pTimer->GetFrameStartTime();
-
-    if(!m_pVotingSystem->GetCooldownTime(entityId,st) || (curr_time-st).GetSeconds()>g_pGame->GetCVars()->sv_votingCooldown)
-    {
-      if(m_pVotingSystem->StartVoting(entityId,curr_time,t,id,param,GetTeam(id)))
-      {
-        m_pVotingSystem->Vote(entityId,GetTeam(entityId), true);
-        VotingStatusParams st_param(t,g_pGame->GetCVars()->sv_votingTimeout,id,param);
-        GetGameObject()->InvokeRMI(ClVotingStatus(), st_param, eRMI_ToAllClients);
-				if(t == eVS_kick)
-				{
-					CryFixedStringT<256> feedbackString("@mp_vote_initialized_kick:#:");
-
-					feedbackString.append(param);
-					SendChatMessage(eChatToAll, entityId, 0, feedbackString.c_str());
-				}
-				else
-					SendChatMessage(eChatToAll, entityId, 0, "@mp_vote_initialized_nextmap");
-      }
-    }
-    else
-    {
-			CryLog("Player %s cannot start voting yet",pActor ? pActor->GetEntity()->GetName() : "_server_");
-    }
-  }
-  else if (pActor && pActor->GetEntityId() == m_pGameFramework->GetClientActor()->GetEntityId())
-    GetGameObject()->InvokeRMIWithDependentObject(SvStartVoting(), params, eRMI_ToServer, entityId);
-}
-
-//------------------------------------------------------------------------
-void CGameRules::Vote(CActor* pActor, bool yes)
-{
-  if(!pActor)
-    return;
-  EntityId id = pActor->GetEntityId();
-
-  if (gEnv->bServer)
-  {
-    if(!m_pVotingSystem)
-      return;
-    if(m_pVotingSystem->CanVote(id) && m_pVotingSystem->IsInProgress())
-    {
-      m_pVotingSystem->Vote(id,GetTeam(id), yes);
-			if(yes)
-				SendChatMessage(eChatToAll, id, 0, "@mp_voted");
-			else
-				SendChatMessage(eChatToAll, id, 0, "@mp_votedno");
-    }
-    else
-    {
-      CryLog("Player %s cannot vote",pActor->GetEntity()->GetName());
-    }
-  }
-  else if (id == m_pGameFramework->GetClientActor()->GetEntityId())
-	{
-		if(yes)
-			GetGameObject()->InvokeRMIWithDependentObject(SvVote(), NoParams(), eRMI_ToServer, id);
-		else
-			GetGameObject()->InvokeRMIWithDependentObject(SvVoteNo(), NoParams(), eRMI_ToServer, id);
-	}
-}
-
-//------------------------------------------------------------------------
-void CGameRules::EndVoting(bool success)
-{
-  if(!m_pVotingSystem || !gEnv->bServer)
-    return;
-
-  if(success)
-  {
-    CryLog("Voting \'%s\' succeeded.",m_pVotingSystem->GetSubject().c_str());
-    switch(m_pVotingSystem->GetType())
-    {
-    case eVS_consoleCmd:
-      gEnv->pConsole->ExecuteString(m_pVotingSystem->GetSubject());
-      break;
-    case eVS_kick:
-      {
-        int ch_id = GetChannelId(m_pVotingSystem->GetEntityId());
-        if(INetChannel* pNetChannel = g_pGame->GetIGameFramework()->GetNetChannel(ch_id))
-          pNetChannel->Disconnect(eDC_Kicked,"Kicked from server by voting");
-      }
-      break;
-    case eVS_nextMap:
-      NextLevel();
-      break;
-    case eVS_changeMap:
-      m_pGameFramework->ExecuteCommandNextFrame(string("map ")+m_pVotingSystem->GetSubject());
-      break;
-    case eVS_none:
-      break;
-    }
-  }
-  else
-    CryLog("Voting \'%s\' ended.",m_pVotingSystem->GetSubject().c_str());
-
-  m_pVotingSystem->EndVoting();
-  VotingStatusParams params(eVS_none, 0, GetEntityId(), "");
-  GetGameObject()->InvokeRMI(ClVotingStatus(), params, eRMI_ToAllClients);
 }
 
 //------------------------------------------------------------------------
@@ -1681,7 +1529,6 @@ void CGameRules::SetTeam(int teamId, EntityId id)
 {
 	if (!gEnv->bServer )
 	{
-		assert(0);
 		return;
 	}
 
@@ -1698,7 +1545,6 @@ void CGameRules::SetTeam(int teamId, EntityId id)
 	if (isplayer && oldTeam)
 	{	
 		TPlayerTeamIdMap::iterator pit=m_playerteams.find(oldTeam);
-		assert(pit!=m_playerteams.end());
 		stl::find_and_erase(pit->second, id);
 	}
 
@@ -1709,7 +1555,6 @@ void CGameRules::SetTeam(int teamId, EntityId id)
 		if (isplayer)
 		{
 			TPlayerTeamIdMap::iterator pit=m_playerteams.find(teamId);
-			assert(pit!=m_playerteams.end());
 			pit->second.push_back(id);
 
 			UpdateObjectivesForPlayer(GetChannelId(id), teamId);
@@ -1766,6 +1611,9 @@ void CGameRules::SetTeam(int teamId, EntityId id)
 		CheckSpawnGroupValidity(id);
 
 	GetGameObject()->InvokeRMIWithDependentObject(ClSetTeam(), SetTeamParams(id, teamId), eRMI_ToRemoteClients, id);
+
+	if (IEntity* pEntity = m_pEntitySystem->GetEntity(id))
+		m_pGameplayRecorder->Event(pEntity, GameplayEvent(eGE_ChangedTeam, 0, (float)teamId));
 }
 
 //------------------------------------------------------------------------
@@ -2414,7 +2262,6 @@ bool CGameRules::TestSpawnLocationWithEnvironment(EntityId spawnLocationId, Enti
 //------------------------------------------------------------------------
 EntityId CGameRules::GetSpawnLocation(EntityId playerId, bool ignoreTeam, bool includeNeutral, EntityId groupId, float minDistToDeath, const Vec3 &deathPos, float *pZOffset, EntityId skipId) const
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
 	const TSpawnLocations *locations=0;
 
 	if (groupId)
@@ -2571,8 +2418,6 @@ EntityId CGameRules::GetSpawnLocationTeamFirst( ) const
 //------------------------------------------------------------------------
 EntityId CGameRules::GetSpawnLocationTeam(EntityId playerId, const Vec3 &deathPos) const
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-//	CGameRules *pGameRules=g_pGame->GetGameRules();
 	int totalPlayersCount(GetTotalAlivePlayerCount(playerId));
 	int playerTeamId(GetTeam(playerId));
 	int playerTeamSize(GetTeamPlayerCount(playerTeamId, false, true, playerId));
@@ -2682,7 +2527,6 @@ float CGameRules::GetClosestPlayerDistSqr(const EntityId spawnLocationId, const 
 //------------------------------------------------------------------------
 float CGameRules::GetClosestTeamMateDistSqr(int teamId, const Vec3& pos, EntityId skipId) const
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
 	float	closestDist(std::numeric_limits<float>::max());
 
 	int idx=0;
@@ -3351,7 +3195,6 @@ float CGameRules::GetRemainingStartTimer() const
 //------------------------------------------------------------------------
 bool CGameRules::OnCollision(const SGameCollision& event)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
 	// currently this function only calls server functions
 	// prevent unnecessary script callbacks on the client
 	if (!gEnv->bServer || !m_onCollisionFunc || IsDemoPlayback())
@@ -4049,10 +3892,7 @@ void CGameRules::ForceScoreboard(bool force)
 //------------------------------------------------------------------------
 void CGameRules::FreezeInput(bool freeze)
 {
-#if !defined(CRY_USE_GCM_HUD)
 	if (gEnv->pInput) gEnv->pInput->ClearKeyState();
-#endif
-
 	g_pGameActions->FilterFreezeTime()->Enable(freeze);
 }
 

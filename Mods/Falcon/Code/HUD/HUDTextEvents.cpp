@@ -641,7 +641,6 @@ const char* GetSoundKey(const char* soundName)
 
 void CHUD::ShowSubtitle(ISound *pSound, bool bShow)
 {
-	assert (pSound != 0);
 	if (pSound == 0)
 		return;
 
@@ -1246,11 +1245,6 @@ void CHUD::UpdateSubtitlesManualRender(float frameTime)
 						subtitleString+=entry.localized;
 					else
 					{
-						assert (entry.nCurChunk >= 0 && entry.nCurChunk < entry.nChunks);
-						if (entry.nCurChunk < 0 || entry.nCurChunk >= entry.nChunks)
-						{
-							CRY_ASSERT(0);
-						}
 						const SSubtitleEntry::Chunk& chunk = entry.chunks[entry.nCurChunk];
 						if (entry.bNameShown == false) // only first visible chunk will display the character's name
 						{

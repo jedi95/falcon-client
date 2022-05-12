@@ -142,8 +142,6 @@ bool CItem::ReadParams(const IItemParamsNode *params)
 //------------------------------------------------------------------------
 bool CItem::ReadGeometry(const IItemParamsNode *geometry)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if (!m_sharedparams->Valid())
 	{
 		// read teh helpers
@@ -610,7 +608,6 @@ bool CItem::ReadAccessoryAmmo(const IItemParamsNode *ammos)
 
 			const char* name = ammo->GetAttribute("name");
 			IEntityClass* pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(name);
-			assert(pClass);
 
 			ammo->GetAttribute("amount", amount);
 
@@ -626,8 +623,6 @@ bool CItem::ReadAccessoryAmmo(const IItemParamsNode *ammos)
 //------------------------------------------------------------------------
 bool CItem::SetGeometryFromParams(int slot, const IItemParamsNode *geometry)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	const char *name = geometry->GetAttribute("name");
 	if (!name || !name[0])
 	{

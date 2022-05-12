@@ -116,8 +116,6 @@ ISerializableInfoPtr CAmmoPickup::GetSpawnInfo()
 //------------------------------------------------------------------------
 bool CAmmoPickup::ReadItemParams(const IItemParamsNode *root)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if (!CWeapon::ReadItemParams(root))
 		return false;
 	

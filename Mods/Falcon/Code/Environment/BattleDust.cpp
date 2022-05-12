@@ -347,8 +347,6 @@ void CBattleDust::ReloadXml()
 
 void CBattleDust::RecordEvent(EBattleDustEventType event, Vec3 worldPos, const IEntityClass* pClass)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if(!g_pGameCVars->g_battleDust_enable)
 		return;
 
@@ -454,8 +452,6 @@ void CBattleDust::RemoveBattleArea(CBattleEvent* pEvent)
 
 void CBattleDust::Update()
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if(!g_pGameCVars->g_battleDust_enable)
 	{
 		RemoveAllEvents();
@@ -592,8 +588,6 @@ bool CBattleDust::GetEventParams(EBattleDustEventType event, const IEntityClass*
 
 bool CBattleDust::CheckForMerging(CBattleEvent* pEvent)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if(!g_pGameCVars->g_battleDust_enable)
 		return false;
 
@@ -663,8 +657,6 @@ void CBattleDust::UpdateParticlesForArea(CBattleEvent* pEvent)
 
 bool CBattleDust::CheckIntersection(CBattleEvent* pEventOne, Vec3& pos, float radius)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if(!pEventOne)
 		return false;
 

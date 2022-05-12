@@ -200,7 +200,6 @@ void CVehicleMovementVTOL::PreProcessMovement(const float deltaTime)
 		return;
 	
 	IPhysicalEntity* pPhysics = GetPhysics();
-	assert(pPhysics);
 
 	float gravity;
 	pe_simulation_params paramsSim;
@@ -319,8 +318,6 @@ void CVehicleMovementVTOL::StopEngine()
 //------------------------------------------------------------------------
 void CVehicleMovementVTOL::ProcessActions(const float deltaTime)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
 	UpdateDamages(deltaTime);
 	UpdateEngine(deltaTime);
 
@@ -658,8 +655,6 @@ void CVehicleMovementVTOL::ProcessActions(const float deltaTime)
 // NOTE: This function must be thread-safe. Before adding stuff contact MarcoC.
 void CVehicleMovementVTOL::ProcessAI(const float deltaTime)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-	
 	if (!m_isVTOLMovement)
 	{
 		CVehicleMovementHelicopter::ProcessAI(deltaTime);
@@ -842,13 +837,10 @@ void CVehicleMovementVTOL::OnEvent(EVehicleMovementEvent event, const SVehicleMo
 //------------------------------------------------------------------------
 void CVehicleMovementVTOL::Update(const float deltaTime)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
 	CVehicleMovementHelicopter::Update(deltaTime);
 	CryAutoLock<CryFastLock> lk(m_lock);
 
 	IActorSystem* pActorSystem = g_pGame->GetIGameFramework()->GetIActorSystem();
-	assert(pActorSystem);
 	IActor* pActor = pActorSystem->GetActor(m_actorId);
 
 	if (m_pWingsAnimation)

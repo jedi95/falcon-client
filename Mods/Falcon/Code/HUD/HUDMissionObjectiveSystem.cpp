@@ -11,8 +11,6 @@ void CHUDMissionObjective::SetStatus(HUDMissionStatus status)
 
 	m_eStatus = status;
 
-	assert (m_pMOS != 0);
-
 	SAFE_HUD_FUNC(UpdateObjective(this));
 
 	m_lastTimeChanged = gEnv->pTimer->GetFrameStartTime().GetSeconds();

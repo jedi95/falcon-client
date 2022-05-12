@@ -697,42 +697,38 @@ void CMultiPlayerMenu::SCreateGame::SetGlobalSettings()
 				m_player->SetVariableArray(FVAT_ConstStrPtr, "m_backKeys", 0, &keyArray[0], keyArray.size());
 				m_player->SetVariableArray(FVAT_ConstStrPtr, "m_backValues", 0, &valueArray[0], keyArray.size());
 				m_player->Invoke0("addLevelToRotation");
-				
-				cache.resize(0);
 
+				cache.resize(0);
 			}while(rot->Advance());
-			
+
 			if(m_randomize)
 				rot->SetRandom(true);
 		}
 	 }
-  //assert(cache.size()<=CACHE_SIZE);
-
 }
 
 void CMultiPlayerMenu::SCreateGame::UpdateLevels(const char* gamemode)
 {
 	m_player->Invoke0("resetMultiplayerLevel");
-  ILevelSystem *pLevelSystem = gEnv->pGame->GetIGameFramework()->GetILevelSystem();
-  if(pLevelSystem)
-  {
-    for(int l = 0; l < pLevelSystem->GetLevelCount(); ++l)
-    {
-      ILevelInfo *pLevelInfo = pLevelSystem->GetLevelInfo(l);
-      if(pLevelInfo && pLevelInfo->SupportsGameType(gamemode))
+	ILevelSystem *pLevelSystem = gEnv->pGame->GetIGameFramework()->GetILevelSystem();
+	if(pLevelSystem)
+	{
+		for(int l = 0; l < pLevelSystem->GetLevelCount(); ++l)
+		{
+			ILevelInfo *pLevelInfo = pLevelSystem->GetLevelInfo(l);
+			if(pLevelInfo && pLevelInfo->SupportsGameType(gamemode))
 			{
-        string disp(pLevelInfo->GetDisplayName());
-        SFlashVarValue args[2] = {pLevelInfo->GetName(),disp.empty()?pLevelInfo->GetName():disp.c_str()};
+				string disp(pLevelInfo->GetDisplayName());
+				SFlashVarValue args[2] = {pLevelInfo->GetName(),disp.empty()?pLevelInfo->GetName():disp.c_str()};
 				m_player->Invoke("addMultiplayerLevel", args, 2);
 			}
-
-    }
-  }
+		}
+	}
 }
 
 void CMultiPlayerMenu::SCreateGame::StartDedicated(const char* params)
 {
-  if(gEnv->pGame->GetIGameFramework()->SaveServerConfig("%USER%/config/server.cfg"))
+	if(gEnv->pGame->GetIGameFramework()->SaveServerConfig("%USER%/config/server.cfg"))
 	{
 		string cmd = "Bin32/CrysisWarsDedicatedServer.exe";
 		if(gEnv->pSystem->IsDevMode())

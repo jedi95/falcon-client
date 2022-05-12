@@ -705,7 +705,6 @@ public:
 		EStance stance;
 		void Serialize(TSerialize ser)
 		{
-			assert( ser.GetSerializationTarget() != eST_Network );
 			ser.BeginGroup("SStagingParams");
 			ser.Value("bActive", bActive);
 			ser.Value("bLocked", bLocked);

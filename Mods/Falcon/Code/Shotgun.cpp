@@ -398,8 +398,6 @@ bool CShotgun::Shoot(bool resetAnimation, bool autoreload/* =true */, bool noSou
 //------------------------------------------------------------------------
 void CShotgun::NetShootEx(const Vec3 &pos, const Vec3 &dir, const Vec3 &vel, const Vec3 &hit, float extra, int ph)
 {
-	assert(0 == ph);
-
 	IEntityClass* ammo = m_fireparams.ammo_type_class;
 	const char *action = m_actions.fire_cock.c_str();
 

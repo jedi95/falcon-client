@@ -148,8 +148,6 @@ int CPlant::GetDamage(float distance) const
 //------------------------------------------------------------------------
 void CPlant::Update(float frameTime, uint frameId)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
 	bool requireUpdate=false;
 
 	CActor *pActor=m_pWeapon->GetOwnerActor();

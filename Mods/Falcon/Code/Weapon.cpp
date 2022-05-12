@@ -115,8 +115,6 @@ CWeapon::~CWeapon()
 //------------------------------------------------------------------------
 bool CWeapon::ReadItemParams(const IItemParamsNode *root)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if (!CItem::ReadItemParams(root))
 		return false;
 
@@ -208,8 +206,6 @@ const IItemParamsNode *CWeapon::GetZoomModeParams(const char *name)
 //------------------------------------------------------------------------
 void CWeapon::InitFireModes(const IItemParamsNode *firemodes)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	m_firemodes.resize(0);
 	m_fmIds.clear();
 	m_fm = 0;
@@ -280,8 +276,6 @@ void CWeapon::InitFireModes(const IItemParamsNode *firemodes)
 //------------------------------------------------------------------------
 void CWeapon::InitZoomModes(const IItemParamsNode *zoommodes)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	m_zoommodes.resize(0);
 	m_zmIds.clear();
 	m_zmId = 0;
@@ -381,8 +375,6 @@ void CWeapon::InitZoomModes(const IItemParamsNode *zoommodes)
 //------------------------------------------------------------------------
 void CWeapon::InitAmmos(const IItemParamsNode *ammos)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	m_ammo.clear();
 
 	if (!ammos)
@@ -400,7 +392,6 @@ void CWeapon::InitAmmos(const IItemParamsNode *ammos)
 
 			const char* name = ammo->GetAttribute("name");
 			IEntityClass* pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(name);
-			assert(pClass);
 
 			ammo->GetAttribute("amount", amount);
 			ammo->GetAttribute("extra", extra);
@@ -429,12 +420,9 @@ void CWeapon::InitAmmos(const IItemParamsNode *ammos)
 //------------------------------------------------------------------------
 void CWeapon::InitAIData(const IItemParamsNode *aiDescriptor)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if (!aiDescriptor)
 		return;
-//	<ai_descriptor	hit="instant" speed="20" damage_radius="45" charge_time="2.5" />
-	
+
 	aiDescriptor->GetAttribute("speed", m_aiWeaponDescriptor.fSpeed);
 	aiDescriptor->GetAttribute("damage_radius", m_aiWeaponDescriptor.fDamageRadius);
 	aiDescriptor->GetAttribute("charge_time", m_aiWeaponDescriptor.fChargeTime);
@@ -581,7 +569,6 @@ void CWeapon::FullSerialize( TSerialize ser )
 		if(ser.IsReading())
 		{
 			IEntityClass* pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(name);
-			assert(pClass);
 			m_ammo[pClass] = amount;
 		}
 	}
@@ -606,7 +593,6 @@ void CWeapon::FullSerialize( TSerialize ser )
 		if(ser.IsReading())
 		{
 			IEntityClass* pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(name);
-			assert(pClass);
 			m_bonusammo[pClass] = amount;
 		}
 	}
@@ -631,7 +617,6 @@ void CWeapon::FullSerialize( TSerialize ser )
 		if(ser.IsReading())
 		{
 			IEntityClass* pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(name);
-			assert(pClass);
 			m_minDroppedAmmo[pClass] = amount;
 		}
 	}
@@ -658,7 +643,6 @@ void CWeapon::FullSerialize( TSerialize ser )
 		ser.Value("numFiremodes", numFiremodes);
 		if(ser.IsReading())
 		{
-			assert ( numFiremodes == GetNumOfFireModes() );
 			if(numFiremodes != GetNumOfFireModes())
 				CryWarning(VALIDATOR_MODULE_GAME, VALIDATOR_ERROR, "Num of firemodes changed - loading will be corrupted.");
 		}
@@ -757,7 +741,6 @@ void CWeapon::SerializeLTL(TSerialize ser)
 		if(ser.IsReading())
 		{
 			IEntityClass* pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(name);
-			assert(pClass);
 			m_ammo[pClass] = amount;
 		}
 	}
@@ -774,7 +757,6 @@ void CWeapon::SerializeLTL(TSerialize ser)
 		ser.Value("numFiremodes", numFiremodes);
 		if(ser.IsReading())
 		{
-			assert ( numFiremodes == GetNumOfFireModes() );
 			if(numFiremodes != GetNumOfFireModes())
 				CryWarning(VALIDATOR_MODULE_GAME, VALIDATOR_ERROR, "Num of firemodes changed - loading will be corrupted.");
 		}
@@ -831,8 +813,6 @@ void CWeapon::SerializeLTL(TSerialize ser)
 //------------------------------------------------------------------------
 void CWeapon::Update( SEntityUpdateContext& ctx, int update)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if (m_frozen || IsDestroyed())
 		return;
 
@@ -887,8 +867,6 @@ void CWeapon::HandleEvent( const SGameObjectEvent& event)
 //------------------------------------------------------------------------
 void CWeapon::ProcessEvent(SEntityEvent& event)
 {
-	FUNCTION_PROFILER(gEnv->pSystem, PROFILE_GAME);
-
 	switch(event.event)
 	{
 		case ENTITY_EVENT_HIDE:
@@ -920,8 +898,6 @@ void CWeapon::SetAuthority(bool auth)
 //------------------------------------------------------------------------
 void CWeapon::Reset()
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	// deactivate everything
 	for (TFireModeVector::iterator it = m_firemodes.begin(); it != m_firemodes.end(); it++)
 		(*it)->Activate(false);

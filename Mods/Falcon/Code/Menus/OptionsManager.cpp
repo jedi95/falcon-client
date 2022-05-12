@@ -53,16 +53,11 @@ COptionsManager::COptionsManager() : m_pPlayerProfileManager(NULL)
 
 void COptionsManager::SetCrysisProfileColor(const char *szValue)
 {
-				if(!strcmp(szValue,CRYSIS_PROFILE_COLOR_AMBER))	m_eCrysisProfileColor = CrysisProfileColor_Amber;
+			if(!strcmp(szValue,CRYSIS_PROFILE_COLOR_AMBER))	m_eCrysisProfileColor = CrysisProfileColor_Amber;
 	else	if(!strcmp(szValue,CRYSIS_PROFILE_COLOR_BLUE))	m_eCrysisProfileColor = CrysisProfileColor_Blue;
 	else	if(!strcmp(szValue,CRYSIS_PROFILE_COLOR_GREEN))	m_eCrysisProfileColor = CrysisProfileColor_Green;
-	else	if(!strcmp(szValue,CRYSIS_PROFILE_COLOR_CYAN))		m_eCrysisProfileColor = CrysisProfileColor_Cyan;
+	else	if(!strcmp(szValue,CRYSIS_PROFILE_COLOR_CYAN))	m_eCrysisProfileColor = CrysisProfileColor_Cyan;
 	else	if(!strcmp(szValue,CRYSIS_PROFILE_COLOR_WHITE))	m_eCrysisProfileColor = CrysisProfileColor_White;
-	else CRY_ASSERT(0);
-
-	// Cursor is updated with WM_SETCURSOR, but this message is sent only when mouse moves. We force once
-	// the update so that the Apply button reflects the change without forcing the user to move his mouse
-	//CGameStartup::ForceCursorUpdate();
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -80,11 +75,6 @@ void COptionsManager::SetProfileManager(IPlayerProfileManager* pProfileMgr)
 		return;
 
 	m_pPlayerProfileManager = pProfileMgr;
-	//don't do that, as there is no profile yet.
-	//InitProfileOptions();
-	//if (g_pGame->GetOptions())
-	//	g_pGame->GetOptions()->UpdateFlashOptions();
-
 }
 //-----------------------------------------------------------------------------------------------------
 
@@ -747,7 +737,7 @@ void COptionsManager::SetAntiAliasingMode(const char* params)
 
 					if(!bHDREnabled)		// no HDR so we either have sys_spec_Shading in 1 or 2 or user
 					{										// (it cannot be the machine is not capable of HDR as we have a list of FSAA modes)
-						ICVar *pSpecShading = gEnv->pConsole->GetCVar("sys_spec_Shading");			assert(pSpecShading);
+						ICVar *pSpecShading = gEnv->pConsole->GetCVar("sys_spec_Shading");
 
 						if(pSpecShading)
 							pSpecShading->Set(3);		// starting with mode 3 we have HDR on

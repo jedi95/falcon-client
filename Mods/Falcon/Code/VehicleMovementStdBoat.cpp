@@ -316,8 +316,6 @@ void CVehicleMovementStdBoat::UpdateRunSound(const float deltaTime)
 //------------------------------------------------------------------------
 void CVehicleMovementStdBoat::UpdateSurfaceEffects(const float deltaTime)
 {
-  FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
   if (0 == g_pGameCVars->v_pa_surface)
   {
     ResetParticles();
@@ -343,7 +341,6 @@ void CVehicleMovementStdBoat::UpdateSurfaceEffects(const float deltaTime)
   { 
     if (emitterIt->layer < 0)
     {
-      assert(0);
       continue;
     }
 
@@ -508,8 +505,6 @@ bool CVehicleMovementStdBoat::IsLifted()
 // NOTE: This function must be thread-safe. Before adding stuff contact MarcoC.
 void CVehicleMovementStdBoat::ProcessAI(const float deltaTime)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
 	float dt = max( deltaTime, 0.005f);
 
 	// It is copyed from CVehicleMoventTank::ProcessAI
@@ -618,9 +613,7 @@ void CVehicleMovementStdBoat::ProcessAI(const float deltaTime)
 //////////////////////////////////////////////////////////////////////////
 // NOTE: This function must be thread-safe. Before adding stuff contact MarcoC.
 void CVehicleMovementStdBoat::ProcessMovement(const float deltaTime)
-{  
-  FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
+{
   static const float fWaterLevelMaxDiff = 0.5f; // max allowed height difference between propeller center and water level
   static const float fSubmergedMin = 0.01f;
   static const float fMinSpeedForTurn = 0.5f; // min speed so that turning becomes possible
@@ -634,7 +627,6 @@ void CVehicleMovementStdBoat::ProcessMovement(const float deltaTime)
 
   IEntity* pEntity = m_pVehicle->GetEntity();
   IPhysicalEntity* pPhysics = pEntity->GetPhysics(); 
-  assert(pPhysics);
 
   float frameTime = min(deltaTime, 0.1f); 
 
@@ -847,8 +839,6 @@ void CVehicleMovementStdBoat::ProcessMovement(const float deltaTime)
 //------------------------------------------------------------------------
 bool CVehicleMovementStdBoat::RequestMovement(CMovementRequest& movementRequest)
 {
-	FUNCTION_PROFILER( gEnv->pSystem, PROFILE_GAME );
- 
 	m_movementAction.isAI = true;
 	if (!m_isEnginePowered)
 		return false;

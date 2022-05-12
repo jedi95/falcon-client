@@ -66,8 +66,6 @@ bool CVehicleMovementTweaks::AddGroup(const SmartScriptTable &table)
 			if (tweakIte.value.GetVarType() == svtObject)
 			{
 				IScriptTable* pTweakTable = tweakIte.value.table;
-				assert(pTweakTable);
-
 				char* pName = NULL;
 				if (pTweakTable->GetValue("name", pName))
 				{
@@ -225,8 +223,6 @@ void CVehicleMovementTweaks::ComputeGroup(const SGroup& group)
 //------------------------------------------------------------------------
 void CVehicleMovementTweaks::BlockValue(TValueId valueId, bool block)
 { 
-  assert(valueId >= 0 && valueId < m_values.size());
-    
   m_values[valueId].blocked = block;  
 }
 

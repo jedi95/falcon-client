@@ -315,7 +315,6 @@ void CMPTutorial::OnSoundEvent( ESoundCallbackEvent event,ISound *pSound )
 {
 	if(event == SOUND_EVENT_ON_PLAYBACK_STOPPED)
 	{
-		assert(m_currentEvent.m_pCurrentSound == pSound);
 		if(pSound)
 			pSound->RemoveEventListener(this);
 
@@ -332,8 +331,6 @@ void CMPTutorial::OnSoundEvent( ESoundCallbackEvent event,ISound *pSound )
 
 void CMPTutorial::Update()
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	if(!m_enabled && g_pGameCVars->g_PSTutorial_Enabled)
 		EnableTutorialMode(true);
 	else if(m_enabled && !g_pGameCVars->g_PSTutorial_Enabled)
@@ -356,7 +353,6 @@ void CMPTutorial::Update()
 		// calculate how far through the current sound we are
 		CTimeValue now = gEnv->pTimer->GetFrameStartTime();
 		float soundTimer = now.GetMilliSeconds() - m_currentEvent.m_soundStartTime;
-		assert(soundTimer >= 0);
 		float soundPercent = 1.0f;
 		if(m_currentEvent.m_soundLength == 0.0f && m_currentEvent.m_pCurrentSound.get())
 		{
@@ -497,8 +493,6 @@ void CMPTutorial::Update()
 
 void CMPTutorial::ShowMessage(STutorialEvent& event)
 {
-	assert(event.m_status == eMS_Waiting);
-
 	// cancel previous sound if necessary
 	if(m_currentEvent.m_pCurrentSound.get())
 	{
@@ -825,8 +819,6 @@ bool CMPTutorial::CheckBriefingEvents(const CPlayer* pPlayer)
 
 bool CMPTutorial::CheckNearbyEntities(const CPlayer *pPlayer)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	// checks for:
 	//	eTE_NeutralFactory
 	//	eTE_CaptureFactory
@@ -1000,8 +992,6 @@ bool CMPTutorial::CheckNearbyEntities(const CPlayer *pPlayer)
 
 bool CMPTutorial::CheckVehicles(const CPlayer* pPlayer)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	bool showPrompt = false;
 	if(!pPlayer)
 		return showPrompt;
@@ -1032,8 +1022,6 @@ bool CMPTutorial::CheckVehicles(const CPlayer* pPlayer)
 
 bool CMPTutorial::CheckBases(const CPlayer *pPlayer)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
-
 	// checks for:
 	//	eTE_HqCritical
 	//	eTE_HqUnderAttack

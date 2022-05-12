@@ -434,7 +434,6 @@ bool CHUD::Init()
 	m_pRenderer = gEnv->pRenderer;
 	m_pUIDraw = gEnv->pGame->GetIGameFramework()->GetIUIDraw();
 	m_pDefaultFont = gEnv->pCryFont->GetFont("default");
-	CRY_ASSERT(m_pDefaultFont);
 
 	bool loadEverything = gEnv->pCryPak->GetLvlResStatus();
 
@@ -769,8 +768,6 @@ void CHUD::PlayerIdSet(EntityId playerId)
 	if(pPlayer)
 	{
 		m_pNanoSuit = pPlayer->GetNanoSuit();
-		assert(m_pNanoSuit); //the player requires to have a nanosuit!
-
 		if(m_pNanoSuit)
 		{
 			m_fSuitEnergy = m_pNanoSuit->GetSuitEnergy();
@@ -848,8 +845,6 @@ void CHUD::SwitchToModalHUD(CGameFlashAnimation* pModalHUD,bool bNeedMouse)
 	}
 	else
 	{
-		CRY_ASSERT(m_iCursorVisibilityCounter >= 0);
-
 		while(m_iCursorVisibilityCounter)
 			CursorDecrementCounter();
 	}
@@ -991,7 +986,6 @@ void CHUD::Serialize(TSerialize ser)
 			}
 			else if(1 < m_iCursorVisibilityCounter)
 			{
-				CRY_ASSERT_MESSAGE(0,"This is not possible !");
 				m_iCursorVisibilityCounter = 0;
 			}
 			if (IPlayerInput * pInput = pPlayer->GetPlayerInput())
@@ -1015,11 +1009,6 @@ void CHUD::Serialize(TSerialize ser)
 
 	//serialize objectives after removing them from the hud
 	m_missionObjectiveSystem.Serialize(ser);
-	/*if(ser.GetSerializationTarget() != eST_Network && ser.IsReading())
-	{
-		m_onScreenMessageBuffer.clear();	//clear old/serialization messages
-		m_onScreenMessage.clear();
-	}*/
 
 	ser.Value("m_bigOverlayText", m_bigOverlayText);
 	ser.Value("m_fBigOverlayTextLineTimeout", m_fBigOverlayTextLineTimeout);
@@ -2096,7 +2085,6 @@ void CHUD::BuyViaFlash(int iItem)
 
 bool CHUD::OnAction(const ActionId& action, int activationMode, float value)
 {
-	FUNCTION_PROFILER(GetISystem(), PROFILE_GAME);
 	const CGameActions &rGameActions = g_pGame->Actions();
 	bool filterOut = true;
 
@@ -3131,22 +3119,14 @@ bool CHUD::WeaponHasAttachments()
 
 void CHUD::OnPostUpdate(float frameTime)
 {
-	FUNCTION_PROFILER(GetISystem(),PROFILE_GAME);
-
 	if (m_bStopCutsceneNextUpdate)
 	{
-#ifdef USER_alexl
-		CryLogAlways("[CX] Frame=%d Aborting Cutscenes", gEnv->pRenderer->GetFrameID(false));
-#endif
 		if (gEnv->pMovieSystem)
 		{
 			ISequenceIt* pSeqIt = gEnv->pMovieSystem->GetSequences(true, true);
 			IAnimSequence *pSeq=pSeqIt->first();
 			while (pSeq)
 			{
-#ifdef USER_alexl
-				CryLogAlways("[CX] Frame=%d Aborting Cutscene 0x%p '%s'", gEnv->pRenderer->GetFrameID(false), pSeq, pSeq->GetName());
-#endif
 				gEnv->pMovieSystem->AbortSequence(pSeq, false);
 				pSeq=pSeqIt->next();
 			}
@@ -4790,14 +4770,6 @@ void CHUD::ResetScoreBoard()
 {
 	if(m_pHUDScore)
 		m_pHUDScore->Reset();
-}
-
-//-----------------------------------------------------------------------------------------------------
-
-void CHUD::SetVotingState(EVotingState state, int timeout, EntityId id, const char* descr)
-{
-  IEntity *pEntity = gEnv->pEntitySystem->GetEntity(id);
-  CryLog("%d (%d seconds left) Entity(id %x name %s) description %s", state, timeout, id, pEntity?pEntity->GetName():"",descr);
 }
 
 //-----------------------------------------------------------------------------------------------------

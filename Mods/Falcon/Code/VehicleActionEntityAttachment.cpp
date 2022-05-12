@@ -31,8 +31,6 @@ CVehicleActionEntityAttachment::~CVehicleActionEntityAttachment()
 	if (m_entityId)
 	{
 		IEntitySystem* pEntitySystem = gEnv->pEntitySystem;
-		assert(pEntitySystem);
-
 		pEntitySystem->RemoveEntity(m_entityId);
 	}
 }
@@ -54,8 +52,6 @@ bool CVehicleActionEntityAttachment::Init(IVehicle* pVehicle, const SmartScriptT
 	if (entityAttachmentTable->GetValue("class", pEntityClassName))
 	{
 		IEntityClassRegistry* pClassRegistry = gEnv->pEntitySystem->GetClassRegistry();
-		assert(pClassRegistry);
-
 		if (IEntityClass* pEntityClass = pClassRegistry->FindClass(pEntityClassName))
 		{
 			m_entityClassName = pEntityClassName;
@@ -75,8 +71,6 @@ void CVehicleActionEntityAttachment::Reset()
 	if (m_entityId)
 	{
 		IEntitySystem* pEntitySystem = gEnv->pEntitySystem;
-		assert(pEntitySystem);
-
 		pEntitySystem->RemoveEntity(m_entityId);
 	}
 
@@ -109,7 +103,6 @@ void CVehicleActionEntityAttachment::Update(const float deltaTime)
 		return;
 
 	IEntitySystem* pEntitySystem = gEnv->pEntitySystem;
-	assert(pEntitySystem);
 
 	IEntity* pEntity = pEntitySystem->GetEntity(m_entityId);
 	if (!pEntity)
@@ -148,10 +141,8 @@ void CVehicleActionEntityAttachment::Update(const float deltaTime)
 void CVehicleActionEntityAttachment::SpawnEntity()
 {
 	IEntitySystem* pEntitySystem = gEnv->pEntitySystem;
-	assert(pEntitySystem);
 
 	IEntityClassRegistry* pClassRegistry = pEntitySystem->GetClassRegistry();
-	assert(pClassRegistry);
 
 	IEntityClass* pEntityClass = pClassRegistry->FindClass(m_entityClassName.c_str());
 	if (!pEntityClass)
@@ -185,14 +176,11 @@ void CVehicleActionEntityAttachment::SpawnEntity()
 bool CVehicleActionEntityAttachment::DetachEntity()
 {
 	IEntitySystem* pEntitySystem = gEnv->pEntitySystem;
-	assert(pEntitySystem);
-
 	if (IEntity* pEntity = pEntitySystem->GetEntity(m_entityId))
 	{
 		IVehicleSystem* pVehicleSystem = gEnv->pGame->GetIGameFramework()->GetIVehicleSystem();
-		assert(pVehicleSystem);
 
-    // FIXME: remove this workaround, replace by e.g. buddy constraint 
+		// FIXME: remove this workaround, replace by e.g. buddy constraint 
 		if (IVehicle* pVehicle = pVehicleSystem->GetVehicle(m_entityId))
 			pVehicle->OnHit(m_pVehicle->GetEntityId(), m_pVehicle->GetEntityId(), 10.0f, Vec3(0.0f, 0.0f, 0.0f), 0.0f, "disableCollisions", false);
 

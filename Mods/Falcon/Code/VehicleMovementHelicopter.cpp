@@ -61,8 +61,7 @@ CVehicleMovementHelicopter::CVehicleMovementHelicopter()
 //------------------------------------------------------------------------
 bool CVehicleMovementHelicopter::Init(IVehicle* pVehicle, const SmartScriptTable &table)
 {
-	if (!CVehicleMovementBase::Init(pVehicle, table))
-		assert(0);
+	CVehicleMovementBase::Init(pVehicle, table);
 
 	MOVEMENT_VALUE("engineWarmupDelay", m_engineWarmupDelay);
 
@@ -378,8 +377,6 @@ void CVehicleMovementHelicopter::OnAction(const TVehicleActionId actionId, int a
 //------------------------------------------------------------------------
 void CVehicleMovementHelicopter::ProcessActions(const float deltaTime)
 {
-FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
 	UpdateDamages(deltaTime);
 	UpdateEngine(deltaTime);
 
@@ -702,8 +699,6 @@ void CVehicleMovementHelicopter::Boost(bool enable)
 // NOTE: This function must be thread-safe. Before adding stuff contact MarcoC.
 void CVehicleMovementHelicopter::ProcessAI(const float deltaTime)
 {
-	FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-	
 	// it's useless to progress further if the engine has yet to be turned on
 	if (!m_isEnginePowered)
 		return;
@@ -799,7 +794,6 @@ void CVehicleMovementHelicopter::SetSoundMasterVolume(float vol)
 void CVehicleMovementHelicopter::PreProcessMovement(const float deltaTime)
 {
 	IPhysicalEntity* pPhysics = GetPhysics();
-	assert(pPhysics);
 
 	float gravity;
 
@@ -829,10 +823,7 @@ void CVehicleMovementHelicopter::PreProcessMovement(const float deltaTime)
 // NOTE: This function must be thread-safe. Before adding stuff contact MarcoC.
 void CVehicleMovementHelicopter::ProcessMovement(const float deltaTime)
 {
-  FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
 	IPhysicalEntity* pPhysics = GetPhysics();
-	assert(pPhysics);
 
 	m_netActionSync.UpdateObject(this);
 
@@ -984,8 +975,6 @@ inline float LookupSpline( float t, float t0, float v0, float t1, float v1, floa
 //------------------------------------------------------------------------
 void CVehicleMovementHelicopter::Update(const float deltaTime)
 {
-  FUNCTION_PROFILER( GetISystem(), PROFILE_GAME );
-
 	CVehicleMovementBase::Update(deltaTime);
 
 	CryAutoLock<CryFastLock> lk(m_lock);
@@ -1059,8 +1048,6 @@ float CVehicleMovementHelicopter::GetEnginePower()
 //------------------------------------------------------------------------
 bool CVehicleMovementHelicopter::RequestMovement(CMovementRequest& movementRequest)
 {
-	FUNCTION_PROFILER( gEnv->pSystem, PROFILE_GAME );
- 
 	m_movementAction.isAI = true;
 	if (!m_isEnginePowered)
 		return false;

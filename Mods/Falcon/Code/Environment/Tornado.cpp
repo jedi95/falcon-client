@@ -287,7 +287,6 @@ bool CTornado::UseFunnelEffect(const char* effectName)
 	GetEntity()->SetSlotLocalTM(0, tm);
 	GetEntity()->SetSlotFlags(0, GetEntity()->GetSlotFlags(0)|ENTITY_SLOT_RENDER);
 	IParticleEmitter* pEmitter = GetEntity()->GetParticleEmitter(0);
-	assert(pEmitter);
 	pEmitter->Prime();
 
 	// init the first time
@@ -393,7 +392,6 @@ void CTornado::UpdateTornadoSpline()
 void CTornado::UpdateFlow()
 {
 	IVehicleSystem* pVehicleSystem = g_pGame->GetIGameFramework()->GetIVehicleSystem();
-	assert(pVehicleSystem);
 
 	float frameTime(gEnv->pTimer->GetFrameTime());
 

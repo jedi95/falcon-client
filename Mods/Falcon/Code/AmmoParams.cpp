@@ -205,7 +205,6 @@ void SAmmoParams::Init(const IItemParamsNode* pItemParams_, const IEntityClass* 
 
 	if (!pItemParams || !pEntityClass)
 	{
-		assert(0);
 		return;
 	}
 

@@ -33,8 +33,6 @@ History:
 
 #include "IronSight.h"
 
-#include "IRenderer.h"
-
 class CGrenadeLaunch::CRotateDrumAction
 {
 	public:
