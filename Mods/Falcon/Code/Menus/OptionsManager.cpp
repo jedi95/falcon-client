@@ -76,31 +76,6 @@ void COptionsManager::SetProfileManager(IPlayerProfileManager* pProfileMgr)
 
 	m_pPlayerProfileManager = pProfileMgr;
 }
-//-----------------------------------------------------------------------------------------------------
-
-const char* COptionsManager::GetProfileName()
-{
-	if(!m_pPlayerProfileManager)
-		return "Nomad";
-	const char* user = m_pPlayerProfileManager->GetCurrentUser();
-	if(!user)
-		return "Nomad";
-	IPlayerProfile* profile = m_pPlayerProfileManager->GetCurrentProfile(user);
-	if(!profile)
-		return "Nomad";
-	if(!stricmp(profile->GetName(),"default"))
-		return "Nomad";
-	return profile->GetName();
-
-}
-
-//-----------------------------------------------------------------------------------------------------
-
-bool COptionsManager::IgnoreProfile()
-{
-	return GetISystem()->IsDevMode() && (g_pGameCVars->g_useProfile==0);
-}
-
 
 ILINE bool IsOption(const char* attribName, const char*& cVarName, bool& bWriteToCfg)
 {
@@ -196,12 +171,7 @@ void COptionsManager::InitProfileOptions(bool switchProfiles)
 				{
 					if(stricmp(pCVar->GetString(), value.c_str()))
 					{
-						//CryLogAlways("Inited, loaded and changed: %s = %s (was %s)", attrib.name, value, pCVar->GetString());
 						pCVar->Set(value.c_str());
-					}
-					else
-					{
-						//CryLogAlways("Inited, loaded, but not changed: %s = %s", attrib.name, value);
 					}
 					if(!stricmp(attrib.name,"Option.hud_colorLine"))
 					{
@@ -477,14 +447,11 @@ bool COptionsManager::HandleFSCommand(const char *szCommand,const char *szArgs)
 			return true; // it's a CVAR, we are done!
 		}
 	}
-	//else //does this map to an options function? even if it is inside m_profileOptions, but not a console variable (e.g. pb_client), we want to see if it's a registered command
+	TOpFuncMapIt iter = m_opFuncMap.find(szCommand);
+	if(iter!=m_opFuncMap.end())
 	{
-		TOpFuncMapIt iter = m_opFuncMap.find(szCommand);
-		if(iter!=m_opFuncMap.end())
-		{
-			(this->*(iter->second))(szArgs);
-			return true;
-		}
+		(this->*(iter->second))(szArgs);
+		return true;
 	}
 
 	return false;
@@ -732,16 +699,12 @@ void COptionsManager::SetAntiAliasingMode(const char* params)
 
 				// FSAA requires HDR mode on, to get consistent menu settings we switch sys_spec_shading to 3 or 4
 				// search for #LABEL_FSAA_HDR
-				{
-					bool bHDREnabled = gEnv->pRenderer->EF_Query(EFQ_HDRModeEnabled)!=0;
-
-					if(!bHDREnabled)		// no HDR so we either have sys_spec_Shading in 1 or 2 or user
-					{										// (it cannot be the machine is not capable of HDR as we have a list of FSAA modes)
-						ICVar *pSpecShading = gEnv->pConsole->GetCVar("sys_spec_Shading");
-
-						if(pSpecShading)
-							pSpecShading->Set(3);		// starting with mode 3 we have HDR on
-					}
+				bool bHDREnabled = gEnv->pRenderer->EF_Query(EFQ_HDRModeEnabled)!=0;
+				if(!bHDREnabled)		// no HDR so we either have sys_spec_Shading in 1 or 2 or user
+				{										// (it cannot be the machine is not capable of HDR as we have a list of FSAA modes)
+					ICVar *pSpecShading = gEnv->pConsole->GetCVar("sys_spec_Shading");
+					if(pSpecShading)
+						pSpecShading->Set(3);		// starting with mode 3 we have HDR on
 				}
 			}
 		}
@@ -792,10 +755,6 @@ void COptionsManager::InitOpFuncMap()
 
 void COptionsManager::SystemConfigChanged(bool silent)
 {
-	//gEnv->pConsole->ExecuteString("sys_SaveCVars 1");
-	//gEnv->pSystem->SaveConfiguration();
-	//gEnv->pConsole->ExecuteString("sys_SaveCVars 0");
-
 	if(m_pPlayerProfileManager)
 	{
 		UpdateToProfile();

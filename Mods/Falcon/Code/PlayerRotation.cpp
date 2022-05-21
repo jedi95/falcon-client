@@ -20,7 +20,7 @@ CPlayerRotation::CPlayerRotation( const CPlayer& player, const SActorFrameMoveme
 	m_upVector(player.m_upVector),
 	m_viewAnglesOffset(player.m_viewAnglesOffset),
 	m_leanAmount(player.m_stats.leanAmount),
-	m_actions(player.m_actions),	  
+	m_actions(player.m_actions),
 	m_absRoll(0.0f),
 	m_angularImpulseTime(m_stats.angularImpulseTime),
 	m_angularImpulse(m_stats.angularImpulse),
@@ -96,7 +96,7 @@ void CPlayerRotation::Commit( CPlayer& player )
 	player.m_viewRoll = m_viewRoll;
 	player.m_upVector = m_upVector;
 	player.m_viewAnglesOffset = m_viewAnglesOffset;
-	player.m_stats.leanAmount = m_leanAmount;	
+	player.m_stats.leanAmount = m_leanAmount;
 	player.m_stats.angularImpulseTime = m_angularImpulseTime;
 	player.m_stats.angularImpulse = m_angularImpulse;
 	player.m_stats.angularVel = m_angularVel;
@@ -146,7 +146,7 @@ void CPlayerRotation::GetStanceAngleLimits(float & minAngle,float & maxAngle)
 
 		SMovementState movestate;
 		m_player.m_pMovementController->GetMovementState(movestate);
-	
+
 		// try a cylinder intersection test
 		IPhysicalEntity* pIgnore[2];
 		pIgnore[0] = m_player.GetEntity()->GetPhysics();
@@ -165,7 +165,7 @@ void CPlayerRotation::GetStanceAngleLimits(float & minAngle,float & maxAngle)
 		params.bSweepTest = false;
 		params.bNoBorder = true;
 		params.bNoAreaContacts = true;
-		n = gEnv->pPhysicalWorld->PrimitiveWorldIntersection(primitives::cylinder::type, &cyl, Vec3(0,0,2), 
+		n = gEnv->pPhysicalWorld->PrimitiveWorldIntersection(primitives::cylinder::type, &cyl, Vec3(0,0,2),
 			ent_static|ent_terrain, &contacts, 0,
 			geom_colltype_player, &params, 0, 0, pIgnore, pIgnore[1]?2:1);
 		int ret = (int)n;
@@ -189,13 +189,12 @@ void CPlayerRotation::GetStanceAngleLimits(float & minAngle,float & maxAngle)
 			}
 			++currentc;
 		}
-	
+
 		if (ret)
 		{
 			WriteLockCond lockColl(*params.plock, 0);
 			lockColl.SetActive(1);
 		}
-
 	}
 
 	minAngle *= gf_PI/180.0f;
@@ -209,7 +208,6 @@ void CPlayerRotation::ProcessFlyingZeroG()
 
 	//thats necessary when passing from groundG to normalG
 	m_baseQuat = m_viewQuat;
-	//m_baseQuat = Quat::CreateSlerp(m_viewQuat,m_player.GetEntity()->GetRotation() * Quat::CreateRotationZ(gf_PI),0.5f);
 
 	Ang3 desiredAngVel(m_deltaAngles.x,m_deltaAngles.y * 0.3f,m_deltaAngles.z);
 
@@ -341,7 +339,6 @@ void CPlayerRotation::ProcessParachute()
 	Vec3 forward((up % right).GetNormalized());
 	m_baseQuat = Quat(Matrix33::CreateFromVectors(forward % up,forward,up));
 
-	//m_viewQuat = m_baseQuat;
 	m_viewRoll = 0;
 	m_upVector = m_baseQuat.GetColumn2();
 }
@@ -405,98 +402,94 @@ void CPlayerRotation::ProcessAngularImpulses()
 
 void CPlayerRotation::ClampAngles()
 {
+
+	//cap up/down looking
+	float minAngle,maxAngle;
+	GetStanceAngleLimits(minAngle,maxAngle);
+
+	float currentViewPitch=GetLocalPitch();
+	float newPitch = currentViewPitch + m_deltaAngles.x;
+	if (newPitch < minAngle)
+		newPitch = minAngle;
+	else if (newPitch > maxAngle)
+		newPitch = maxAngle;
+	m_deltaAngles.x = newPitch - currentViewPitch;
+
+
+	//further limit the view if necessary
+	float limitV = m_params.vLimitRangeV;
+	float limitH = m_params.vLimitRangeH;
+	Vec3  limitDir = m_params.vLimitDir;
+	float limitVUp = m_params.vLimitRangeVUp;
+	float limitVDown = m_params.vLimitRangeVDown;
+
+	if (m_player.m_stats.isFrozen.Value())
 	{
-		//cap up/down looking
-		float minAngle,maxAngle;
-		GetStanceAngleLimits(minAngle,maxAngle);
+		float clampMin = g_pGameCVars->cl_frozenAngleMin;
+		float clampMax = g_pGameCVars->cl_frozenAngleMax;
+		float frozenLimit = DEG2RAD(clampMin + (clampMax-clampMin)*(1.f-m_player.GetFrozenAmount(true)));    
 
-		float currentViewPitch=GetLocalPitch();
-		float newPitch = currentViewPitch + m_deltaAngles.x;
-		if (newPitch < minAngle)
-			newPitch = minAngle;
-		else if (newPitch > maxAngle)
-			newPitch = maxAngle;
-		m_deltaAngles.x = newPitch - currentViewPitch;
-
+		if (limitV == 0 || limitV>frozenLimit)
+			limitV = frozenLimit;
+		if (limitH == 0 || limitH>frozenLimit)
+			limitH = frozenLimit;
 	}
 
+	if(m_player.m_stats.isOnLadder)
 	{
-		//further limit the view if necessary
-		float limitV = m_params.vLimitRangeV;
-		float limitH = m_params.vLimitRangeH;
-		Vec3  limitDir = m_params.vLimitDir;
-		float limitVUp = m_params.vLimitRangeVUp;
-		float limitVDown = m_params.vLimitRangeVDown;
+		limitDir = -m_player.m_stats.ladderOrientation;
+		limitH = DEG2RAD(40.0f);
+	}
 
-		if (m_player.m_stats.isFrozen.Value())
-		{ 
-			float clampMin = g_pGameCVars->cl_frozenAngleMin;
-			float clampMax = g_pGameCVars->cl_frozenAngleMax;
-			float frozenLimit = DEG2RAD(clampMin + (clampMax-clampMin)*(1.f-m_player.GetFrozenAmount(true)));    
+	if ((limitH+limitV+limitVUp+limitVDown) && limitDir.len2()>0.1f)
+	{
+		//A matrix is built around the view limit, and then the player view angles are checked with it.
+		//Later, if necessary the upVector could be made customizable.
+		Vec3 forward(limitDir);
+		Vec3 up(m_baseQuat.GetColumn2());
+		Vec3 right(-(up % forward));
+		right.Normalize();
 
-			if (limitV == 0 || limitV>frozenLimit)
-				limitV = frozenLimit;
-			if (limitH == 0 || limitH>frozenLimit)
-				limitH = frozenLimit;
+		Matrix33 limitMtx;
+		limitMtx.SetFromVectors(right,forward,right%forward);
+		limitMtx.Invert();
 
+		Vec3 localDir(limitMtx * m_viewQuat.GetColumn1());
+
+		Ang3 limit;
+
+		if (limitV)
+		{
+			limit.x = asin(localDir.z) + m_deltaAngles.x;
+
+			float deltaX(limitV - fabs(limit.x));
+			if (deltaX < 0.0f)
+				m_deltaAngles.x += deltaX*(limit.x>0.0f?1.0f:-1.0f);
 		}
 
-		if(m_player.m_stats.isOnLadder)
+		if (limitVUp || limitVDown)
 		{
-			limitDir = -m_player.m_stats.ladderOrientation;
-			limitH = DEG2RAD(40.0f);
+			limit.x = asin(localDir.z) + m_deltaAngles.x;
+
+			if(limit.x>=limitVUp && limitVUp!=0)
+			{
+				float deltaXUp(limitVUp - limit.x);
+				m_deltaAngles.x += deltaXUp;
+			}
+			if(limit.x<=limitVDown && limitVDown!=0)
+			{
+				float deltaXDown(limitVDown - limit.x);
+				m_deltaAngles.x += deltaXDown;
+			}
 		}
 
-		if ((limitH+limitV+limitVUp+limitVDown) && limitDir.len2()>0.1f)
+		if (limitH)
 		{
-			//A matrix is built around the view limit, and then the player view angles are checked with it.
-			//Later, if necessary the upVector could be made customizable.
-			Vec3 forward(limitDir);
-			Vec3 up(m_baseQuat.GetColumn2());
-			Vec3 right(-(up % forward));
-			right.Normalize();
+			limit.z = cry_atan2f(-localDir.x,localDir.y) + m_deltaAngles.z;
 
-			Matrix33 limitMtx;
-			limitMtx.SetFromVectors(right,forward,right%forward);
-			limitMtx.Invert();
-
-			Vec3 localDir(limitMtx * m_viewQuat.GetColumn1());
-
-			Ang3 limit;
-
-			if (limitV)
-			{
-				limit.x = asin(localDir.z) + m_deltaAngles.x;
-
-				float deltaX(limitV - fabs(limit.x));
-				if (deltaX < 0.0f)
-					m_deltaAngles.x += deltaX*(limit.x>0.0f?1.0f:-1.0f);
-			}
-
-			if (limitVUp || limitVDown)
-			{
-				limit.x = asin(localDir.z) + m_deltaAngles.x;
-
-				if(limit.x>=limitVUp && limitVUp!=0)
-				{
-					float deltaXUp(limitVUp - limit.x);
-					m_deltaAngles.x += deltaXUp;
-				}
-				if(limit.x<=limitVDown && limitVDown!=0)
-				{
-					float deltaXDown(limitVDown - limit.x);
-					m_deltaAngles.x += deltaXDown;
-				}
-			}
-
-			if (limitH)
-			{
-				limit.z = cry_atan2f(-localDir.x,localDir.y) + m_deltaAngles.z;
-
-				float deltaZ(limitH - fabs(limit.z));
-				if (deltaZ < 0.0f)
-					m_deltaAngles.z += deltaZ*(limit.z>0.0f?1.0f:-1.0f);		
-			}
+			float deltaZ(limitH - fabs(limit.z));
+			if (deltaZ < 0.0f)
+				m_deltaAngles.z += deltaZ*(limit.z>0.0f?1.0f:-1.0f);		
 		}
 	}
 }

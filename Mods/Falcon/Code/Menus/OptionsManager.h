@@ -87,10 +87,6 @@ public :
 	void SaveValueToProfile(const char* key, float value);
 	void SaveValueToProfile(const char* key, const string& value);
 	void SaveProfile();
-	const char* GetProfileName();
-	void CVarToProfile();
-	void ProfileToCVar();
-	bool IgnoreProfile();
 	bool WriteGameCfg();
 	void SetVideoMode(const char* params);
 	void AutoDetectHardware(const char* params);

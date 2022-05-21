@@ -633,7 +633,7 @@ void CNanoSuit::Balance(float energy)
 	}
 }
 
-void CNanoSuit::SetSuitEnergy(float value, bool playerInitiated /* = false */)
+void CNanoSuit::SetSuitEnergy(float value, bool playerInitiated)
 {
 	value = clamp(value, 0.0f, NANOSUIT_ENERGY);
 	if (m_pOwner && value!=m_energy && gEnv->bServer)
@@ -666,19 +666,6 @@ void CNanoSuit::SetSuitEnergy(float value, bool playerInitiated /* = false */)
 	{
 		if (!playerInitiated)
 		{
-			//armor mode hit fx (in armor mode energy is decreased by damage
-			/*if (m_energy-value>=NANOSUIT_ENERGY * 0.2f) //now always happening on hit
-			{
-				if(m_pOwner && !m_pOwner->IsGod() && !m_pOwner->IsThirdPerson() && (m_currentMode == NANOMODE_DEFENSE))
-				{
-					IMaterialEffects* pMaterialEffects = gEnv->pGame->GetIGameFramework()->GetIMaterialEffects();
-					SMFXRunTimeEffectParams params;
-					params.pos = m_pOwner->GetEntity()->GetWorldPos();
-					params.soundSemantic = eSoundSemantic_NanoSuit;
-					TMFXEffectId id = pMaterialEffects->GetEffectIdByName("player_fx", "player_damage_armormode");
-					pMaterialEffects->ExecuteEffect(id, params);
-				}
-			}*/
 			if (gEnv->bMultiplayer && ((value/NANOSUIT_ENERGY)<=0.2f) && (m_energy>value) && g_pGameCVars->g_mpSpeedRechargeDelay) // if we cross the 20% boundary we don't regenerate for 3secs
 				m_energyRechargeDelay=3.0f;
 		}
@@ -694,9 +681,8 @@ void CNanoSuit::SetSuitEnergy(float value, bool playerInitiated /* = false */)
 void CNanoSuit::Hit(int damage)
 {
 	//server only
-
- 	if (gEnv->bMultiplayer)
- 		m_energyRechargeDelay = MAX(m_energyRechargeDelay, 3.0f);
+	if (gEnv->bMultiplayer)
+		m_energyRechargeDelay = MAX(m_energyRechargeDelay, 3.0f);
 
 	// this should work in MP as well as SP now.
 	m_healthRegenDelay = fabsf(g_pGameCVars->g_playerSuitHealthRegenDelay);
@@ -710,14 +696,6 @@ void CNanoSuit::Hit(int damage)
 		TMFXEffectId id = pMaterialEffects->GetEffectIdByName("player_fx", "player_damage_armormode");
 		pMaterialEffects->ExecuteEffect(id, params);
 	}
-
-	/*if(damage > 10.0f && m_pOwner && m_pOwner->GetHealth() > 0)
-	{
-		m_defenseHitTimer = HIT_EFFECT_TIME;
-		if(gEnv->bClient)
-			SelectSuitMaterial();
-		m_pOwner->GetGameObject()->ChangedNetworkState(CPlayer::ASPECT_NANO_SUIT_DEFENSE_HIT);
-	}*/
 }
 
 bool CNanoSuit::SetAllSlots(float armor, float strength, float speed)
@@ -750,11 +728,6 @@ bool CNanoSuit::SetMode(ENanoMode mode, bool forceUpdate, bool keepInvul)
 {
 	if (!IsActive())
 		return false;
-
-	/*if(m_pOwner && (!stricmp("Kyong1", m_pOwner->GetEntity()->GetName()) || !stricmp("ai_kyong", m_pOwner->GetEntity()->GetName())))
-	{
-		mode = NANOMODE_STRENGTH;
-	}*/
 
 	if(m_currentMode == mode && !forceUpdate)
 		return false;
@@ -979,7 +952,7 @@ void CNanoSuit::SetCloak(bool on, bool force)
 			}
 
 			m_pOwner->CreateScriptEvent("cloaking",on?cloakMode:0);
-								
+
 			// player's squadmates mimicking nanosuit modifications
 			if (m_pOwner->GetEntity()->GetAI())
 				gEnv->pAISystem->SendSignal(SIGNALFILTER_SENDER,1, (on?"OnNanoSuitCloak":"OnNanoSuitUnCloak"),m_pOwner->GetEntity()->GetAI());
@@ -1077,7 +1050,7 @@ void CNanoSuit::PlaySound(ENanoSound sound, float param, bool stopSound)
 	bool	force3DSound = false;
 	bool	bAppendPostfix=true;
 	static string soundName;
-  soundName.resize(0);
+	soundName.resize(0);
 
 	switch(sound)
 	{
@@ -1253,10 +1226,8 @@ void CNanoSuit::PlaySound(ENanoSound sound, float param, bool stopSound)
 		}
 	}
 
-	if ( pSound )		//set params and play
+	if (pSound)
 	{
-		//pSound->SetPosition(m_pOwner->GetEntity()->GetWorldPos());
-
 		if(setParam)
 		{
 			if (m_sounds[sound].nMassIndex != -1)

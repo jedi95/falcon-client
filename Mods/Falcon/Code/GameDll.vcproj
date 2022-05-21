@@ -560,14 +560,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Observer.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Observer.h"
-					>
-				</File>
-				<File
 					RelativePath=".\Scout.cpp"
 					>
 				</File>
@@ -1762,10 +1754,6 @@
 			</File>
 			<File
 				RelativePath=".\Menus\FlashMenuObjectProfiles.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Menus\FlashMenuObjectSingleplayer.cpp"
 				>
 			</File>
 			<File

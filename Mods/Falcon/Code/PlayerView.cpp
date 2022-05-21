@@ -57,10 +57,6 @@ void CPlayerView::Commit(CPlayer &rPlayer,SViewParams &viewParams)
 	ViewPostProcess(rPlayer,viewParams);
 }
 
-//-----------------------------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------------------------
-
 //--------------------------------------------------------------------------
 //--- ViewPreProcess
 //--------------------------------------------------------------------------
@@ -151,17 +147,15 @@ void CPlayerView::ViewPreProcess(const CPlayer &rPlayer,SViewParams &viewParams,
 
 		m_in.deathTime = rPlayer.GetDeathTime();
 	}
-	
+
 	// SViewStateInOut -- temporaries and output
 	{
 		m_io.wAngles=Ang3(0,0,0);
 	}
-	
-	// *****
+
 	viewParams.fov = m_in.defaultFov*rPlayer.m_params.viewFoVScale*(gf_PI/180.0f);
 	viewParams.nearplane = 0.0f;
-	// *****
-		
+
 	m_io.eyeOffsetViewGoal=rPlayer.GetStanceViewOffset(rPlayer.m_stance);
 
 	m_io.viewQuatFinal=rPlayer.m_viewQuatFinal;
@@ -369,7 +363,7 @@ void CPlayerView::ViewFirstThirdSharedPost(SViewParams &viewParams)
 		m_io.wAngles = Ang3(wQuat);
 	}
 
-	//smooth out the view elevation		
+	//smooth out the view elevation
 	if (m_in.stats_inAir < 0.1f && !m_in.stats_flyMode && !m_in.stats_spectatorMode && !m_io.bUsePivot)
 	{
 		if (m_io.stats_smoothZType!=1)
@@ -638,9 +632,9 @@ void CPlayerView::ViewFirstPerson(SViewParams &viewParams)
 		{
 			m_io.stats_bobCycle = 0;
 
-			//while flying offset a bit the weapon model by the player speed	
+			//while flying offset a bit the weapon model by the player speed
 			if (m_in.stats_velocity.len2()>0.001f)
-			{				
+			{
 				float dotFwd(m_io.viewQuatFinal.GetColumn1() * vSpeed);
 				float dotSide(m_io.viewQuatFinal.GetColumn0() * vSpeed);
 				float dotUp(m_io.viewQuatFinal.GetColumn2() * vSpeed);

@@ -49,7 +49,7 @@ CScriptBind_Actor::CScriptBind_Actor(ISystem *pSystem)
 #undef SCRIPT_REG_CLASSNAME
 #define SCRIPT_REG_CLASSNAME &CScriptBind_Actor::
 
-  SCRIPT_REG_FUNC(DumpActorInfo);
+	SCRIPT_REG_FUNC(DumpActorInfo);
 	SCRIPT_REG_FUNC(SetViewAngleOffset);
 	SCRIPT_REG_FUNC(GetViewAngleOffset);
 	SCRIPT_REG_FUNC(Revive);
@@ -68,7 +68,7 @@ CScriptBind_Actor::CScriptBind_Actor(ISystem *pSystem)
 	SCRIPT_REG_TEMPLFUNC(GetLinkedVehicleId, "");
 	SCRIPT_REG_FUNC(LinkToVehicle);
 	SCRIPT_REG_FUNC(LinkToVehicleRemotely);
-  SCRIPT_REG_FUNC(IsGhostPit);
+	SCRIPT_REG_FUNC(IsGhostPit);
 	SCRIPT_REG_FUNC(IsFlying);
 	SCRIPT_REG_TEMPLFUNC(SetAngles,"vAngles");
 	SCRIPT_REG_FUNC(GetAngles);
@@ -96,16 +96,16 @@ CScriptBind_Actor::CScriptBind_Actor(ISystem *pSystem)
 	SCRIPT_REG_FUNC(GetMaxHealth);
 	SCRIPT_REG_FUNC(GetArmor);
 	SCRIPT_REG_FUNC(GetMaxArmor);
-  SCRIPT_REG_FUNC(GetFrozenAmount);
-  SCRIPT_REG_TEMPLFUNC(AddFrost, "frost");
+	SCRIPT_REG_FUNC(GetFrozenAmount);
+	SCRIPT_REG_TEMPLFUNC(AddFrost, "frost");
 
 	SCRIPT_REG_TEMPLFUNC(SetPhysicalizationProfile, "profile");
 	SCRIPT_REG_TEMPLFUNC(GetPhysicalizationProfile, "");
 
 	SCRIPT_REG_TEMPLFUNC(GetClosestAttachment, "characterSlot, testPos, maxDistance, suffix");
-  SCRIPT_REG_TEMPLFUNC(AttachVulnerabilityEffect, "characterSlot, partid, hitPos, radius, effect, attachmentIdentifier");
-  SCRIPT_REG_TEMPLFUNC(ResetVulnerabilityEffects, "characterSlot");
-  SCRIPT_REG_TEMPLFUNC(GetCloseColliderParts, "characterSlot, hitPos, radius");
+	SCRIPT_REG_TEMPLFUNC(AttachVulnerabilityEffect, "characterSlot, partid, hitPos, radius, effect, attachmentIdentifier");
+	SCRIPT_REG_TEMPLFUNC(ResetVulnerabilityEffects, "characterSlot");
+	SCRIPT_REG_TEMPLFUNC(GetCloseColliderParts, "characterSlot, hitPos, radius");
 
 	SCRIPT_REG_TEMPLFUNC(QueueAnimationState,"animationState");
 	SCRIPT_REG_TEMPLFUNC(ChangeAnimGraph,"graph, layer");
@@ -146,15 +146,13 @@ CScriptBind_Actor::CScriptBind_Actor(ISystem *pSystem)
 	SCRIPT_REG_TEMPLFUNC(SelectLastItem, "");
 
 	SCRIPT_REG_TEMPLFUNC(SelectItemByNameRemote, "itemClassName");
-  	
 	//------------------------------------------------------------------------
-	
+
 	SCRIPT_REG_TEMPLFUNC(CreateIKLimb,"slot,limbName,rootBone,midBone,endBone,flags");
 
 	SCRIPT_REG_TEMPLFUNC(ResetScores, "");
 	SCRIPT_REG_TEMPLFUNC(RenderScore, "");
-
-  SCRIPT_REG_TEMPLFUNC(SetSearchBeam, "dir");
+	SCRIPT_REG_TEMPLFUNC(SetSearchBeam, "dir");
 
 	// Crafty #CustomCharacters
 	SCRIPT_REG_TEMPLFUNC(SetCustomSuitMats, "supports");
@@ -178,7 +176,7 @@ CScriptBind_Actor::CScriptBind_Actor(ISystem *pSystem)
 	m_pSS->SetGlobalValue("NANOMODE_STRENGTH", NANOMODE_STRENGTH);
 	m_pSS->SetGlobalValue("NANOMODE_CLOAK", NANOMODE_CLOAK);
 	m_pSS->SetGlobalValue("NANOMODE_DEFENSE", NANOMODE_DEFENSE);
-  m_pSS->SetGlobalValue("NANOSUIT_ENERGY", NANOSUIT_ENERGY);
+	m_pSS->SetGlobalValue("NANOSUIT_ENERGY", NANOSUIT_ENERGY);
 
 	m_pSS->SetGlobalValue("CLIENT_SIDE", CLIENT_SIDE);
 	m_pSS->SetGlobalValue("SERVER_SIDE", SERVER_SIDE);
@@ -284,7 +282,6 @@ int CScriptBind_Actor::RagDollize(IFunctionHandler *pH)
 		return pH->EndFunction();
 
 	pActor->GetGameObject()->SetAspectProfile(eEA_Physics, eAP_Ragdoll);
-	//pActor->RagDollize();
 
 	return pH->EndFunction();
 }
@@ -372,11 +369,6 @@ int CScriptBind_Actor::GetHeadPos(IFunctionHandler *pH)
 	CActor *pActor = GetActor(pH);
 	if (!pActor)
 		return pH->EndFunction();
-	
-	//FIXME:dir is not used
-	//	Vec3 dir(0,0,0);
-	//	Vec3 pos(0,0,0);
-	//	pActor->GetActorInfo(pos,dir);
 
 	Vec3 headPos(0,0,0);
 
@@ -1199,49 +1191,46 @@ int CScriptBind_Actor::GetPhysicalizationProfile(IFunctionHandler *pH)
 //------------------------------------------------------------------------
 int CScriptBind_Actor::AttachVulnerabilityEffect(IFunctionHandler *pH, int characterSlot, int partid, Vec3 hitPos, float radius, const char* effect, const char* attachmentIdentifier)
 {
-  CActor *pActor = GetActor(pH);  
+	CActor *pActor = GetActor(pH);
 	if (!pActor)
 		return pH->EndFunction();
 
-  IEntity* pEntity = pActor->GetEntity();
-  ICharacterInstance* pChar = pEntity->GetCharacter(characterSlot);
+	IEntity* pEntity = pActor->GetEntity();
+	ICharacterInstance* pChar = pEntity->GetCharacter(characterSlot);
 
-  if (!pChar || !effect)  
-    return pH->EndFunction();
+	if (!pChar || !effect)
+		return pH->EndFunction();
 
-  //fallback: use nearest attachment
-  float minDiff = radius*radius;  
-  IAttachment* pClosestAtt = 0;
-  
-  IAttachmentManager* pMan = pChar->GetIAttachmentManager();
-  for (int i=0; i<pMan->GetAttachmentCount(); ++i)
-  {
-    IAttachment* pAtt = pMan->GetInterfaceByIndex(i);
-    
-    float diff = (hitPos - pAtt->GetAttWorldAbsolute().t).len2();        
-    if (diff < minDiff)
-    {
-      // only use specified attachments 
-      if (attachmentIdentifier[0] && !strstr(pAtt->GetName(), attachmentIdentifier))
-        continue;
+	//fallback: use nearest attachment
+	float minDiff = radius*radius;
+	IAttachment* pClosestAtt = 0;
 
-      minDiff = diff; 
-      pClosestAtt = pAtt;      
-    }   
-    //CryLog("diff: %.2f, att: %s", diff, attName.c_str());
-  }
+	IAttachmentManager* pMan = pChar->GetIAttachmentManager();
+	for (int i=0; i<pMan->GetAttachmentCount(); ++i)
+	{
+		IAttachment* pAtt = pMan->GetInterfaceByIndex(i);
 
-  if (!pClosestAtt)
-    return pH->EndFunction();
+		float diff = (hitPos - pAtt->GetAttWorldAbsolute().t).len2();        
+		if (diff < minDiff)
+		{
+			// only use specified attachments 
+			if (attachmentIdentifier[0] && !strstr(pAtt->GetName(), attachmentIdentifier))
+				continue;
 
-  //CryLog("AttachVulnerabilityEffect: closest att %s, attaching effect %s", pClosestAtt->GetName(), effect);
-  
-  CEffectAttachment *pEffectAttachment = new CEffectAttachment(effect, Vec3(ZERO), Vec3(0,1,0), 1.f);
+			minDiff = diff;
+			pClosestAtt = pAtt;
+		}
+	}
 
-  pClosestAtt->AddBinding(pEffectAttachment);
-  pClosestAtt->HideAttachment(0);
-  
-  return pH->EndFunction(pClosestAtt->GetName());    
+	if (!pClosestAtt)
+		return pH->EndFunction();
+
+	CEffectAttachment *pEffectAttachment = new CEffectAttachment(effect, Vec3(ZERO), Vec3(0,1,0), 1.f);
+
+	pClosestAtt->AddBinding(pEffectAttachment);
+	pClosestAtt->HideAttachment(0);
+
+	return pH->EndFunction(pClosestAtt->GetName());
 }
 
 int CScriptBind_Actor::GetClosestAttachment(IFunctionHandler *pH, int characterSlot, Vec3 testPos, float maxDistance, const char* suffix)
@@ -1299,98 +1288,97 @@ int CScriptBind_Actor::GetClosestAttachment(IFunctionHandler *pH, int characterS
 //------------------------------------------------------------------------
 int CScriptBind_Actor::ResetVulnerabilityEffects(IFunctionHandler *pH, int characterSlot)
 {
-  CActor *pActor = GetActor(pH);  
+	CActor *pActor = GetActor(pH);
 	if (!pActor)
 		return pH->EndFunction();
 
-  IEntity* pEntity = pActor->GetEntity();
+	IEntity* pEntity = pActor->GetEntity();
 
-  ICharacterInstance* pChar = pEntity->GetCharacter(characterSlot);
+	ICharacterInstance* pChar = pEntity->GetCharacter(characterSlot);
 
-  if (pChar)  
-  {
-    IAttachmentManager* pMan = pChar->GetIAttachmentManager();
-    for (int i=0; i<pMan->GetAttachmentCount(); ++i)
-    {
-      IAttachment* pAtt = pMan->GetInterfaceByIndex(i);
-      if (strstr(pAtt->GetName(), "vulnerable"))
-        pAtt->ClearBinding();
-    }
-  }
-  return pH->EndFunction();
+	if (pChar)
+	{
+		IAttachmentManager* pMan = pChar->GetIAttachmentManager();
+		for (int i=0; i<pMan->GetAttachmentCount(); ++i)
+		{
+			IAttachment* pAtt = pMan->GetInterfaceByIndex(i);
+			if (strstr(pAtt->GetName(), "vulnerable"))
+				pAtt->ClearBinding();
+		}
+	}
+	return pH->EndFunction();
 }
 
 //------------------------------------------------------------------------
 int CScriptBind_Actor::GetCloseColliderParts(IFunctionHandler *pH, int characterSlot, Vec3 hitPos, float radius)
 {
-  // find nearest physic. parts to explosion center
-  // for now we just return the closest part (using the AABB)  
-  
-  CActor *pActor = GetActor(pH);  
+	// find nearest physic. parts to explosion center
+	// for now we just return the closest part (using the AABB)
+
+	CActor *pActor = GetActor(pH);
 	if (!pActor)
 		return pH->EndFunction();
 
-  IEntity* pEntity = pActor->GetEntity();
+	IEntity* pEntity = pActor->GetEntity();
 
-  ICharacterInstance* pChar = pEntity->GetCharacter(characterSlot);
+	ICharacterInstance* pChar = pEntity->GetCharacter(characterSlot);
 
-  if (pChar && pChar->GetISkeletonPose()->GetCharacterPhysics())  
-  { 
-    IPhysicalEntity* pPhysics = pChar->GetISkeletonPose()->GetCharacterPhysics();
-    
-    pe_status_nparts nparts;
-    int numParts = pPhysics->GetStatus(&nparts);    
+	if (pChar && pChar->GetISkeletonPose()->GetCharacterPhysics())
+	{
+		IPhysicalEntity* pPhysics = pChar->GetISkeletonPose()->GetCharacterPhysics();
 
-    float minLenSq = radius*radius + 0.1f;
-    int minLenPart = -1;
-    
-    pe_status_pos status;
+		pe_status_nparts nparts;
+		int numParts = pPhysics->GetStatus(&nparts);
 
-    for (int i=0; i<numParts; ++i)
-    {
-      status.ipart = i;
-      if (pPhysics->GetStatus(&status))
-      { 
-        AABB box(status.pos+status.BBox[0], status.pos+status.BBox[1]);
-             
-        // if hitpos inside AABB, return
-        if (box.IsContainPoint(hitPos))
-        {
-          minLenPart = i;          
-          break;
-        }
+		float minLenSq = radius*radius + 0.1f;
+		int minLenPart = -1;
 
-        // else find closest distance 
-        float lenSq = Distance::Point_AABBSq(hitPos, box);
-        if (lenSq < minLenSq)
-        {
-          minLenSq = lenSq;
-          minLenPart = i;          
-        }
-      }      
-    }
+		pe_status_pos status;
 
-    // get material from selected part
-    static ISurfaceTypeManager* pSurfaceMan = gEnv->p3DEngine->GetMaterialManager()->GetSurfaceTypeManager();
+		for (int i=0; i<numParts; ++i)
+		{
+			status.ipart = i;
+			if (pPhysics->GetStatus(&status))
+			{
+				AABB box(status.pos+status.BBox[0], status.pos+status.BBox[1]);
 
-    if (minLenPart != -1)
-    {
-	     pe_params_part params;
-      params.ipart = minLenPart;
-      if (pPhysics->GetParams(&params))
-      { 
-        phys_geometry* pGeom = params.pPhysGeomProxy ? params.pPhysGeomProxy : params.pPhysGeom;
-        if (pGeom->surface_idx > 0 &&  pGeom->surface_idx < params.nMats)
+				// if hitpos inside AABB, return
+				if (box.IsContainPoint(hitPos))
+				{
+					minLenPart = i;
+					break;
+				}
+
+				// else find closest distance 
+				float lenSq = Distance::Point_AABBSq(hitPos, box);
+				if (lenSq < minLenSq)
+				{
+					minLenSq = lenSq;
+					minLenPart = i;
+				}
+			}
+		}
+
+		// get material from selected part
+		static ISurfaceTypeManager* pSurfaceMan = gEnv->p3DEngine->GetMaterialManager()->GetSurfaceTypeManager();
+
+		if (minLenPart != -1)
+		{
+			pe_params_part params;
+			params.ipart = minLenPart;
+			if (pPhysics->GetParams(&params))
+			{
+				phys_geometry* pGeom = params.pPhysGeomProxy ? params.pPhysGeomProxy : params.pPhysGeom;
+				if (pGeom->surface_idx > 0 &&  pGeom->surface_idx < params.nMats)
 				{
 					if (ISurfaceType *pSurfaceType=pSurfaceMan->GetSurfaceType(pGeom->pMatMapping[pGeom->surface_idx]))
 						return pH->EndFunction(params.partid, pSurfaceType->GetName(), pSurfaceType->GetType());
 				}
-      }
-
-      return pH->EndFunction(params.partid);
-    }    
-  }
-  return pH->EndFunction();
+			}
+			return pH->EndFunction(params.partid);
+		}
+	}
+	return pH->EndFunction();
 }
 
 //------------------------------------------------------------------------
@@ -1574,44 +1562,44 @@ int CScriptBind_Actor::SelectItem(IFunctionHandler *pH, ScriptHandle itemId)
 //------------------------------------------------------------------------
 int CScriptBind_Actor::GetFrozenAmount(IFunctionHandler *pH)
 {
-  CActor *pActor = GetActor(pH);
-  if (!pActor)
-    return pH->EndFunction();
+	CActor *pActor = GetActor(pH);
+	if (!pActor)
+		return pH->EndFunction();
 
-  return pH->EndFunction(pActor->GetFrozenAmount());   
+	return pH->EndFunction(pActor->GetFrozenAmount());
 }
 
 //------------------------------------------------------------------------
 int CScriptBind_Actor::AddFrost(IFunctionHandler *pH, float frost)
 {
-  CActor *pActor = GetActor(pH);
+	CActor *pActor = GetActor(pH);
 
-  if (pActor)
-    pActor->AddFrost(frost);
-  
-  return pH->EndFunction();  
+	if (pActor)
+		pActor->AddFrost(frost);
+
+	return pH->EndFunction();
 }
 
 //------------------------------------------------------------------------
 int CScriptBind_Actor::IsGhostPit(IFunctionHandler *pH)
 {
 	CActor *pActor = GetActor(pH);
-  if (!pActor)
-    return pH->EndFunction();
+	if (!pActor)
+		return pH->EndFunction();
 
-  bool hidden = false;
-	 
-  if (IVehicle* pVehicle = pActor->GetLinkedVehicle())
-  {
-    IVehicleSeat* pSeat = pVehicle->GetSeatForPassenger(pActor->GetEntityId());
-    if (pSeat)
-    { 
-      if (IVehicleView* pView = pSeat->GetView(pSeat->GetCurrentView()))
-        hidden = pView->IsPassengerHidden();
-    }
-  }
+	bool hidden = false;
 
-  return pH->EndFunction(hidden);   
+	if (IVehicle* pVehicle = pActor->GetLinkedVehicle())
+	{
+		IVehicleSeat* pSeat = pVehicle->GetSeatForPassenger(pActor->GetEntityId());
+		if (pSeat)
+		{
+			if (IVehicleView* pView = pSeat->GetView(pSeat->GetCurrentView()))
+				hidden = pView->IsPassengerHidden();
+		}
+	}
+
+	return pH->EndFunction(hidden);
 }
 
 //------------------------------------------------------------------------
@@ -1652,7 +1640,7 @@ int CScriptBind_Actor::SetNanoSuitMode(IFunctionHandler *pH, int mode)
 int CScriptBind_Actor::GetNanoSuitMode(IFunctionHandler *pH)
 {
 	CActor *pActor = GetActor(pH);
-	if (!pActor || pActor->GetActorClass() != CPlayer::GetActorClassType())    
+	if (!pActor || pActor->GetActorClass() != CPlayer::GetActorClassType())
 		return pH->EndFunction(0);
 
 	if(CNanoSuit *pSuit = ((CPlayer*)pActor)->GetNanoSuit())
@@ -1665,26 +1653,26 @@ int CScriptBind_Actor::GetNanoSuitMode(IFunctionHandler *pH)
 int CScriptBind_Actor::GetNanoSuitEnergy(IFunctionHandler *pH)
 {
 	CActor *pActor = GetActor(pH);
-  if (!pActor || pActor->GetActorClass() != CPlayer::GetActorClassType())    
+	if (!pActor || pActor->GetActorClass() != CPlayer::GetActorClassType())
 		return pH->EndFunction(0);
-  	
-  if(CNanoSuit *pSuit = ((CPlayer*)pActor)->GetNanoSuit())
+
+	if(CNanoSuit *pSuit = ((CPlayer*)pActor)->GetNanoSuit())
 		return pH->EndFunction(pSuit->GetSuitEnergy());
-	
-  return pH->EndFunction(0);
+
+	return pH->EndFunction(0);
 }
 
 //------------------------------------------------------------------------
 int CScriptBind_Actor::SetNanoSuitEnergy(IFunctionHandler *pH, int energy)
 {
 	CActor *pActor = GetActor(pH);
-  if (!pActor || pActor->GetActorClass() != CPlayer::GetActorClassType())    
+	if (!pActor || pActor->GetActorClass() != CPlayer::GetActorClassType())
 		return pH ->EndFunction();
-	
-  if(CNanoSuit *pSuit = ((CPlayer*)pActor)->GetNanoSuit())
+
+	if(CNanoSuit *pSuit = ((CPlayer*)pActor)->GetNanoSuit())
 		pSuit->SetSuitEnergy(energy);
-	
-  return pH->EndFunction();
+
+	return pH->EndFunction();
 }
 
 //------------------------------------------------------------------------
@@ -1718,19 +1706,18 @@ int CScriptBind_Actor::NanoSuitHit(IFunctionHandler *pH, int damage)
 	if(CNanoSuit *pSuit = ((CPlayer*)pActor)->GetNanoSuit())
 		pSuit->Hit(damage);
 
-  return pH->EndFunction();
+	return pH->EndFunction();
 }
 
 //------------------------------------------------------------------------
 int CScriptBind_Actor::SetSearchBeam(IFunctionHandler *pH, Vec3 dir)
 {
-  CActor *pActor = GetActor(pH);
-  if (!pActor || pActor->GetActorClass() != CAlien::GetActorClassType())
-    return pH->EndFunction();
-  
-  ((CAlien*)pActor)->SetSearchBeamGoal(dir);
+	CActor *pActor = GetActor(pH);
+	if (!pActor || pActor->GetActorClass() != CAlien::GetActorClassType())
+		return pH->EndFunction();
 
-  return pH->EndFunction();
+	((CAlien*)pActor)->SetSearchBeamGoal(dir);
+	return pH->EndFunction();
 }
 
 //------------------------------------------------------------------------
@@ -1760,7 +1747,6 @@ int CScriptBind_Actor::IsFlying(IFunctionHandler *pH)
 //------------------------------------------------------------------------
 int CScriptBind_Actor::SetCustomSuitMats(IFunctionHandler* pH, bool bSupports)
 {
-	//CryWarning(VALIDATOR_MODULE_GAME, VALIDATOR_WARNING, "SERVER: CScriptBind_Actor::SetCustomSuitMats %d", bSupports);
 	CActor* pActor = GetActor(pH);
 	if (pActor)
 	{

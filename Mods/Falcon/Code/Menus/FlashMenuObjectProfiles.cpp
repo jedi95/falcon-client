@@ -83,7 +83,7 @@ void CFlashMenuObject::AddProfile(const char *profileName)
 			if(m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART])
 			{
 				ShowMenuMessage("@ui_menu_PROFILEERROR");
-			}			
+			}
 			return;
 		}
 
@@ -108,14 +108,14 @@ void CFlashMenuObject::AddProfile(const char *profileName)
 			{
 				m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Invoke("Root.MainMenu.Profile.gotoProfileMenu");
 				ShowMenuMessage("@ui_menu_PROFILECREATED");
-			}			
+			}
 		}
 		else
 		{
 			if(m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART])
 			{
 				ShowMenuMessage("@ui_menu_PROFILEERROR");
-			}			
+			}
 		}
 	}
 }
@@ -132,7 +132,7 @@ void CFlashMenuObject::SelectProfile(const char *profileName, bool silent, bool 
 			SwitchProfiles(oldProfile->GetName(), profileName);
 		else
 			SwitchProfiles(NULL, profileName);
-    g_pGame->GetIGameFramework()->GetILevelSystem()->LoadRotation();
+		g_pGame->GetIGameFramework()->GetILevelSystem()->LoadRotation();
 		UpdateProfiles();
 		if(keepOldSettings)
 			g_pGame->GetOptions()->UpdateToProfile();

@@ -210,6 +210,7 @@ private:
 		}
 	};
 
+	void UpdateMods();
 	void UpdateLevels(const char *gamemode);
 
 	//Profiles screen
@@ -219,16 +220,6 @@ private:
 	void DeleteProfile(const char *profileName);
 	void SwitchProfiles(const char *oldProfile, const char *newProfile);
 	void SelectActiveProfile();
-
-	//Singleplayer screen
-	void UpdateSingleplayerDifficulties();
-	void StartSingleplayerGame(const char *strDifficulty);
-	void UpdateSaveGames();
-	void LoadGame(const char *FileName);
-	bool SaveGame(const char *FileName);
-	void DeleteSaveGame(const char *FileName);
-	const char* ValidateName(const char *fileName);
-	void UpdateMods();
 
 	//Options screen
 	void SaveActionToMap(const char* actionmap, const char* action, const char *key);
@@ -294,12 +285,6 @@ private:
 	IPlayerProfileManager* m_pPlayerProfileManager;
 
 	IMusicSystem *m_pMusicSystem;
-
-	struct SLoadSave
-	{
-		string name;
-		bool save;
-	} m_sLoadSave;
 
 	typedef std::map<string,Vec2> ButtonPosMap;
 	ButtonPosMap m_currentButtons;

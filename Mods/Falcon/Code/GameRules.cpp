@@ -675,7 +675,7 @@ bool CGameRules::OnClientEnteredGame(int channelId, bool isReset)
 
 	// don't do this on reset - have already been added to correct team!
 	if(!isReset || GetTeamCount() < 2)
-		ReconfigureVoiceGroups(pActor->GetEntityId(), -999, 0); /* -999 should never exist :) */
+		ReconfigureVoiceGroups(pActor->GetEntityId(), -999, 0); // -999 should never exist :)
 
 	return true;
 }
@@ -936,9 +936,7 @@ void CGameRules::RevivePlayer(CActor *pActor, const Vec3 &pos, const Ang3 &angle
 		FreezeEntity(pActor->GetEntityId(), false, false);
 	}
 
-	int health = 100;
-	//if(!gEnv->bMultiplayer && pActor->IsClient())
-		health = g_pGameCVars->g_playerHealthValue;
+	int health = g_pGameCVars->g_playerHealthValue;
 	pActor->SetMaxHealth(health);
 
 	if (!m_pGameFramework->IsChannelOnHold(pActor->GetChannelId()))
@@ -967,7 +965,7 @@ void CGameRules::RevivePlayer(CActor *pActor, const Vec3 &pos, const Ang3 &angle
 }
 
 //------------------------------------------------------------------------
-void CGameRules::RevivePlayerInVehicle(CActor *pActor, EntityId vehicleId, int seatId, int teamId/* =0 */, bool clearInventory/* =true */)
+void CGameRules::RevivePlayerInVehicle(CActor *pActor, EntityId vehicleId, int seatId, int teamId, bool clearInventory)
 {
 	// might get here with an invalid (-ve) seat id if all seats are currently occupied. 
 	// In that case we use the seat exit code to find a valid position to spawn at.
@@ -1023,7 +1021,6 @@ void CGameRules::RevivePlayerInVehicle(CActor *pActor, EntityId vehicleId, int s
 		CActor::ReviveInVehicleParams(vehicleId, seatId, teamId), eRMI_ToAllClients|eRMI_NoLocalCalls);
 }
 
-
 // Crafty #CustomCharacters
 //-----------------------------------------------------------------------
 void CGameRules::ReviveInPlaceInVehicle(CActor* pActor)
@@ -1031,8 +1028,6 @@ void CGameRules::ReviveInPlaceInVehicle(CActor* pActor)
 	pActor->NetReviveInPlaceInVehicle();
 }
 
-
-// Crafty
 void CGameRules::RenameEntity(IEntity *pEntity, const char *name)
 {
 	RenameEntityParams params(pEntity->GetId(), name);
@@ -1330,10 +1325,6 @@ bool CGameRules::IsPlayerActivelyPlaying(EntityId playerId, bool mustBeAlive) co
 {
 	if(!gEnv->bMultiplayer)
 		return true;
-
-	// 'actively playing' means they have selected a team / joined the game.
-
-	int count = GetTeamCount();
 
 	if(GetTeamCount() > 1)
 	{
@@ -1966,8 +1957,7 @@ void CGameRules::ShatterEntity(EntityId entityId, const Vec3 &pos, const Vec3 &i
 	if (!pEntity)
 		return;
 
-  // FIXME: Marcio: fix order of Shatter/Freeze on client, otherwise this check fails
-  //if (!IsFrozen(entityId)) 
+	// FIXME: Marcio: fix order of Shatter/Freeze on client, otherwise this check fails
 	if (gEnv->bServer && !IsFrozen(entityId)) 
 		return;
 
@@ -2025,17 +2015,6 @@ void CGameRules::ShatterEntity(EntityId entityId, const Vec3 &pos, const Vec3 &i
 
 	if (IEntityRenderProxy *pProxy=static_cast<IEntityRenderProxy *>(pEntity->GetProxy(ENTITY_PROXY_RENDER)))
 		gEnv->p3DEngine->DeleteEntityDecals(pProxy->GetRenderNode());
-
-/*
-	SpawnParams spawnparams;
-	spawnparams.eAttachForm=GeomForm_Surface;
-	spawnparams.eAttachType=GeomType_Render;
-	spawnparams.bIndependent=true;
-	spawnparams.bCountPerUnit=1;
-	spawnparams.fCountScale=1.0f;
-
-	gEnv->pEntitySystem->GetBreakableManager()->AttachSurfaceEffect(pEntity, 0, SURFACE_BREAKAGE_TYPE("freeze_shatter"), spawnparams);
-*/
 
 	IBreakableManager::BreakageParams breakage;
 	breakage.type = IBreakableManager::BREAKAGE_TYPE_FREEZE_SHATTER;
@@ -2185,7 +2164,7 @@ bool CGameRules::IsSpawnLocationSafe(EntityId playerId, EntityId spawnLocationId
 				continue;
 
 			CActor *pActor=static_cast<CActor *>(g_pGame->GetIGameFramework()->GetIActorSystem()->GetActor(entityId));
-			if (pActor==NULL)// || pActor && pActor->GetSpectatorMode()!=0) // ignore spectators
+			if (pActor==NULL)
 				continue;
 
 			if (playerTeamId && playerTeamId==GetTeam(entityId)) // ignore team players on team games
@@ -2301,7 +2280,8 @@ EntityId CGameRules::GetSpawnLocation(EntityId playerId, bool ignoreTeam, bool i
 	float enemyRejectDistSqr = 0.f;
 	if(strcmp(GetEntity()->GetClass()->GetName(), "PowerStruggle"))
 		enemyRejectDistSqr = GetMinEnemyDist();
-g_pGameCVars->g_spawnenemydist = enemyRejectDistSqr;	// doing this for debugging
+
+	g_pGameCVars->g_spawnenemydist = enemyRejectDistSqr;
 	enemyRejectDistSqr *= enemyRejectDistSqr;
 
 	float mdtd=minDistToDeath;
@@ -2389,8 +2369,6 @@ EntityId CGameRules::GetSpawnLocationTeamFirst( ) const
 	for (TSpawnLocations::const_iterator it=m_spawnLocations.begin(); it!=m_spawnLocations.end(); ++it)
 	{
 		EntityId spawnId(*it);
-//		if(!IsSpawnLocationSafe(playerId, spawnId, safeDistance, zoffset))
-//			continue;
 		const IEntity *pSpawn( gEnv->pEntitySystem->GetEntity(spawnId));
 		avrgPos += pSpawn->GetWorldPos();
 	}	
@@ -2400,8 +2378,6 @@ EntityId CGameRules::GetSpawnLocationTeamFirst( ) const
 	for (TSpawnLocations::const_iterator it=m_spawnLocations.begin(); it!=m_spawnLocations.end(); ++it)
 	{
 		EntityId spawnId(*it);
-		//		if(!IsSpawnLocationSafe(playerId, spawnId, safeDistance, zoffset))
-		//			continue;
 		const IEntity *pSpawn( gEnv->pEntitySystem->GetEntity(spawnId));
 		float sqrDist = (avrgPos - pSpawn->GetWorldPos()).GetLengthSquared();
 		candidates.insert(TCandidates::value_type(-sqrDist, spawnId));
@@ -2422,7 +2398,7 @@ EntityId CGameRules::GetSpawnLocationTeam(EntityId playerId, const Vec3 &deathPo
 	int playerTeamId(GetTeam(playerId));
 	int playerTeamSize(GetTeamPlayerCount(playerTeamId, false, true, playerId));
 
-	if ( totalPlayersCount==1) //this is the first player on the map
+	if (totalPlayersCount==1) //this is the first player on the map
 		return GetSpawnLocationTeamFirst();
 
 	EntityId bestPointId(0);
@@ -2430,7 +2406,7 @@ EntityId CGameRules::GetSpawnLocationTeam(EntityId playerId, const Vec3 &deathPo
 	float minDistToDeathSqr(g_pGameCVars->g_spawndeathdist*g_pGameCVars->g_spawndeathdist);
 	int enemyTeamId(GetEnemyTeamId(playerTeamId));
 	// the only player of the team - maximize enemy dist
-	if(playerTeamSize<2)	
+	if(playerTeamSize<2)
 	{
 		float	bestEnemyDist(0);
 		for (TSpawnLocations::const_iterator it=m_spawnLocations.begin(); it!=m_spawnLocations.end(); ++it)
@@ -2456,7 +2432,7 @@ EntityId CGameRules::GetSpawnLocationTeam(EntityId playerId, const Vec3 &deathPo
 	// have teammates in the game already
 	float	bestFriendDist(std::numeric_limits<float>::max());
 	float enemyRejectDistSqr = GetMinEnemyDist();
-g_pGameCVars->g_spawnenemydist = enemyRejectDistSqr;	// doing this for debugging
+	g_pGameCVars->g_spawnenemydist = enemyRejectDistSqr;
 	enemyRejectDistSqr *= enemyRejectDistSqr;
 
 	for (TSpawnLocations::const_iterator it=m_spawnLocations.begin(); it!=m_spawnLocations.end(); ++it)
@@ -2527,7 +2503,7 @@ float CGameRules::GetClosestPlayerDistSqr(const EntityId spawnLocationId, const 
 //------------------------------------------------------------------------
 float CGameRules::GetClosestTeamMateDistSqr(int teamId, const Vec3& pos, EntityId skipId) const
 {
-	float	closestDist(std::numeric_limits<float>::max());
+	float closestDist(std::numeric_limits<float>::max());
 
 	int idx=0;
 	EntityId teamMateId;
@@ -2980,31 +2956,6 @@ void CGameRules::SendTextMessage(ETextMessageType type, const char *msg, unsigne
 //------------------------------------------------------------------------
 bool CGameRules::CanReceiveChatMessage(EChatMessageType type, EntityId sourceId, EntityId targetId) const
 {
-	/*
-	if(sourceId == targetId)
-		return true;
-
-	bool sspec=!IsPlayerActivelyPlaying(sourceId);
-	bool sdead=IsDead(sourceId);
-
-	bool tspec=!IsPlayerActivelyPlaying(targetId);
-	bool tdead=IsDead(targetId);
-
-	if(sdead != tdead)
-	{
-		CryLog("Disallowing msg (dead): source %d, target %d, sspec %d, sdead %d, tspec %d, tdead %d", sourceId, targetId, sspec, sdead, tspec, tdead);
-		return false;
-	}
-
-	if(!(tspec || (sspec==tspec)))
-	{
-		CryLog("Disallowing msg (spec): source %d, target %d, sspec %d, sdead %d, tspec %d, tdead %d", sourceId, targetId, sspec, sdead, tspec, tdead);
-		return false;
-	}
-
-	CryLog("Allowing msg: source %d, target %d, sspec %d, sdead %d, tspec %d, tdead %d", sourceId, targetId, sspec, sdead, tspec, tdead);
-	*/
-
 	return true;
 }
 
@@ -3307,8 +3258,8 @@ void CGameRules::CreateScriptHitInfo(SmartScriptTable &scriptHitInfo, const HitI
 		hit.SetValue("dir", hitInfo.dir);
 		hit.SetValue("partId", hitInfo.partId);
 		hit.SetValue("backface", hitInfo.normal.Dot(hitInfo.dir)>=0.0f);
-		
-		hit.SetValue("targetId", ScriptHandle(hitInfo.targetId));		
+
+		hit.SetValue("targetId", ScriptHandle(hitInfo.targetId));
 		hit.SetValue("shooterId", ScriptHandle(hitInfo.shooterId));
 		hit.SetValue("weaponId", ScriptHandle(hitInfo.weaponId));
 		hit.SetValue("projectileId", ScriptHandle(hitInfo.projectileId));
@@ -3323,7 +3274,6 @@ void CGameRules::CreateScriptHitInfo(SmartScriptTable &scriptHitInfo, const HitI
 		hit.SetValue("target", pTarget?pTarget->GetScriptTable():(IScriptTable *)0);
 		hit.SetValue("shooter", pShooter?pShooter->GetScriptTable():(IScriptTable *)0);
 		hit.SetValue("weapon", pWeapon?pWeapon->GetScriptTable():(IScriptTable *)0);
-		//hit.SetValue("projectile_class", pProjectile?pProjectile->GetClass()->GetName():"");
 
 		hit.SetValue("materialId", hitInfo.material);
 		
@@ -3344,10 +3294,10 @@ void CGameRules::CreateScriptHitInfo(SmartScriptTable &scriptHitInfo, const HitI
 		
 		hit.SetValue("typeId", hitInfo.type);
 		const char *type=GetHitType(hitInfo.type);
-    hit.SetValue("type", type ? type : "");
+		hit.SetValue("type", type ? type : "");
 		hit.SetValue("remote", hitInfo.remote);
 		hit.SetValue("bulletType", hitInfo.bulletType);
-	
+
 		// Check for hit assistance
 		float assist=0.0f;
 		if (pShooter && 
@@ -3362,8 +3312,8 @@ void CGameRules::CreateScriptHitInfo(SmartScriptTable &scriptHitInfo, const HitI
 				assist=player->HasHitAssistance() ? 1.0f : 0.0f;
 			}
 		}
-		
-		hit.SetValue("assistance", assist);		
+
+		hit.SetValue("assistance", assist);
 	}
 }
 
@@ -3398,13 +3348,13 @@ void CGameRules::CreateScriptExplosionInfo(SmartScriptTable &scriptExplosionInfo
 		explosion.SetValue("impact", explosionInfo.impact);
 		explosion.SetValue("impact_velocity", explosionInfo.impact_velocity);
 		explosion.SetValue("impact_normal", explosionInfo.impact_normal);
-    explosion.SetValue("impact_targetId", ScriptHandle(explosionInfo.impact_targetId));		
+		explosion.SetValue("impact_targetId", ScriptHandle(explosionInfo.impact_targetId));		
 	}
-  
-  SmartScriptTable temp;
-  if (scriptExplosionInfo->GetValue("AffectedEntities", temp))
-  {
-    temp->Clear();
+
+	SmartScriptTable temp;
+	if (scriptExplosionInfo->GetValue("AffectedEntities", temp))
+	{
+		temp->Clear();
 	}
 	if (scriptExplosionInfo->GetValue("AffectedEntitiesObstruction", temp))
 	{
@@ -3425,16 +3375,15 @@ void CGameRules::UpdateAffectedEntitiesSet(TExplosionAffectedEntities &affectedE
 	if (pExplosion)
 	{
 		for (int i=0; i<pExplosion->nAffectedEnts; ++i)
-		{ 
+		{
 			if (IEntity *pEntity = gEnv->pEntitySystem->GetEntityFromPhysics(pExplosion->pAffectedEnts[i]))
-			{ 
+			{
 				if (IScriptTable *pEntityTable = pEntity->GetScriptTable())
 				{
 					IPhysicalEntity* pEnt = pEntity->GetPhysics();
 					if (pEnt)
 					{
 						float affected=gEnv->pPhysicalWorld->IsAffectedByExplosion(pEnt);
-
 						AddOrUpdateAffectedEntity(affectedEnts, pEntity, affected);
 					}
 				}
@@ -3474,7 +3423,7 @@ void CGameRules::CommitAffectedEntitiesSet(SmartScriptTable &scriptExplosionInfo
 		}
 		else
 		{
-			int k=0;      
+			int k=0;
 			for (TExplosionAffectedEntities::const_iterator it=affectedEnts.begin(),end=affectedEnts.end(); it!=end; ++it)
 			{
 				float obstruction = 1.0f-it->second;
@@ -3518,18 +3467,6 @@ void CGameRules::PrepCollision(int src, int trg, const SGameCollision& event, IE
 		chain.SetValue("target_mass", pCollision->mass[trg]);
 	}
 	chain.SetValue("backface", pCollision->n.Dot(dir) >= 0);
-	//chain.SetValue("partid", pCollision->partid[src]);
-	//chain.SetValue("backface", pCollision->n.Dot(dir) >= 0);
-	/*float deltaE = 0;
-	if (pCollision->mass[0])
-		deltaE += -pCollision->normImpulse*(pCollision->vloc[0]*pCollision->n + pCollision->normImpulse*0.5f/pCollision->mass[0]);
-	if (pCollision->mass[1])
-		deltaE +=  pCollision->normImpulse*(pCollision->vloc[1]*pCollision->n - pCollision->normImpulse*0.5f/pCollision->mass[1]);
-	chain.SetValue("energy_loss", deltaE);*/
-
-	//IEntity *pTarget = gEnv->pEntitySystem->GetEntityFromPhysics(pCollision->pEntity[trg]);
-
-	//chain.SetValue("target_type", (int)pCollision->pEntity[trg]->GetType());
 
 	if (pTarget)
 	{
@@ -3563,9 +3500,6 @@ void CGameRules::PrepCollision(int src, int trg, const SGameCollision& event, IE
 		chain.SetValue("materialId",pCollision->idmat[trg]); //Pass collision with barbwire to script
 	else
 		chain.SetValue("materialId", pCollision->idmat[src]);
-	//chain.SetValue("target_materialId", pCollision->idmat[trg]);
-
-	//ISurfaceTypeManager *pSurfaceTypeManager = gEnv->p3DEngine->GetMaterialManager()->GetSurfaceTypeManager();
 }
 
 //------------------------------------------------------------------------
@@ -3603,14 +3537,13 @@ void CGameRules::ResetEntities()
 	m_processingHit=0;
 
 	// remove voice groups too. They'll be recreated when players are put back on their teams after reset.
- 	TTeamIdVoiceGroupMap::iterator it = m_teamVoiceGroups.begin();
- 	TTeamIdVoiceGroupMap::iterator next;
- 	for(; it != m_teamVoiceGroups.end(); it=next)
- 	{
- 		next = it; ++next;
- 
+	TTeamIdVoiceGroupMap::iterator it = m_teamVoiceGroups.begin();
+	TTeamIdVoiceGroupMap::iterator next;
+	for(; it != m_teamVoiceGroups.end(); it=next)
+	{
+		next = it; ++next;
 		m_teamVoiceGroups.erase(it);
- 	}
+	}
 
 	m_respawns.clear();
 	m_entityteams.clear();
@@ -3620,9 +3553,6 @@ void CGameRules::ResetEntities()
 		tit->second.resize(0);
 
 	g_pGame->GetIGameFramework()->Reset(gEnv->bServer);
-
-//	SEntityEvent event(ENTITY_EVENT_START_GAME);
-//	gEnv->pEntitySystem->SendEventToAll(event);
 }
 
 //------------------------------------------------------------------------
@@ -3653,7 +3583,6 @@ void CGameRules::OnEndGame()
 			am->SetActionListener(0);
 		}
 	}
-
 }
 
 //------------------------------------------------------------------------
@@ -3782,10 +3711,10 @@ void CGameRules::UpdateEntitySchedules(float frameTime)
 			TEntityRespawnDataMap::iterator dit=m_respawndata.find(id);
 			
 			if (dit==m_respawndata.end())
-      {
-        m_respawns.erase(it);
+			{
+				m_respawns.erase(it);
 				continue;
-      }
+			}
 
 			SEntityRespawnData &data=dit->second;
 			
@@ -3947,7 +3876,6 @@ void CGameRules::AbortEntityRemoval(EntityId entityId)
 
 void CGameRules::SendRadioMessage(const EntityId sourceId,const int msg)
 {
-	/*g_pGame->GetIGameFramework()->GetClientActor()->GetEntityId()*/
 	RadioMessageParams params(sourceId,msg);
 
 	if(gEnv->bServer)
@@ -3974,7 +3902,6 @@ void CGameRules::SendRadioMessage(const EntityId sourceId,const int msg)
 
 void CGameRules::OnRadioMessage(const EntityId sourceId,const int msg)
 {
-	//CryLog("[radio] from: %s message: %d",,msg);
 	m_pRadio->OnRadioMessage(msg,sourceId);
 }
 
@@ -4008,18 +3935,13 @@ void CGameRules::ReconfigureVoiceGroups(EntityId id,int old_team,int new_team)
 	if(!pVoiceContext)
 		return; // voice context is now disabled in single player game. talk to me if there are any problems - Lin
 
-	if(old_team==new_team)	
+	if(old_team==new_team)
 		return;
 
 	TTeamIdVoiceGroupMap::iterator iter=m_teamVoiceGroups.find(old_team);
 	if(iter!=m_teamVoiceGroups.end())
 	{
 		iter->second->RemoveEntity(id);
-		//CryLog("<--Removing entity %d from team %d", id, old_team);
-	}
-	else
-	{
-		//CryLog("<--Failed to remove entity %d from team %d", id, old_team);
 	}
 
 	iter=m_teamVoiceGroups.find(new_team);
@@ -4030,7 +3952,6 @@ void CGameRules::ReconfigureVoiceGroups(EntityId id,int old_team,int new_team)
 	}
 	iter->second->AddEntity(id);
 	pVoiceContext->InvalidateRoutingTable();
-	//CryLog("-->Adding entity %d to team %d", id, new_team);
 }
 
 CBattleDust* CGameRules::GetBattleDust() const
@@ -4051,7 +3972,6 @@ void CGameRules::ForceSynchedStorageSynch(int channel)
 	g_pGame->GetServerSynchedStorage()->FullSynch(channel, true);
 }
 
-
 void CGameRules::PlayerPosForRespawn(CPlayer* pPlayer, bool save)
 {
 	static 	Matrix34	respawnPlayerTM(IDENTITY);
@@ -4064,7 +3984,6 @@ void CGameRules::PlayerPosForRespawn(CPlayer* pPlayer, bool save)
 		pPlayer->GetEntity()->SetWorldTM(respawnPlayerTM);
 	}
 }
-
 
 void CGameRules::GetMemoryStatistics(ICrySizer * s)
 {
@@ -4163,10 +4082,9 @@ void CGameRules::CreateRestrictedItemList(const char* restrictedItems)
 			thisItemName=string(&itemString[i], k-i);
 
 			// prevent players removing their fists. Possibly other types need to be added here too.
-			if(!thisItemName.empty() && thisItemName != "Fists")	
+			if(!thisItemName.empty() && thisItemName != "Fists")
 			{
 				m_restrictedItemList.push_back(thisItemName);
-				//CryLog("Restricting item type: %s", thisItemName);
 			}
 
 			i=k;

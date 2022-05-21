@@ -29,9 +29,4 @@ enum EVotingState
   eVS_last//this should be always last!
 };
 
-struct SVotingParams
-{
-  SVotingParams();
-};
-
 #endif // #ifndef __VOTING_H__

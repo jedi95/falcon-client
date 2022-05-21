@@ -29,74 +29,73 @@ void CNetPlayerInput::PreUpdate()
 	CMovementRequest moveRequest;
 	SMovementState moveState;
 	m_pPlayer->GetMovementController()->GetMovementState(moveState);
-	Quat worldRot = m_pPlayer->GetBaseQuat(); // m_pPlayer->GetEntity()->GetWorldRotation();
+	Quat worldRot = m_pPlayer->GetBaseQuat();
 	Vec3 deltaMovement = worldRot.GetInverted().GetNormalized() * m_curInput.deltaMovement;
 	// absolutely ensure length is correct
 	deltaMovement = deltaMovement.GetNormalizedSafe(ZERO) * m_curInput.deltaMovement.GetLength();
 	moveRequest.AddDeltaMovement( deltaMovement );
-	if( IsDemoPlayback() )
+	if(IsDemoPlayback())
 	{
 		Vec3 localVDir(m_pPlayer->GetViewQuatFinal().GetInverted() * m_curInput.lookDirection);
 		Ang3 deltaAngles(asin(localVDir.z),0,cry_atan2f(-localVDir.x,localVDir.y));
 		moveRequest.AddDeltaRotation(deltaAngles*gEnv->pTimer->GetFrameTime());
 	}
-	//else
+
+	Vec3 distantTarget = moveState.eyePosition + 1000.0f * m_curInput.lookDirection;
+	Vec3 lookTarget = distantTarget;
+	if (gEnv->bClient && m_pPlayer->GetGameObject()->IsProbablyVisible())
 	{
-		Vec3 distantTarget = moveState.eyePosition + 1000.0f * m_curInput.lookDirection;
-		Vec3 lookTarget = distantTarget;
-		if (gEnv->bClient && m_pPlayer->GetGameObject()->IsProbablyVisible())
+		// post-process aim direction
+		ray_hit hit;
+		static const int obj_types = ent_all;
+		static const unsigned int flags = rwi_stop_at_pierceable|rwi_colltype_any;
+		bool rayHitAny = 0 != gEnv->pPhysicalWorld->RayWorldIntersection( moveState.eyePosition, 150.0f * m_curInput.lookDirection, obj_types, flags, &hit, 1, pPhysEnt );
+		if (rayHitAny)
 		{
-			// post-process aim direction	
-			ray_hit hit;
-			static const int obj_types = ent_all; // ent_terrain|ent_static|ent_rigid|ent_sleeping_rigid|ent_living;
-			static const unsigned int flags = rwi_stop_at_pierceable|rwi_colltype_any;
-			bool rayHitAny = 0 != gEnv->pPhysicalWorld->RayWorldIntersection( moveState.eyePosition, 150.0f * m_curInput.lookDirection, obj_types, flags, &hit, 1, pPhysEnt );
+			lookTarget = hit.pt;
+		}
+
+		static float proneDist = 1.0f;
+		static float crouchDist = 0.6f;
+		static float standDist = 0.3f;
+
+		float dist = standDist;
+		if(m_pPlayer->GetStance() == STANCE_CROUCH)
+			dist = crouchDist;
+		else if(m_pPlayer->GetStance() == STANCE_PRONE)
+			dist = proneDist;
+
+		if((lookTarget - moveState.eyePosition).GetLength2D() < dist)
+		{
+			Vec3 eyeToTarget2d = lookTarget - moveState.eyePosition;
+			eyeToTarget2d.z = 0.0f;
+			eyeToTarget2d.NormalizeSafe();
+			eyeToTarget2d *= dist;
+			ray_hit newhit;
+			bool rayHitAny = 0 != gEnv->pPhysicalWorld->RayWorldIntersection( moveState.eyePosition + eyeToTarget2d, 3 * Vec3(0,0,-1), obj_types, flags, &newhit, 1, pPhysEnt );
 			if (rayHitAny)
 			{
-				lookTarget = hit.pt;
-			}
-
-			static float proneDist = 1.0f;
-			static float crouchDist = 0.6f;
-			static float standDist = 0.3f;
-
-			float dist = standDist;
-			if(m_pPlayer->GetStance() == STANCE_CROUCH)
-				dist = crouchDist;
-			else if(m_pPlayer->GetStance() == STANCE_PRONE)
-				dist = proneDist;
-
-			if((lookTarget - moveState.eyePosition).GetLength2D() < dist)
-			{
-				Vec3 eyeToTarget2d = lookTarget - moveState.eyePosition;
-				eyeToTarget2d.z = 0.0f;
-				eyeToTarget2d.NormalizeSafe();
-				eyeToTarget2d *= dist;
-				ray_hit newhit;
-				bool rayHitAny = 0 != gEnv->pPhysicalWorld->RayWorldIntersection( moveState.eyePosition + eyeToTarget2d, 3 * Vec3(0,0,-1), obj_types, flags, &newhit, 1, pPhysEnt );
-				if (rayHitAny)
-				{
-					lookTarget = newhit.pt;
-				}
-			}
-
-			// SNH: new approach. Make sure the aimTarget is at least 1.5m away,
-			//	if not, pick a point 1m down the vector instead.
-			Vec3 dir = lookTarget - moveState.eyePosition;
-			static float minDist = 1.5f;
-			if(dir.GetLengthSquared() < minDist)
-			{
-				lookTarget = moveState.eyePosition + dir.GetNormalizedSafe();
+				lookTarget = newhit.pt;
 			}
 		}
 
-		moveRequest.SetLookTarget( lookTarget );
-		moveRequest.SetAimTarget( lookTarget );
-		if (m_curInput.deltaMovement.GetLengthSquared() > sqr(0.2f)) // 0.2f is almost stopped
-			moveRequest.SetBodyTarget( distantTarget );
-		else
-			moveRequest.ClearBodyTarget();
+		// SNH: new approach. Make sure the aimTarget is at least 1.5m away,
+		//	if not, pick a point 1m down the vector instead.
+		Vec3 dir = lookTarget - moveState.eyePosition;
+		static float minDist = 1.5f;
+		if(dir.GetLengthSquared() < minDist)
+		{
+			lookTarget = moveState.eyePosition + dir.GetNormalizedSafe();
+		}
 	}
+
+	moveRequest.SetLookTarget( lookTarget );
+	moveRequest.SetAimTarget( lookTarget );
+	if (m_curInput.deltaMovement.GetLengthSquared() > sqr(0.2f)) // 0.2f is almost stopped
+		moveRequest.SetBodyTarget( distantTarget );
+	else
+		moveRequest.ClearBodyTarget();
+
 	moveRequest.SetAllowStrafing(true);
 
 	float pseudoSpeed = 0.0f;
@@ -193,11 +192,9 @@ void CNetPlayerInput::DoSetState(const SSerializedPlayerInput& input )
 		Ang3 deltaAngles(asin(localVDir.z),0,cry_atan2f(-localVDir.x,localVDir.y));
 		moveRequest.AddDeltaRotation(deltaAngles*gEnv->pTimer->GetFrameTime());
 	}
-	//else
-	{
-		moveRequest.SetLookTarget( m_pPlayer->GetEntity()->GetWorldPos() + 10.0f * m_curInput.lookDirection );
-		moveRequest.SetAimTarget(moveRequest.GetLookTarget());
-	}
+
+	moveRequest.SetLookTarget( m_pPlayer->GetEntity()->GetWorldPos() + 10.0f * m_curInput.lookDirection );
+	moveRequest.SetAimTarget(moveRequest.GetLookTarget());
 
 	float pseudoSpeed = 0.0f;
 	if (m_curInput.deltaMovement.len2() > 0.0f)

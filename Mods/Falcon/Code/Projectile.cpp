@@ -78,9 +78,6 @@ CProjectile::~CProjectile()
 //------------------------------------------------------------------------
 bool CProjectile::SetAspectProfile( EEntityAspects aspect, uint8 profile )
 {
-	//if (m_pAmmoParams->physicalizationType == ePT_None)
-		//return true;
-
 	if (aspect == eEA_Physics)
 	{
 		Vec3 spin(m_pAmmoParams->spin);
@@ -530,7 +527,7 @@ void CProjectile::SetParams(EntityId ownerId, EntityId hostId, EntityId weaponId
 	m_fmId = fmId;
 	m_hostId = hostId;
 	m_damage = damage;
-  m_hitTypeId = hitTypeId;
+	m_hitTypeId = hitTypeId;
 
 	if (m_hostId || m_ownerId)
 	{
@@ -605,43 +602,8 @@ void CProjectile::Launch(const Vec3 &pos, const Vec3 &dir, const Vec3 &velocity,
 				float dummySpeed;
 				if (GetWeapon())
 					GetWeapon()->PredictProjectileHit(pOwnerEntity->GetPhysics(), pos, dir, velocity, speedScale * m_pAmmoParams->speed, predictedPos, dummySpeed);
-/*				bool res = pOwnerEntity->GetAI()->GetProxy()->GetSecWeapon()->PredictProjectileHit(
-					pOwnerEntity->GetPhysics(), GetEntity()->GetPos(), grenadeDir, ownerVel, 1, predictedPos, speed);*/
 
 				gEnv->pAISystem->GrenadeEvent(predictedPos, 0.0f, AIGE_GRENADE_THROWN, GetEntity(), pOwnerEntity);
-
-				// Inform the AI that sees the throw
-/*				IAIObject* pOwnerAI = pOwnerEntity->GetAI();
-				AutoAIObjectIter it(gEnv->pAISystem->GetFirstAIObjectInRange(IAISystem::OBJFILTER_TYPE, AIOBJECT_PUPPET, predictedPos, 20.0f, false));
-				for(; it->GetObject(); it->Next())
-				{
-					IAIObject* pAI = it->GetObject();
-					if (!pAI->IsEnabled()) continue;
-					if (pOwnerAI && !pOwnerAI->IsHostile(pAI,false))
-						continue;
-
-					// Only sense grenades that are on front of the AI and visible when thrown.
-					// Another signal is sent when the grenade hits the ground.
-					Vec3 delta = GetEntity()->GetPos() - pAI->GetPos();	// grenade to AI
-					float dist = delta.NormalizeSafe();
-					const float thr = cosf(DEG2RAD(160.0f));
-					if (delta.Dot(pAI->GetViewDir()) > thr)
-					{
-						ray_hit hit;
-						static const int objTypes = ent_static | ent_terrain | ent_rigid | ent_sleeping_rigid;
-						static const unsigned int flags = rwi_stop_at_pierceable|rwi_colltype_any;
-						int res = gEnv->pPhysicalWorld->RayWorldIntersection(pAI->GetPos(), delta*dist, objTypes, flags, &hit, 1);
-						if (!res || hit.dist > dist*0.9f)
-						{
-							IAISignalExtraData* pEData = gEnv->pAISystem->CreateSignalExtraData();	// no leak - this will be deleted inside SendAnonymousSignal
-							pEData->point = predictedPos;
-							pEData->nID = pOwnerEntity->GetId();
-							pEData->iValue = 1;
-							gEnv->pAISystem->SendSignal(SIGNALFILTER_SENDER, 1, "OnGrenadeDanger", pAI, pEData);
-						}
-					}
-				}
-*/
 			}
 		}
 	}
@@ -833,7 +795,7 @@ void CProjectile::RicochetSound(const Vec3 &pos, const Vec3 &dir)
 }
 
 //------------------------------------------------------------------------
-void CProjectile::TrailEffect(bool enable, bool underWater /*=false*/)
+void CProjectile::TrailEffect(bool enable, bool underWater)
 {
 	if (enable)
 	{
@@ -985,14 +947,6 @@ void CProjectile::ScaledEffect(const SScaledEffectParams* pScaledEffect)
 
 				IEntity* pOwnerEntity = gEnv->pEntitySystem->GetEntity(m_ownerId);
 				gEnv->pAISystem->GrenadeEvent(pos.pos, pScaledEffect->aiObstructionRadius*1.5f, AIGE_SMOKE, GetEntity(), pOwnerEntity);
-
-/*				AutoAIObjectIter it(gEnv->pAISystem->GetFirstAIObjectInRange(IAISystem::OBJFILTER_TYPE, AIOBJECT_PUPPET, pos.pos, pScaledEffect->aiObstructionRadius*1.5f, false));
-				for(; it->GetObject(); it->Next())
-				{
-					IAIObject* pAI = it->GetObject();
-					if (!pAI->IsEnabled()) continue;
-					gEnv->pAISystem->SendSignal(SIGNALFILTER_SENDER, 1, "OnExposedToSmoke", pAI);
-				}*/
 			}
 		}
 
@@ -1157,7 +1111,7 @@ void CProjectile::OnHit(const HitInfo& hit)
 
 //==================================================================
 void CProjectile::OnExplosion(const ExplosionInfo& explosion)
-{	
+{
 
 }
 //==================================================================
@@ -1172,63 +1126,55 @@ void CProjectile::OnServerExplosion(const ExplosionInfo& explosion)
 		if(pGameRules->IsFrozen(GetEntityId()))
 			return;
 
-	//One check more, just in case...
-	//if(CWeapon* pWep = GetWeapon())
-		//if(pWep->GetEntityId()==explosion.weaponId)
-			//return;
-
-	//Stolen from SinglePlayer.lua ;p
 	IPhysicalEntity *pPE = GetEntity()->GetPhysics();
 	if(pPE)
 	{
 		float obstruction = 1.0f-gEnv->pSystem->GetIPhysicalWorld()->IsAffectedByExplosion(pPE);
+		float distance	= (GetEntity()->GetWorldPos()-explosion.pos).len();
+		distance = max(0.0f, min(distance,explosion.radius));
 
-	  float distance	= (GetEntity()->GetWorldPos()-explosion.pos).len();
-    distance = max(0.0f, min(distance,explosion.radius));
-		
-		float		 effect = (explosion.radius-distance)/explosion.radius;
+		float effect = (explosion.radius-distance)/explosion.radius;
 		effect =  max(min(1.0f, effect*effect), 0.0f);
 		effect =  effect*(1.0f-obstruction*0.7f); 
-		
+
 		m_hitPoints -= (int)(effect*explosion.damage);
 
 		if(m_hitPoints<=0)
 			Explode(true);
 	}
-
 }
 
 //---------------------------------------------------------------------------------
 void CProjectile::SetDefaultParticleParams(pe_params_particle *pParams)
 {
- //Use ammo params if they exist
- if(m_pAmmoParams && m_pAmmoParams->pParticleParams)
- {
-	 pParams->mass = m_pAmmoParams->pParticleParams->mass; 
-	 pParams->size = m_pAmmoParams->pParticleParams->size;
-	 pParams->thickness = m_pAmmoParams->pParticleParams->thickness;
-	 pParams->heading.Set(0.0f,0.0f,0.0f);
-	 pParams->velocity = 0.0f;
-	 pParams->wspin = m_pAmmoParams->pParticleParams->wspin;
-	 pParams->gravity = m_pAmmoParams->pParticleParams->gravity;
-	 pParams->normal.Set(0.0f,0.0f,0.0f);
-	 pParams->kAirResistance = m_pAmmoParams->pParticleParams->kAirResistance;
-	 pParams->accThrust = m_pAmmoParams->pParticleParams->accThrust;
-	 pParams->accLift = m_pAmmoParams->pParticleParams->accLift;
-	 pParams->q0.SetIdentity(); 
-	 pParams->surface_idx = m_pAmmoParams->pParticleParams->surface_idx;
-	 pParams->flags = m_pAmmoParams->pParticleParams->flags;
-	 pParams->pColliderToIgnore = NULL;
-	 pParams->iPierceability = m_pAmmoParams->pParticleParams->iPierceability;
- }
- else
- {
-	 int type = pParams->type;
-	 memset(pParams,0,sizeof(pe_params_particle));
-	 pParams->type = type;
-	 pParams->velocity = 0.0f;
-	 pParams->iPierceability = 7;	  
- }
+	//Use ammo params if they exist
+	if(m_pAmmoParams && m_pAmmoParams->pParticleParams)
+	{
+		pParams->mass = m_pAmmoParams->pParticleParams->mass; 
+		pParams->size = m_pAmmoParams->pParticleParams->size;
+		pParams->thickness = m_pAmmoParams->pParticleParams->thickness;
+		pParams->heading.Set(0.0f,0.0f,0.0f);
+		pParams->velocity = 0.0f;
+		pParams->wspin = m_pAmmoParams->pParticleParams->wspin;
+		pParams->gravity = m_pAmmoParams->pParticleParams->gravity;
+		pParams->normal.Set(0.0f,0.0f,0.0f);
+		pParams->kAirResistance = m_pAmmoParams->pParticleParams->kAirResistance;
+		pParams->accThrust = m_pAmmoParams->pParticleParams->accThrust;
+		pParams->accLift = m_pAmmoParams->pParticleParams->accLift;
+		pParams->q0.SetIdentity(); 
+		pParams->surface_idx = m_pAmmoParams->pParticleParams->surface_idx;
+		pParams->flags = m_pAmmoParams->pParticleParams->flags;
+		pParams->pColliderToIgnore = NULL;
+		pParams->iPierceability = m_pAmmoParams->pParticleParams->iPierceability;
+	}
+	else
+	{
+		int type = pParams->type;
+		memset(pParams,0,sizeof(pe_params_particle));
+		pParams->type = type;
+		pParams->velocity = 0.0f;
+		pParams->iPierceability = 7;
+	}
 }
 
 void CProjectile::GetMemoryStatistics(ICrySizer *s)
@@ -1308,7 +1254,7 @@ uint8 CProjectile::GetDefaultProfile( EEntityAspects aspect )
 //------------------------------------------------------------------------
 void CProjectile::PostSerialize()
 {
-//	InitWithAI();
+
 }
 
 //------------------------------------------------------------------------

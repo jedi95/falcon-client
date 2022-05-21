@@ -290,7 +290,6 @@ void CPlayerMovement::ProcessFlyingZeroG()
 					m_zgDashTimer = 0.0f;
 					m_zgDashWorldDir = desiredWorldVelocity.GetNormalized();
 					m_player.PlaySound(CPlayer::ESound_ThrustersDash, true);
-					//m_player.PlaySound(CPlayer::ESound_ThrustersDash02, true);
 
 					if (pSuit != NULL)
 					{
@@ -697,7 +696,6 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 				move /= moveModule;
 		}
 
-		//move *= m_animParams.runSpeed/GetStanceMaxSpeed(m_stance);
 		bool speedMode = false;
 
 		if(pSuit)
@@ -957,13 +955,9 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 		}
 	}
 
-	if (g_pGameCVars->fn_circleJump == 0)
-	{
-		//be sure desired velocity is flat to the ground
-		Vec3 vz = desiredVel * baseMtxZ;
-		desiredVel -= vz;
-	}
-	
+	//be sure desired velocity is flat to the ground
+	desiredVel -= desiredVel * baseMtxZ;
+
 	Vec3 modifiedSlopeNormal = m_stats.groundNormal;
 	if (m_player.IsPlayer())
 	{
@@ -994,7 +988,6 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 		alignment = min(0.0f, alignment);
 		desiredVel -= modifiedSlopeNormal * alignment;
 
-		//be sure desired velocity is flat to the ground
 		Vec3 vz = (1.0f - g_pGameCVars->fn_circleJump) * desiredVel * baseMtxZ;
 		desiredVel -= vz;
 	}
@@ -1188,7 +1181,7 @@ void CPlayerMovement::ProcessMovementOnLadder(CPlayer &player)
 		return;
 	}
 
-	move *= m_movement.desiredVelocity.y*0.5f;// * (dirDot>0.0f?1.0f:-1.0f) * min(1.0f,fabs(dirDot)*5);
+	move *= m_movement.desiredVelocity.y*0.5f;
 
 	//cap the movement vector to max 1
 	float moveModule(move.len());
@@ -1198,7 +1191,6 @@ void CPlayerMovement::ProcessMovementOnLadder(CPlayer &player)
 
 	move *= m_player.GetStanceMaxSpeed(STANCE_STAND)*0.5f;
 
-	//player.m_stats.bSprinting = false;		//Manual update here (if not suit doensn't decrease energy and so on...)
 	if (m_actions & ACTION_SPRINT)
 	{
 		if((move.len2()>0.1f))
@@ -1206,7 +1198,6 @@ void CPlayerMovement::ProcessMovementOnLadder(CPlayer &player)
 			move *= 1.2f;
 			if(player.GetNanoSuit() && (player.GetNanoSuit()->GetMode()==NANOMODE_SPEED))
 				move *= (max(1.2f,player.GetNanoSuit()->GetSprintMultiplier(cry_fabsf(m_movement.desiredVelocity.x)>0.01f)*0.5f));
-			//player.m_stats.bSprinting = true;
 		}
 	}
 	if(m_actions & ACTION_JUMP)
@@ -1220,17 +1211,15 @@ void CPlayerMovement::ProcessMovementOnLadder(CPlayer &player)
 	{
 		move *= 0.8f;
 		AdjustPlayerPositionOnLadder(player);
-		bottomDist += (move.z*gEnv->pTimer->GetFrameTime());   	
+		bottomDist += (move.z*gEnv->pTimer->GetFrameTime());
 		float animTime = bottomDist - cry_floorf(bottomDist);
 		CPlayer::ELadderDirection eLDir = (m_movement.desiredVelocity.y >= 0.0f ? CPlayer::eLDIR_Up : CPlayer::eLDIR_Down);
 		if(!player.UpdateLadderAnimation(CPlayer::eLS_Climb,eLDir,animTime))
 			return;
 	}
-		
+
 	m_request.type = eCMT_Fly;
 	m_request.velocity = move;
-
-	//m_velocity.Set(0,0,0);
 }
 
 //---------------------------------------------------------

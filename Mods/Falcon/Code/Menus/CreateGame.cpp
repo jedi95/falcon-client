@@ -228,8 +228,7 @@ void CMultiPlayerMenu::SCreateGame::StartServer()
   command.append(rotation->GetNextGameRules());
   gEnv->pConsole->ExecuteString(command.c_str()); 
 
-  command = "g_nextlevel"; //"map ";
-  //command.append(rotation->GetNextLevel());
+  command = "g_nextlevel";
   command.append(" s");
   if(m_dx10)
     command.append(" x");
@@ -257,7 +256,6 @@ void CMultiPlayerMenu::SCreateGame::StartServer()
 	
   if(m_dedicated)
   {
-    //command = "g_nextlevel +" + command;
     if(m_anticheat)
       command = "net_pb_sv_enable true +" + command;
     StartDedicated(command);
@@ -267,7 +265,6 @@ void CMultiPlayerMenu::SCreateGame::StartServer()
 		gEnv->pGame->GetIGameFramework()->SaveServerConfig("%USER%/config/server.cfg");
 
     pConsole->ExecuteString("disconnect");
-    //pConsole->ExecuteString("g_nextlevel");
     gEnv->pGame->GetIGameFramework()->ExecuteCommandNextFrame(command.c_str());
   }
 }

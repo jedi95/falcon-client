@@ -50,12 +50,6 @@ static const size_t scuiControlCodePrefixLen = strlen(scuiControlCodePrefix);
 
 static const int BLACK_FRAMES = 4;
 
-
-
-
-
-
-
 //-----------------------------------------------------------------------------------------------------
 
 CFlashMenuObject *CFlashMenuObject::s_pFlashMenuObject = NULL;
@@ -141,18 +135,9 @@ CFlashMenuObject::CFlashMenuObject()
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDRESET] = new CFlashMenuScreen;
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDRESET]->Load("Libs/UI/HUD_MP_RestartScreen.gfx");
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART] = new CFlashMenuScreen;
-#ifdef CRYSIS_BETA
-		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Load("Libs/UI/Menus_StartMenu_Beta.gfx");
-#else
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Load("Libs/UI/Menus_StartMenu.gfx");
-#endif
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME] = new CFlashMenuScreen;
-
-#ifdef CRYSIS_BETA
-		m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Load("Libs/UI/Menus_IngameMenu_Beta.gfx");
-#else
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Load("Libs/UI/Menus_IngameMenu.gfx");
-#endif
 
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDLOADING]->Unload();
 		SAFE_DELETE(m_apFlashMenuScreens[MENUSCREEN_FRONTENDLOADING]);
@@ -165,21 +150,11 @@ CFlashMenuObject::CFlashMenuObject()
 	}
 
 	m_pMusicSystem = gEnv->pSystem->GetIMusicSystem();
-
 	m_multiplayerMenu = new CMPHub();
 	m_bExclusiveVideo = false;
 
 	if(gEnv->bEditor)
 		LoadDifficultyConfig(2);	//set normal diff in editor
-
-	// create the avi reader; 
-	//m_pAVIReader = g_pISystem->CreateAVIReader();
-	//m_pAVIReader->OpenFile("Crysis_main_menu_background.avi");
-
-
-
-
-
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -212,8 +187,6 @@ CFlashMenuObject::~CFlashMenuObject()
 	m_pCurrentFlashMenuScreen	= NULL;
 	
 	s_pFlashMenuObject = NULL;
-
-	// g_pISystem->ReleaseAVIReader(m_pAVIReader);
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -1542,10 +1515,6 @@ void CFlashMenuObject::OnHardwareMouseEvent(int iX,int iY,EHARDWAREMOUSEEVENT eH
 		else if(HARDWAREMOUSEEVENT_LBUTTONUP == eHardwareMouseEvent)
 		{
 			eCursorState = SFlashCursorEvent::eCursorReleased;
-
-
-
-
 		}
 
 		if(m_pCurrentFlashMenuScreen && m_pCurrentFlashMenuScreen->GetFlashPlayer())
@@ -1569,10 +1538,6 @@ void CFlashMenuObject::OnHardwareMouseEvent(int iX,int iY,EHARDWAREMOUSEEVENT eH
 
 void CFlashMenuObject::UpdateButtonSnap(const Vec2 mouse)
 {
-
-
-
-
 	Vec2 mouseNew(mouse);
 	HWMouse2Flash(mouseNew);
 	if(m_currentButtons.empty()) return;
@@ -1590,7 +1555,6 @@ void CFlashMenuObject::UpdateButtonSnap(const Vec2 mouse)
 	}
 	if(bestEst != m_currentButtons.end())
 		m_sCurrentButton = bestEst->first;
-
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -1600,63 +1564,10 @@ void CFlashMenuObject::SnapToNextButton(const Vec2 dir)
 	if(!m_bUpdate) return;
 	if(m_currentButtons.empty()) return;
 	ButtonPosMap::iterator current = m_currentButtons.find(m_sCurrentButton);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	if(current == m_currentButtons.end())
 	{
 		current = m_currentButtons.begin();
 	}
-
-	// Used only for 2D navigation mode
-	/*if (dir.y > 0.0)
-	{
-		++current;
-
-		if (current == m_currentButtons.end())
-			current = m_currentButtons.begin();		
-	}
-	else
-	{
-		if (current == m_currentButtons.begin())
-			current = m_currentButtons.end();
-
-		--current;
-	}
-
-	if (current == m_currentButtons.end())
-	{
-		m_sCurrentButton="";
-	}
-	else
-	{
-		m_sCurrentButton=current->first;
-		HighlightButton(current);
-	}
-	*/
 
 	// The original implementation with four directions
 	Vec2 curPos = current->second;
@@ -1703,26 +1614,6 @@ void CFlashMenuObject::SnapToNextButton(const Vec2 dir)
 		}
 	}
 
-/*	if(bestEst==m_currentButtons.end())
-	{
-		fBestValue = -1.0f;
-		for(ButtonPosMap::iterator it = m_currentButtons.begin(); it != m_currentButtons.end(); ++it)
-		{
-			if(it == current) continue;
-			Vec2 btndir = it->second - curPos;
-			float dist = btndir.GetLength();
-			btndir = btndir.GetNormalizedSafe();
-			float arc = dir.Dot(btndir);
-			if(arc<=0.0) continue;
-			if(fBestValue<0 || dist<fBestValue)
-			{
-				fBestValue = dist;
-				bestEst = it;
-				m_sCurrentButton = it->first;
-			}
-		}
-	}
-*/
 	if(bestEst!=m_currentButtons.end())
 		HighlightButton(bestEst);
 	else if(current!=m_currentButtons.end())
@@ -1962,10 +1853,6 @@ void CFlashMenuObject::HandleFSCommand(const char *szCommand,const char *szArgs)
 	{
 		m_multiplayerMenu->SetIsInLogin(false);
 	}
-	else if(!strcmp(szCommand, "GotoLink_Terms"))
-	{
-		gEnv->pGame->GetIGameFramework()->ShowPageInBrowser("https://login.ign.com/tos.aspx");
-	}
 	else if(!strcmp(szCommand, "ResolutionChange"))
 	{
 		if(szArgs)
@@ -2088,19 +1975,6 @@ void CFlashMenuObject::HandleFSCommand(const char *szCommand,const char *szArgs)
 		string sX = sTemp.substr(0,iSep);
 		string sY = sTemp.substr(iSep+1,sTemp.length());
 		m_currentButtons.insert(ButtonPosMap::iterator::value_type(sName, Vec2(atoi(sX), atoi(sY))));
-
-
-
-
-
-
-
-
-
-
-
-		//if (m_iGamepadsConnected && sName.substr(sName.length()-1, 1) == "1")
-			//HighlightButton(m_currentButtons.find(sName));
 	}
 	else if(!strcmp(szCommand,"VirtualKeyboard"))
 	{
@@ -2124,15 +1998,10 @@ void CFlashMenuObject::HandleFSCommand(const char *szCommand,const char *szArgs)
 	}
 	else if(!strcmp(szCommand,"Back"))
 	{
-    /*if(m_QuickGame)
-    {
-      gEnv->pConsole->ExecuteString("g_quickGameStop");
-      m_QuickGame = false;
-    }*/
-    if(m_multiplayerMenu)
-      m_multiplayerMenu->HandleFSCommand(szCommand,szArgs);
+		if(m_multiplayerMenu)
+			m_multiplayerMenu->HandleFSCommand(szCommand,szArgs);
     
-    m_pCurrentFlashMenuScreen = m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART];
+		m_pCurrentFlashMenuScreen = m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART];
 		if(m_pMusicSystem)
 		{
 			m_pMusicSystem->SetMood("menu_music", true, true);
@@ -2150,26 +2019,10 @@ void CFlashMenuObject::HandleFSCommand(const char *szCommand,const char *szArgs)
 		m_textfieldFocus = false;
 		m_bVirtualKeyboardFocus = false;
 		m_bUpdate = !m_bUpdate;
-		if(m_bUpdate)
-      ShowInGameMenu(m_bUpdate);
-    else
-      HideInGameMenuNextFrame(true);
-
-		if(IActor *pPlayer = g_pGame->GetIGameFramework()->GetClientActor())
-		{
-			if(pPlayer->GetHealth() <= 0)
-			{
-				string lastSaveGame = string(GetLastInGameSave()->c_str());
-				if(!lastSaveGame.size())
-					lastSaveGame = g_pGame->GetLastSaveGame();
-				if(lastSaveGame.size())
-				{
-					SAFE_HUD_FUNC(DisplayFlashMessage("", 2));	//removing warning / loading text
-					m_sLoadSave.save = false;
-					m_sLoadSave.name = lastSaveGame;
-				}
-			}
-		}
+		if (m_bUpdate)
+			ShowInGameMenu(m_bUpdate);
+		else
+			HideInGameMenuNextFrame(true);
 	}
 	else if(!strcmp(szCommand,"Restart"))
 	{
@@ -2230,58 +2083,10 @@ void CFlashMenuObject::HandleFSCommand(const char *szCommand,const char *szArgs)
 		if(szArgs)
 			DeleteProfile(szArgs);
 	}
-	else if(!strcmp(szCommand, "SetDifficulty"))
-	{
-		if(szArgs)
-			SetDifficulty(atoi(szArgs));
-	}
-	else if(!strcmp(szCommand,"UpdateSingleplayerDifficulties"))
-	{
-		UpdateSingleplayerDifficulties();
-	}
-	else if(!strcmp(szCommand,"StartSingleplayerGame"))
-	{
-		StartSingleplayerGame(szArgs);
-	}
-	else if(!strcmp(szCommand,"LoadGame"))
-	{
-		m_sLoadSave.save = false;
-		m_sLoadSave.name = szArgs;
-    HideInGameMenuNextFrame(false);
-		if(gEnv->pGame->GetIGameFramework()->IsGameStarted())
-			m_bClearScreen = true;
-	}
-	else if(!strcmp(szCommand,"DeleteSaveGame"))
-	{
-		if(szArgs)
-			DeleteSaveGame(szArgs);
-	}
-	else if(!strcmp(szCommand,"SaveGame"))
-	{
-		m_sLoadSave.save = true;
-		m_sLoadSave.name = szArgs;
-	}
 	else if(!strcmp(szCommand,"UpdateHUD"))
 	{
 		SetColorChanged();
 		UpdateMenuColor();
-	}
-	else if(!strcmp(szCommand,"setSaveGameSortMode"))
-	{
-		if(szArgs)
-		{
-			int mode = atoi(szArgs);
-			if(mode > eSAVE_COMPARE_FIRST && mode < eSAVE_COMPARE_LAST)
-			{
-				m_eSaveGameCompareMode = ESaveCompare(mode);
-				UpdateSaveGames();
-			}
-		}
-	}
-	else if(!strcmp(szCommand,"setSaveGameSortModeUpDown"))
-	{
-		if(szArgs)
-			m_bSaveGameSortUp = (atoi(szArgs))?true:false;
 	}
 	else if(!strcmp(szCommand,"CatchNextInput"))
 	{
@@ -2297,10 +2102,6 @@ void CFlashMenuObject::HandleFSCommand(const char *szCommand,const char *szArgs)
 	{
 		UpdateKeyMenu();
 	}
-	else if(!strcmp(szCommand,"UpdateSaveGames"))
-	{
-		UpdateSaveGames();
-	}
 	else if(!strcmp(szCommand,"SetCVar"))
 	{
 		string sTemp(szArgs);
@@ -2308,25 +2109,6 @@ void CFlashMenuObject::HandleFSCommand(const char *szCommand,const char *szArgs)
 		string s1 = sTemp.substr(0,iSep);
 		string s2 = sTemp.substr(iSep+2,sTemp.length());
 		SetCVar(s1, s2);
-	}
-	else if(!strcmp(szCommand,"TabStopPutMouse"))
-	{
-/*		string sTemp(szArgs);
-		int iSep = sTemp.find("//");
-		string s1 = sTemp.substr(0,iSep);
-		string s2 = sTemp.substr(iSep+2,sTemp.length());
-
-		float x;
-		float y;
-
-		TFlowInputData data = (TFlowInputData)s1;
-		data.GetValueWithConversion(x);
-		data = (TFlowInputData)s2;
-		data.GetValueWithConversion(y);
-
-		
-		UpdateMousePosition();
-*/
 	}
 	else if(!strcmp(szCommand,"SetKey"))
 	{
@@ -2349,11 +2131,9 @@ void CFlashMenuObject::HandleFSCommand(const char *szCommand,const char *szArgs)
 		RestoreDefaults();
 	}
 
-
 	// Credits
 	else if(strstr( szCommand, "credit" ) && m_pMusicSystem)
 	{
-
 		const char *pGroupCount = strstr( szCommand, "credit_group" );
 
 		if(!strcmp(szCommand,"credits_start"))
@@ -2873,13 +2653,8 @@ void CFlashMenuObject::HandleFSCommand(const char *szCommand,const char *szArgs)
 	// Credits End
 
 	else if(m_multiplayerMenu && m_multiplayerMenu->HandleFSCommand(szCommand,szArgs))
-  {
-    //handled by Multiplayer menu
-  }
-  else 
 	{
-		// Dev mode: we clicked on a button which should execute something like "map MapName"
-		gEnv->pConsole->ExecuteString(szCommand);
+		//handled by Multiplayer menu
 	}
 }
 
@@ -2916,9 +2691,6 @@ void CFlashMenuObject::InitStartMenu()
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Load("Libs/UI/Menus_StartMenu.gfx");
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->GetFlashPlayer()->SetFSCommandHandler(this);
 
-		// not working yet, gets reset on loadMovie within .swf/.gfx
-		// m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->GetFlashPlayer()->SetLoadMovieHandler(this);
-
 		char strProductVersion[256];
 		gEnv->pSystem->GetProductVersion().ToString(strProductVersion);
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Invoke("setGameVersion", strProductVersion);
@@ -2928,11 +2700,7 @@ void CFlashMenuObject::InitStartMenu()
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Invoke("set64Bit",true);
 #endif
 
-		//SModInfo info;
-		//if(g_pGame->GetIGameFramework()->GetModInfo(&info))
-		//{
-			m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Invoke("addLoadedModText","Falcon");
-		//}
+		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Invoke("addLoadedModText","Falcon");
 
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Invoke("Directx10", true);
 		time_t today = time(NULL);
@@ -2945,16 +2713,12 @@ void CFlashMenuObject::InitStartMenu()
 			UpdateMenuColor();
 	}
 
-//  m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->SetVariable("Authorized","1");
-  /*m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->SetVariable("MainWindow","2");
-	m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->SetVariable("SubWindow","2");*/
-
 	m_pCurrentFlashMenuScreen = m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART];
 	HardwareEvaluation();
-  if(m_multiplayerMenu)
-  {
-    m_multiplayerMenu->SetCurrentFlashScreen(m_pCurrentFlashMenuScreen->GetFlashPlayer(),false);
-  }
+	if(m_multiplayerMenu)
+	{
+		m_multiplayerMenu->SetCurrentFlashScreen(m_pCurrentFlashMenuScreen->GetFlashPlayer(),false);
+	}
 	m_bIgnoreEsc = true;
 	m_bExclusiveVideo = false;
 
@@ -3000,11 +2764,7 @@ void CFlashMenuObject::InitIngameMenu()
 	{
 		SAFE_HARDWARE_MOUSE_FUNC(IncrementCounter());
 
-#ifdef CRYSIS_BETA
-		m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Load("Libs/UI/Menus_IngameMenu_Beta.gfx");
-#else
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Load("Libs/UI/Menus_IngameMenu.gfx");
-#endif
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->GetFlashPlayer()->SetFSCommandHandler(this);
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Invoke("setLineColor", SFlashVarValue(g_pGameCVars->hud_colorLine));
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Invoke("setOverColor", SFlashVarValue(g_pGameCVars->hud_colorOver));
@@ -3024,11 +2784,7 @@ void CFlashMenuObject::InitIngameMenu()
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Invoke("set64Bit",true);
 #endif
 
-		//SModInfo info;
-		//if(g_pGame->GetIGameFramework()->GetModInfo(&info))
-		//{
-			m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Invoke("addLoadedModText","Falcon");
-		//}
+		m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Invoke("addLoadedModText","Falcon");
 
 		if(m_pPlayerProfileManager)
 		{
@@ -3306,44 +3062,11 @@ void CFlashMenuObject::OnPostUpdate(float fDeltaTime)
 		m_pCurrentFlashMenuScreen->Invoke("setServerConnected",connected);
 	}
 
-	if(m_sLoadSave.name.empty() == false)
-	{
-		string temp = m_sLoadSave.name;
-		m_sLoadSave.name.resize(0);
-		if(m_sLoadSave.save)
-		{
-			bool valid = SaveGame(temp.c_str());
-			if(valid)
-			{
-				// we turn off buffer swapping and don't render the menu for 2 frames
-				// to prevent screenshots/thumbnails with menu on
-				// m_nRenderAgainFrameId will additionally be set to 0 when screenshot is done
-				// but there is also a safety check below
-				m_nRenderAgainFrameId = gEnv->pRenderer->GetFrameID(false) + 2;
-				gEnv->pRenderer->EnableSwapBuffers(false);
-
-				// show messsage, that game saving was successful
-				ShowMenuMessage("@ui_GAMESAVEDSUCCESSFUL");
-			}
-		}
-		else
-			LoadGame(temp.c_str());
-	}
-
 	int curFrameID = gEnv->pRenderer->GetFrameID(false);
-	// if (curFrameID == m_nLastFrameUpdateID)
-	// 	return;
 	m_nLastFrameUpdateID = curFrameID;
 
 	if (m_nBlackGraceFrames > 0)
 	{
-/*		IUIDraw *pUIDraw = gEnv->pGame->GetIGameFramework()->GetIUIDraw();
-
-		pUIDraw->PreRender();
-		//const uchar *pImage=m_pAVIReader->QueryFrame();
-		pUIDraw->DrawImage(*pImage,0,0,800,600,0,1,1,1,1);
-		pUIDraw->PostRender();
-*/
 		ColorF cBlack(Col_Black);
 		gEnv->pRenderer->ClearBuffer(FRT_CLEAR | FRT_CLEAR_IMMEDIATE,&cBlack);
 
@@ -3996,3 +3719,46 @@ void CFlashMenuObject::UpdateNetwork(float fDeltaTime)
 }
 
 //-----------------------------------------------------------------------------------------------------
+
+void CFlashMenuObject::UpdateMods()
+{
+	string dir("Mods\\");
+	string search = dir;
+	search += "*.*";
+
+	SModInfo info;
+	string currentMod;
+	bool currentModExists = g_pGame->GetIGameFramework()->GetModInfo(&info);
+	if (currentModExists)
+		currentMod = info.m_name;
+
+	m_pCurrentFlashMenuScreen->Invoke("Root.MainMenu.Mods.resetMods");
+
+	ICryPak* pPak = gEnv->pSystem->GetIPak();
+	_finddata_t fd;
+	intptr_t handle = pPak->FindFirst(search.c_str(), &fd, ICryPak::FLAGS_NO_MASTER_FOLDER_MAPPING);
+	if (handle > -1)
+	{
+		do
+		{
+			if (fd.attrib & _A_SUBDIR)
+			{
+				if (!stricmp("..", fd.name)) continue;
+				string subDir(dir);
+				subDir.append(fd.name);
+				subDir += "\\";
+				if (g_pGame->GetIGameFramework()->GetModInfo(&info, subDir.c_str()))
+				{
+					string screenshot = subDir;
+					screenshot += "\\";
+					screenshot += info.m_screenshot;
+					bool isCurrent = false;
+					if (currentModExists)
+						isCurrent = (!strcmp(info.m_name, currentMod.c_str())) ? true : false;
+					SFlashVarValue args[8] = { info.m_name, info.m_displayname ? info.m_displayname : info.m_name, info.m_team, info.m_version, info.m_url, info.m_description, screenshot.c_str(), isCurrent };
+					m_pCurrentFlashMenuScreen->Invoke("Root.MainMenu.Mods.addModToList", args, 8);
+				}
+			}
+		} while (pPak->FindNext(handle, &fd) >= 0);
+	}
+}

@@ -2147,8 +2147,6 @@ bool CHUD::OnAction(const ActionId& action, int activationMode, float value)
 			}
 		}
 	}
-
-
 	else if(action == rGameActions.xi_rotatepitch || action == rGameActions.xi_v_rotatepitch)
 	{
 		if(m_iCursorVisibilityCounter)
@@ -2175,19 +2173,6 @@ bool CHUD::OnAction(const ActionId& action, int activationMode, float value)
 		}
 		filterOut = false;
 	}
-	/*else if(action != rGameActions.rotateyaw && action != rGameActions.rotatepitch && action != rGameActions.binoculars && action != rGameActions.hud_night_vision)
-	{
-		if(m_fPlayerDeathTime && gEnv->pTimer->GetFrameStartTime().GetSeconds() - m_fPlayerDeathTime > 3.0f)
-		{
-			if(!g_pGame->GetMenu()->IsActive())
-			{
-				m_fPlayerDeathTime = m_fPlayerDeathTime -  20.0f; //0.0f;  //load immediately
-				DisplayFlashMessage("", 2);
-				DisplayOverlayFlashMessage("");
-				return true;
-			}
-		}
-	}*/
 
 	if(action == rGameActions.attack1 && activationMode == eIS_Pressed)
 	{
