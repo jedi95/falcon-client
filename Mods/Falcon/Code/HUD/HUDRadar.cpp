@@ -186,7 +186,7 @@ void CHUDRadar::ShowEntityTemporarily(FlashRadarType type, EntityId id, float ti
 	m_tempEntitiesOnRadar.push_back(TempRadarEntity(id, type, timeLimit));
 }
 
-void CHUDRadar::AddStoryEntity(EntityId id, FlashRadarType type /* = EWayPoint */, const char* text /* = NULL */)
+void CHUDRadar::AddStoryEntity(EntityId id, FlashRadarType type, const char* text)
 {
 	IEntity *pEntity = gEnv->pEntitySystem->GetEntity(id);
 	if(pEntity)
@@ -357,17 +357,9 @@ void CHUDRadar::Update(float fDeltaTime)
 	Matrix34	playerViewMtxInverted = pPlayer->GetViewMatrix().GetInverted();
 	Vec3			playerViewMtxTranslation = pPlayer->GetViewMatrix().GetTranslation();
 
-	//CompassStealth***************************************************************
 	UpdateCompassStealth(pActor, fDeltaTime);
-	//~CompassStealth**************************************************************
-
-	//binocs***********************************************************************
 	UpdateBinoculars(pActor, fDeltaTime);
-	//~binocs**********************************************************************
-
-	//jammer***********************************************************************
 	UpdateRadarJammer(pActor);
-	//~jammer**********************************************************************
 
 	//*********************************ACTUAL SCANNING****************************
 	Vec3 vOrigin = GetISystem()->GetViewCamera().GetPosition();
@@ -1312,7 +1304,7 @@ bool CHUDRadar::ScanObject(EntityId id)
 		g_pGame->GetHUD()->AutoAimNoText(id);	
 
 		m_scannerObjectID=id;
-		m_scannerTimer=g_pGameCVars->hud_binocsScanningDelay;//0.55f;
+		m_scannerTimer=g_pGameCVars->hud_binocsScanningDelay;
 
 		return true;
 	}
@@ -1372,8 +1364,6 @@ void CHUDRadar::UpdateScanner(float frameTime)
 		if (m_scannerGatherTimer<=0.0f)
 		{
 			m_scannerGatherTimer=0.0f;
-			//GatherScannableObjects(); // design @GC 2007 : only scan lookat
-
 			m_scannerGatherTimer=0.50f;
 		}
 	}
@@ -1496,18 +1486,6 @@ void CHUDRadar::GatherScannableObjects()
 	if (!pActor)
 		return;
 
-	/*IEntityItPtr pIt=gEnv->pEntitySystem->GetEntityIterator();
-
-	while (!pIt->IsEnd())
-	{
-		if (IEntity *pEntity=pIt->Next())
-		{
-			EntityId id=pEntity->GetId();
-			if (CheckObject(pEntity, true, false) && !IsOnRadar(id, 0, m_entitiesOnRadar.size()-1) && !IsObjectInQueue(id))
-				m_scannerQueue.push_back(id);
-		}
-	}*/
-
 	int count = m_pActorSystem->GetActorCount();
 	if (count > 0)
 	{
@@ -1574,7 +1552,6 @@ bool CHUDRadar::GetPosOnMap(IEntity* pEntity, float &outX, float &outY, bool fla
 				int16 id = info.pCharacter->GetISkeletonPose()->GetJointIDByName("objectiveicon");
 				if (id >= 0)
 				{
-					//vPos = pCharacter->GetISkeleton()->GetHelperPos(helper);
 					pos = info.pCharacter->GetISkeletonPose()->GetAbsJointByID(id).t;
 					if (!pos.IsZero())
 					{
@@ -1802,7 +1779,6 @@ void CHUDRadar::RenderMapOverlay()
 		return;
 	if(m_jammerDisconnectMap)
 		return;
-	//LoadMiniMap(m_currentLevel);
 
 	m_possibleOnScreenObjectives.resize(0);
 	//double array buffer for flash transfer optimization
@@ -2162,14 +2138,11 @@ void CHUDRadar::RenderMapOverlay()
 	{
 		if(IVehicle* pVehicle = pActor->GetLinkedVehicle())
 		{
-			//if(!stl::find_in_map(drawnVehicles, pVehicle->GetEntityId(), false))
-			//{
-				GetPosOnMap(pVehicle->GetEntity(), fX, fY);
-				vPlayerPos.x = fX;
-				vPlayerPos.y = fY;
-				numOfValues += FillUpDoubleArray(&entityValues, pVehicle->GetEntity()->GetId(), ChooseType(pVehicle->GetEntity()), fX, fY, 270.0f-RAD2DEG(pVehicle->GetEntity()->GetWorldAngles().z), ESelf, 100, 100, iOnScreenObjective==pVehicle->GetEntity()->GetId(), iCurrentSpawnPoint==pVehicle->GetEntity()->GetId());
-				drawnVehicles[pVehicle->GetEntityId()] = true;
-			//}
+			GetPosOnMap(pVehicle->GetEntity(), fX, fY);
+			vPlayerPos.x = fX;
+			vPlayerPos.y = fY;
+			numOfValues += FillUpDoubleArray(&entityValues, pVehicle->GetEntity()->GetId(), ChooseType(pVehicle->GetEntity()), fX, fY, 270.0f-RAD2DEG(pVehicle->GetEntity()->GetWorldAngles().z), ESelf, 100, 100, iOnScreenObjective==pVehicle->GetEntity()->GetId(), iCurrentSpawnPoint==pVehicle->GetEntity()->GetId());
+			drawnVehicles[pVehicle->GetEntityId()] = true;
 		}
 	}
 
@@ -2190,7 +2163,7 @@ void CHUDRadar::RenderMapOverlay()
 				if(GetPosOnMap(pEntity, fX, fY))
 				{
 					int friendly = FriendOrFoe(isMultiplayer, team, pEntity, pGameRules);
-					if(isVehicle /*&& !stl::find_in_map(drawnVehicles, pVehicle->GetEntityId(), false)*/)
+					if(isVehicle)
 					{
 						if(friendly == EFriend)
 						{
@@ -2262,7 +2235,6 @@ void CHUDRadar::RenderMapOverlay()
 	ComputePositioning(vPlayerPos, &entityValues);
 
 	//tell flash file that we are done ...
-	//m_flashMap->Invoke("updateObjects", "");
 	if(entityValues.size())
 		m_flashMap->GetFlashPlayer()->SetVariableArray(FVAT_Double, "Root.PDAArea.Map_M.MapArea.m_allValues", 0, &entityValues[0], numOfValues);
 	m_flashMap->Invoke("Root.PDAArea.Map_M.MapArea.setObjectArray");
@@ -2350,41 +2322,39 @@ void CHUDRadar::ComputePositioning(Vec2 playerpos, std::vector<double> *doubleAr
 	{
 		vOffset.y = fMapSize - vMapPos.y;
 	}
-	//if(bUpdate || m_initMap)
-	{
-		m_initMap = false;
 
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.MapArea.Map.Map_G._xscale", SFlashVarValue(100.0f * m_fPDAZoomFactor));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.MapArea.Map.Map_G._yscale", SFlashVarValue(100.0f * m_fPDAZoomFactor));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.MapArea.Map.Map_G._x", SFlashVarValue(vMapPos.x + vOffset.x));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.MapArea.Map.Map_G._y", SFlashVarValue(vMapPos.y + vOffset.y));
+	m_initMap = false;
 
-		float fStep = 63.5f * m_fPDAZoomFactor;
-		float fOffsetX = (fStep * 0.5f)-70.0f;
-		float fOffsetY = (fStep * 0.5f)-18.0f;
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.MapArea.Map.Map_G._xscale", SFlashVarValue(100.0f * m_fPDAZoomFactor));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.MapArea.Map.Map_G._yscale", SFlashVarValue(100.0f * m_fPDAZoomFactor));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.MapArea.Map.Map_G._x", SFlashVarValue(vMapPos.x + vOffset.x));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.MapArea.Map.Map_G._y", SFlashVarValue(vMapPos.y + vOffset.y));
 
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorA._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*8.0f + fOffsetY));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorB._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*7.0f + fOffsetY));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorC._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*6.0f + fOffsetY));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorD._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*5.0f + fOffsetY));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorE._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*4.0f + fOffsetY));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorF._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*3.0f + fOffsetY));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorG._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*2.0f + fOffsetY));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorH._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*1.0f + fOffsetY));
+	float fStep = 63.5f * m_fPDAZoomFactor;
+	float fOffsetX = (fStep * 0.5f)-70.0f;
+	float fOffsetY = (fStep * 0.5f)-18.0f;
 
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector1._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*1.0f - fOffsetX));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector2._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*2.0f - fOffsetX));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector3._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*3.0f - fOffsetX));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector4._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*4.0f - fOffsetX));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector5._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*5.0f - fOffsetX));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector6._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*6.0f - fOffsetX));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector7._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*7.0f - fOffsetX));
-		m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector8._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*8.0f - fOffsetX));
-		
-		float value = 0;
-		value = (vMapPos.x + vOffset.x)+ fStep*4.0f - fOffsetX;
-		value = (vMapPos.x + vOffset.x)+ fStep*4.0f - fOffsetX;
-	}
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorA._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*8.0f + fOffsetY));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorB._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*7.0f + fOffsetY));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorC._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*6.0f + fOffsetY));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorD._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*5.0f + fOffsetY));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorE._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*4.0f + fOffsetY));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorF._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*3.0f + fOffsetY));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorG._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*2.0f + fOffsetY));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.SectorH._y", SFlashVarValue((vMapPos.y + vOffset.y)- fStep*1.0f + fOffsetY));
+
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector1._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*1.0f - fOffsetX));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector2._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*2.0f - fOffsetX));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector3._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*3.0f - fOffsetX));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector4._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*4.0f - fOffsetX));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector5._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*5.0f - fOffsetX));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector6._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*6.0f - fOffsetX));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector7._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*7.0f - fOffsetX));
+	m_flashPDA->SetVariable("Root.PDAArea.Map_M.Sector8._x", SFlashVarValue((vMapPos.x + vOffset.x)+ fStep*8.0f - fOffsetX));
+
+	float value = 0;
+	value = (vMapPos.x + vOffset.x)+ fStep*4.0f - fOffsetX;
+	value = (vMapPos.x + vOffset.x)+ fStep*4.0f - fOffsetX;
 
 	//calculate icon positions
 	for(int i(0); i < doubleArray->size(); i+=11)

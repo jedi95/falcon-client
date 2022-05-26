@@ -871,17 +871,6 @@ void CHUD::Targetting(EntityId pTargetEntity, bool bStatic)
 		}
 	}
 
-/*	if(m_pHUDRadar->m_selectedTeamMates.size())
-	{
-		std::vector<EntityId>::iterator it = m_pHUDRadar->m_selectedTeamMates.begin();
-		for(; it != m_pHUDRadar->m_selectedTeamMates.end(); ++it)
-		{
-			IEntity* pEntity = gEnv->pEntitySystem->GetEntity(*it);
-			if(pEntity)
-				UpdateMissionObjectiveIcon(*it,1,eOS_TeamMate);
-		}
-	}*/
-
 	if(pActor && pGameRules)
 	{
 		SetTACWeapon(false);
@@ -1068,7 +1057,6 @@ bool CHUD::ToScreenCheck(const Vec3& src, Vec3& vScreenSpace) const
 
 	m_pRenderer->ProjectToScreen(src.x,src.y,src.z,&vScreenSpace.x,&vScreenSpace.y,&vScreenSpace.z);
 	return true;
-//	return vScreenSpace.z<1.0f;
 }
 
 bool CHUD::IsUnderAttack(IEntity *pEntity)
@@ -1199,10 +1187,6 @@ void CHUD::ShowDeathFX(int type)
 	if (!pActor)
 		return;
 
-	//if(pActor->GetHealth() <= 0)
-	//	return;
-	//find a fix for retriggering this when actor died already ...
-
 	SMFXRunTimeEffectParams params;
 	params.pos = pActor->GetEntity()->GetWorldPos();
 	params.soundSemantic = eSoundSemantic_HUD;
@@ -1246,9 +1230,6 @@ void CHUD::UpdateVoiceChat()
 
 	bool someoneTalking = false;
 	EntityId localPlayerId = pLocalActor->GetEntityId();
-	//CGameRules::TPlayers players;
-	//g_pGame->GetGameRules()->GetPlayers(players); - GameRules has 0 players on client
-	//for(CGameRules::TPlayers::iterator it = players.begin(), itEnd = players.end(); it != itEnd; ++it)
 	IActorIteratorPtr it = g_pGame->GetIGameFramework()->GetIActorSystem()->CreateActorIterator();
 	while (IActor* pActor = it->Next())
 	{
@@ -1256,8 +1237,6 @@ void CHUD::UpdateVoiceChat()
 			continue;
 
 		CGameRules* pGR = g_pGame->GetGameRules();
-
-		//IEntity *pEntity = gEnv->pEntitySystem->GetEntity(*it);
 		IEntity *pEntity = pActor->GetEntity();
 		if(pEntity)
 		{
@@ -1505,11 +1484,6 @@ bool CHUD::OnBeginCutScene(IAnimSequence* pSeq, bool bResetFX)
 	m_bCutscenePlaying = true;
 	m_bCutsceneAbortPressed = false;
 
-#ifdef USER_alexl
-	CryLogAlways("[CX]: BEGIN Frame=%d 0x%p Name=%s Cutscene=%d NoPlayer=%d NoHUD=%d NoAbort=%d",
-		gEnv->pRenderer->GetFrameID(false), pSeq, pSeq->GetName(), flags & IAnimSequence::CUT_SCENE, flags & IAnimSequence::NO_PLAYER, flags & IAnimSequence::NO_HUD, flags & IAnimSequence::NO_ABORT);
-#endif
-
 	return true;
 }
 
@@ -1566,11 +1540,6 @@ bool CHUD::OnEndCutScene(IAnimSequence* pSeq)
 		}
 	}
 
-#ifdef USER_alexl
-	CryLogAlways("[CX]: END Frame=%d 0x%p Name=%s Cutscene=%d NoPlayer=%d NoHUD=%d NoAbort=%d",
-		gEnv->pRenderer->GetFrameID(false), pSeq, pSeq->GetName(), flags & IAnimSequence::CUT_SCENE, flags & IAnimSequence::NO_PLAYER, flags & IAnimSequence::NO_HUD, flags & IAnimSequence::NO_ABORT);
-#endif
-
 	return true;
 }
 
@@ -1619,7 +1588,7 @@ void CHUD::SetSubtitleMode(HUDSubtitleMode mode)
 
 //-----------------------------------------------------------------------------------------------------
 
-void CHUD::ShowProgress(int progress, bool init /* = false */, int posX /* = 0 */, int posY /* = 0 */, const char *text, bool topText, bool lockingBar)
+void CHUD::ShowProgress(int progress, bool init, int posX, int posY, const char *text, bool topText, bool lockingBar)
 {
 	CGameFlashAnimation *pAnim = &m_animProgress;
 	if(m_bProgressLocking)
@@ -1755,7 +1724,7 @@ void CHUD::ShowWeaponsOnGround()
 
 //-----------------------------------------------------------------------------------------------------
 
-void CHUD::FireModeSwitch(bool grenades /* = false */)
+void CHUD::FireModeSwitch(bool grenades)
 {
 	if(m_quietMode)
 		return;

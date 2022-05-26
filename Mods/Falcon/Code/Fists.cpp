@@ -147,13 +147,10 @@ void CFists::UpdateAnimState(float frameTime)
 }
 
 //------------------------------------------
-//CFists::RequestAnimState(EFistAnimState eFAS)
-//
 //This method changes (if possible) the current animation for the fists
 // eFAS - Requested anim state
-void CFists::RequestAnimState(EFistAnimState eFAS, bool force /*=false*/)
+void CFists::RequestAnimState(EFistAnimState eFAS, bool force)
 {
-
 	//Only if selected
 	if(!IsSelected() || m_frozen || IsWeaponRaised())
 		return;
@@ -162,116 +159,110 @@ void CFists::RequestAnimState(EFistAnimState eFAS, bool force /*=false*/)
 	{
 		switch(eFAS)
 		{
-					case eFAS_NOSTATE:	m_currentAnimState = eFAS_NOSTATE;
-															m_timeOut = TIMEOUT;
-															break;
-
-					case eFAS_RELAXED: if(m_currentAnimState!=eFAS_NOSTATE && m_currentAnimState!=eFAS_RELAXED)
-															{
-																m_currentAnimState = eFAS_RELAXED;
-																m_timeOut = TIMEOUT;
-																PlayAction(g_pItemStrings->deselect);
-																SetDefaultIdleAnimation(CItem::eIGS_FirstPerson,g_pItemStrings->idle_relaxed);
-															 }
-																break;
-
-					case eFAS_FIGHT:		//if(m_currentAnimState!=eFAS_RUNNING)
-															{
-																SetDefaultIdleAnimation(CItem::eIGS_FirstPerson,g_pItemStrings->idle);
-																m_currentAnimState = eFAS_FIGHT;
-																m_timeOut = TIMEOUT;
-															}
-															break;
-
-					case eFAS_RUNNING:	if(m_currentAnimState==eFAS_RELAXED || CanMeleeAttack())
-															{
-																PlayAction(g_pItemStrings->run_forward,0,true);
-																m_currentAnimState = eFAS_RUNNING;
-															}
-															break;
-
-					case eFAS_JUMPING:	if(m_currentAnimState==eFAS_RUNNING)
-															{
-																PlayAction(g_pItemStrings->jump_start);
-																SetDefaultIdleAnimation(CItem::eIGS_FirstPerson,g_pItemStrings->jump_idle);
-																m_currentAnimState = eFAS_JUMPING;
-															}
-															break;
-
-					case eFAS_LANDING:	 if(m_currentAnimState==eFAS_JUMPING)
-															{
-																PlayAction(g_pItemStrings->jump_end);
-																SetDefaultIdleAnimation(CItem::eIGS_FirstPerson,g_pItemStrings->idle_relaxed);
-																m_currentAnimState = eFAS_RELAXED;
-															}
-															 break;
-
-					case eFAS_CRAWL:		if(m_currentAnimState!=eFAS_CRAWL)
-															{
-																PlayAction(g_pItemStrings->crawl,0,true);
-																//SetDefaultIdleAnimation(CItem::eIGS_FirstPerson,g_pItemStrings->crawl);
-																m_currentAnimState = eFAS_CRAWL;
-															}
-															break;
-
-
+		case eFAS_NOSTATE:	m_currentAnimState = eFAS_NOSTATE;
+			m_timeOut = TIMEOUT;
+			break;
+		case eFAS_RELAXED:
+			if(m_currentAnimState!=eFAS_NOSTATE && m_currentAnimState!=eFAS_RELAXED)
+			{
+				m_currentAnimState = eFAS_RELAXED;
+				m_timeOut = TIMEOUT;
+				PlayAction(g_pItemStrings->deselect);
+				SetDefaultIdleAnimation(CItem::eIGS_FirstPerson,g_pItemStrings->idle_relaxed);
+			}
+			break;
+		case eFAS_FIGHT:
+			SetDefaultIdleAnimation(CItem::eIGS_FirstPerson,g_pItemStrings->idle);
+			m_currentAnimState = eFAS_FIGHT;
+			m_timeOut = TIMEOUT;
+			break;
+		case eFAS_RUNNING:
+			if(m_currentAnimState==eFAS_RELAXED || CanMeleeAttack())
+			{
+				PlayAction(g_pItemStrings->run_forward,0,true);
+				m_currentAnimState = eFAS_RUNNING;
+			}
+			break;
+		case eFAS_JUMPING:
+			if(m_currentAnimState==eFAS_RUNNING)
+			{
+				PlayAction(g_pItemStrings->jump_start);
+				SetDefaultIdleAnimation(CItem::eIGS_FirstPerson,g_pItemStrings->jump_idle);
+				m_currentAnimState = eFAS_JUMPING;
+			}
+			break;
+		case eFAS_LANDING:
+			if(m_currentAnimState==eFAS_JUMPING)
+			{
+				PlayAction(g_pItemStrings->jump_end);
+				SetDefaultIdleAnimation(CItem::eIGS_FirstPerson,g_pItemStrings->idle_relaxed);
+				m_currentAnimState = eFAS_RELAXED;
+			}
+			break;
+		case eFAS_CRAWL:
+			if(m_currentAnimState!=eFAS_CRAWL)
+			{
+				PlayAction(g_pItemStrings->crawl,0,true);
+				m_currentAnimState = eFAS_CRAWL;
+			}
+			break;
 		}
 	}
 	else
 	{
 		switch(eFAS)
 		{
-					case eFAS_SWIM_IDLE:		if(m_currentAnimState!=eFAS_SWIM_IDLE)
-																	{
-																		m_currentAnimState = eFAS_SWIM_IDLE;
-																		PlayAction(g_pItemStrings->swim_idle,0,true,eIPAF_Default|eIPAF_CleanBlending);
-																	}
-																	break;
-					
-					case eFAS_SWIM_IDLE_UW:	if(m_currentAnimState!=eFAS_SWIM_IDLE_UW)
-																	{
-																		m_currentAnimState = eFAS_SWIM_IDLE_UW;
-																		PlayAction(g_pItemStrings->swim_idle_2,0,true,eIPAF_Default|eIPAF_CleanBlending);
-																	}
-																	break;
-
-					case eFAS_SWIM_FORWARD:	if(m_currentAnimState!=eFAS_SWIM_FORWARD)
-																	{
-																		m_currentAnimState = eFAS_SWIM_FORWARD;
-																		PlayAction(g_pItemStrings->swim_forward,0,true,eIPAF_Default|eIPAF_CleanBlending);
-																	}
-																	break;
-
-					case eFAS_SWIM_FORWARD_UW:	if(m_currentAnimState!=eFAS_SWIM_FORWARD_UW)
-																			{
-																				m_currentAnimState = eFAS_SWIM_FORWARD_UW;
-																				PlayAction(g_pItemStrings->swim_forward_2,0,true,eIPAF_Default|eIPAF_CleanBlending);
-																			}
-																			break;
-
-					case eFAS_SWIM_BACKWARD: if(m_currentAnimState!=eFAS_SWIM_BACKWARD)
-																	 {
-																		 m_currentAnimState = eFAS_SWIM_BACKWARD;
-																		 PlayAction(g_pItemStrings->swim_backward,0,true,eIPAF_Default|eIPAF_CleanBlending);
-																	 }
-																	 break;
-
-					case eFAS_SWIM_SPEED:		if(m_currentAnimState!=eFAS_SWIM_SPEED)
-																	{
-																		m_currentAnimState = eFAS_SWIM_SPEED;
-																		PlayAction(g_pItemStrings->speed_swim,0,true,eIPAF_Default|eIPAF_CleanBlending);
-																	}
-																	break;
-
-					case eFAS_SWIM_FORWARD_SPEED: if(m_currentAnimState!=eFAS_SWIM_FORWARD_SPEED)
-																		{
-																			m_currentAnimState = eFAS_SWIM_FORWARD_SPEED;
-																			PlayAction(g_pItemStrings->swim_forward_2,0,true,eIPAF_Default|eIPAF_CleanBlending);
-																		}
-																		break;
+		case eFAS_SWIM_IDLE:
+			if(m_currentAnimState!=eFAS_SWIM_IDLE)
+			{
+				m_currentAnimState = eFAS_SWIM_IDLE;
+				PlayAction(g_pItemStrings->swim_idle,0,true,eIPAF_Default|eIPAF_CleanBlending);
+			}
+			break;	
+		case eFAS_SWIM_IDLE_UW:
+			if(m_currentAnimState!=eFAS_SWIM_IDLE_UW)
+			{
+				m_currentAnimState = eFAS_SWIM_IDLE_UW;
+				PlayAction(g_pItemStrings->swim_idle_2,0,true,eIPAF_Default|eIPAF_CleanBlending);
+			}
+			break;
+		case eFAS_SWIM_FORWARD:
+			if(m_currentAnimState!=eFAS_SWIM_FORWARD)
+			{
+				m_currentAnimState = eFAS_SWIM_FORWARD;
+				PlayAction(g_pItemStrings->swim_forward,0,true,eIPAF_Default|eIPAF_CleanBlending);
+			}
+			break;
+		case eFAS_SWIM_FORWARD_UW:
+			if(m_currentAnimState!=eFAS_SWIM_FORWARD_UW)
+			{
+				m_currentAnimState = eFAS_SWIM_FORWARD_UW;
+				PlayAction(g_pItemStrings->swim_forward_2,0,true,eIPAF_Default|eIPAF_CleanBlending);
+			}
+			break;
+		case eFAS_SWIM_BACKWARD:
+			if(m_currentAnimState!=eFAS_SWIM_BACKWARD)
+			{
+				m_currentAnimState = eFAS_SWIM_BACKWARD;
+				PlayAction(g_pItemStrings->swim_backward,0,true,eIPAF_Default|eIPAF_CleanBlending);
+			}
+			break;
+		case eFAS_SWIM_SPEED:
+			if(m_currentAnimState!=eFAS_SWIM_SPEED)
+			{
+				m_currentAnimState = eFAS_SWIM_SPEED;
+				PlayAction(g_pItemStrings->speed_swim,0,true,eIPAF_Default|eIPAF_CleanBlending);
+			}
+			break;
+		case eFAS_SWIM_FORWARD_SPEED:
+			if(m_currentAnimState!=eFAS_SWIM_FORWARD_SPEED)
+			{
+				m_currentAnimState = eFAS_SWIM_FORWARD_SPEED;
+				PlayAction(g_pItemStrings->swim_forward_2,0,true,eIPAF_Default|eIPAF_CleanBlending);
+			}
+			break;
 		}
 	}
-
 }
 
 //---------------------------------------------------------------
@@ -290,7 +281,7 @@ struct CFists::EndRaiseWeaponAction
 	}
 };
 
-void CFists::RaiseWeapon(bool raise, bool faster /*= false*/)
+void CFists::RaiseWeapon(bool raise, bool faster)
 {
 	//Only when colliding something while running
 	if(raise && (GetCurrentAnimState()==eFAS_RUNNING || GetCurrentAnimState()==eFAS_JUMPING) && !IsWeaponRaised())
@@ -430,7 +421,7 @@ void CFists::FullSerialize(TSerialize ser)
 }
 
 //-----------------------------------------------------
-tSoundID CFists::PlayAction(const ItemString& action, int layer /* =0  */, bool loop /* =false  */, uint flags /* = eIPAF_Default  */, float speedOverride /* = -1.0f  */)
+tSoundID CFists::PlayAction(const ItemString& action, int layer, bool loop, uint flags, float speedOverride)
 {
 	if(action==g_pItemStrings->offhand_on && m_currentAnimState == eFAS_RELAXED)
 		return CWeapon::PlayAction(g_pItemStrings->offhand_on_akimbo, layer,loop,flags,speedOverride);

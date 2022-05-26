@@ -9,10 +9,6 @@
 #include <IVehicleSystem.h>
 #include <StringUtils.h>
 
-#if defined(WHOLE_PROJECT)
-	#define GetPlayer GetPlayerSensor
-#endif
-
 CPlayer* GetPlayer(EntityId id)
 {
 	if (id == 0)
@@ -483,8 +479,3 @@ public:
 REGISTER_FLOW_NODE("Game:ActorSensor",	CFlowNode_ActorSensor);
 REGISTER_FLOW_NODE_SINGLETON("Game:DifficultyLevel",	CFlowNode_DifficultyLevel);
 REGISTER_FLOW_NODE_SINGLETON("Camera:OverrideFOV",	CFlowNode_OverrideFOV); // Intended: Singleton although contains members!
-
-#if defined(WHOLE_PROJECT)
-	#undef GetPlayer
-#endif
-

@@ -312,13 +312,11 @@ void CGameRules::Update( SEntityUpdateContext& ctx, int updateSlot )
 	if (updateSlot!=0)
 		return;
 
-	//g_pGame->GetServerSynchedStorage()->SetGlobalValue(15, 1026);
-
 	bool server=gEnv->bServer;
 
 	if (server)
-  {
-    ProcessQueuedExplosions();
+	{
+		ProcessQueuedExplosions();
 		UpdateEntitySchedules(ctx.fFrameTime);
 
 		if (m_pShotValidator)
@@ -349,7 +347,7 @@ void CGameRules::Update( SEntityUpdateContext& ctx, int updateSlot )
 				}
 			}
 		}
-  }
+	}
 
 	UpdateMinimap(ctx.fFrameTime);
 

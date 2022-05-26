@@ -326,13 +326,6 @@ void CHUDPowerStruggle::Update(float fDeltaTime)
 		{
 			m_lastPowerTeam1 = power1;
 			m_lastPowerTeam2 = power2;
-
-/*
-			if(teamId==1 && m_lastPowerArg1!=power[0])
-				UpdateEnergyBuyList(m_lastPowerArg1, power[0]);
-			else if(teamId==2 && m_lastPowerArg2!=power[1])
-				UpdateEnergyBuyList(m_lastPowerArg1, power[1]);
-*/
 			SFlashVarValue args[2] = {m_lastPowerTeam1, m_lastPowerTeam2};
 			m_animSwingOMeter.Invoke("setEnergy", args, 2);
 			objective = true;
@@ -414,8 +407,6 @@ void CHUDPowerStruggle::Update(float fDeltaTime)
 		if (m_capturing)
 		{
 			int icap=(int)(m_captureProgress*100.0f);
-			//sprintf(text, "%d%%", icap);
-			//DrawBar(16.0f, 80.0f, 72.0f, 14.0f, 2.0f, m_captureProgress, Col_DarkGray, Col_LightGray, text, Col_White, fabsf(cry_sinf(gEnv->pTimer->GetCurrTime()*2.5f)));
 			if(icap != m_lastBuildingTime)
 			{
 				m_currentHexIconState = E_HEX_ICON_CAPTURING;
@@ -1499,7 +1490,6 @@ void CHUDPowerStruggle::PopulateBuyList()
 
 	bool isDead = pGameRules->IsDead(uiPlayerID);
 
-	//std::sort(itemList.begin(),itemList.end(),SortByPrice);
 	std::vector<string> itemArray;
 
 	char tempBuf[256];
@@ -1807,8 +1797,6 @@ void CHUDPowerStruggle::UpdatePackageItemList(const char *page)
 	std::vector<string> itemArray;
 	char tempBuf[256];
 
-	//std::sort(itemList.begin(),itemList.end(),SortByPrice);
-
 	for(std::vector<SItem>::iterator iter=itemList.begin(); iter!=itemList.end(); ++iter)
 	{
 		SItem item = (*iter);
@@ -2001,17 +1989,7 @@ void CHUDPowerStruggle::UpdateServiceZone(bool trespassing, EntityId zone)
 				if(pGameRules->GetTeam(*it) == playerTeam)
 				{
 					m_serviceZoneTypes[1] = true;
-/*					if(IsFactoryType(*it,E_WEAPONS))
-						m_serviceZoneTypes[0] = true;
-					if(IsFactoryType(*it,E_AMMO))
-						m_serviceZoneTypes[1] = true;
-					if(IsFactoryType(*it,E_EQUIPMENT))
-						m_serviceZoneTypes[2] = true;
-					if(IsFactoryType(*it,E_VEHICLES))
-						m_serviceZoneTypes[3] = true;
-					if(IsFactoryType(*it,E_PROTOTYPES))
-						m_serviceZoneTypes[4] = true;
-*/					inBuyZone = true;
+					inBuyZone = true;
 				}
 			}
 		}
@@ -2028,7 +2006,6 @@ void CHUDPowerStruggle::UpdateServiceZone(bool trespassing, EntityId zone)
 		}
 
 		//update buy zone
-		//m_bInBuyZone = (inBuyZone)?true:false;
 		m_bInServiceZone = (inBuyZone)?true:false;
 
 		// if we leave buy zone, close the buy menu

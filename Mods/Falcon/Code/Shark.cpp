@@ -25,7 +25,6 @@ History:
 
 #include "SharkMovementController.h"
 
-//Vec3 CShark::m_lastSpawnPoint;
 /**
 * Tries to initialize as much of SMovementRequestParams' data
 * as possible from a CMovementRequest instance.
@@ -522,7 +521,7 @@ void CShark::UpdateStatus(float frameTime, const IEntity* pTarget)
 					currentStartPos = targetPos + m_escapeDir;
 				}
 				//find escape direction
-				static const int objTypes = ent_terrain|ent_static|ent_sleeping_rigid;  // |ent_rigid;
+				static const int objTypes = ent_terrain|ent_static|ent_sleeping_rigid;
 				static const unsigned int flags = rwi_stop_at_pierceable|rwi_colltype_any;
 				ray_hit ray;
 				Vec3 startPos(myPos+Vec3(0,0,1));
@@ -556,7 +555,7 @@ void CShark::UpdateStatus(float frameTime, const IEntity* pTarget)
 
 			Vec3 moveTarget( targetPos);
 			bool force = false;
-			const int objTypes = ent_terrain|ent_static|ent_sleeping_rigid;//|ent_rigid;    
+			const int objTypes = ent_terrain|ent_static|ent_sleeping_rigid;
 			const unsigned int flags = rwi_stop_at_pierceable|rwi_colltype_any;
 			ray_hit ray;
 	
@@ -642,7 +641,6 @@ void CShark::UpdateStatus(float frameTime, const IEntity* pTarget)
 				Vec3 moveTargetDir(m_moveTarget - myPos);
 				float moveDistTarget = moveTargetDir.GetLength();
 				bool force = false;
-				//Vec3 pos(targetPos + m_circleDisplacement);
 				if(!bTargetOnVehicle && m_remainingCirclingTime<=0 && targetDirN.Dot(pTarget->GetRotation().GetColumn1()) < -0.7f)
 				{
 					//shark is in front of target and he's circled around enough
@@ -835,7 +833,7 @@ void CShark::AdjustMoveTarget(float maxHeight, const IEntity* pTargetEntity)
 		query.pEntityClass = NULL;
 		float dimxy = 10;
 		float dimz = 3;
-		query.box = AABB(Vec3(myPos.x - dimxy, myPos.y - dimxy, myPos.z /*avoid checking entities below*/),\
+		query.box = AABB(Vec3(myPos.x - dimxy, myPos.y - dimxy, myPos.z),\
 			Vec3(myPos.x + dimxy, myPos.y + dimxy, myPos.z+dimz));
 
 		gEnv->pEntitySystem->QueryProximity(query);
@@ -1298,19 +1296,8 @@ void CShark::RagDollize( bool fallAndPlay )
 	}
 }
 
-void	CShark::MeleeAnimation()
+void CShark::MeleeAnimation()
 {
-	/*
-	CryCharAnimationParams aparams;
-	aparams.m_nLayerID = 1;
-	aparams.m_fPlaybackSpeed=1.f;
-	aparams.m_nFlags=0;
-	//			character->EnableStartAnimation(true);
-	ICharacterInstance *character = GetEntity()->GetCharacter(0);
-	ISkeleton* pSkeleton;
-	if(character && (pSkeleton=character->GetISkeleton()))
-		pSkeleton->StartAnimation(m_params.meleeAnimation,0,0,0,aparams);
-	*/
 	IAnimationGraphState* pAGState = GetAnimationGraphState();
 	if ( pAGState)
 		pAGState->SetInput( m_idSignalInput, "melee" );
@@ -1321,7 +1308,7 @@ void	CShark::MeleeAnimation()
 }
 
 
-void	CShark::SetStance(EStance stance)
+void CShark::SetStance(EStance stance)
 {
 	CActor::SetStance(stance);
 	const SStanceInfo* pStanceInfo = GetStanceInfo(stance);
@@ -1332,8 +1319,6 @@ void	CShark::SetStance(EStance stance)
 void CShark::OnAction(const ActionId& actionId, int activationMode, float value)
 {
 	GetGameObject()->ChangedNetworkState( eEA_GameServerStatic | eEA_GameServerDynamic | eEA_GameClientStatic | eEA_GameClientDynamic );
-
-
 	CActor::OnAction(actionId, activationMode, value);
 }
 
@@ -1495,7 +1480,7 @@ void CShark::GetActorInfo(SBodyInfo& bodyInfo)
 		bodyInfo.vEyeDirAnim = bodyInfo.vEyeDir;
 	}
 
-	bodyInfo.vFwdDir = GetEntity()->GetRotation().GetColumn1();//m_viewMtx.GetColumn(1);
+	bodyInfo.vFwdDir = GetEntity()->GetRotation().GetColumn1();
 	bodyInfo.vUpDir = m_viewMtx.GetColumn(2);
 	bodyInfo.vFireDir = bodyInfo.vFwdDir;
 

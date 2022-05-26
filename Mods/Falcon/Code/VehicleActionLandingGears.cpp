@@ -85,7 +85,6 @@ bool CVehicleActionLandingGears::Init(IVehicle* pVehicle, const SmartScriptTable
 
 	m_pLandingGearsAnim->StartAnimation();
 	m_pLandingGearsAnim->ToggleManualUpdate(true);
-	//m_pLandingGearsAnim->SetTime(GEARS_EXTRACTED_TIME);
 
 	m_landingGearOpenedId = m_pLandingGearsAnim->GetStateId("opened");
 	m_landingGearClosedId = m_pLandingGearsAnim->GetStateId("closed");
@@ -200,9 +199,6 @@ int CVehicleActionLandingGears::OnEvent(int eventType, SVehicleEventParams& even
 				if (gearStatus < 0.85f)
 				{
 					// we got some damages, but did we break the landing gears?
-					//m_pLandingGearsAnim->StopAnimation();
-					//m_isDestroyed = true;
-
 					damage = m_landingDamages;
 				}
 				else
@@ -224,10 +220,8 @@ int CVehicleActionLandingGears::OnEvent(int eventType, SVehicleEventParams& even
 				}
 			}
 		}
-
 		return 1;
 	}
-
 	return 0;
 }
 
@@ -328,7 +322,6 @@ void CVehicleActionLandingGears::RetractGears()
 //------------------------------------------------------------------------
 bool CVehicleActionLandingGears::AreLandingGearsOpen()
 {
-	//return (m_pLandingGearsAnim->GetState() == m_landingGearOpenedId);
 	return (m_animGoal < 1.0f);
 }
 

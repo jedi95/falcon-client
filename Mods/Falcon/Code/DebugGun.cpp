@@ -52,9 +52,6 @@ void CDebugGun::OnAction(EntityId actorId, const ActionId& actionId, int activat
 
     if (m_fireMode == m_fireModes.size())
       m_fireMode = 0;
-    
-    //SGameObjectEvent evt("HUD_TextMessage", eGOEF_ToAll, IGameObjectSystem::InvalidExtensionID, (void*)m_fireModes[m_fireMode].c_str());
-    //SendHUDEvent(evt);
   }
   else
     CWeapon::OnAction(actorId, actionId, activationMode, value);

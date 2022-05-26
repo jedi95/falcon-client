@@ -444,8 +444,7 @@ void CVehicleWeapon::CheckForFriendlyAI(float frameTime)
 								bool isEnemy = false;
 								if(gEnv->bMultiplayer)
 									isEnemy = true;
-								//else if(g_pGame->GetIGameFramework()->GetIActorSystem()->GetActor(pLookAtEntity->GetId()))
-								//	isEnemy = true;
+
 								else if(IVehicle *pVehicle = g_pGame->GetIGameFramework()->GetIVehicleSystem()->GetVehicle(pLookAtEntity->GetId()))
 								{
 									if(pVehicle->GetDriver())

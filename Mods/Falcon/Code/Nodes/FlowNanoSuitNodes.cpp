@@ -4,10 +4,6 @@
 #include "NanoSuit.h"
 #include "Nodes/G2FlowBaseNode.h"
 
-#if defined(WHOLE_PROJECT)
-	#define GetPlayer GetPlayerNodes
-#endif
-
 namespace
 {
 	CPlayer* GetPlayer(EntityId entityId)
@@ -87,8 +83,6 @@ public:
 			OutputPortConfig_Void  ("Speed", _HELP("Triggered on Speed Mode")),
 			OutputPortConfig<float>("Energy", _HELP("Current Energy")),
 			OutputPortConfig<int>  ("CloakLevel", _HELP("Current cloak level [set when Cloak mode is active]")),
-			// OutputPortConfig_Void  ("BreakHUD", "Triggered on breaking the HUD"),
-			// OutputPortConfig_Void  ("RebootHUD", "Triggered on rebooting the HUD"),
 			{0}
 		};
 		config.nFlags |= EFLN_TARGET_ENTITY;
@@ -215,13 +209,6 @@ public:
 	{
 	}
 
-	/*
-	IFlowNodePtr Clone( SActivationInfo * pActInfo )
-	{
-		return this; // new CFlowNanoSuitNode(pActInfo);
-	}
-	*/
-
 	enum EInputPorts
 	{
 		EIP_Trigger = 0,
@@ -315,13 +302,6 @@ public:
 	{
 	}
 
-	/*
-	IFlowNodePtr Clone( SActivationInfo * pActInfo )
-	{
-		return this;
-	}
-	*/
-
 	enum EInputPorts
 	{
 		EIP_Add = 0,
@@ -414,13 +394,6 @@ public:
 	~CFlowParachuteControlNode()
 	{
 	}
-
-	/*
-	IFlowNodePtr Clone( SActivationInfo * pActInfo )
-	{
-		return this;
-	}
-	*/
 
 	enum EInputPorts
 	{
@@ -581,10 +554,4 @@ REGISTER_FLOW_NODE("NanoSuit:NanoSuit", CFlowNanoSuitNode);
 REGISTER_FLOW_NODE_SINGLETON("NanoSuit:NanoSuitGet", CFlowNanoSuitGetNode);
 REGISTER_FLOW_NODE_SINGLETON("NanoSuit:ModeControl", CFlowNanoSuitControlNode);
 REGISTER_FLOW_NODE_SINGLETON("NanoSuit:FakeMaterial", CFlowNanoSuitFakeMaterial);
-
 REGISTER_FLOW_NODE_SINGLETON("Inventory:ParachuteControl", CFlowParachuteControlNode);
-
-#if defined(WHOLE_PROJECT)
-	#undef GetPlayer
-#endif
-

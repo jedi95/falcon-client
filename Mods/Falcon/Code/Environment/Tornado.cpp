@@ -352,7 +352,6 @@ void CTornado::UpdateTornadoSpline()
 	SEntityPhysicalizeParams::AreaDefinition areaDef;
 
 	Vec3 pos = GetEntity()->GetWorldPos();
-	//gEnv->pLog->Log("TORNADO DELTA: %f %f %f", deltaPos.x, deltaPos.y, deltaPos.z);
 	float fac = 0.0f;
 	
 	m_points[0] = pos;
@@ -363,12 +362,8 @@ void CTornado::UpdateTornadoSpline()
 	fac = 0.05f * gEnv->pTimer->GetFrameTime();
 	m_points[3] = m_oldPoints[3] + fac * (pos + Vec3(0,0,m_cloudHeight) - m_oldPoints[3]);
 
-	//for (int i=0; i<4; ++i)
-	//	gEnv->pLog->Log("TORNADO %d: %f %f %f", i, m_points[i].x, m_points[i].y, m_points[i].z);
-
 	for (int i=0; i<4; ++i)
 		m_oldPoints[i] = m_points[i];
-
 
 	pparams.type = PE_AREA;
 	pparams.pAreaDef = &areaDef;
@@ -380,7 +375,6 @@ void CTornado::UpdateTornadoSpline()
 	gravityParams.gravity.Set(0,0,-9.81f);
 	gravityParams.size = ZERO;
 	gravityParams.falloff0 = -1.0f;	// ?: was NAN. CPhysicalProxy::PhysicalizeArea sets to 'unused' if less than zero...
-	//gravityParams.gravity.Set(0,0,0);
 	
 	gravityParams.bUniform = 1;
 	gravityParams.bUseCallback = 0;
@@ -422,7 +416,6 @@ void CTornado::UpdateFlow()
 				m_spinningEnts.push_back(id);
 			}
 		}
-		//OutputDistance();
 	}
 
 	//mess entities around

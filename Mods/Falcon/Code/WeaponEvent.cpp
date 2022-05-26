@@ -86,10 +86,7 @@ void CWeapon::OnShoot(EntityId shooterId, EntityId ammoId, IEntityClass* pAmmoTy
 		Vec3 vPlayerPos=pClientActor->GetEntity()->GetWorldPos();
 		float fDist2=(vPlayerPos-pos).len2();
 		if (fDist2<250.0f*250.0f)
-		{			
-			//if (pClientActor->GetEntityId() != shooterId) 
-				//	pHUD->ShowSoundOnRadar(pos);
-				
+		{
 			if(gEnv->bMultiplayer)
 			{
 				CGameRules *pGameRules = g_pGame->GetGameRules();
@@ -98,7 +95,6 @@ void CWeapon::OnShoot(EntityId shooterId, EntityId ammoId, IEntityClass* pAmmoTy
 					//Small workaround for patch2...
 					IFireMode* pFM = GetFireMode(GetCurrentFireMode());
 					bool grenade = pFM?(pFM->GetAmmoType()==CItem::sScarGrenadeClass):false;
-					//~...
 
 					if (!IsSilencerAttached() || grenade)
 					{
@@ -174,14 +170,6 @@ void CWeapon::OnEndReload(EntityId shooterId, IEntityClass* pAmmoType)
 void CWeapon::OnOutOfAmmo(IEntityClass* pAmmoType)
 {
 	BROADCAST_WEAPON_EVENT(OnOutOfAmmo, (this, pAmmoType));
-
-/*	- no need to send signal here - puppet will check ammo when fires
-	if (CActor *pActor = GetOwnerActor())
-	{
-		if (IAIObject *pAIObject=Actor->GetEntity()->GetAI())
-			gEnv->pAISystem->SendSignal( SIGNALFILTER_SENDER, 1, "OnOutOfAmmo", pAIObject);
-	}
-*/
 }
 
 //------------------------------------------------------------------------
@@ -281,7 +269,6 @@ void CWeapon::OnMelee(EntityId shooterId)
 					{
 						if(gEnv->bMultiplayer)
 						{
-//						pSuit->SetSuitEnergy(pSuit->GetSuitEnergy()-40.0f);
 							float	strengthPunchEnergyCost = NANOSUIT_ENERGY*.2;	// 20%
 							pSuit->SetSuitEnergy(pSuit->GetSuitEnergy()-strengthPunchEnergyCost);
 						}

@@ -217,8 +217,8 @@ void CTrooper::Update(SEntityUpdateContext& ctx, int updateSlot)
 			{ 
 				float cloakMult = (m_stats.cloaked) ? 0.5f : 1.f;      
 				float sizeScale = m_params.groundEffectBaseScale * cloakMult;
-				float countScale = /*1.f * */ cloakMult;
-				float speedScale = /*1.f * */ cloakMult; 
+				float countScale = cloakMult;
+				float speedScale = cloakMult; 
 
 				if (m_params.groundEffectMaxSpeed != 0.f)
 				{
@@ -260,7 +260,7 @@ void CTrooper::Update(SEntityUpdateContext& ctx, int updateSlot)
 						sp.fSizeScale = min(1.f, max(0.01f, m_healthTrailScale / m_params.healthTrailEffectMaxSize));
 
 					if (m_params.healthTrailEffectMaxCount != 0.f)
-						sp.fCountScale = 1.0f; // min(1.f, m_healthTrailScale / m_params.healthTrailEffectMaxCount);
+						sp.fCountScale = 1.0f;
 
 					pEffectAttachment->SetSpawnParams(sp);
 				}
@@ -461,7 +461,7 @@ void CTrooper::ProcessRotation(float frameTime)
 					static const float BANK_PRECISION = 100.f;
 					anglex = floor(anglex * BANK_PRECISION)/BANK_PRECISION;
 					angley = floor(angley * BANK_PRECISION)/BANK_PRECISION;
-					//y =angley;
+
 					rollx += anglex;
 					roll += angley;
 				}
@@ -491,7 +491,6 @@ void CTrooper::ProcessRotation(float frameTime)
 				rotSpeed = m_params.rotSpeed_min + (max(maxSpeed - max(m_stats.speed - m_params.speed_min,0.0f),0.0f) / maxSpeed) * (m_params.rotSpeed_max - m_params.rotSpeed_min);
 
 			Interpolate(m_turnSpeed,rotSpeed,2.5f,frameTime);
-			//m_turnSpeed = rotSpeed;
 
 			m_modelQuat = Quat::CreateSlerp(currRotation, currQuat, min(1.0f,frameTime * m_turnSpeed)  );
 			m_modelQuat.Normalize();
@@ -588,7 +587,6 @@ void CTrooper::SetAnimTentacleParams(pe_params_rope& pRope, float physicBlend)
 		coeff *= accelCoeff;
 		if(coeff>=1)
 		{
-			//coeff=1;
 			pRope.stiffnessAnim = 0;
 			pRope.dampingAnim = 1;
 		}
@@ -737,7 +735,7 @@ void CTrooper::ProcessMovement(float frameTime)
 						// computing remaining time to land
 						float t=-1;
 						Vec3 vN(m_stats.velocity/(m_stats.speed>0 ? m_stats.speed : 1));
-						if(!m_jumpParams.bFreeFall )//&& t > 0.4f) // avoid raycast when expected left fly time is high enough
+						if(!m_jumpParams.bFreeFall ) // avoid raycast when expected left fly time is high enough
 							t = m_jumpParams.duration - (currTime - m_jumpParams.startTime).GetSeconds();
 						else
 						{
@@ -1016,7 +1014,7 @@ void CTrooper::ProcessAnimation(ICharacterInstance *pCharacter,float frameTime)
 		if(m_stats.isGrabbed)
 			pCharacter->GetISkeletonPose()->SetLookIK(false,0,Vec3(0,0,0));
 		else
-			pCharacter->GetISkeletonPose()->SetLookIK(true,gf_PI*0.9f,m_stats.lookTargetSmooth);//,m_customLookIKBlends);
+			pCharacter->GetISkeletonPose()->SetLookIK(true,gf_PI*0.9f,m_stats.lookTargetSmooth);
 	}
 }
 

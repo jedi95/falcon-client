@@ -634,9 +634,9 @@ void CVehicleMovementHovercraft::ProcessMovement(const float deltaTime)
   
   if (m_contacts >= minContacts && abs(m_movementAction.rotateYaw) > 0.001f)
   {    
-    int iDir = m_movementAction.power != 0.f ? sgn(m_movementAction.power) : 1;//sgn(localVel.y);
+    int iDir = m_movementAction.power != 0.f ? sgn(m_movementAction.power) : 1;
     turnAccel = m_movementAction.rotateYaw * m_turnAccel * iDir;
-    
+   
     // steering and current w in same direction?
     int sgnSteerW = sgn(m_movementAction.rotateYaw) * iDir * sgn(-localW.z);
 

@@ -136,7 +136,7 @@ void CVehicleDamageBehaviorBlowTire::DamagePlayers()
 				pGameRules->ServerHit(hit); 
 			}  
 		} 
-	} //i
+	}
 }
 
 //------------------------------------------------------------------------
@@ -295,26 +295,15 @@ void CVehicleDamageBehaviorBlowTire::Activate(bool activate)
 //------------------------------------------------------------------------
 void CVehicleDamageBehaviorBlowTire::OnDamageEvent(EVehicleDamageBehaviorEvent event, const SVehicleDamageBehaviorEventParams& behaviorParams)
 {
-  if (event == eVDBE_Hit && behaviorParams.componentDamageRatio >= 1.0f && behaviorParams.pVehicleComponent)
-  {
-  	// SNH: seems like this isn't needed anymore - done by damage resistance in the vehicle xml file.
-		//IGameRules* pGameRules = g_pGame->GetGameRules(); 
-    //static int htBullet = pGameRules->GetHitTypeId("bullet");
-    //static int htGaussBullet = pGameRules->GetHitTypeId("gaussbullet");
-    //static int htFire = pGameRules->GetHitTypeId("fire");
-		//static int htMelee = pGameRules->GetHitTypeId("melee");
-		//static int htFrag = pGameRules->GetHitTypeId("frag");
-
-    //if (behaviorParams.hitType && (behaviorParams.hitType==htBullet || behaviorParams.hitType==htGaussBullet || behaviorParams.hitType==htFire || behaviorParams.hitType==htMelee || behaviorParams.hitType==htFrag))
-    {     
-      m_component = behaviorParams.pVehicleComponent->GetComponentName();
-      Activate(true);    
+    if (event == eVDBE_Hit && behaviorParams.componentDamageRatio >= 1.0f && behaviorParams.pVehicleComponent)
+    {   
+        m_component = behaviorParams.pVehicleComponent->GetComponentName();
+        Activate(true);    
     }
-  }
-  else if (event == eVDBE_Repair && behaviorParams.componentDamageRatio < 1.f)
-  {
-    Activate(false);
-  }
+    else if (event == eVDBE_Repair && behaviorParams.componentDamageRatio < 1.f)
+    {
+        Activate(false);
+    }
 }
 
 //------------------------------------------------------------------------

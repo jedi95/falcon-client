@@ -590,7 +590,6 @@ float CVehicleMovementStdWheeled::GetMaxSteer(float speedRel)
 {
   // reduce max steering angle with increasing speed
   m_steerMax = m_v0SteerMax - (m_kvSteerMax * speedRel);
-  //m_steerMax = 45.0f;
   return DEG2RAD(m_steerMax);
 }
 
@@ -1159,7 +1158,7 @@ void CVehicleMovementStdWheeled::UpdateSuspensionSound(const float deltaTime)
           soundMatId = gEnv->pPhysicalWorld->GetWaterMat();
           m_lostContactTimer = 0;
         }
-        else if (ws.contactSurfaceIdx > 0 /*&& soundMatId != gEnv->pPhysicalWorld->GetWaterMat()*/)
+        else if (ws.contactSurfaceIdx > 0)
         {   
           if (m_wheelParts[i]->GetState() == IVehiclePart::eVGS_Damaged1)
             m_surfaceSoundStats.scratching = 1;
@@ -1386,7 +1385,6 @@ void CVehicleMovementStdWheeled::ProcessMovement(const float deltaTime)
 	// moved to main thread
 	UpdateSuspension(deltaTime);   	
 	UpdateAxleFriction(m_movementAction.power, true, deltaTime);
-	//UpdateBrakes(deltaTime);
 
 	// speed ratio    
 	float speedRel = min(speed, m_vMaxSteerMax) / m_vMaxSteerMax;  
@@ -1625,8 +1623,6 @@ void CVehicleMovementStdWheeled::UpdateSurfaceEffects(const float deltaTime)
       continue;
 
     const SEnvironmentLayer& layer = envParams->GetLayer(emitterIt->layer);
-
-    //if (!layer.active || !layer.IsGroupActive(emitterIt->group))
     
     // scaling for each wheelgroup is based on vehicle speed + avg. slipspeed
     float slipAvg = 0; 

@@ -64,11 +64,7 @@ void CC4Projectile::HandleEvent(const SGameObjectEvent &event)
 //-------------------------------------------
 void CC4Projectile::Launch(const Vec3 &pos, const Vec3 &dir, const Vec3 &velocity, float speedScale)
 {
-	float speedScaleMod = speedScale;
-	if (g_pGameCVars->fn_c4ThrowVelocityMultiplier != 0)
-		speedScaleMod *= g_pGameCVars->fn_c4ThrowVelocityMultiplier;
-
-	CProjectile::Launch(pos, dir, velocity, speedScaleMod);
+	CProjectile::Launch(pos, dir, velocity, speedScale * g_pGameCVars->fn_c4ThrowVelocityMultiplier);
 
 	if(gEnv->bMultiplayer && gEnv->bServer)
 	{
@@ -97,7 +93,7 @@ void CC4Projectile::SetParams(EntityId ownerId, EntityId hostId, EntityId weapon
 }
 
 //-------------------------------------------
-void CC4Projectile::Explode(bool destroy, bool impact/* =false */, const Vec3 &pos/* =ZERO */, const Vec3 &normal/* =FORWARD_DIRECTION */, const Vec3 &vel/* =ZERO */, EntityId targetId/* =0  */)
+void CC4Projectile::Explode(bool destroy, bool impact, const Vec3 &pos, const Vec3 &normal, const Vec3 &vel, EntityId targetId)
 {
 	if (m_frozen)
 		return;
@@ -152,7 +148,7 @@ void CC4Projectile::Stick(EventPhysCollision *pCollision)
 		{
 			//Stick to actors using a character attachment
 			CActor *pActor = static_cast<CActor*>(gEnv->pGame->GetIGameFramework()->GetIActorSystem()->GetActor(pTargetEntity->GetId()));
-			
+
 			//Not in MP
 			if(pActor && gEnv->bMultiplayer)
 			{
@@ -166,7 +162,7 @@ void CC4Projectile::Stick(EventPhysCollision *pCollision)
 				{
 					m_notStick = true;
 					return;
-				}	
+				}
 
 				if(StickToCharacter(true,pTargetEntity))
 				{
@@ -294,11 +290,7 @@ bool CC4Projectile::StickToCharacter(bool stick,IEntity* pActor)
 	Vec3 c4ToChar = pActor->GetWorldPos() - GetEntity()->GetWorldPos();
 	c4ToChar.Normalize();
 
-	//if(c4ToChar.Dot(charOrientation)>0.0f)
-		//pAttachment = pAttachmentManager->GetInterfaceByName("c4_back");
-	//else
-		pAttachment = pAttachmentManager->GetInterfaceByName("c4_front");
-
+	pAttachment = pAttachmentManager->GetInterfaceByName("c4_front");
 	if (!pAttachment)
 	{
 		GameWarning("No c4 face attachment found in actor");

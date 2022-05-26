@@ -16,13 +16,6 @@ public:
 	{
 	}
 
-	/*
-	IFlowNodePtr Clone( SActivationInfo * pActInfo )
-	{
-		return new CFlowPlayerStagingNode(pActInfo);
-	}
-	*/
-
 	enum EInputPorts
 	{
 		EIP_Trigger = 0,
@@ -107,47 +100,6 @@ public:
 						!iszero(stagingParams.vLimitRangeH) && 
 						!iszero(stagingParams.vLimitRangeV)) );
 					pPlayer->StagePlayer(bActive, &stagingParams);
-
-					/*
-					SActorParams* pActorParams = pPlayerActor->GetActorParams();
-					if (pActorParams)
-					{
-						CPlayer* pPlayer = static_cast<CPlayer*> (pPlayerActor);
-						if (dir.len2()>0.01f)
-						{
-							if (localSpace)
-							{
-								const Quat& viewQuat = pPlayer->GetViewQuatFinal(); // WC
-								Vec3 dirWC = viewQuat * dir;
-								pActorParams->vLimitDir = dirWC.GetNormalizedSafe(ZERO);
-							}
-							else
-								pActorParams->vLimitDir = dir.GetNormalizedSafe(ZERO);
-						}
-						else 
-							pActorParams->vLimitDir.zero();
-
-						pActorParams->vLimitRangeH = DEG2RAD(rangeH);
-						pActorParams->vLimitRangeV = DEG2RAD(rangeV);
-						const bool bLock = GetPortBool(pActInfo, EIP_Lock);
-
-						// AlexL 23/01/2007: disable this until we have a working solution to lock player movement (action filter)
-						// SPlayerStats* pActorStats = static_cast<SPlayerStats*> (pPlayer->GetActorStats());
-						// if (pActorStats)
-						//	pActorStats->spectatorMode = bLock ? CActor::eASM_Cutscene : 0;
-						IActionMapManager* pAmMgr = g_pGame->GetIGameFramework()->GetIActionMapManager();
-						if (pAmMgr)
-							pAmMgr->EnableFilter("no_move", bLock);
-
-						if (bLock)
-						{
-							// CPlayerMovementController* pMC = static_cast<CPlayerMovementController*> (pPlayer->GetMovementController());
-							// pMC->Reset();
-							if(pPlayer->GetPlayerInput())
-								pPlayer->GetPlayerInput()->Reset();
-						}
-					}
-					*/
 				}
 				ActivateOutput(pActInfo, EOP_Done, false);
 			}

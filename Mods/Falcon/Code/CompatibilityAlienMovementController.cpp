@@ -61,7 +61,6 @@ bool CCompatibilityAlienMovementController::RequestMovement( CMovementRequest& r
 			}
 
 			// workaround: DistanceToPathEnd is bogus values. Using true distance to anim target pos instead.
-			//pAnimTarget->allowActivation = m_state.GetDistanceToPathEnd() < 5.0f;
 			bool b3D = false;
 			IAIActor* pAIActor = CastToIAIActorSafe(m_pAlien->GetEntity()->GetAI());
 			// sort of working, would fail if the AI moved in 2D while being able to do it in 3D

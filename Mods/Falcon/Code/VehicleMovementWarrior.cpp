@@ -147,8 +147,6 @@ bool CVehicleMovementWarrior::IsCollapsing()
 void CVehicleMovementWarrior::EnableThruster(SThruster* pThruster, bool enable)
 {
   pThruster->enabled = enable;
-  //if (!enable)
-    //pThruster->hoverHeight = 0.2f;
     
   if (!pThruster->pHelper)
   {
@@ -251,7 +249,6 @@ void CVehicleMovementWarrior::Collapse()
     if (pThruster->pPart && pThruster->heightAdaption > 0.f)
     {
       pThruster->enabled = true; // enable all for collapsing
-      //pThruster->hoverHeight *= 0.5f;
       pThruster->heightAdaption *= 2.f;
     }
     else
@@ -343,8 +340,7 @@ void CVehicleMovementWarrior::Physicalize()
 
 //------------------------------------------------------------------------
 bool CVehicleMovementWarrior::UpdateAlways()
-{ 
-  //return IsCollapsing() || IsCollapsed();    
+{  
   return false;
 }
 
@@ -439,30 +435,6 @@ void CVehicleMovementWarrior::Update(const float deltaTime)
           pThruster->hoverHeight = max(0.1f, pThruster->hoverHeight - 0.6f*deltaTime);
           continue;
         }
-        else
-        {
-          //if (!pThruster->groundContact)          
-          //pThruster->hoverHeight = max(0.1f, pThruster->hoverHeight - 0.2f*deltaTime);          
-        }
-
-        /* 
-        // special legs control
-        float collapseSpeed = DEG2RAD(5.f);
-        float maxDistMovable = 1.f/0.8f;
-
-        float dist = (isneg(pThruster->prevDist)) ? 0.f : pThruster->hoverHeight - pThruster->prevDist;
-
-        if (isneg(dist))
-        {
-        collapseSpeed *= max(0.f, 1.f + maxDistMovable*dist);
-        }
-
-        if (collapseSpeed > 0.f)
-        { 
-        float angle = RotatePart(pThruster->pParentPart, DEG2RAD(m_collapsedLegAngle), collapseSpeed, deltaTime);          
-        RotatePart(pThruster->pPart, DEG2RAD(m_collapsedFeetAngle), collapseSpeed, deltaTime);
-        }
-        */
       }      
     }
     else

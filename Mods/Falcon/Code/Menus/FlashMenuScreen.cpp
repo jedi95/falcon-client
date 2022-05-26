@@ -23,7 +23,6 @@ bool CFlashMenuScreen::Load(const char *strFile)
 	{
 		IRenderer *pRenderer = gEnv->pRenderer;
 		UpdateRatio();
-		//m_pFlashPlayer->SetViewport(0,0,pRenderer->GetWidth(),pRenderer->GetHeight());
 		GetFlashPlayer()->SetBackgroundAlpha(0.0f);
 		return true;
 	}

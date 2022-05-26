@@ -313,8 +313,6 @@ void CVehicleMovementBase::Reset()
     m_pWind[0] = m_pWind[1] = 0;
   }
 
-  //InitWind();
-    
 	m_movementAction.Clear();
   m_movementAction.brake = true;  
   m_bMovementProcessingEnabled = true;
@@ -519,11 +517,6 @@ void CVehicleMovementBase::UpdateRunSound(const float deltaTime)
 
 	if (pEngineSound)
 		radius = MAX(radius, pEngineSound->GetMaxDistance());
-
-// not needed... ambient sound is much quieter than the engine sound; code is here for reference
-//	ISound* pAmbientSound = GetSound(eSID_Ambience);
-//	if (pAmbientSound)
-//		radius = std::max(radius, pAmbientSound->GetMaxDistance());
 	
 	if (IActor * pActor = g_pGame->GetIGameFramework()->GetClientActor())
 	{
@@ -543,8 +536,6 @@ void CVehicleMovementBase::UpdateRunSound(const float deltaTime)
     if (ISound* pSound = GetOrPlaySound(eSID_Damage, 5.f, m_enginePos))
       SetSoundParam(pSound, "damage", damage);    
   }
-
-  //SetSoundParam(eSID_Run, "boost", Boosting() ? 1.f : 0.f);
 
   if (m_rpmPitchSpeed>0.f)
   {
@@ -650,11 +641,11 @@ void CVehicleMovementBase::OnSoundEvent(ESoundCallbackEvent event,ISound *pSound
 //------------------------------------------------------------------------
 bool CVehicleMovementBase::StartEngine(EntityId driverId)
 {  
- if (m_isEngineDisabled || m_isEngineStarting)
-    return false;
- 
- if (/*m_damage >= 1.0f || */ m_pVehicle->IsDestroyed())
-   return false;
+    if (m_isEngineDisabled || m_isEngineStarting)
+        return false;
+
+    if (m_pVehicle->IsDestroyed())
+        return false;
 
 	m_actorId = driverId;
 
@@ -804,49 +795,6 @@ void CVehicleMovementBase::OnAction(const TVehicleActionId actionId, int activat
     else if (activationMode == eAAM_OnRelease)
       Boost(false);   
   }
-
-	if(g_pGameCVars->goc_enable)
-	{
-/*
-		Matrix34 camMat = gEnv->pRenderer->GetCamera().GetMatrix();
-		Vec3 viewDir = gEnv->pRenderer->GetCamera().GetViewdir();
-		Matrix34 vehicleMat = m_pVehicle->GetEntity()->GetWorldTM();
-		Vec3 vehicleDir = vehicleMat.GetColumn1();
-		float s = 1.0f;
-		if (vehicleDir.Dot(camMat.GetColumn0())>0.0f)
-			s = -1.0f;
-
-		s*=m_movementAction.power;
-
-		// get angle difference
-		viewDir.z = 0;
-		viewDir.Normalize();
-		vehicleDir.z = 0;
-		vehicleDir.Normalize();
-		float amount = viewDir.Dot(vehicleDir);
-
-		float minAngle = 0.9999f;
-		float maxAngle = 0.0f;
-
-		if (amount > minAngle)
-		{
-			m_movementAction.rotateYaw = 0.0f;
-		}
-		else
-		{
-			if (amount > maxAngle)
-			{
-				// soft range
-				float scale = 1.0f - (amount - maxAngle)/(minAngle - maxAngle);
-				m_movementAction.rotateYaw = s * scale;
-			}
-			else
-			{
-				m_movementAction.rotateYaw = s;
-			}
-		}
-*/
-	}
 }
 
 //------------------------------------------------------------------------
@@ -864,7 +812,7 @@ void CVehicleMovementBase::Boost(bool enable)
   
   if (enable)
   {
-    if (m_boostCounter < 0.25f || m_movementAction.power < -0.001f /*|| m_damage == 1.f*/)
+    if (m_boostCounter < 0.25f || m_movementAction.power < -0.001f)
       return;
 
     if ((m_statusDyn.submergedFraction > 0.75f) && (GetMovementType()!=IVehicleMovement::eVMT_Amphibious))
@@ -886,7 +834,7 @@ void CVehicleMovementBase::Boost(bool enable)
 
 	// NB: m_pPaParams *can* be null here (amphibious apc has two VehicleMovement objects and one isn't
 	//	initialised fully the first time we get here)
-  if(m_pPaParams)
+    if(m_pPaParams)
 	{
 		const char* boostEffect = m_pPaParams->GetExhaustParams()->GetBoostEffect();  
 		if (IParticleEffect* pBoostEffect = gEnv->p3DEngine->FindParticleEffect(boostEffect))
@@ -1045,7 +993,7 @@ void CVehicleMovementBase::OnEvent(EVehicleMovementEvent event, const SVehicleMo
 	}
 	else if (event == eVME_WarmUpEngine)
 	{
-		if (/*m_damage == 1.f || */m_pVehicle->IsDestroyed())
+		if (m_pVehicle->IsDestroyed())
 			return;
 
 		StopSound(eSID_Start);
@@ -1173,7 +1121,7 @@ void CVehicleMovementBase::SetSoundMasterVolume(float vol)
 }
 
 //------------------------------------------------------------------------
-void CVehicleMovementBase::StartExhaust(bool ignition/*=true*/, bool reload/*=true*/)
+void CVehicleMovementBase::StartExhaust(bool ignition, bool reload)
 { 
 	if(!m_pPaParams)
 		return;
@@ -1226,7 +1174,6 @@ void CVehicleMovementBase::FreeEmitterSlot(int& slot)
 {
   if (slot > -1)
   {
-    //CryLogAlways("[VehicleMovement]: Freeing slot %i", slot);
     m_pEntity->FreeSlot(slot);
     slot = -1;
   }
@@ -1259,7 +1206,7 @@ void CVehicleMovementBase::StopExhaust()
   }
 
   // trigger stop effect if available
-  if (0 != exParams->GetStopEffect()[0] && !m_pVehicle->IsDestroyed() /*&& m_damage < 1.f*/)
+  if (0 != exParams->GetStopEffect()[0] && !m_pVehicle->IsDestroyed())
   {
     IParticleEffect* pEff = gEnv->p3DEngine->FindParticleEffect(exParams->GetStopEffect());
     if (pEff)    
@@ -1270,7 +1217,6 @@ void CVehicleMovementBase::StopExhaust()
         {          
           it->startStopSlot = m_pEntity->LoadParticleEmitter(it->startStopSlot, pEff);
           m_pEntity->SetSlotLocalTM(it->startStopSlot, it->pHelper->GetVehicleTM());                  
-          //CryLogAlways("[VehicleMovement::StopExhaust]: Loaded to slot %i..", it->startStopSlot);
         }
       }
     }
@@ -1298,7 +1244,6 @@ void CVehicleMovementBase::ResetParticles()
 		SEnvParticleStatus::TEnvEmitters::iterator end = m_paStats.envStats.emitters.end();
 		for (SEnvParticleStatus::TEnvEmitters::iterator it=m_paStats.envStats.emitters.begin(); it!=end; ++it)
 		{
-			//FreeEmitterSlot(it->slot);
 			if (it->group >= 0)
 			{
 				const SEnvironmentLayer& layer = pEnvParams->GetLayer(it->layer);
@@ -1306,9 +1251,6 @@ void CVehicleMovementBase::ResetParticles()
 			} 
 		}
 	}
-
-  //m_paStats.envStats.emitters.clear();
-  //m_paStats.envStats.initalized = false;
 }
 
 //------------------------------------------------------------------------
@@ -1444,7 +1386,6 @@ float CVehicleMovementBase::GetWaterMod(SExhaustStatus& exStatus)
 {  
   // check water flag
 	Vec3 vPos = exStatus.pHelper->GetWorldTM().GetTranslation();
-  //bool inWater = gEnv->p3DEngine->GetWaterLevel( &vPos ) > vPos.z;
 	const SVehicleStatus& status = m_pVehicle->GetStatus();
 	bool inWater = status.submergedRatio > 0.05f;
   if ((inWater && !m_pPaParams->GetExhaustParams()->insideWater) || (!inWater && !m_pPaParams->GetExhaustParams()->outsideWater))
@@ -1532,7 +1473,6 @@ float CVehicleMovementBase::GetSurfaceSoundParam(int matId)
       TSurfaceSoundInfo::const_iterator it=m_surfaceSoundInfo.find(CONST_TEMP_STRING(soundType));
       if (it != m_surfaceSoundInfo.end())
       {
-        // param = index/10
         return 0.1f * it->second.paramIndex;
       }
     }    
@@ -1702,45 +1642,7 @@ void CVehicleMovementBase::UpdateSurfaceEffects(const float deltaTime)
 //------------------------------------------------------------------------
 void CVehicleMovementBase::InitWind()
 { 
-  // disabled for now
-  return;
-
-  if(!GenerateWind())
     return;
-
-  if (!m_pWind[0])
-  {
-    AABB bounds;
-    m_pEntity->GetLocalBounds(bounds);
-
-    primitives::box geomBox;
-    geomBox.Basis.SetIdentity();    
-    geomBox.bOriented = 0;    
-    geomBox.size = bounds.GetSize(); // doubles size of entity bbox    
-    geomBox.size.x *= 0.75f;
-    geomBox.size.y = max(min(3.f, 0.5f*geomBox.size.y), 5.f);
-    geomBox.size.z *= 0.75f;
-    //geomBox.center.Set(0, -0.75f*geomBox.size.y, 0); // offset center to front
-    geomBox.center.Set(0,0,0);
-
-    IGeometry *pGeom1 = gEnv->pPhysicalWorld->GetGeomManager()->CreatePrimitive( primitives::box::type, &geomBox );    
-    if (pGeom1)    
-      m_pWind[0] = gEnv->pPhysicalWorld->AddArea( pGeom1, m_pEntity->GetWorldPos(), m_pEntity->GetRotation(), 1.f);
-
-    IGeometry *pGeom2 = gEnv->pPhysicalWorld->GetGeomManager()->CreatePrimitive( primitives::box::type, &geomBox );    
-    if (pGeom2)    
-      m_pWind[1] = gEnv->pPhysicalWorld->AddArea( pGeom2, m_pEntity->GetWorldPos(), m_pEntity->GetRotation(), 1.f);    
-  }
-
-  if (m_pWind[0])    
-  {
-    pe_params_area area;
-    area.bUniform = 0;
-    //area.falloff0 = 0.8f;    
-    m_pWind[0]->SetParams(&area);
-
-    SetWind(Vec3(ZERO));  
-  }
 }
 
 //------------------------------------------------------------------------
@@ -1828,7 +1730,6 @@ void CVehicleMovementBase::SetWind(const Vec3& wind)
 
   // radial wind
   buoy.waterFlow.Set(0,0,-radial);    
-  //ClampWind(buoy.waterFlow);
   m_pWind[0]->SetParams(&buoy); 
   
   // linear wind  
@@ -1889,8 +1790,6 @@ void CVehicleMovementBase::SetSoundParam(ISound* pSound, const char* param, floa
 //------------------------------------------------------------------------
 void CVehicleMovementBase::Serialize(TSerialize ser, unsigned aspects)
 {
-	// SVehicleMovementAction m_movementAction;
-
 	if (ser.GetSerializationTarget() != eST_Network)
 	{
     ser.BeginGroup("MovementBase");

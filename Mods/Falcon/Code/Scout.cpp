@@ -26,18 +26,14 @@
 class CScoutBeam : public CBaseGrabHandler
 {
 public:
-
 	typedef std::vector<IGrabHandler *> TScoutBeams;
 	
 public:
-
 	CScoutBeam(CActor *pActor);
 	~CScoutBeam();
 
-	//
 	virtual bool SetGrab(SmartScriptTable &rParams);
-	
-	//
+
 	ILINE static int BeamNumByObject(EntityId grabId)
 	{
 		int num(0);
@@ -49,21 +45,15 @@ public:
 	}
 		
 protected:
-
 	virtual void UpdatePosVelRot(float frameTime);
 
 public:
-
 	char m_beamBone[128];
 
 protected:
-
 	float m_followDelay;
 	float m_followDelayMax;
-
 	float m_criticalDistance;
-
-	//
 	static TScoutBeams s_scoutBeams;
 };
 
@@ -123,8 +113,6 @@ bool CScout::EnableSearchBeam(bool enable)
 
 IGrabHandler *CScout::CreateGrabHanlder()
 {
-//	m_pGrabHandler = new CScoutBeam(this);
-//	m_pGrabHandler = new CAnimatedGrabHandler(this);
 	m_pGrabHandler = new CMultipleGrabHandler(this);
 	return m_pGrabHandler;
 }
@@ -215,55 +203,49 @@ void CScout::ProcessRotation(float frameTime)
 	//6 degree of freedom
 	//FIXME:put mouse sensitivity here!
 	//TODO:use radians
-	float rotSpeed(0.3f);
+	float rotSpeed(0.3f);		
 
-//	if (m_stats.inAir && IsZeroG())
-	{		
+	// Mikko: Separated the look and movement directions. This is a workaround! The reason is below (moved from the SetActorMovement):
+	// >> Danny - old code had desired direction using vLookDir but this caused spinning behaviour
+	// >> when it was significantly different to vMoveDir
 
-		// Mikko: Separated the look and movement directions. This is a workaround! The reason is below (moved from the SetActorMovement):
-		// >> Danny - old code had desired direction using vLookDir but this caused spinning behaviour
-		// >> when it was significantly different to vMoveDir
+	if (m_input.viewVector.len2()>0.0f)
+	{
+		m_eyeMtx.SetRotationVDir(m_input.viewVector.GetNormalizedSafe());
+	}
 
-		if (m_input.viewVector.len2()>0.0f)
-		{
-			m_eyeMtx.SetRotationVDir(m_input.viewVector.GetNormalizedSafe());
-		}
-
-		if (m_input.viewVector.len2()>0.0f)
-		{
-			m_viewMtx.SetRotationVDir(m_input.viewVector.GetNormalizedSafe());
-		}
-		else
-		{
-			Ang3 desiredAngVel(m_input.deltaRotation.x * rotSpeed,0,m_input.deltaRotation.z * rotSpeed);
+	if (m_input.viewVector.len2()>0.0f)
+	{
+		m_viewMtx.SetRotationVDir(m_input.viewVector.GetNormalizedSafe());
+	}
+	else
+	{
+		Ang3 desiredAngVel(m_input.deltaRotation.x * rotSpeed,0,m_input.deltaRotation.z * rotSpeed);
 					
-			//rollage
-			if (m_input.actions & ACTION_LEANLEFT)
-				desiredAngVel.y -= 10.0f * rotSpeed;
-			if (m_input.actions & ACTION_LEANRIGHT)
-				desiredAngVel.y += 10.0f * rotSpeed;
+		//rollage
+		if (m_input.actions & ACTION_LEANLEFT)
+			desiredAngVel.y -= 10.0f * rotSpeed;
+		if (m_input.actions & ACTION_LEANRIGHT)
+			desiredAngVel.y += 10.0f * rotSpeed;
 
-			Interpolate(m_angularVel,desiredAngVel,3.5f,frameTime);
+		Interpolate(m_angularVel,desiredAngVel,3.5f,frameTime);
 
-			Matrix33 yawMtx;
-			Matrix33 pitchMtx;
-			Matrix33 rollMtx;
+		Matrix33 yawMtx;
+		Matrix33 pitchMtx;
+		Matrix33 rollMtx;
 
-			//yaw
-			yawMtx.SetRotationZ(m_angularVel.z * gf_PI/180.0f);
-			//pitch
-			pitchMtx.SetRotationX(m_angularVel.x * gf_PI/180.0f);
-			//roll
-			if (fabs(m_angularVel.y) > 0.001f)
-				rollMtx.SetRotationY(m_angularVel.y * gf_PI/180.0f);
-			else
-				rollMtx.SetIdentity();
-			//
-			
-			m_viewMtx = m_viewMtx * yawMtx * pitchMtx * rollMtx;
-			m_viewMtx.OrthonormalizeFast();
+		//yaw
+		yawMtx.SetRotationZ(m_angularVel.z * gf_PI/180.0f);
+		//pitch
+		pitchMtx.SetRotationX(m_angularVel.x * gf_PI/180.0f);
+		//roll
+		if (fabs(m_angularVel.y) > 0.001f)
+			rollMtx.SetRotationY(m_angularVel.y * gf_PI/180.0f);
+		else
+			rollMtx.SetIdentity();
 
-		}
+		m_viewMtx = m_viewMtx * yawMtx * pitchMtx * rollMtx;
+		m_viewMtx.OrthonormalizeFast();
 	}
 }
 void CScout::ProcessMovementNew(float frameTime)
@@ -399,10 +381,7 @@ void CScout::ProcessMovement(float frameTime)
 	if (m_stats.sprintLeft)
 		move *= m_params.sprintMultiplier;
 
-  //if (m_input.posTarget.len2()>0.0f)
- 	  m_desiredVelocity = move;
-  //else
-  //  Interpolate(m_desiredVelocity,move,3.0f,frameTime);
+ 	m_desiredVelocity = move;
 
 	Matrix33 velMtx;
 	Vec3 vecRefRoll;
@@ -434,13 +413,9 @@ void CScout::ProcessMovement(float frameTime)
 	m_desiredVeloctyQuat = GetQuatFromMat33(velMtx);
 
 	//rollage
-	if (m_input.upTarget.len2()>0.0f)
+	if (m_input.upTarget.len2()<=0.0f)
 	{
-		// No rollage, when the up vector is forced!
-	}
-	else
-	{
-		float	rollAmt = 0.0f;
+		float rollAmt = 0.0f;
 		float dotRoll(vecRefRoll * m_baseMtx.GetColumn(0));
 		if (fabs(dotRoll)>0.001f)
 			rollAmt = max(min(gf_PI*0.30f,dotRoll*m_params.rollAmount),-gf_PI*0.30f);
@@ -475,26 +450,13 @@ void CScout::ProcessMovement(float frameTime)
 	if (m_params.idealSpeed > -0.001f)
 		desiredVelMod = min(desiredVelMod,m_params.idealSpeed);
 
-	/*Vec3 desiredVel;
-	//a bit workaround: needed when the alien is forced to move in some position
-	if (m_input.posTarget.len2()>0.0f)
-		desiredVel = m_desiredVelocity;
-	else
-		desiredVel = m_baseMtx.GetColumn(1)*desiredVelMod;
-	
-  // make sure alien reaches destination, ignore speedInertia
-  if (m_input.posTarget.len2()>0.0f)
-    m_velocity = desiredVel;
-  else
-	  Interpolate(m_velocity,desiredVel,m_params.speedInertia,frameTime);*/
-
 	Interpolate(m_velocity,m_desiredVelocity,m_params.speedInertia,frameTime);
 
 	Quat modelRot(m_baseMtx);
-	modelRot = Quat::CreateSlerp(GetEntity()->GetRotation().GetNormalized(), modelRot, min(frameTime * 6.6f/*m_turnSpeed*/ /** (m_stats.speed/GetStanceInfo(m_stance)->maxSpeed)*/, 1.0f));
+	modelRot = Quat::CreateSlerp(GetEntity()->GetRotation().GetNormalized(), modelRot, min(frameTime * 6.6f, 1.0f));
 
 	m_moveRequest.rotation = GetEntity()->GetRotation().GetInverted() * modelRot;
-  m_moveRequest.rotation.Normalize();
+	m_moveRequest.rotation.Normalize();
 	m_moveRequest.velocity = m_velocity;
 	m_moveRequest.type = eCMT_Fly;
 
@@ -510,7 +472,6 @@ void CScout::ProcessMovement(float frameTime)
 		if (dist2ToClient<maxRange)
 		{
 			IView *pView = g_pGame->GetIGameFramework()->GetIViewSystem()->GetViewByEntityId(pClient->GetEntityId());
-			//IView *pViewActive = g_pGame->GetIGameFramework()->GetIViewSystem()->GetActiveView();
 			if (pView)
 			{
 				float shake = min(m_stats.speed*0.0015f,0.05f);
@@ -521,7 +482,6 @@ void CScout::ProcessMovement(float frameTime)
 	}
 }
 
-//
 CScoutBeam::TScoutBeams CScoutBeam::s_scoutBeams;
 
 CScoutBeam::CScoutBeam(CActor *pActor) : CBaseGrabHandler(pActor), 
@@ -578,7 +538,7 @@ void CScoutBeam::UpdatePosVelRot(float frameTime)
 		IEntity *pEnt = m_pActor->GetEntity();
 
 		Vec3 grabWPos(pEnt->GetSlotWorldTM(0) * m_grabStats.lHoldPos);
-		Quat grabWQuat(pEnt->GetRotation());// * m_grabStats.additionalRotation);
+		Quat grabWQuat(pEnt->GetRotation());
 
 		int grabbersNum(1);
 		//FIXME:its not very efficient to check all the scout beams, but for the current case there is no real need to optimize this.
@@ -591,7 +551,7 @@ void CScoutBeam::UpdatePosVelRot(float frameTime)
 					IEntity *pBEnt = pBeam->GetOwner()->GetEntity();
 					
 					grabWPos = (grabWPos + pBEnt->GetSlotWorldTM(0) * pBeam->GetStats()->lHoldPos) * 0.5f;
-					grabWQuat = Quat::CreateSlerp( grabWQuat, pBEnt->GetRotation()/* * pBeam->GetStats()->additionalRotation*/, 0.5f );
+					grabWQuat = Quat::CreateSlerp( grabWQuat, pBEnt->GetRotation(), 0.5f );
 
 					++grabbersNum;
 				}
@@ -637,12 +597,6 @@ void CScoutBeam::UpdatePosVelRot(float frameTime)
 				else
 				{
 					asv.v = (grabWPos - grabCenter) * (m_grabStats.followSpeed * followRatio);
-
-					//Vec3 delta(grabWPos - grabCenter);
-					//float deltaLen(delta.len());
-					//asv.v = delta.GetNormalizedSafe(ZERO)*min(deltaLen,5.0f)*m_grabStats.followSpeed;
-
-					//asv.v = dyn.v + (grabWPos - grabCenter)*m_grabStats.followSpeed;
 				}
 
 				asv.w.Set(0,0,0);
@@ -732,9 +686,6 @@ void CScout::SetActorMovement(SMovementRequestParams &control)
 void CScout::FullSerialize(TSerialize ser)
 {
 	CAlien::FullSerialize(ser);
-
-//	ser.BeginGroup("CScout");
-//	ser.EndGroup();
 }
 
 void CScout::AnimationEvent(ICharacterInstance *pCharacter, const AnimEventInstance &event)

@@ -224,7 +224,7 @@ bool CSingleTG::IsValidAutoAimTarget(IEntity* pEntity, int partId)
 }
 
 //--------------------------------------------------
-void CSingleTG::StartLocking(EntityId targetId, int partId /*= 0*/)
+void CSingleTG::StartLocking(EntityId targetId, int partId)
 {
 	// start locking
 	IEntity* pEntity = gEnv->pEntitySystem->GetEntity(targetId);
@@ -254,7 +254,7 @@ void CSingleTG::Unlock()
 }
 
 //--------------------------------------------------
-void CSingleTG::Lock(EntityId targetId, int partId /*= 0*/)
+void CSingleTG::Lock(EntityId targetId, int partId)
 {
 	IEntity* pEntity = gEnv->pEntitySystem->GetEntity(targetId);
 	if(!pEntity)

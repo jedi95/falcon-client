@@ -165,7 +165,6 @@ public:
 	CGameActions&	Actions() const {	return *m_pGameActions;	};
 
 	CGameRules *GetGameRules() const;
-	CBulletTime *GetBulletTime() const;
 	CSoundMoods *GetSoundMoods() const;
 	CHUD *GetHUD() const;
 	CFlashMenuObject *GetMenu() const;
@@ -216,16 +215,13 @@ protected:
 
 	static void CmdLastInv(IConsoleCmdArgs *pArgs);
 	static void CmdTeam(IConsoleCmdArgs *pArgs);
-	static void CmdLoadLastSave(IConsoleCmdArgs *pArgs);
 	static void CmdSpectator(IConsoleCmdArgs *pArgs);
 	static void CmdJoinGame(IConsoleCmdArgs *pArgs);
 	static void CmdKill(IConsoleCmdArgs *pArgs);
-  static void CmdVehicleKill(IConsoleCmdArgs *pArgs);
 	static void CmdRestart(IConsoleCmdArgs *pArgs);
 	static void CmdSay(IConsoleCmdArgs *pArgs);
 	static void CmdReloadItems(IConsoleCmdArgs *pArgs);
 	static void CmdLoadActionmap(IConsoleCmdArgs *pArgs);
-  static void CmdReloadGameRules(IConsoleCmdArgs *pArgs);
   static void CmdNextLevel(IConsoleCmdArgs* pArgs);
 
   static void CmdQuickGame(IConsoleCmdArgs* pArgs);
@@ -282,7 +278,6 @@ protected:
 	string                 m_lastSaveGame;
 	string								 m_newSaveGame;
 
-	CBulletTime						*m_pBulletTime;
 	CSoundMoods						*m_pSoundMoods;
 
 	typedef std::map<string, string, stl::less_stricmp<string> > TLevelMapMap;

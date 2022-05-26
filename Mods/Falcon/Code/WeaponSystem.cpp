@@ -28,7 +28,6 @@ History:
 #include "TagBullet.h"
 #include "AVMine.h"
 #include "Claymore.h"
-//#include "EMPField.h"
 #include "C4Projectile.h"
 #include "Expansion/Weapons/RemoteGrenade.h"
 
@@ -110,13 +109,12 @@ CWeaponSystem::CWeaponSystem(CGame *pGame, ISystem *pSystem)
 	REGISTER_PROJECTILE(Bullet, CBullet);
 	REGISTER_PROJECTILE(Rock, CRock);
 	REGISTER_PROJECTILE(Rocket, CRocket);
-  REGISTER_PROJECTILE(HomingMissile, CHomingMissile);
+	REGISTER_PROJECTILE(HomingMissile, CHomingMissile);
 	REGISTER_PROJECTILE(TacBullet, CTacBullet);
 	REGISTER_PROJECTILE(TagBullet, CTagBullet);
 	REGISTER_PROJECTILE(AVExplosive, CAVMine);
 	REGISTER_PROJECTILE(ClaymoreExplosive, CClaymore);
 	REGISTER_PROJECTILE(RemoteGrenade, CRemoteGrenade);	// FGL40 grenade launcher remote detonated grenades
-	//REGISTER_PROJECTILE(EMPField, CEMPField);
 	REGISTER_PROJECTILE(C4Projectile, CC4Projectile); 
 
 	//Expansion
@@ -217,33 +215,28 @@ void CWeaponSystem::OnLoadingStart(ILevelInfo *pLevel)
 //------------------------------------------------------------------------
 void CWeaponSystem::OnLoadingComplete(ILevel *pLevel)
 {
-	// marcio: precaching of items enabled by default for now
-//	ICVar *sys_preload=m_pSystem->GetIConsole()->GetCVar("sys_preload");
-//	if ((!sys_preload || sys_preload->GetIVal()) && m_pPrecache->GetIVal())
+	for (TAmmoTypeParams::iterator it=m_ammoparams.begin(); it!=m_ammoparams.end(); ++it)
 	{
-		for (TAmmoTypeParams::iterator it=m_ammoparams.begin(); it!=m_ammoparams.end(); ++it)
+		const SAmmoParams *pParams=GetAmmoParams(it->first);
+		const IItemParamsNode *params = pParams->pItemParams;
+		const IItemParamsNode *geometry = params?params->GetChild("geometry"):0;
+
+		m_pItemSystem->CacheGeometry(geometry);
+
+		// Preload particle assets.
+		for (int ch = params->GetChildCount()-1; ch >= 0; ch--)
 		{
-			const SAmmoParams *pParams=GetAmmoParams(it->first);
-			const IItemParamsNode *params = pParams->pItemParams;
-			const IItemParamsNode *geometry = params?params->GetChild("geometry"):0;
-
-			m_pItemSystem->CacheGeometry(geometry);
-
-			// Preload particle assets.
-			for (int ch = params->GetChildCount()-1; ch >= 0; ch--)
+			const IItemParamsNode *child = params->GetChild(ch);
+			if (child)
 			{
-				const IItemParamsNode *child = params->GetChild(ch);
-				if (child)
-				{
-					CItemParamReader reader(child);
-					const char *effect = 0;
-					reader.Read("effect", effect);
-					if (effect && *effect)
-						gEnv->p3DEngine->FindParticleEffect(effect, "WeaponSystem");
-				}
+				CItemParamReader reader(child);
+				const char *effect = 0;
+				reader.Read("effect", effect);
+				if (effect && *effect)
+					gEnv->p3DEngine->FindParticleEffect(effect, "WeaponSystem");
 			}
 		}
-	}	
+	}
 
 	if(!m_tokensUpdated)
 	{
@@ -252,7 +245,6 @@ void CWeaponSystem::OnLoadingComplete(ILevel *pLevel)
 		CreateEnvironmentGameTokens(m_frozenEnvironment,m_wetEnvironment); //Do not force set/creation if exit
 	}
 	m_tokensUpdated = false;
-	
 }
 
 //------------------------------------------------------------------------
@@ -514,8 +506,6 @@ bool CWeaponSystem::ScanXML(XmlNodeRef &root, const char *xmlFile)
 	IEntityClassRegistry::SEntityClassDesc classDesc;
 	classDesc.sName = name;
 	classDesc.sScriptFile = scriptName?scriptName:"";
-	//classDesc.pUserProxyData = (void *)it->second;
-	//classDesc.pUserProxyCreateFunc = &CreateProxy<CProjectile>;
 	classDesc.flags |= ECLF_INVISIBLE;
 
 	IEntityClass* pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(name);

@@ -90,37 +90,6 @@ void CWeapon::ForcePendingActions()
 	if(!pOwner || !pOwner->IsClient())
 		return;
 
-	//Force start firing, if needed and possible
-	/*if(m_requestedFire)
-	{
-		if(!IsDualWield() && !IsWeaponRaised())
-		{
-			m_requestedFire = false;
-			if(IsTargetOn() || (m_fm && !m_fm->AllowZoom()))
-				return;
-			
-			OnAction(GetOwnerId(),"attack1",eAAM_OnPress,0.0f);
-		}
-		else if(IsDualWield() && IsDualWieldMaster())
-		{
-			IItem *slave = GetDualWieldSlave();
-			if(!IsWeaponRaised())
-			{
-				m_requestedFire = false;
-				OnAction(GetOwnerId(),"attack1",eAAM_OnPress,0.0f);
-			}
-			else if(slave && slave->GetIWeapon())
-			{
-				CWeapon* dualwield = static_cast<CWeapon*>(slave);
-				if(!dualwield->IsWeaponRaised())
-				{
-					m_requestedFire = false;
-					OnAction(GetOwnerId(),"attack1",eAAM_OnPress,0.0f);
-				}
-			}
-		}
-	}*/
-
 	// EXP 1: Rewritten dual wield handling
 	if(m_requestedFire && !IsWeaponRaised())
 	{
@@ -143,28 +112,24 @@ bool CWeapon::PreActionAttack(bool startFire)
 	if(!pPlayer)
 		return false;
 
-	//if(gEnv->bMultiplayer)
+	if(startFire && pPlayer->IsSprinting())
 	{
-		if(startFire && pPlayer->IsSprinting())
+		//Stop sprinting, start firing
+		SPlayerStats *pStats = static_cast<SPlayerStats*>(pPlayer->GetActorStats());
+		if(pStats)
 		{
-			//Stop sprinting, start firing
-			SPlayerStats *pStats = static_cast<SPlayerStats*>(pPlayer->GetActorStats());
-			if(pStats)
-			{
-				pStats->bSprinting = false;
-				pStats->bIgnoreSprinting = true;
-			}
-		}
-		else if(!startFire)
-		{
-			//Stop firing, continue sprinting
-			SPlayerStats *pStats = static_cast<SPlayerStats*>(pPlayer->GetActorStats());
-			if(pStats)
-				pStats->bIgnoreSprinting = false;
-
+			pStats->bSprinting = false;
+			pStats->bIgnoreSprinting = true;
 		}
 	}
+	else if(!startFire)
+	{
+		//Stop firing, continue sprinting
+		SPlayerStats *pStats = static_cast<SPlayerStats*>(pPlayer->GetActorStats());
+		if(pStats)
+			pStats->bIgnoreSprinting = false;
 
+	}
 	return false;
 }
 
@@ -186,47 +151,12 @@ bool CWeapon::OnActionAttack(EntityId actorId, const ActionId& actionId, int act
 
 		if (activationMode == eAAM_OnPress)
 		{
-
 			if(PreActionAttack(true))
 				return true;
 
 			bool isDualWield = false;
 			CWeapon *dualWield = NULL;
 			GetDualWieldInfo(this,isDualWield,&dualWield);
-
-			// EXPANSION: Dino has rewritten dual wield control!
-			/*if (isDualWield)
-			{
-				m_fire_alternation = !m_fire_alternation;
-				m_requestedFire = true;
-
-				if (!m_fire_alternation && dualWield->OutOfAmmo(false) && dualWield->CanReload())
-				{
-					dualWield->Reload();
-					return true;
-				}
-				else if(m_fire_alternation && OutOfAmmo(false) && CanReload())
-				{
-					Reload();
-					return true;
-				}
-
-				if (m_fire_alternation || (!dualWield->CanFire() || !dualWield->IsSelected()))
-				{
-					if(!IsWeaponRaised() && CanFire())
-						StartFire();
-					else if(!dualWield->IsWeaponRaised() && dualWield->IsSelected())
-						dualWield->StartFire();
-				}
-				else if (dualWield->CanFire())
-				{
-					if(!dualWield->IsWeaponRaised() && dualWield->CanFire())
-						dualWield->StartFire();
-					else if(!IsWeaponRaised())
-						StartFire();
-				}
-			}*/
-			// /EXPANSION
 		
 			if (isDualWield)
 			{
@@ -235,14 +165,10 @@ bool CWeapon::OnActionAttack(EntityId actorId, const ActionId& actionId, int act
 
 				m_fire_alternation = false;
 								
-				if (!dualWield->IsWeaponRaised())// && dualWield->CanFire())
+				if (!dualWield->IsWeaponRaised())
 				{
 					dualWield->StartFire();
 				}
-			/*	else if(dualWield->OutOfAmmo(false) && !dualWield->IsReloading())
-				{
-					dualWield->Reload();
-				}*/
 
 				dualWield->m_requestedFire = true;
 			}
@@ -261,10 +187,9 @@ bool CWeapon::OnActionAttack(EntityId actorId, const ActionId& actionId, int act
 			PreActionAttack(false);
 
 			// EXP 1: Don't stop both slave and master simultaneously!!!
-				//Stop slave
+			//Stop slave
 			if(IsDualWieldMaster())
 			{
-				//FireSlave(actorId,false);
 				CWeapon *dualWield = NULL;
 				IItem *slave = GetDualWieldSlave();
 
@@ -283,8 +208,6 @@ bool CWeapon::OnActionAttack(EntityId actorId, const ActionId& actionId, int act
 				m_fm->StopFire();
 				m_requestedFire = false;
 			}
-			// StopFire();
-			// /EXP 1
 		}
 	}
 
@@ -293,10 +216,6 @@ bool CWeapon::OnActionAttack(EntityId actorId, const ActionId& actionId, int act
 
 bool CWeapon::OnActionAttackSecondary(EntityId actorId, const ActionId& actionId, int activationMode, float value)
 {
-
-
-
-
 	if(!m_modifying)
 	{
 		bool isDualWield = false;
@@ -316,13 +235,10 @@ bool CWeapon::OnActionAttackSecondary(EntityId actorId, const ActionId& actionId
 				{
 					m_fire_alternation = false;
 					
-					if(!IsWeaponRaised())// && CanFire())
+					if(!IsWeaponRaised())
 					{
 						StartFire();
 					}
-					/*else if(OutOfAmmo(false))
-						Reload();*/
-
 					m_requestedFire = true;
 				}
 			}
@@ -333,7 +249,6 @@ bool CWeapon::OnActionAttackSecondary(EntityId actorId, const ActionId& actionId
 				// Don't stop slave!!!
 				if (m_fm)
 					m_fm->StopFire();
-				//StopFire(actorId);
 				m_requestedFire = false;
 			}
 		}
@@ -342,10 +257,6 @@ bool CWeapon::OnActionAttackSecondary(EntityId actorId, const ActionId& actionId
 			m_fm->StartSecondaryFire(actorId);
 		}
 	}
-
-
-
-
 	return true;
 }
 

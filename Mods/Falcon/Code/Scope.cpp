@@ -37,7 +37,6 @@ void CScope::Update(float frameTime, uint frameId)
 		if (m_showTimer<=0.0f)
 		{
 			m_showTimer=-1.0f;
-			//m_pWeapon->Hide(false);
 			m_pWeapon->SendMusicLogicEvent(eMUSICLOGICEVENT_SNIPERMODE_LEAVE);
 			m_pWeapon->OnZoomOut();
 		}
@@ -53,7 +52,6 @@ void CScope::Update(float frameTime, uint frameId)
 			if(m_pWeapon->GetOwnerActor() && m_pWeapon->GetOwnerActor()->IsClient())
 			{
 				m_hideTimer=-1.0f;
-				//m_pWeapon->Hide(true);
 				m_pWeapon->OnZoomIn();
 				int iZoom = 0;
 				if(!strcmp(m_scopeparams.scope.c_str(),"scope_assault"))

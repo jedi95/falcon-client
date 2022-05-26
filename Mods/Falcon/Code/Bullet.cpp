@@ -154,14 +154,6 @@ void CBullet::HandleEvent(const SGameObjectEvent &event)
 			if ((pCollision->idmat[1] == CBullet::m_waterMaterialId) && 
 					(pCollision->pEntity[1]!=gEnv->pPhysicalWorld->AddGlobalArea() || !gEnv->p3DEngine->GetVisAreaFromPos(pos)))
 			{
-				//Reduce drastically bullet velocity (to be able to see the trail effect)
-				//pe_params_particle pparams;
-				//if(m_pPhysicalEntity->GetParams(&pparams)==0)
-					//SetDefaultParticleParams(&pparams);
-				//pparams.velocity = 25.0f;
-
-				//m_pPhysicalEntity->SetParams(&pparams);
-
 				if(m_trailUnderWaterId<0)
 				{
 					//Check terrain/against water level
@@ -185,5 +177,3 @@ void CBullet::SetWaterMaterialId()
 {
 	m_waterMaterialId = gEnv->p3DEngine->GetMaterialManager()->GetSurfaceTypeManager()->GetSurfaceTypeByName("mat_water")->GetId();
 }
-
-

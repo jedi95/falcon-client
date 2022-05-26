@@ -43,7 +43,7 @@ History:
 #include "GameNetworkProfile.h"
 
 //both are defined again in FlashMenuObjectOptions
-static const char* scuiControlCodePrefix = "@cc_"; // "@cc_"; // AlexL 03/04/2007: enable this when keys/controls are fully localized
+static const char* scuiControlCodePrefix = "@cc_";
 static const size_t scuiControlCodePrefixLen = strlen(scuiControlCodePrefix);
 
 //-----------------------------------------------------------------------------------------------------
@@ -762,8 +762,6 @@ bool CFlashMenuObject::OnInputEventUI( const SInputEvent &rInputEvent )
 
 		if (m_pCurrentFlashMenuScreen && m_pCurrentFlashMenuScreen->GetFlashPlayer())
 		{
-			//if(eIS_Pressed == rInputEvent.state)
-			//	m_pCurrentFlashMenuScreen->CheckedInvoke("onPressedKey", rInputEvent.keyName.c_str());
 			m_pCurrentFlashMenuScreen->GetFlashPlayer()->SendKeyEvent(keyEvent);
 			keyEvent.m_state = SFlashKeyEvent::eKeyUp;
 			m_pCurrentFlashMenuScreen->GetFlashPlayer()->SendKeyEvent(keyEvent);
@@ -778,9 +776,6 @@ bool CFlashMenuObject::OnInputEventUI( const SInputEvent &rInputEvent )
 			keyEvent.m_state = SFlashKeyEvent::eKeyDown;
 		}
 	}
-
-	//AddInputChar( event.keyName[0] );
-
 	return false;
 }
 //-----------------------------------------------------------------------------------------------------
@@ -885,7 +880,7 @@ void CFlashMenuObject::OnLoadingStart(ILevelInfo *pLevel)
 	{
 		m_iMaxProgress = 100;
 	}
-	//DestroyStartMenu();
+
 	if(!m_apFlashMenuScreens[MENUSCREEN_FRONTENDLOADING]->IsLoaded())
 	{
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDLOADING]->Load("Libs/UI/Menus_Loading_MP.gfx");
@@ -1155,7 +1150,6 @@ void CFlashMenuObject::ShowInGameMenu(bool bShow)
 			m_bDestroyInGameMenuPending = false;
 			if(m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME])
 				m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->SetVisible(true);
-			//
 
 			InitIngameMenu();
 		}
@@ -1656,11 +1650,6 @@ void CFlashMenuObject::GetButtonClientPos(ButtonPosMap::iterator button, Vec2 &p
 	pos*=renderHeight/movieHeight;
 	pos.x+=offsetX;
 	pos.y+=offsetY;
-
-
-
-
-
 }
 
 //-----------------------------------------------------------------------------------------------------

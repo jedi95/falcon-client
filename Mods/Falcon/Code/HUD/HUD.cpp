@@ -1939,16 +1939,10 @@ bool CHUD::OnInputEvent(const SInputEvent &rInputEvent)
 			{
 				m_bStopCutsceneNextUpdate = true;
 				m_bCutsceneAbortPressed = false;
-#ifdef USER_alexl
-				CryLogAlways("[CX] Frame=%d Space released -> scheduling abort", gEnv->pRenderer->GetFrameID(false));
-#endif
 				return true;
 			}
 			else if (rInputEvent.state == eIS_Pressed)
 			{
-#ifdef USER_alexl
-				CryLogAlways("[CX] Frame=%d Space pressed", gEnv->pRenderer->GetFrameID(false));
-#endif
 				m_bCutsceneAbortPressed = true;
 				return true;
 			}

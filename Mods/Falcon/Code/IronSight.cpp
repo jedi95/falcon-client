@@ -15,7 +15,6 @@ History:
 #include "Player.h"
 #include "GameCVars.h"
 #include "Single.h"
-#include "BulletTime.h"
 #include "IPlayerInput.h"
 
 //------------------------------------------------------------------------
@@ -689,15 +688,6 @@ void CIronSight::OnEnterZoom()
 			gEnv->p3DEngine->SetPostEffectParam("FilterMaskedBlurring_Amount", m_zoomparams.blur_amount);
 			gEnv->p3DEngine->SetPostEffectParamString("FilterMaskedBlurring_MaskTexName", m_zoomparams.blur_mask);
 		}
-
-		if (pActor->GetActorClass() == CPlayer::GetActorClassType())
-		{
-			CPlayer* pPlayer = static_cast<CPlayer*>(pActor);
-			if (g_pGameCVars->bt_ironsight && (!g_pGameCVars->bt_speed || (pPlayer->GetNanoSuit() && (pPlayer->GetNanoSuit()->GetMode() == NANOMODE_SPEED))))
-			{
-				g_pGame->GetBulletTime()->Activate(true);
-			}
-		}
 	}
 	m_swayTime = 0.0f;
 }
@@ -984,15 +974,6 @@ void CIronSight::ClearDoF()
 	if (pActor && pActor->IsClient())
 	{
 		gEnv->p3DEngine->SetPostEffectParam("Dof_Active", 0.0f);
-
-		if (pActor->GetActorClass() == CPlayer::GetActorClassType())
-		{
-			CPlayer* pPlayer = static_cast<CPlayer*>(pActor);
-			if (g_pGameCVars->bt_ironsight && (!g_pGameCVars->bt_speed || (pPlayer->GetNanoSuit() && (pPlayer->GetNanoSuit()->GetMode() == NANOMODE_SPEED))))
-			{
-				g_pGame->GetBulletTime()->Activate(false);
-			}
-		}
 	}
 }
 

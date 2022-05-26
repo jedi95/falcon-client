@@ -133,16 +133,5 @@ bool CTacLauncher::CanPickUp(EntityId userId) const
 	else
 		return false;
 
-//	uint8 uniqueId = m_pItemSystem->GetItemUniqueId(GetEntity()->GetClass()->GetName());
-
-	//Can not pick up a tac launcher while I have one already 
-// 	if(pInventory && (pInventory->GetCountOfUniqueId(uniqueId)>0))
-// 	{
-// 		if(pActor->IsClient())
-// 			g_pGame->GetGameRules()->OnTextMessage(eTextMessageCenter, "@mp_CannotCarryMoreLAW");
-// 		return false;
-// 	}
-
 	return true;
-		
 }

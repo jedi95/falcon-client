@@ -19,7 +19,6 @@
 #include "Menus/OptionsManager.h"
 
 #include "GameRules.h"
-#include "BulletTime.h"
 #include "SoundMoods.h"
 #include "HUD/HUD.h"
 #include "WeaponSystem.h"
@@ -82,7 +81,6 @@ CGame::CGame()
 	m_pScriptBindActor(0),
 	m_pScriptBindGame(0),
 	m_pPlayerProfileManager(0),
-	m_pBulletTime(0),
 	m_pSoundMoods(0),
 	m_pHUD(0),
 	m_pServerSynchedStorage(0),
@@ -117,7 +115,6 @@ CGame::~CGame()
 	ReleaseActionMaps();
 	SAFE_DELETE(m_pFlashMenuObject);
 	SAFE_DELETE(m_pOptionsManager);
-	SAFE_DELETE(m_pBulletTime);
 	SAFE_DELETE(m_pSoundMoods);
 	SAFE_DELETE(m_pHUD);
 	m_pWeaponSystem->Release();
@@ -307,11 +304,6 @@ bool CGame::Init(IGameFramework *pFramework)
 
 	if (!m_pServerSynchedStorage)
 		m_pServerSynchedStorage = new CServerSynchedStorage(GetIGameFramework());
-	
-	if (!m_pBulletTime)
-	{
-		m_pBulletTime = new CBulletTime();
-	}
 
 	if (!m_pSoundMoods)
 	{
@@ -391,8 +383,6 @@ int CGame::Update(bool haveFocus, unsigned int updateFlags)
 	if (m_pFramework->IsGamePaused() == false)
 	{
 		m_pWeaponSystem->Update(frameTime);
-
-		m_pBulletTime->Update();
 		m_pSoundMoods->Update();
 	}
 
@@ -688,11 +678,6 @@ void CGame::BlockingProcess(BlockingConditionFunction f)
 CGameRules *CGame::GetGameRules() const
 {
 	return static_cast<CGameRules *>(m_pFramework->GetIGameRulesSystem()->GetCurrentGameRules());
-}
-
-CBulletTime *CGame::GetBulletTime() const
-{
-	return m_pBulletTime;
 }
 
 CSoundMoods *CGame::GetSoundMoods() const

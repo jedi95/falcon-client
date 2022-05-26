@@ -72,7 +72,7 @@ public:
 
 	virtual void StopFire();
 
-	virtual bool Shoot(bool resetAnimation, bool autoreload, bool noSound /* =false */);
+	virtual bool Shoot(bool resetAnimation, bool autoreload, bool noSound);
 
 	virtual void ChargeEffect(bool attach);
 	virtual void ChargedShoot();

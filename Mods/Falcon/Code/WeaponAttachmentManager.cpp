@@ -28,32 +28,24 @@ namespace
 		"Bip01 Spine2",
 		"Bip01 Spine2",
 		"alt_weapon_bone01"
-		//"weaponPos_pistol_R_leg",
-		//"weaponPos_pistol_L_leg"
 	};
 	const char gAttachmentTable[MAX_WEAPON_ATTACHMENTS][32] = 
 	{
 		"back_item_attachment_01",
 		"back_item_attachment_02",
 		"left_hand_grenade_attachment"
-		//"pistol_attachment_right",
-		//"pistol_attachment_left"
 	};
 	const Vec3 gOffsetTable[MAX_WEAPON_ATTACHMENTS] = 
 	{
 		Vec3(0.21944635f,-0.14831634f,1.3135500f),
 		Vec3(-0.18169385f,-0.15057199f,1.4539498f),
 		Vec3(-0.74055958f,0.17096956f,1.2127678f)
-		//Vec3(0,0,0),
-		//Vec3(0,0,0)
 	};
 	const Quat gRotationTable[MAX_WEAPON_ATTACHMENTS] =
 	{
 		Quat(-0.53083998f, 0.42361471f,0.54312921f,-0.49373195f),
 		Quat(0.53463978f,-0.41727185f,0.52943635f,-0.50965005f),
 		Quat(0.7229929f,-0.37515444f,0.46481827f,0.34710974f)
-		//Quat(Quat::CreateIdentity()),
-		//Quat(Quat::CreateIdentity())
 	};
 	
 }

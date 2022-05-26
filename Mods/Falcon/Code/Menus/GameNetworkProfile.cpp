@@ -827,7 +827,6 @@ struct CGameNetworkProfile::SBuddies  : public INetworkProfileListener
 		op.m_id = id;
 		op.m_param = message;
 		m_operations.push_back(op);
-		//if(!CheckId(id)) - not checking because there is a lag about having buddy added - omitted for possibility of auto add
 		m_parent->m_profile->GetUserNick(id);
   }
 
@@ -1521,8 +1520,7 @@ void CGameNetworkProfile::QueryUserInfo(const char* nick)
 
 void CGameNetworkProfile::QueryUserInfo(int id)
 {
-	//m_infoReader->ReadInfo(id);
-  m_buddies->QueryUserInfo(id);
+	m_buddies->QueryUserInfo(id);
 }
 
 void CGameNetworkProfile::SendBuddyMessage(int id, const char* message)

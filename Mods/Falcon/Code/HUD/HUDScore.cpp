@@ -276,9 +276,6 @@ void CHUDScore::Render()
 		m_scoreBoard[i].UpdateLiveStats();
 	std::sort(m_scoreBoard.begin(), m_scoreBoard.end());
 
-	//clear the teams stats in flash
-	//m_pFlashBoard->Invoke("clearTable");
-
 	std::vector<ScoreEntry>::iterator it;
 	IActor *pClientActor=g_pGame->GetIGameFramework()->GetClientActor();
 	if(!pClientActor)

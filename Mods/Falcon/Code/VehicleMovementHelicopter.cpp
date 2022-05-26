@@ -109,9 +109,6 @@ bool CVehicleMovementHelicopter::Init(IVehicle* pVehicle, const SmartScriptTable
 
 	m_pRotorAnim = NULL;
 
-	//m_yaw_controller(-0.03f, 0.0f, 0.00f),
-	//m_power_controller(0.4f, 0.0f, -0.1f)
-
 	m_liftPID.Reset();
 	m_yawPID.Reset();
 
@@ -809,7 +806,6 @@ void CVehicleMovementHelicopter::PreProcessMovement(const float deltaTime)
 	const Ang3 angles = Ang3::GetAnglesXYZ(tm);
 
 	m_workingUpDir = m_engineUpDir;
-	//m_workingUpDir += (m_rotorDiskTiltScale * Vec3(m_actionRoll, -m_actionPitch, 0.0f));
 	m_workingUpDir += (m_rotorDiskTiltScale * Vec3(angles.y, -angles.x, 0.0f));
 	m_workingUpDir = tm * m_workingUpDir;
 	m_workingUpDir.NormalizeSafe();

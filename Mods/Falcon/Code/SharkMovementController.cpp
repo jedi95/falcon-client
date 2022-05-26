@@ -65,9 +65,6 @@ void CSharkMovementController::UpdateCurMovementState(const SActorFrameMovementP
 	SMovementState& state(m_currentMovementState);
 	CShark::SBodyInfo bodyInfo;
 	m_pShark->GetActorInfo( bodyInfo );
-	//state.maxSpeed = bodyInfo.maxSpeed;
-	//state.minSpeed = bodyInfo.minSpeed;
-	//state.normalSpeed = bodyInfo.normalSpeed;
 	state.stance = bodyInfo.stance;
 	state.m_StanceSize		= bodyInfo.m_stanceSizeAABB;
 	state.m_ColliderSize	= bodyInfo.m_colliderSizeAABB;
@@ -78,10 +75,6 @@ void CSharkMovementController::UpdateCurMovementState(const SActorFrameMovementP
 	state.movementDirection = bodyInfo.vFwdDir;
 	state.upDirection = bodyInfo.vUpDir;
 	state.atMoveTarget = m_atTarget;
-
-	/*	if (IItem * pItem = gEnv->pGame->GetIGameFramework()->GetIItemSystem()->GetItem( itemEntity ))
-	if (const IWeapon * pWeapon = pItem->GetIWeapon())
-	state.weaponPosition = pWeapon->GetFiringPos(Vec3(0,0,0));*/
 
 	state.aimDirection = bodyInfo.vFireDir.GetNormalizedSafe();
 

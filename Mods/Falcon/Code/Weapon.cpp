@@ -24,7 +24,6 @@ History:
 #include "ISerialize.h"
 #include "ScriptBind_Weapon.h"
 #include "Player.h"
-#include "BulletTime.h"
 #include "HUD/HUD.h"
 #include "HUD/HUDRadar.h"
 #include "HUD/HUDCrosshair.h"
@@ -637,8 +636,6 @@ void CWeapon::FullSerialize( TSerialize ser )
 		ser.BeginGroup("WeaponStats");
 		ser.Value("silencer", m_silencerAttached);
 
-		//if (m_fm)
-     // m_fm->Serialize(ser);
 		int numFiremodes = GetNumOfFireModes();
 		ser.Value("numFiremodes", numFiremodes);
 		if(ser.IsReading())
@@ -751,8 +748,6 @@ void CWeapon::SerializeLTL(TSerialize ser)
 		ser.BeginGroup("WeaponStats");
 		ser.Value("silencer", m_silencerAttached);
 
-		//if (m_fm)
-		// m_fm->Serialize(ser);
 		int numFiremodes = GetNumOfFireModes();
 		ser.Value("numFiremodes", numFiremodes);
 		if(ser.IsReading())
@@ -841,7 +836,6 @@ void CWeapon::Update( SEntityUpdateContext& ctx, int update)
 			m_dofValue += m_dofSpeed*ctx.fFrameTime;
 			m_dofValue = CLAMP(m_dofValue, 0, 1);
 
-			//GameWarning("Actual DOF value = %f",m_dofValue);
 			if(m_dofSpeed < 0.0f)
 			{
 				m_focusValue -= m_dofSpeed*ctx.fFrameTime*150.0f;
@@ -1041,9 +1035,6 @@ void CWeapon::Select(bool select)
 		FrostEnable(select, false);
 	}
 	ClearInputFlags();
-
-	if (g_pGameCVars && g_pGameCVars->bt_end_select && isClient)
-		g_pGame->GetBulletTime()->Activate(false);
 
 	if (!select)
 	{
@@ -1345,7 +1336,7 @@ bool CWeapon::IsReloading() const
 	return m_fm && m_fm->IsReloading();
 }
 
-void CWeapon::AssistAiming(float magnification/*=1.0f*/, bool accurate/*=false*/)
+void CWeapon::AssistAiming(float magnification, bool accurate)
 {
 	// Check for assistance switches
 	if (!accurate && !g_pGameCVars->aim_assistTriggerEnabled)
@@ -1395,12 +1386,6 @@ void CWeapon::AssistAiming(float magnification/*=1.0f*/, bool accurate/*=false*/
 	Vec3 origo=camera.GetPosition();
 	// PARAMETER: Autotarget search radius
 	const float radius=g_pGameCVars->aim_assistSearchBox;
-	// Using radar's proximity check result for optimization
-	/*SEntityProximityQuery query;
-	query.box= AABB(Vec3(origo.x-radius,origo.y-radius,origo.z-radius),
-									Vec3(origo.x+radius,origo.y+radius,origo.z+radius));
-	query.nEntityFlags = ENTITY_FLAG_ON_RADAR;
-	gEnv->pEntitySystem->QueryProximity(query);*/
 	
 	// Some other ray may be used too, like weapon aiming or firing ray 
 	Line aim=Line(info.eyePosition, info.eyeDirection);
@@ -1476,7 +1461,6 @@ void CWeapon::AssistAiming(float magnification/*=1.0f*/, bool accurate/*=false*/
 
 		Matrix34 mInvWorld = pSelf->GetWorldTM();
 		mInvWorld.Invert();
-		//Matrix34 mInvWorld = pSelf->GetLocalTM();
 
 		v0 = mInvWorld.TransformVector( v0 );
 		v1 = mInvWorld.TransformVector( v1 );
@@ -1505,16 +1489,14 @@ void CWeapon::AssistAiming(float magnification/*=1.0f*/, bool accurate/*=false*/
 				assistMod=g_pGameCVars->aim_assistSingleCoeff;
 				
 			scale=sqr(1.0f-bestSnapSqr/maxSnapSqr)*assistMod;
-			//GetISystem()->GetILog()->Log("AutoAim mod: %f at mode %s", assistMod, modetype.c_str());
 		}
 
-		//GetISystem()->GetILog()->Log("AutoAim scale: %f", scale);
 		req.AddDeltaRotation(deltaR*scale);
 		pMC->RequestMovement(req);
 	}
 }
 
-bool CWeapon::IsValidAssistTarget(IEntity *pEntity, IEntity *pSelf,bool includeVehicles/*=false*/)
+bool CWeapon::IsValidAssistTarget(IEntity *pEntity, IEntity *pSelf,bool includeVehicles)
 {
 	if(!pEntity)
 		return false;
@@ -1724,9 +1706,6 @@ void CWeapon::Reload(bool force)
 
 	if (m_fm && (m_fm->CanReload() || force))
 	{
-		if (g_pGameCVars->bt_end_reload && isClient)
-			g_pGame->GetBulletTime()->Activate(false);
-
 		if (m_zm)
 			m_fm->Reload(m_zm->GetCurrentStep());
 		else
@@ -1870,9 +1849,6 @@ void CWeapon::SetInventoryAmmoCount(IEntityClass* pAmmoType, int count)
 			pInventory->SetAmmoCount(pAmmoType,capacity);
 			if(GetOwnerActor()->IsClient() && capacity - current > 0)
 			{
-				/*char buffer[5];
-				itoa(capacity - current, buffer, 10);
-				SAFE_HUD_FUNC(DisplayFlashMessage("@grab_ammo", 3, Col_Wheat, true, (string("@")+pAmmoType->GetName()).c_str(), buffer));*/
 				SAFE_HUD_FUNC(DisplayAmmoPickup(pAmmoType->GetName(), capacity - current));
 			}
 			if (IsServer())
@@ -1884,9 +1860,6 @@ void CWeapon::SetInventoryAmmoCount(IEntityClass* pAmmoType, int count)
 		pInventory->SetAmmoCount(pAmmoType, count);
 		if(GetOwnerActor()->IsClient() && count - current > 0)
 		{
-			/*char buffer[5];
-			itoa(count - current, buffer, 10);
-			SAFE_HUD_FUNC(DisplayFlashMessage("@grab_ammo", 3, Col_Wheat, true, (string("@")+pAmmoType->GetName()).c_str(), buffer));*/
 			SAFE_HUD_FUNC(DisplayAmmoPickup(pAmmoType->GetName(), count - current));
 		}
 		if (IsServer())
@@ -2076,12 +2049,7 @@ void CWeapon::ChangeZoomMode()
 {
 	if (m_zoommodes.empty())
 		return;
-/*
-	if (m_zmId+1<m_zoommodes.size())
-		SetCurrentZoomMode(m_zmId+1);
-	else if (m_zoommodes.size()>1)
-		SetCurrentZoomMode(0);
-		*/
+
 	int t = m_zmId;
 	do {
 		t++;
@@ -2843,7 +2811,7 @@ bool CWeapon::IsFlashlightAttached()
 }
 
 //-----------------------------------------------------------------
-void CWeapon::ActivateLamLaser(bool activate, bool aiRequest /* = true */)
+void CWeapon::ActivateLamLaser(bool activate, bool aiRequest)
 {
 	m_lamID = GetLAMAttachment();
 	m_lamAttached = m_lamID != 0;
@@ -2862,7 +2830,7 @@ void CWeapon::ActivateLamLaser(bool activate, bool aiRequest /* = true */)
 }
 
 //------------------------------------------------------------------
-void CWeapon::ActivateLamLight(bool activate, bool aiRequest /* = true */)
+void CWeapon::ActivateLamLight(bool activate, bool aiRequest)
 {
 	m_lamID = GetLAMAttachment();
 	if(m_lamID==0)
@@ -2918,7 +2886,7 @@ bool CWeapon::IsLamLightActivated()
 	return false;
 }
 
-void CWeapon::RaiseWeapon(bool raise, bool faster /* = false */)
+void CWeapon::RaiseWeapon(bool raise, bool faster)
 {
 	if(m_params.raiseable)
 	{
@@ -2967,7 +2935,6 @@ void CWeapon::RaiseWeapon(bool raise, bool faster /* = false */)
 
 				// unzoom before raising weapon
 				if(IsZoomed() || IsZooming())
-					// ExitZoom() StopZoom()
 					StopZoom(GetOwnerId());
 
 				//Weapon firing, reloading, ...
@@ -3094,17 +3061,6 @@ void CWeapon::AutoDrop(bool doCount)
 				pOwner->SetDropWeaponTimer( GetEntityId(), 2.f);
 			else if(!gEnv->bMultiplayer)
 				g_pGame->GetGameRules()->ScheduleEntityRemoval(GetEntityId(),5.0f,true);
-/*
-			if( pOwner )
-			{
-				if(IsSelected())
-					pOwner->DropItem(GetEntityId(),2.0f,true,false);
-				else
-					pOwner->DropItem(GetEntityId(),2.0f,false,false);
-			}
-			if(!gEnv->bMultiplayer)
-				g_pGame->GetGameRules()->ScheduleEntityRemoval(GetEntityId(),5.0f,true);
-*/
 		}
 	}
 }
@@ -3282,12 +3238,6 @@ void CWeapon::GetMemoryStatistics(ICrySizer * s)
 {
 	s->Add(*this);
 	CItem::GetMemoryStatistics(s);
-/*
-	if (m_fm)
-		m_fm->GetMemoryStatistics(s);
-	if (m_zm)
-		m_zm->GetMemoryStatistics(s);
-*/
 	{
 		SIZER_COMPONENT_NAME(s, "FireModes");
 		s->AddContainer(m_fmIds);

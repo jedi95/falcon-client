@@ -128,10 +128,7 @@ bool CVehicleMovementStdBoat::Init(IVehicle* pVehicle, const SmartScriptTable &t
   m_Inertia.z = mass * (sqr(width) + sqr(length)) / 12;
   
   m_massOffset = bbox.GetCenter();
-
-  //CryLog("[StdBoat movement]: got mass offset (%f, %f, %f)", m_massOffset.x, m_massOffset.y, m_massOffset.z);
-
-	m_pSplashPos = m_pVehicle->GetHelper("splashPos");
+  m_pSplashPos = m_pVehicle->GetHelper("splashPos");
 
 	if (m_pSplashPos)
 		m_lastWakePos = m_pSplashPos->GetWorldTM().GetTranslation();
@@ -254,7 +251,6 @@ void CVehicleMovementStdBoat::UpdateRunSound(const float deltaTime)
 
   SetSoundParam(eSID_Run, "speed", soundSpeedRatio);
   SetSoundParam(eSID_Ambience, "speed", soundSpeedRatio);
-  //SetSoundParam(eSID_Run, "boost", Boosting() ? 1.f : 0.f);
 
   float acceleration = min(1.f, abs(localAccel.y) / m_accel*max(1.f, m_accelCoeff));
   if (acceleration > 0.5f) 
@@ -604,10 +600,7 @@ void CVehicleMovementStdBoat::ProcessAI(const float deltaTime)
 		}
 
 		m_prevAngle =  angle;
-		//CryLog("steering	%4.2f	%4.2f %4.2f	%4.2f	%4.2f	%4.2f	%d", deltaTime,inputSpeed - currentSpeed,angle,currentAngleSpeed, m_movementAction.rotateYaw,currentAngleSpeed-m_prevAngle,step);
-
 	}
-
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -789,8 +782,7 @@ void CVehicleMovementStdBoat::ProcessMovement(const float deltaTime)
           turnAccelNorm = sgn(turnAccelNorm) * min(abs(turnAccelNorm), maxRatio);
         }
 
-        turnAccel = turnAccelNorm * m_turnAccel;
-        //roll = 0.2f * turnAccel; // slight roll        
+        turnAccel = turnAccelNorm * m_turnAccel;     
       }        
     }    
     else 

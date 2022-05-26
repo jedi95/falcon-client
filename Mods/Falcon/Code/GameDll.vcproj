@@ -593,14 +593,6 @@
 			Name="Game Files"
 			>
 			<File
-				RelativePath=".\BulletTime.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BulletTime.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ClientSynchedStorage.cpp"
 				>
 			</File>

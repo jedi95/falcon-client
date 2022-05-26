@@ -189,4 +189,3 @@ REGISTER_FLOW_NODE_SINGLETON_EX("CrysisFX:PostFXWaterDroplets", CFlowFXNode<FXPa
 REGISTER_FLOW_NODE_SINGLETON_EX("CrysisFX:PostFXBloodSplats", CFlowFXNode<FXParamsBloodSplats>, FXParamsBloodSplats);
 REGISTER_FLOW_NODE_SINGLETON_EX("CrysisFX:PostFXGlow", CFlowFXNode<FXParamsGlow>, FXParamsGlow);
 REGISTER_FLOW_NODE_SINGLETON_EX("CrysisFX:PostFXGlittering", CFlowFXNode<FXParamsGlittering>, FXParamsGlittering);
-// REGISTER_FLOW_NODE_EX("CrysisFX:PostFXSunShafts", CFlowFXNode<FXParamsSunShafts>, FXParamsSunShafts);

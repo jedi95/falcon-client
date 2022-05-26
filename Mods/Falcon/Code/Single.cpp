@@ -278,25 +278,9 @@ void CSingle::PostUpdate(float frameTime)
 				dir3 = dir3.normalize() * WEAPON_HIT_RANGE;
 				Vec3 spot = pos + dir3;
 
-//no need for the Z check? nobody knows why this is here
+				//no need for the Z check? nobody knows why this is here
 				m_pWeapon->SetAimLocation(spot);
 				m_pWeapon->SetTargetLocation(m_targetSpot);
-/*
-				if(spot.z > m_targetSpot.z)
-				{
-					m_pWeapon->SetAimLocation(spot);
-					m_pWeapon->SetTargetLocation(m_targetSpot);
-				}
-				else if(x<speed)
-				{
-					m_pWeapon->SetAimLocation(m_targetSpot);
-					m_pWeapon->SetTargetLocation(m_targetSpot);
-				}
-				else
-				{
-					startTarget = false;
-				}
-*/
 			}
 			if(startTarget)
 			{
@@ -319,7 +303,7 @@ void CSingle::UpdateFPView(float frameTime)
 }
 
 //------------------------------------------------------------------------
-bool CSingle::IsValidAutoAimTarget(IEntity* pEntity, int partId /*= 0*/)
+bool CSingle::IsValidAutoAimTarget(IEntity* pEntity, int partId)
 {  
   IActor *pActor = 0;				
   IVehicle* pVehicle = 0;
@@ -333,7 +317,6 @@ bool CSingle::IsValidAutoAimTarget(IEntity* pEntity, int partId /*= 0*/)
   
   if (vol < m_fireparams.autoaim_minvolume || vol > m_fireparams.autoaim_maxvolume)
   {
-    //CryLogAlways("volume check failed: %f", vol);
     return false;
   }
  
@@ -388,7 +371,7 @@ bool CSingle::CheckAutoAimTolerance(const Vec3& aimPos, const Vec3& aimDir)
   return (dot >= maxDot);
 }
 
-void CSingle::Lock(EntityId targetId, int partId /*=0*/)
+void CSingle::Lock(EntityId targetId, int partId)
 {
 	m_lockedTarget = targetId;
 	m_bLocking = false;
@@ -445,7 +428,7 @@ void CSingle::Unlock()
 	m_autoaimTimeOut = AUTOAIM_TIME_OUT;
 }
 
-void CSingle::StartLocking(EntityId targetId, int partId /*=0*/)
+void CSingle::StartLocking(EntityId targetId, int partId)
 {
 	// start locking
 	m_lockedTarget = targetId;
@@ -1041,10 +1024,6 @@ void CSingle::EndReload(int zoomed)
 	m_pWeapon->SetBusy(false);
 	if(m_pWeapon->IsServer())
 		m_pWeapon->ForcePendingActions(); 
-
-	//Do not zoom after reload
-	//if (zoomed && m_pWeapon->IsSelected())
-		//m_pWeapon->StartZoom(m_pWeapon->GetOwnerId(),zoomed);
 }
 
 //----------------------------------------------------
@@ -1279,7 +1258,7 @@ public:
 	}
 };
 
-bool CSingle::Shoot(bool resetAnimation, bool autoreload/* =true */, bool noSound /* =false */)
+bool CSingle::Shoot(bool resetAnimation, bool autoreload, bool noSound)
 {
 	IEntityClass* spawn_ammo = m_fireparams.ammo_type_class;
 
@@ -1293,7 +1272,7 @@ void CSingle::NetShootEx(const Vec3 &pos, const Vec3 &dir, const Vec3 &vel, cons
 	InternalNetShootEx(spawn_ammo, pos, dir, vel, hit, extra, ph);
 }
 
-bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool autoreload/* =true */, bool noSound /* =false */)
+bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool autoreload, bool noSound)
 {
 	IEntityClass* ammo = m_fireparams.ammo_type_class;
 	int ammoCount = m_pWeapon->GetAmmoCount(ammo);
@@ -1399,13 +1378,6 @@ bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool 
     pAmmo->Launch(pos, dir, vel, m_speed_scale);
     
 		int frequency = m_tracerparams.frequency;
-
-		// marcok: please don't touch
-		if (g_pGameCVars->bt_ironsight || g_pGameCVars->bt_speed)
-		{
-			frequency = 1;
-		}
-
 		bool emit = false;
 		if(m_pWeapon->GetStats().fp)
 			emit = (!m_tracerparams.geometryFP.empty() || !m_tracerparams.effectFP.empty()) && (ammoCount==GetClipSize() || (ammoCount%frequency==0));
@@ -1440,13 +1412,12 @@ bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool 
 		pAmmo->GetGameObject()->BindToNetwork();
 	}
 
-  m_pWeapon->OnShoot(m_pWeapon->GetOwnerId(), pAmmo?pAmmo->GetEntity()->GetId():0, ammo, pos, dir, vel);
+	m_pWeapon->OnShoot(m_pWeapon->GetOwnerId(), pAmmo?pAmmo->GetEntity()->GetId():0, ammo, pos, dir, vel);
 
 	MuzzleFlashEffect(true); 
-  //SmokeEffect();  //Only when stop firing - for Sean
-  DustEffect(pos);
+	DustEffect(pos);
 	RejectEffect();
-  RecoilImpulse(pos, dir);
+	RecoilImpulse(pos, dir);
 
 	m_fired = true;
 	m_next_shot += m_next_shot_dt;
@@ -1739,7 +1710,7 @@ Vec3 CSingle::GetFiringPos(const Vec3 &probableHit) const
 		// FIXME
 		// should be getting it from MovementCotroller (same for AIProxy::QueryBodyInfo)
 		// update: now AI always should be using the fire_pos from movement controller
-		if (/*pActor->IsPlayer() && */(HasFireHelper() && ShootFromHelper(pos, probableHit)))
+		if (HasFireHelper() && ShootFromHelper(pos, probableHit))
 		{
 			// FIXME
 			// making fire pos be at eye when animation is not updated (otherwise shooting from ground)
@@ -2026,36 +1997,35 @@ void CSingle::SetupEmitters(bool attach)
 //------------------------------------------------------------------------
 void CSingle::MuzzleFlashEffect(bool attach, bool light, bool effect)
 { 
-  // muzzle effects & lights are permanently attached and emitted on attach==true
-  // calling with attach==false removes the emitters
-  if (attach)
+	// muzzle effects & lights are permanently attached and emitted on attach==true
+	// calling with attach==false removes the emitters
+	if (attach)
 	{    
-    int slot = m_pWeapon->GetStats().fp ? CItem::eIGS_FirstPerson : CItem::eIGS_ThirdPerson;
-    int id = m_pWeapon->GetStats().fp ? 0 : 1;
+		int slot = m_pWeapon->GetStats().fp ? CItem::eIGS_FirstPerson : CItem::eIGS_ThirdPerson;
+		int id = m_pWeapon->GetStats().fp ? 0 : 1;
 
 		if (effect)
-    {
-      if (!m_muzzleflash.effect[id].empty() && !m_pWeapon->GetEntity()->IsHidden())
-		  {
-			  if (!m_mfIds[m_barrelId].mfId[id])
-				  SetupEmitters(true);		
-
-			  IParticleEmitter *pEmitter = m_pWeapon->GetEffectEmitter(m_mfIds[m_barrelId].mfId[id]);
-			  if (pEmitter)
-				  pEmitter->EmitParticle();
-		  }		  
-    }
-		
-    if (light && m_muzzleflash.light_radius[id] != 0.f)
 		{
-      if (!m_mflightId[id] && !m_muzzleflash.light_helper[id].empty())
-      {
-			  m_mflightId[id] = m_pWeapon->AttachLight(slot, 0, true, m_muzzleflash.light_radius[id],          
-          m_muzzleflash.light_color[id], 1.0f, 0, 0, m_muzzleflash.light_helper[id].c_str());
-          //m_muzzleflash.light_color[id], Vec3Constants<float>::fVec3_One, 0, 0, m_muzzleflash.light_helper[id].c_str());
-      }
+			if (!m_muzzleflash.effect[id].empty() && !m_pWeapon->GetEntity()->IsHidden())
+			{
+				if (!m_mfIds[m_barrelId].mfId[id])
+					SetupEmitters(true);		
+
+				IParticleEmitter *pEmitter = m_pWeapon->GetEffectEmitter(m_mfIds[m_barrelId].mfId[id]);
+				if (pEmitter)
+					pEmitter->EmitParticle();
+			}		  
+		}
+		
+		if (light && m_muzzleflash.light_radius[id] != 0.f)
+		{
+			if (!m_mflightId[id] && !m_muzzleflash.light_helper[id].empty())
+			{
+				m_mflightId[id] = m_pWeapon->AttachLight(slot, 0, true, m_muzzleflash.light_radius[id],          
+				m_muzzleflash.light_color[id], 1.0f, 0, 0, m_muzzleflash.light_helper[id].c_str());
+			}
       
-      m_pWeapon->EnableLight(true, m_mflightId[id]);
+			m_pWeapon->EnableLight(true, m_mflightId[id]);
 			m_mflTimer = m_muzzleflash.light_time[id];
 			m_mflFrameId = gEnv->pRenderer->GetFrameID();
 
@@ -2067,17 +2037,17 @@ void CSingle::MuzzleFlashEffect(bool attach, bool light, bool effect)
 			}
 		}
 	}
-  else
-  {
-    if (effect)
-      SetupEmitters(false);
+	else
+	{
+		if (effect)
+			SetupEmitters(false);
 
-    if (light)
-    {
-      m_mflightId[0] = m_pWeapon->AttachLight(CItem::eIGS_FirstPerson, m_mflightId[0], false);      
-      m_mflightId[1] = m_pWeapon->AttachLight(CItem::eIGS_ThirdPerson, m_mflightId[1], false);
-    }
-  }
+		if (light)
+		{
+			m_mflightId[0] = m_pWeapon->AttachLight(CItem::eIGS_FirstPerson, m_mflightId[0], false);      
+			m_mflightId[1] = m_pWeapon->AttachLight(CItem::eIGS_ThirdPerson, m_mflightId[1], false);
+		}
+	}
 }
 
 //------------------------------------------------------------------------
@@ -2181,7 +2151,7 @@ void CSingle::DustEffect(const Vec3& pos)
 //------------------------------------------------------------------------
 void CSingle::SpinUpEffect(bool attach)
 { 
-  m_pWeapon->AttachEffect(0, m_suId, false);
+	m_pWeapon->AttachEffect(0, m_suId, false);
 	m_pWeapon->AttachLight(0, m_sulightId, false);
 	m_suId=0;
 	m_sulightId=0;
@@ -2193,22 +2163,14 @@ void CSingle::SpinUpEffect(bool attach)
 
 		if (!m_spinup.effect[0].empty() || !m_spinup.effect[1].empty())
 		{
-      //CryLog("[%s] spinup effect (true)", m_pWeapon->GetEntity()->GetName());
-
 			m_suId = m_pWeapon->AttachEffect(slot, 0, true, m_spinup.effect[id].c_str(), 
-        m_spinup.helper[id].c_str(), Vec3Constants<float>::fVec3_Zero, Vec3Constants<float>::fVec3_OneY, 1.0f, false);
-
-      //m_sulightId = m_pWeapon->AttachLight(slot, 0, true, m_spinup.light_radius[id], m_spinup.light_color[id], Vec3(1,1,1), 0, 0,
+			m_spinup.helper[id].c_str(), Vec3Constants<float>::fVec3_Zero, Vec3Constants<float>::fVec3_OneY, 1.0f, false);
 			m_sulightId = m_pWeapon->AttachLight(slot, 0, true, m_spinup.light_radius[id], m_spinup.light_color[id], 1, 0, 0,
-				m_spinup.light_helper[id].c_str());
+			m_spinup.light_helper[id].c_str());
 		}
 
 		m_suTimer = (uint)(m_spinup.time[id]);
 	}
-  else
-  {
-    //CryLog("[%s] spinup effect (false)", m_pWeapon->GetEntity()->GetName());
-  }
 }
 
 //------------------------------------------------------------------------
@@ -2394,8 +2356,6 @@ float CSingle::GetSpread() const
 		return (speedSpread+rotationSpread+m_spread)*stanceScale;
 
 	return pZoomMode->GetRecoilScale()*(speedSpread+rotationSpread+m_spread)*stanceScale;
-	
-	//return (speedSpread+m_spread)*stanceScale;
 }
 
 //------------------------------------------------------------------------
@@ -2489,7 +2449,6 @@ void CSingle::UpdateHeat(float frameTime)
 //------------------------------------------------------------------------
 void CSingle::UpdateRecoil(float frameTime)
 {
-	//float white[4]={1,1,1,1};
 	// spread
 	float spread_add = 0.0f;
 	float spread_sub = 0.0f;
@@ -2569,7 +2528,6 @@ void CSingle::UpdateRecoil(float frameTime)
 				attack*=1.20f;
 
 			recoil_add = attack*scale*strenghtScale;
-			//CryLogAlways("recoil scale: %.3f", scale);
 
 			if (pActor && m_pWeapon->ApplyActorRecoil())
 			{

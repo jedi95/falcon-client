@@ -32,7 +32,7 @@ CCharge::~CCharge()
 {
 }
 
-//----------------------------------------"--------------------------------
+//------------------------------------------------------------------------
 void CCharge::Update(float frameTime, uint frameId)
 {
 	if (m_charging)
@@ -144,7 +144,7 @@ void CCharge::StopFire()
 }
 
 //------------------------------------------------------------------------
-bool CCharge::Shoot(bool resetAnimation, bool autoreload /* =true */, bool noSound /* =false */)
+bool CCharge::Shoot(bool resetAnimation, bool autoreload, bool noSound)
 {
 	m_autoreload = autoreload;
 

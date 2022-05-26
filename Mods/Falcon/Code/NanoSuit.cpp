@@ -18,7 +18,6 @@
 #include "GameUtils.h"
 #include "HUD/HUD.h"
 #include "GameRules.h"
-#include "BulletTime.h"
 #include "SoundMoods.h"
 #include "WeaponSystem.h"
 #include "OffHand.h"
@@ -535,8 +534,6 @@ void CNanoSuit::Update(float frameTime)
 		}
 	}
 
-	//CryLogAlways("%s Suit Energy: %.3f", m_pOwner->GetEntity()->GetName(), m_energy);
-
 	if (m_healthRegenDelay > 0.0f)
 	{
 		bool regenAfterFullEnergy = g_pGameCVars->g_playerSuitHealthRegenDelay < 0.0f;
@@ -589,7 +586,6 @@ void CNanoSuit::Update(float frameTime)
 				++iter;
 			}
 		}
-		//CryLogAlways("[nano]-- updating %s's nanosuit energy: %f", m_pOwner->GetEntity()->GetName(), m_energy);
 	}
 
 	Balance(m_energy);
@@ -747,16 +743,6 @@ bool CNanoSuit::SetMode(ENanoMode mode, bool forceUpdate, bool keepInvul)
 				PlaySound(ESound_SuitSpeedActivate);
 			SetCloak(false);
 			effectName = "suit_speedmode";
-			//marcok: don't touch please
-			if (g_pGameCVars->bt_speed)
-			{
-				IItem *pItem = m_pOwner->GetCurrentItem();
-				IWeapon *pWeapon = pItem ? pItem->GetIWeapon() : NULL;
-				if (!g_pGameCVars->bt_ironsight || (pWeapon && pWeapon->IsZoomed()))
-				{
-					g_pGame->GetBulletTime()->Activate(true);
-				}
-			}
 			break;
 		case NANOMODE_STRENGTH:
 			SetAllSlots(50.0f, 100.0f, 25.0f);
@@ -780,18 +766,6 @@ bool CNanoSuit::SetMode(ENanoMode mode, bool forceUpdate, bool keepInvul)
 		default:
 			GameWarning("Non existing NANOMODE selected: %d", mode);
 			return false;
-	}
-
-	//marcok: don't touch please
-	if (g_pGameCVars->bt_speed)
-	{
-		if (lastMode != m_currentMode)
-		{
-			if (lastMode == NANOMODE_SPEED)
-			{
-				g_pGame->GetBulletTime()->Activate(false);
-			}
-		}
 	}
 
 	if(m_pOwner)
@@ -1633,7 +1607,6 @@ void CNanoSuit::UpdateSprinting(float &recharge, const SPlayerStats &stats, floa
 					}
 				}
 
-				//recharge -= std::max(1.0f, g_pGameCVars->g_suitSpeedEnergyConsumption*frametime);
 				float consumption=gEnv->bMultiplayer?g_pGameCVars->g_suitSpeedEnergyConsumptionMultiplayer:g_pGameCVars->g_suitSpeedEnergyConsumption;
 				recharge -= m_pOwner->ShouldSwim()?consumption*1.25f:consumption;
 

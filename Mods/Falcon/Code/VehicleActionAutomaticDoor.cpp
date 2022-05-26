@@ -209,13 +209,10 @@ void CVehicleActionAutomaticDoor::Update(const float deltaTime)
 		m_animGoal = DOOR_CLOSED;
 	}
 
-	//if (m_animGoal != m_animTime)
-	{
-		float speed = 0.5f;
-		speed += min( curSpeed*0.1f, 1.0f );
-		Interpolate(m_animTime, m_animGoal, speed, deltaTime);
-		m_pDoorAnim->SetTime(m_animTime);
-	}
+	float speed = 0.5f;
+	speed += min( curSpeed*0.1f, 1.0f );
+	Interpolate(m_animTime, m_animGoal, speed, deltaTime);
+	m_pDoorAnim->SetTime(m_animTime);
 }
 
 //------------------------------------------------------------------------

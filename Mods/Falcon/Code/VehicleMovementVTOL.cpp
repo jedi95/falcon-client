@@ -210,7 +210,6 @@ void CVehicleMovementVTOL::PreProcessMovement(const float deltaTime)
 
 	float vertical = 1.0f - m_horizontal;
 
-	//m_engineForce = max(1.0f, gravity * vertical) * m_enginePower * max(0.25f, vertical);
 	m_engineForce = 0.0f;
 	m_engineForce += gravity * vertical * m_enginePower;
 	m_engineForce += m_horizontal * m_enginePower;
@@ -218,7 +217,7 @@ void CVehicleMovementVTOL::PreProcessMovement(const float deltaTime)
 	Matrix33 tm( m_PhysPos.q);
 	Ang3 angles = Ang3::GetAnglesXYZ(tm);
 
- 	m_workingUpDir = m_engineUpDir; //Vec3(0.0f, 0.0f, 1.0f);
+ 	m_workingUpDir = m_engineUpDir;
 	
 	m_workingUpDir += (vertical * m_rotorDiskTiltScale * Vec3(angles.y, -angles.x, 0.0f));
 	m_workingUpDir += (m_horizontal * m_rotorDiskTiltScale * Vec3(0.0f, 0.0f, angles.z));
@@ -467,12 +466,6 @@ void CVehicleMovementVTOL::ProcessActions(const float deltaTime)
 		Interpolate(m_liftPitchAngle, 0.0f, 1.0f, deltaTime);
 		m_desiredPitch += 0.05f * -m_liftPitchAngle;
 	}
-
-	/* todo
-	else if (m_liftAction < -0.001f)
-	{
-		m_desiredPitch += min(0.0f, (DEG2RAD(-5.0f) - currentPitch)) * 0.5f * m_liftAction;
-	}*/
 
 	if (!iszero(m_desiredPitch))
 	{
@@ -772,9 +765,6 @@ void CVehicleMovementVTOL::ProcessAI(const float deltaTime)
 	if ( m_aiRequest.HasMoveTarget() )
 	{
 		m_hoveringPower = m_powerPID.Update(currentVel.z, desiredVel.z, -1.0f, 4.0f);
-		
-		//m_hoveringPower = (m_desiredHeight - currentHeight) * m_powerInputConst;
-		//m_hoveringPower += m_powerInputDamping * (currentHeight - m_lastHeight) / deltaTime;
 
 		if (isHorizontal)
 		{
@@ -905,13 +895,6 @@ void CVehicleMovementVTOL::Update(const float deltaTime)
 		turnParamGoal += turnParamGoal * m_boost * 0.25f;
 		Interpolate(m_soundParamTurn, turnParamGoal, 0.5f, deltaTime);
 		SetSoundParam(eSID_Run, "turn", m_soundParamTurn);
-
-		float damage = GetSoundDamage();
-		if (damage > 0.1f)
-		{ 
-			//if (ISound* pSound = GetOrPlaySound(eSID_Damage, 5.f, m_enginePos))
-				//SetSoundParam(pSound, "damage", damage);        
-		}
 	}
 }
 

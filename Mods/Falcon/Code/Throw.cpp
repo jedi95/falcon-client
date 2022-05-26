@@ -494,7 +494,6 @@ void CThrow::ThrowObject(IEntity* pEntity, IPhysicalEntity* pPE)
 		finalW.y *= Random(0.5f,1.3f);
 		finalW.z *= Random(0.5f,1.3f);
 		asv.w = finalW;
-		//asv.w = Vec3(Random(-4.5f,3.5f),Random(-1.75f,2.5f),Random(-1.5f,2.2f));
 		pPE->Action(&asv);
 	}		
 
@@ -577,7 +576,4 @@ void CThrow::GetMemoryStatistics(ICrySizer * s)
 void CThrow::Serialize(TSerialize ser)
 {
 	CSingle::Serialize(ser);
-	if(ser.GetSerializationTarget() != eST_Network)
-	{
-	}
 }

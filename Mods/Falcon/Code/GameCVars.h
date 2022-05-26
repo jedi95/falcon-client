@@ -28,7 +28,7 @@ struct SCVars
 	int	  fn_circleJump;
 	int fn_fastWeaponSwitch;
 	int fn_disableFreefall;
-	int fn_c4ThrowVelocityMultiplier;
+	float fn_c4ThrowVelocityMultiplier;
 	int fn_constantMouseSensitivity;
 	int fn_fixExplosivePlant;
 	int fn_fastWeaponMenu;
@@ -88,18 +88,6 @@ struct SCVars
 	float goc_targetx;
 	float goc_targety;
 	float goc_targetz;
-
-	// bullet time CVars
-	int		bt_ironsight;
-	int		bt_speed;
-	int		bt_end_reload;
-	int		bt_end_select;
-	int		bt_end_melee;
-	float bt_time_scale;
-	float bt_pitch;
-	float bt_energy_max;
-	float bt_energy_decay;
-	float bt_energy_regen;
 
 	int		dt_enable;
 	float dt_time;

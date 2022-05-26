@@ -240,7 +240,7 @@ struct CShotgun::ZoomedCockAction
 	}
 };
 
-bool CShotgun::Shoot(bool resetAnimation, bool autoreload/* =true */, bool noSound /* =false */)
+bool CShotgun::Shoot(bool resetAnimation, bool autoreload, bool noSound)
 {
 	IEntityClass* ammo = m_fireparams.ammo_type_class;
 	int ammoCount = m_pWeapon->GetAmmoCount(ammo);

@@ -161,8 +161,6 @@ m_isInLogin(false)
 
 CMPHub::~CMPHub()
 {
- // m_menu.reset(0);
- // m_profile.reset(0);
 }
 
 bool CMPHub::HandleFSCommand(const char* pCmd, const char* pArgs)
@@ -396,7 +394,6 @@ bool CMPHub::HandleFSCommand(const char* pCmd, const char* pArgs)
     }
     break;
 	case eGUC_forgotPassword:
-		//gEnv->pGame->GetIGameFramework()->ShowPageInBrowser("http://login.gamespy.com/lostpassword.aspx");
 		if(m_currentScreen)
 		{
 			m_profile.reset(new CGameNetworkProfile(this));
@@ -1143,7 +1140,6 @@ void CMPHub::AddGameModToList(const char* mod)
 {
   if(m_currentScreen)
   {
-    //_root.Root.MainMenu.MultiPlayer.ClearGameModeList() - clear
     m_currentScreen->Invoke1("_root.Root.MainMenu.MultiPlayer.AddGameMode",mod);
   }
 }
@@ -1433,11 +1429,6 @@ void CMPHub::OnDownloadFinished(int result, const char* fileName)
 			}
 		}
 		break;
-
-	// non retryable errors. Any?
-	//case eDS_Error:
-	//	retry = false;
-	//	break;
 
 		// special case - do nothing
 	case eFDE_RequestCancelled:

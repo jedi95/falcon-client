@@ -276,8 +276,6 @@ void CServerSynchedStorage::OnClientDisconnect(int channelId, bool onhold)
 		m_channels.erase(channelId);
 	else
 		pChannel->onhold=onhold;
-//	m_globalQueue.erase(channelId);
-//	m_entityQueue.erase(channelId);
 
 	ResetChannel(channelId);
 }

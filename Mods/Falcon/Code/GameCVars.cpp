@@ -52,39 +52,6 @@ static void BroadcastChangeSafeMode( ICVar * )
 	}
 }
 
-void CmdBulletTimeMode( IConsoleCmdArgs* cmdArgs)
-{
-	g_pGameCVars->goc_enable = 0;
-	g_pGameCVars->goc_tpcrosshair = 0;
-
-	g_pGameCVars->bt_ironsight = 1;
-	g_pGameCVars->bt_speed = 0;
-	g_pGameCVars->bt_energy_decay = 2.5;
-	g_pGameCVars->bt_end_reload = 1;
-	g_pGameCVars->bt_end_select = 1;
-	g_pGameCVars->bt_end_melee = 0;
-}
-
-void CmdGOCMode( IConsoleCmdArgs* cmdArgs)
-{
-	g_pGameCVars->goc_enable = 1;
-	g_pGameCVars->goc_tpcrosshair = 1;
-	
-	g_pGameCVars->bt_ironsight = 1;
-	g_pGameCVars->bt_speed = 0;
-	g_pGameCVars->bt_energy_decay = 0;
-	g_pGameCVars->bt_end_reload = 1;
-	g_pGameCVars->bt_end_select = 1;
-	g_pGameCVars->bt_end_melee = 0;
-
-	//
-	CPlayer *pPlayer = static_cast<CPlayer *>(gEnv->pGame->GetIGameFramework()->GetClientActor());
-	if(pPlayer && !pPlayer->IsThirdPerson())
-	{
-		pPlayer->ToggleThirdPerson();
-	}
-}
-
 // FOV
 void OnFOVUpdated(ICVar* cvar)
 {
@@ -117,7 +84,6 @@ void OnMaxFpsUpdated(ICVar* cvar)
 // Custom character callbacks
 void OnFpBodyUpdated(ICVar* cvar)
 {
-	//CryLogAlways("OnFpBodyUpdated: %d", cvar->GetIVal());
 	if (!gEnv->bClient || !gEnv->bMultiplayer)
 		return;
 
@@ -173,7 +139,7 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("fn_circleJump", &fn_circleJump, 0, VF_RESTRICTEDMODE, "Enables the Crysis 1 circle jump bug (WIP)");
 	pConsole->Register("fn_fastWeaponSwitch", &fn_fastWeaponSwitch, 0, VF_RESTRICTEDMODE, "Makes switching weapons faster");
 	pConsole->Register("fn_disableFreefall", &fn_disableFreefall, 0, VF_RESTRICTEDMODE, "Disables the freefall animation.");
-	pConsole->Register("fn_c4ThrowVelocityMultiplier", &fn_c4ThrowVelocityMultiplier, 0, VF_RESTRICTEDMODE, "Set a multiplier for the launch velocity of thrown C4");
+	pConsole->Register("fn_c4ThrowVelocityMultiplier", &fn_c4ThrowVelocityMultiplier, 1.0f, VF_RESTRICTEDMODE, "Set a multiplier for the launch velocity of thrown C4");
 	pConsole->Register("fn_fastWeaponMenu", &fn_fastWeaponMenu, 0, VF_RESTRICTEDMODE, "Enables instant weapon customization menu.");
     pConsole->Register("fn_weaponMassMultiplier", &fn_weaponMassMultiplier, 1.0f, VF_RESTRICTEDMODE, "Weapon mass multiplier.");
 	pConsole->Register("fn_playerLeaning", &fn_playerLeaning, 0, VF_RESTRICTEDMODE, "Enables Crysis 1 player leaning while prone, crouching or standing");
@@ -223,20 +189,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("goc_targetx", &goc_targetx, 0.5f, VF_NOT_NET_SYNCED, "target position of camera");
 	pConsole->Register("goc_targety", &goc_targety, -2.5f, VF_NOT_NET_SYNCED, "target position of camera");
 	pConsole->Register("goc_targetz", &goc_targetz, 0.2f, VF_NOT_NET_SYNCED, "target position of camera");
-	//pConsole->AddCommand("GOCMode", CmdGOCMode, 0, "Enable GOC mode");
-
-	// BulletTime
-	pConsole->Register("bt_speed", &bt_speed, 0, VF_CHEAT, "bullet-time when in speed mode");
-	pConsole->Register("bt_ironsight", &bt_ironsight, 0, VF_CHEAT, "bullet-time when in ironsight");
-	pConsole->Register("bt_end_reload", &bt_end_reload, 0, VF_CHEAT, "end bullet-time when reloading");
-	pConsole->Register("bt_end_select", &bt_end_select, 0, VF_CHEAT, "end bullet-time when selecting a new weapon");
-	pConsole->Register("bt_end_melee", &bt_end_melee, 0, VF_CHEAT, "end bullet-time when melee");
-	pConsole->Register("bt_time_scale", &bt_time_scale, 0.2f, VF_CHEAT, "bullet-time time scale to apply");
-	pConsole->Register("bt_pitch", &bt_pitch, -0.4f, VF_CHEAT, "sound pitch shift for bullet-time");
-	pConsole->Register("bt_energy_max", &bt_energy_max, 1.0f, VF_CHEAT, "maximum bullet-time energy");
-	pConsole->Register("bt_energy_decay", &bt_energy_decay, 2.5f, VF_CHEAT, "bullet time energy decay rate");
-	pConsole->Register("bt_energy_regen", &bt_energy_regen, 0.5f, VF_CHEAT, "bullet time energy regeneration rate");
-	pConsole->AddCommand("bulletTimeMode", CmdBulletTimeMode, VF_CHEAT, "Enable bullet time mode");
 
 	pConsole->Register("dt_enable", &dt_enable, 0, 0, "suit actions activated by double-tapping");
 	pConsole->Register("dt_time", &dt_time, 0.25f, 0, "time in seconds between double taps");
@@ -975,30 +927,19 @@ void CGame::RegisterConsoleVars()
 void CGame::RegisterConsoleCommands()
 {
 	m_pConsole->AddCommand("quit", "System.Quit()", VF_RESTRICTEDMODE, "Quits the game");
-	m_pConsole->AddCommand("goto", "g_localActor:SetWorldPos({x=%1, y=%2, z=%3})", VF_CHEAT, "Sets current player position.");
-	m_pConsole->AddCommand("gotoe", "local e=System.GetEntityByName(%1); if (e) then g_localActor:SetWorldPos(e:GetWorldPos()); end", VF_CHEAT, "Sets current player position.");
-	m_pConsole->AddCommand("freeze", "g_gameRules:SetFrozenAmount(g_localActor,1)", 0, "Freezes player");
-
 	m_pConsole->AddCommand("loadactionmap", CmdLoadActionmap, 0, "Loads a key configuration file");
 	m_pConsole->AddCommand("restartgame", CmdRestartGame, 0, "Restarts Crysis Wars completely.");
-
 	m_pConsole->AddCommand("lastinv", CmdLastInv, 0, "Selects last inventory item used.");
 	m_pConsole->AddCommand("team", CmdTeam, VF_RESTRICTEDMODE, "Sets player team.");
-	m_pConsole->AddCommand("loadLastSave", CmdLoadLastSave, 0, "Loads the last savegame if available.");
 	m_pConsole->AddCommand("spectator", CmdSpectator, 0, "Sets the player as a spectator.");
 	m_pConsole->AddCommand("join_game", CmdJoinGame, VF_RESTRICTEDMODE, "Enter the current ongoing game.");
 	m_pConsole->AddCommand("kill", CmdKill, VF_RESTRICTEDMODE, "Kills the player.");
-  m_pConsole->AddCommand("v_kill", CmdVehicleKill, VF_CHEAT, "Kills the players vehicle.");
 	m_pConsole->AddCommand("sv_restart", CmdRestart, 0, "Restarts the round.");
 	m_pConsole->AddCommand("sv_say", CmdSay, 0, "Broadcasts a message to all clients.");
 	m_pConsole->AddCommand("i_reload", CmdReloadItems, 0, "Reloads item scripts.");
-
-  m_pConsole->AddCommand("g_reloadGameRules", CmdReloadGameRules, 0, "Reload GameRules script");
-  m_pConsole->AddCommand("g_quickGame", CmdQuickGame, 0, "Quick connect to good server.");
-  m_pConsole->AddCommand("g_quickGameStop", CmdQuickGameStop, 0, "Cancel quick game search.");
-
-  m_pConsole->AddCommand("g_nextlevel", CmdNextLevel,0,"Switch to next level in rotation or restart current one.");
-
+	m_pConsole->AddCommand("g_quickGame", CmdQuickGame, 0, "Quick connect to good server.");
+	m_pConsole->AddCommand("g_quickGameStop", CmdQuickGameStop, 0, "Cancel quick game search.");
+	m_pConsole->AddCommand("g_nextlevel", CmdNextLevel,0,"Switch to next level in rotation or restart current one.");
 	m_pConsole->AddCommand("g_battleDust_reload", CmdBattleDustReload, 0, "Reload the battle dust parameters xml");
 	m_pConsole->AddCommand("login",CmdLogin, 0, "Log in to GameSpy using nickname and password as arguments");
 	m_pConsole->AddCommand("login_profile", CmdLoginProfile, 0, "Log in to GameSpy using email, profile and password as arguments");
@@ -1265,31 +1206,6 @@ void CGame::CmdTeam(IConsoleCmdArgs *pArgs)
 }
 
 //------------------------------------------------------------------------
-void CGame::CmdLoadLastSave(IConsoleCmdArgs *pArgs)
-{
-	if (!gEnv->bClient || gEnv->bMultiplayer)
-		return;
-
-	if(g_pGame->GetMenu() && g_pGame->GetMenu()->IsActive())
-		return;
-
-	string* lastSave = NULL;
-	if(g_pGame->GetMenu())
-		lastSave = g_pGame->GetMenu()->GetLastInGameSave();
-	if(lastSave && lastSave->size())
-	{
-		if(!g_pGame->GetIGameFramework()->LoadGame(lastSave->c_str(), true))
-			g_pGame->GetIGameFramework()->LoadGame(g_pGame->GetLastSaveGame().c_str(), false);
-	}
-	else
-	{
-		const string& file = g_pGame->GetLastSaveGame().c_str();
-		if(!g_pGame->GetIGameFramework()->LoadGame(file.c_str(), true))
-			g_pGame->GetIGameFramework()->LoadGame(file.c_str(), false);
-	}
-}
-
-//------------------------------------------------------------------------
 void CGame::CmdSpectator(IConsoleCmdArgs *pArgs)
 {
 	if (!gEnv->bClient)
@@ -1341,31 +1257,6 @@ void CGame::CmdKill(IConsoleCmdArgs *pArgs)
 }
 
 //------------------------------------------------------------------------
-void CGame::CmdVehicleKill(IConsoleCmdArgs *pArgs)
-{
-  if (!gEnv->bClient)
-    return;
-
-  IActor *pClientActor=g_pGame->GetIGameFramework()->GetClientActor();
-  if (!pClientActor)
-    return;
-
-  IVehicle* pVehicle = pClientActor->GetLinkedVehicle();
-  if (!pVehicle)
-    return;
-  
-  CGameRules *pGameRules = g_pGame->GetGameRules();
-  if (pGameRules)
-  {
-    HitInfo suicideInfo(pVehicle->GetEntityId(), pVehicle->GetEntityId(), pVehicle->GetEntityId(),
-      -1, 0, 0, -1, 0, pVehicle->GetEntity()->GetWorldPos(), ZERO, ZERO);
-		suicideInfo.SetDamage(10000);
-
-    pGameRules->ClientHit(suicideInfo);
-  }
-}
-
-//------------------------------------------------------------------------
 void CGame::CmdRestart(IConsoleCmdArgs *pArgs)
 {
 	if(g_pGame && g_pGame->GetGameRules())
@@ -1405,37 +1296,6 @@ void CGame::CmdReloadItems(IConsoleCmdArgs *pArgs)
 	g_pGame->GetItemSharedParamsList()->Reset();
 	g_pGame->GetIGameFramework()->GetIItemSystem()->Reload();
 	g_pGame->GetWeaponSystem()->Reload();
-}
-
-//------------------------------------------------------------------------
-void CGame::CmdReloadGameRules(IConsoleCmdArgs *pArgs)
-{
-  if (gEnv->bMultiplayer)
-    return;
-
-  IGameRulesSystem* pGameRulesSystem = g_pGame->GetIGameFramework()->GetIGameRulesSystem();
-  IGameRules* pGameRules = pGameRulesSystem->GetCurrentGameRules();
-    
-  const char* name = "SinglePlayer";
-  IEntityClass* pEntityClass = 0; 
-  
-  if (pGameRules)    
-  {
-    pEntityClass = pGameRules->GetEntity()->GetClass();
-    name = pEntityClass->GetName();
-  }  
-  else
-    pEntityClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(name);
-
-  if (pEntityClass)
-  {
-    pEntityClass->LoadScript(true);
-  
-    if (pGameRulesSystem->CreateGameRules(name))
-      CryLog("reloaded GameRules <%s>", name);
-    else
-      GameWarning("reloading GameRules <%s> failed!", name);
-  }  
 }
 
 void CGame::CmdNextLevel(IConsoleCmdArgs* pArgs)

@@ -17,24 +17,6 @@
 #include "GameRules.h"
 #include "Single.h"
 
-/*
-#define CHECK_OWNER_REQUEST()	\
-	{ \
-		uint16 channelId=m_pGameFramework->GetGameChannelId(pNetChannel);	\
-		IActor *pOwnerActor=GetOwnerActor(); \
-		if (!pOwnerActor || pOwnerActor->GetChannelId()!=channelId) \
-		{ \
-			CryLogAlways("[gamenet] Disconnecting %s. Bogus weapon action '%s' request! %s %d!=%d (%s!=%s)", \
-			pNetChannel->GetName(), __FUNCTION__, pOwnerActor?pOwnerActor->GetEntity()->GetName():"null", \
-			pOwnerActor?pOwnerActor->GetChannelId():0, channelId,\
-			pOwnerActor?pOwnerActor->GetEntity()->GetName():"null", \
-			m_pGameFramework->GetIActorSystem()->GetActorByChannelId(channelId)?m_pGameFramework->GetIActorSystem()->GetActorByChannelId(channelId)->GetEntity()->GetName():"null"); \
-
-			return false; \
-		} \
-	} \
-*/
-
 #define CHECK_OWNER_REQUEST()	\
 	{ \
 		uint16 channelId=m_pGameFramework->GetGameChannelId(pNetChannel);	\
@@ -94,8 +76,6 @@ void CWeapon::NetStartSecondaryFire()
 {
 	if (m_fm)
 		m_fm->NetStartSecondaryFire();
-
-	//gEnv->pLog->Log("<<< NetStartSecondaryFire!!! >>>");
 }
 
 //------------------------------------------------------------------------
@@ -409,8 +389,6 @@ IMPLEMENT_RMI(CWeapon, SvRequestShoot)
 					AABB bbox; pEntity->GetWorldBounds(bbox);
 					bool hit0 = bbox.GetRadius() < 1.0f; // this (radius*2) must match the value in CompressionPolicy.xml ("hit0")
 					Vec3 hitLocal = pEntity->GetWorldTM().GetInvertedFast() * rh.pt;
-					//GetGameObject()->InvokeRMI(CWeapon::ClShootX(), ClShootXParams(pEntity->GetId(), hit0, hitLocal, params.predictionHandle),
-					//	eRMI_ToOtherClients|eRMI_NoLocalCalls, m_pGameFramework->GetGameChannelId(pNetChannel));
 					GetGameObject()->InvokeRMIWithDependentObject(CWeapon::ClShootX(), ClShootXParams(pEntity->GetId(), hit0, hitLocal, params.predictionHandle),
 						eRMI_ToOtherClients|eRMI_NoLocalCalls, pEntity->GetId(), m_pGameFramework->GetGameChannelId(pNetChannel));
 
@@ -768,8 +746,6 @@ IMPLEMENT_RMI(CWeapon, SvRequestStartSecondaryFire)
 
 	if (!isLocal && !IsClient())
 		NetStartSecondaryFire();
-		
-	//GetGameObject()->InvokeRMI(CWeapon::ClStartSecondaryFire(), params, eRMI_ToAllClients);
 
 	return true;
 }
