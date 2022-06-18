@@ -1150,11 +1150,6 @@ void CPlayerView::ViewShakePostProcess(CPlayer &rPlayer,SViewParams &viewParams)
 // If there are first person hands present, then position and orient them relative to the view
 void CPlayerView::HandsPostProcess(CPlayer &rPlayer,SViewParams &viewParams)
 {
-	//for testing sake
-	float nearPlaneOverride(g_pGameCVars->cl_nearPlane);
-	if (nearPlaneOverride > 0.001f)
-		viewParams.nearplane = nearPlaneOverride;
-
 	//FIXME:find a better place?
 	// Convention: if Player has a renderable object in slot 2 then it's the first person hands.
 	if (rPlayer.GetEntity()->GetSlotFlags(2) & ENTITY_SLOT_RENDER)

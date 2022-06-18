@@ -54,7 +54,6 @@ struct SCVars
 	float cl_headBobLimit;
 	float cl_tpvDist;
 	float cl_tpvYaw;
-	float cl_nearPlane;
 	float cl_sprintShake;
 	float cl_sensitivityZeroG;
 	float cl_sensitivity;
@@ -155,12 +154,11 @@ struct SCVars
 	float g_frostDecay;
 	float g_stanceTransitionSpeed;
 	float g_stanceTransitionSpeedSecondary;
-	int		g_enableIdleCheck;
 	int		g_playerRespawns;
 	float g_playerLowHealthThreshold;
 	float g_playerLowHealthThreshold2;
 	float g_playerLowHealthThresholdMultiplayer;
-	float g_playerLowHealthThreshold2Multiplayer;	
+	float g_playerLowHealthThreshold2Multiplayer;
 	int		g_punishFriendlyDeaths;
 	int		g_enableMPStealthOMeter;
 	int   g_meleeWhileSprinting;

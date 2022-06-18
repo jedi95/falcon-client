@@ -2530,7 +2530,6 @@ int CScriptBind_GameRules::SetPersistentCharResources(IFunctionHandler* pH, bool
 	ICharacterManager* charMan = gEnv->pCharacterManager;
 	if (charMan)
 	{
-		//CryLogAlways("%s persistent character resources.", bPersistent ? "Enabling" : "Disabling");
 		if (bPersistent)
 		{
 			charMan->LockResources();
@@ -2556,7 +2555,6 @@ int CScriptBind_GameRules::CacheCharacter(IFunctionHandler* pH, const char* char
 	{
 		charMan->LockResources();
 		ICharacterInstance* pCharInst = charMan->CreateInstance(character);
-		//CryLogAlways("Created character instance for %s", character);
 	}
 
 	return pH->EndFunction();

@@ -171,7 +171,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("cl_headBobLimit", &cl_headBobLimit, 0.06f, 0, "head bobbing distance limit");
 	pConsole->Register("cl_tpvDist", &cl_tpvDist, 3.5f, 0, "camera distance in 3rd person view");
 	pConsole->Register("cl_tpvYaw", &cl_tpvYaw, 0, 0, "camera angle offset in 3rd person view");
-	pConsole->Register("cl_nearPlane", &cl_nearPlane, 0, 0, "overrides the near clipping plane if != 0, just for testing.");
 	pConsole->Register("cl_sprintShake", &cl_sprintShake, 0.0f, 0, "sprint shake");
 	pConsole->Register("cl_sensitivityZeroG", &cl_sensitivityZeroG, 70.0f, VF_DUMPTODISK, "Set mouse sensitivity in ZeroG!");
 	pConsole->Register("cl_sensitivity", &cl_sensitivity, 45.0f, VF_DUMPTODISK | VF_RESTRICTEDMODE, "Set mouse sensitivity!");
@@ -334,7 +333,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_ragdollUnseenTime", &g_ragdollUnseenTime, 2.0f, 0, "time in seconds that the player has to look away from the ragdoll before it disappears");
 	pConsole->Register("g_ragdollPollTime", &g_ragdollPollTime, 0.5f, 0, "time in seconds where 'unseen' polling is done");
 	pConsole->Register("g_ragdollDistance", &g_ragdollDistance, 10.0f, 0, "distance in meters that the player has to be away from the ragdoll before it can disappear");
-	pConsole->Register("g_enableIdleCheck", &g_enableIdleCheck, 1, 0);
 
 	// Crysis supported gamemode CVars
 	pConsole->Register("g_timelimit", &g_timelimit, 60.0f, 0, "Duration of a time-limited game (in minutes). Default is 0, 0 means no time-limit.");
@@ -610,7 +608,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("fn_circleJump", true);
 	pConsole->UnregisterVariable("fn_wallJumpMultiplier", true);
 	pConsole->UnregisterVariable("fn_fastWeaponSwitch", true);
-	pConsole->UnregisterVariable("fn_randomSpawnFactor", true);
 	pConsole->UnregisterVariable("fn_disableFreefall", true);
 	pConsole->UnregisterVariable("fn_c4ThrowVelocityMultiplier", true);
 	pConsole->UnregisterVariable("fn_constantMouseSensitivity", true);
@@ -630,7 +627,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("cl_bob", true);
 	pConsole->UnregisterVariable("cl_tpvDist", true);
 	pConsole->UnregisterVariable("cl_tpvYaw", true);
-	pConsole->UnregisterVariable("cl_nearPlane", true);
 	pConsole->UnregisterVariable("cl_sprintShake", true);
 	pConsole->UnregisterVariable("cl_sensitivityZeroG", true);
 	pConsole->UnregisterVariable("cl_sensitivity", true);
@@ -785,7 +781,6 @@ void SCVars::ReleaseCVars()
 	// variables from CPlayer
 	pConsole->UnregisterVariable("player_DrawIK", true);
 	pConsole->UnregisterVariable("player_NoIK", true);
-	pConsole->UnregisterVariable("g_enableIdleCheck", true);
 
 	// variables from CHUD
 	pConsole->UnregisterVariable("hud_mpNamesNearDistance", true);

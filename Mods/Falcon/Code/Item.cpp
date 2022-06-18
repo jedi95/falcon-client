@@ -689,11 +689,7 @@ void CItem::FullSerialize( TSerialize ser )
 			ser.BeginGroup("Accessory");
 			ser.Value("Name", name);
 			ser.Value("Id", id);
-#ifndef ITEM_USE_SHAREDSTRING
-			m_accessories[name] = id;
-#else
 			m_accessories[ItemString(name)] = id;
-#endif
 			ser.EndGroup();
 		}
 	}

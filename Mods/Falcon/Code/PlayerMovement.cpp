@@ -711,7 +711,7 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 		}
 		else
 		{
-			if (m_actions & ACTION_SPRINT && (!speedMode || sprintMult > 1.0f) && !m_player.m_stats.bIgnoreSprinting)// && m_player.GetStance() == STANCE_STAND)
+			if (m_actions & ACTION_SPRINT && (!speedMode || sprintMult > 1.0f) && !m_player.m_stats.bIgnoreSprinting)
 				move *= m_params.sprintMultiplier * sprintMult ;
 		}
 	}

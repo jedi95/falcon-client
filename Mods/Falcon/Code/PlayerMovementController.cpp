@@ -515,9 +515,8 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 	params.aimIK = false;
 	params.deltaAngles = Ang3(0,0,0);
 
-	static bool forceStrafe = false;	// [mikko] For testing, should be 'false'.
 	bool allowStrafing = m_state.AllowStrafing();
-	params.allowStrafe = allowStrafing || forceStrafe;
+	params.allowStrafe = allowStrafing;
 
 	if(gEnv->bMultiplayer && m_state.HasStance() && m_state.GetStance() == STANCE_PRONE)
 	{

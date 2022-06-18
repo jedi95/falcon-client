@@ -234,17 +234,6 @@ int CScriptBind_HUD::SetUsability(IFunctionHandler *pH, int objId, const char *m
 			{
 				if(!gotMessage)
 					return pH->EndFunction(); 
-				//Offhand controls pick up messages
-				/*if(!pActor->CheckInventoryRestrictions(pItem->GetEntity()->GetClass()->GetName()))
-				{
-					usable = 2;
-					textLabel = "@inventory_full";
-				}
-				else
-				{
-					if(!gotMessage)
-						return pH->EndFunction();  
-				}*/
 			}
 		}
 		else

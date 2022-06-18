@@ -25,7 +25,6 @@ History:
 struct SSharkStats : public SActorStats
 {
 	float turnRadius;
-//	void Serialize( TSerialize ser );
 	SSharkStats()
 	{
 		memset(this,0,sizeof(SSharkStats));
@@ -114,12 +113,7 @@ struct SSharkInput
 
 	Vec3 viewDir; // requested view direction
 	float pathLength; // remaining path length
-/*
-	Vec3 posTarget;
-	Vec3 dirTarget;
-	Vec3 upTarget;
-	float	speedTarget;
-*/
+
 	static const int STICKY_ACTIONS = 
 		ACTION_JUMP | 
 		ACTION_CROUCH |
@@ -141,7 +135,6 @@ struct SSharkInput
 	SSharkInput()
 	{
 		memset(this,0,sizeof(SSharkInput));
-		//speedTarget = 1.0f;
 	}
 
 	void Serialize( TSerialize ser );

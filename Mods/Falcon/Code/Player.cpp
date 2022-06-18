@@ -1169,24 +1169,6 @@ void CPlayer::PrePhysicsUpdate()
 	if (pEnt->IsHidden() && !(GetEntity()->GetFlags() & ENTITY_FLAG_UPDATE_HIDDEN))
 		return;
 
-	if (m_pMovementController && !gEnv->bMultiplayer) //CryMP: Ghost Bug Fix #2, disable this in mp for now
-	{
-		if (g_pGame->GetCVars()->g_enableIdleCheck == 1)
-		{
-			IActorMovementController::SStats stats;
-			if (m_pMovementController->GetStats(stats) && stats.idle == true)
-			{
-				if (GetGameObject()->IsProbablyVisible()==false && GetGameObject()->IsProbablyDistant() )
-				{
-					CPlayerMovementController* pMC = static_cast<CPlayerMovementController*> (m_pMovementController);
-					float frameTime = gEnv->pTimer->GetFrameTime();
-					pMC->IdleUpdate(frameTime);
-					return;
-				}
-			}		
-		}
-	}
-
 	bool client(IsClient());
 	float frameTime = gEnv->pTimer->GetFrameTime();
 
@@ -1265,7 +1247,6 @@ void CPlayer::PrePhysicsUpdate()
 
 				if (m_forcedRotation)
 				{
-					//m_baseQuat = baseQuatBackup;
 					m_forcedRotation = false;
 				}
 			}
@@ -1354,9 +1335,6 @@ void CPlayer::SetIK( const SActorFrameMovementParams& frameMovementParams )
 {
 	if (!m_pAnimatedCharacter)
 		return;
-
-//	if (!IsThirdPerson() && !IsPlayer())
-//		return;
 
 	IAnimationGraphState * pGraph = m_pAnimatedCharacter?m_pAnimatedCharacter->GetAnimationGraphState():NULL;
 	if (!pGraph)
@@ -1473,12 +1451,12 @@ void CPlayer::UpdateView(SViewParams &viewParams)
 
 	CPlayerView playerView(*this,viewParams);
 	playerView.Process(viewParams);
-	playerView.Commit(*this,viewParams);	
+	playerView.Commit(*this,viewParams);
 
 	if (!IsThirdPerson())
   {
     float animControlled = m_pAnimatedCharacter->FilterView(viewParams);
-		
+
     if (animControlled >= 1.f)
     { 
       m_baseQuat = m_viewQuat = m_viewQuatFinal = viewParams.rotation;
@@ -2229,7 +2207,6 @@ void CPlayer::UpdateStats(float frameTime)
 		simPar.type = simParType;
 	}
 
-	//if (GetLinkedVehicle())
 	const SAnimationTarget * pTarget = NULL;
 	if(GetAnimationGraphState())
 		pTarget = GetAnimationGraphState()->GetAnimationTarget();
@@ -2469,7 +2446,6 @@ void CPlayer::UpdateStats(float frameTime)
 				float playerHeight = GetEntity()->GetWorldPos().z;
 				if(playerHeight > terrainHeight + 2.5f)
 				{
-					//CryLogAlways("%f %f %f", terrainHeight, playerHeight, playerHeight-terrainHeight);
 					if (!g_pGameCVars->fn_disableFreefall)
 						ChangeParachuteState(1);
 				}
@@ -2844,7 +2820,6 @@ void CPlayer::Revive( bool fromInit )
 
 	m_angleOffset.Set(0,0,0);
 
-	//m_baseQuat.SetIdentity();
 	m_viewQuatFinal = m_baseQuat = m_viewQuat = GetEntity()->GetRotation();
 	m_clientViewMatrix.SetIdentity();
 
@@ -3013,7 +2988,6 @@ void CPlayer::RagDollize( bool fallAndPlay )
 	{
 		pe_simulation_params sp;
 		sp.gravity = sp.gravityFreefall = m_stats.gravity;
-		//sp.damping = 1.0f;
 		sp.dampingFreefall = 0.0f;
 		sp.mass = m_stats.mass * 2.0f;
 		if(sp.mass <= 0.0f)
@@ -3871,7 +3845,6 @@ void SPlayerStats::Serialize(TSerialize ser, unsigned aspects)
 		ser.Value("waterLevel", relativeWaterLevel);
 		ser.Value("flatSpeed", speedFlat);
 		ser.Value("gravity", gravity);
-		//ser.Value("mass", mass);		//serialized in Actor::SerializeProfile already ...
 		ser.Value("bobCycle", bobCycle);
 		ser.Value("leanAmount", leanAmount);
 		ser.Value("shakeAmount", shakeAmount);
@@ -5053,7 +5026,7 @@ void CPlayer::GrabOnLadder(ELadderActionType reason)
 	ChangeParachuteState(0);
 	
 	// SNH: moved this from IsLadderUsable
-	if (IsClient() || gEnv->bServer)	
+	if (IsClient() || gEnv->bServer)
 	{
 		IMovementController* pMC = GetMovementController();
 		if(pMC)
@@ -5245,7 +5218,7 @@ bool CPlayer::UpdateLadderAnimation(ELadderState eLS, ELadderDirection eLDIR, fl
 				m_pAnimatedCharacter->GetAnimationGraphState()->SetInput("Signal","exit_ladder_top");
 				//break;
 
-			case eLS_Exit:			
+			case eLS_Exit:
 				m_pAnimatedCharacter->GetAnimationGraphState()->SetInput("Action","idle");
 				break;
 

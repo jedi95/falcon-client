@@ -568,11 +568,7 @@ bool CItem::ReadAccessoryParams(const IItemParamsNode *accessory, SAccessoryPara
 	{
 		curToken = nextToken;
 		curToken.Trim();
-#ifdef ITEM_USE_SHAREDSTRING
 		params->firemodes.push_back(curToken.c_str());
-#else
-		params->firemodes.push_back(curToken);
-#endif
 		nextToken = firemodes.Tokenize(",", curPos);
 	}
 

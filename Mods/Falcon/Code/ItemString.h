@@ -286,15 +286,7 @@ namespace SharedString
 
 }; // _ItemString
 
-
-#define ITEM_USE_SHAREDSTRING
-
-#ifdef ITEM_USE_SHAREDSTRING
 typedef SharedString::CSharedString ItemString;
 #define CONST_TEMPITEM_STRING(a) a
-#else
-typedef string ItemString;
-#define CONST_TEMPITEM_STRING(a) CONST_TEMP_STRING(a)
-#endif
 
 #endif

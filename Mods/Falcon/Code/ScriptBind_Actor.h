@@ -145,9 +145,6 @@ public:
 
   virtual int SetSearchBeam(IFunctionHandler *pH, Vec3 dir);
 
-	//misc
-	//virtual int MeleeEffect(IFunctionHandler *pH);
-
   // Crafty #CustomCharacters
   virtual int SetCustomSuitMats(IFunctionHandler* pH, bool bCustom);
   virtual int ResetNanoSuit(IFunctionHandler* pH);

@@ -376,11 +376,7 @@ bool CItem::SetGeometry(int slot, const ItemString& name, const Vec3& poffset, c
 			if (!name || forceReload)
 			{
 				GetEntity()->FreeSlot(slot);
-#ifndef ITEM_USE_SHAREDSTRING
-				m_geometry[slot].resize(0);
-#else
 				m_geometry[slot].reset();
-#endif
 			}
 
 			ResetCharacterAttachment(eIGS_FirstPerson, ITEM_ARMS_ATTACHMENT_NAME);
@@ -419,11 +415,7 @@ bool CItem::SetGeometry(int slot, const ItemString& name, const Vec3& poffset, c
 			if (!name || forceReload)
 			{
 				GetEntity()->FreeSlot(slot);
-#ifndef ITEM_USE_SHAREDSTRING
-				m_geometry[slot].resize(0);
-#else
 				m_geometry[slot].reset();
-#endif
 			}
 	
 			DestroyAttachmentHelpers(slot);
@@ -715,7 +707,6 @@ tSoundID CItem::PlayAction(const ItemString& actionName, int layer, bool loop, u
 			
 			TempResourceName name;
 			FixResourceName(action.sound[sid].name, name, flags);
-			//nSoundFlags = nSoundFlags | (fp?FLAG_SOUND_DEFAULT_3D|FLAG_SOUND_RELATIVE:FLAG_SOUND_DEFAULT_3D);
 			Vec3 vOffset(0,0,0);
 			if (fp)
 				vOffset.x = 0.3f; // offset for first person weapon to the front
@@ -1003,7 +994,6 @@ void CItem::PlayLayer(const ItemString& layerName, int flags, bool record)
 				FixResourceName(layer.name[i], tempResourceName, flags);
 
 				ISkeletonAnim* pSkeletonAnim=pCharacter->GetISkeletonAnim();
-			//	pSkeleton->SetRedirectToLayer0(1);
 				pSkeletonAnim->StartAnimation(tempResourceName, 0, 0,0,  params);
 
 				if (layer.bones.empty())
@@ -1189,7 +1179,6 @@ const Matrix33 &CItem::GetSlotHelperRotation(int slot, const char *helper, bool 
 			if(!pCharacter)
 				return rotation;
 			int16 id = pCharacter->GetISkeletonPose()->GetJointIDByName(helper);
-		//	if (id > -1) rotation = Matrix33(pCharacter->GetISkeleton()->GetAbsJMatrixByID(id));
 			if (id > -1)
 			{
 				if (relative)
@@ -1327,11 +1316,7 @@ void CItem::ReleaseStaticSound(SInstanceAudio *sound)
 			else
 				pSoundProxy->StopSound(sound->id);
 			sound->id = INVALID_SOUNDID;
-#ifndef ITEM_USE_SHAREDSTRING
-			sound->static_name.resize(0);
-#else
 			sound->static_name.reset();
-#endif
 		}
 	}
 }

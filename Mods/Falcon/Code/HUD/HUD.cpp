@@ -3231,19 +3231,6 @@ void CHUD::OnPostUpdate(float frameTime)
 
 	if(m_pHUDPowerStruggle)
 	{
-		
-		/*CGameRules *pGameRules=g_pGame->GetGameRules();
-		if(pGameRules)
-		{
-			if(pGameRules->GetTeamId("black") == pGameRules->GetTeam(pPlayer->GetEntityId()))
-				SetTeamDisplay("US");
-			else if(pGameRules->GetTeamId("tan") == pGameRules->GetTeam(pPlayer->GetEntityId()))
-				SetTeamDisplay("NK");
-			else
-				SetTeamDisplay("");
-		}*/
-
-		
 		int pp = m_pHUDPowerStruggle->GetPlayerPP();
 		if(m_lastPlayerPPSet != pp)
 		{
@@ -4350,8 +4337,6 @@ void CHUD::SetFireMode(IItem *pItem, IFireMode *pFM, bool forceUpdate)
 
 		pFM = pWeapon->GetFireMode(pWeapon->GetCurrentFireMode());
 	}
-	
-	//string FMclass = pItem->GetEntity()->GetClass()->GetName();
 
 	int iFireMode = stl::find_in_map(m_hudFireModes, CONST_TEMP_STRING(pItem->GetEntity()->GetClass()->GetName()), 0);
 
@@ -4588,9 +4573,6 @@ void CHUD::TextMessage(const char* message)
 
 	if(strlen(message) > 1)
 		DisplayFlashMessage(message, 3);
-
-	//display message
-	//m_onScreenText[string(message)] = gEnv->pTimer->GetCurrTime();
 }
 //-----------------------------------------------------------------------------------------------------
 
@@ -4629,7 +4611,7 @@ void CHUD::UpdateObjective(CHUDMissionObjective *pObjective)
 
 		if(description.size() || message.size())
 		{
-			if(!pObjective->IsSilent() /*&& pObjective->GetStatus() != CHUDMissionObjective::DEACTIVATED*/)
+			if(!pObjective->IsSilent())
 			{
 				const wchar_t* localizedText = LocalizeWithParams(description);
 				wstring text = localizedText;
@@ -4875,9 +4857,6 @@ void CHUD::GetMemoryStatistics(ICrySizer * s)
 		CHILD_STATISTICS(*iter);
 	}
 
-	//s->Add(m_onScreenMessage);
-	//s->AddContainer(m_onScreenMessageBuffer);
-	//s->AddContainer(m_onScreenText);
 	m_missionObjectiveSystem.GetMemoryStatistics(s);
 
 	for (THUDObjectsList::iterator iter = m_hudObjectsList.begin(); iter != m_hudObjectsList.end(); ++iter)
@@ -4952,14 +4931,6 @@ void CHUD::OnExitVehicle(IActor *pActor)
 	}
 
 	m_pHUDVehicleInterface->OnExitVehicle(pActor);
-
-/*	SFlashVarValue args[6] = {m_iWeaponAmmo,m_iWeaponInvAmmo,m_iWeaponClipSize, 0, m_iGrenadeAmmo, (const char *)m_sGrenadeType};
-	m_animPlayerStats.Invoke("setAmmo", args, 6);
-	m_animPlayerStats.Invoke("setAmmoMode", 0);
-	if(m_pHUDVehicleInterface)
-		m_pHUDVehicleInterface->AmmoForceNextUpdate();
-	if(m_iWeaponAmmo == -1)
-		m_animPlayerStats.Invoke("setFireMode", 8);*/
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -5022,7 +4993,6 @@ void CHUD::UnloadSimpleHUDElements(bool unload)
 		m_animQuickMenu.Reload();
 		m_animBuyMenu.Reload();
 		m_animTacLock.Reload();
-//		m_animTargetter.Reload();
 		m_animDownloadEntities.Reload();
 
 		ResetQuickMenu();
@@ -5035,7 +5005,6 @@ void CHUD::UnloadSimpleHUDElements(bool unload)
 		m_animQuickMenu.Unload();
 		m_animBuyMenu.Unload();
 		m_animTacLock.Unload();
-//		m_animTargetter.Unload();
 		m_animDownloadEntities.Unload();
 
 		m_friendlyTrackerStatus=0;
@@ -5060,9 +5029,6 @@ void CHUD::LoadGameRulesHUD(bool load)
         m_animObjectivesTab.Invoke("showObjectives", "noAnim");
         m_animObjectivesTab.SetVisible(false);
       }
-//      if(!m_animTargetter.IsLoaded())
-//				m_animTargetter.Load("Libs/UI/HUD_Binoculars_EnemyIndicator.gfx", eFD_Center, eFAF_ThisHandler);
-        //m_animTargetter.Load("Libs/UI/HUD_EnemyShootingIndicator.gfx", eFD_Center, eFAF_ThisHandler);
 			if(!m_animMessages.IsLoaded())
 				m_animMessages.Load("Libs/UI/HUD_Messages.gfx");
     }
@@ -5070,7 +5036,6 @@ void CHUD::LoadGameRulesHUD(bool load)
     {
       m_animObjectivesTab.Unload();
 			m_animMessages.Unload();
-//      m_animTargetter.Unload();
     }
     break;
   case EHUD_INSTANTACTION:
