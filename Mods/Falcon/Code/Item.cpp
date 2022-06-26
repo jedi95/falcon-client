@@ -288,13 +288,13 @@ void CItem::ResetOwner()
 {
   if (m_ownerId)
   {
-    if (m_stats.used)
-      StopUse(m_ownerId);
+	if (m_stats.used)
+	  StopUse(m_ownerId);
 
-    CActor *pOwner=GetOwnerActor();
+	CActor *pOwner=GetOwnerActor();
 
-    if (!pOwner || pOwner->GetInventory()->FindItem(GetEntityId())<0)
-      SetOwnerId(0);
+	if (!pOwner || pOwner->GetInventory()->FindItem(GetEntityId())<0)
+	  SetOwnerId(0);
   }
 }
 
@@ -340,7 +340,7 @@ void CItem::Update( SEntityUpdateContext& ctx, int slot )
 	if (slot==eIUS_General)
 	{
 		if (m_stats.mounted)
-  		UpdateMounted(ctx.fFrameTime);
+		UpdateMounted(ctx.fFrameTime);
 	}
 }
 
@@ -457,7 +457,7 @@ void CItem::ProcessEvent(SEntityEvent &event)
 					pPhysics->AddImpulse(-1, Vec3(0.0f,0.0f,0.0f), Vec3(0.0f,0.0f,-1.0f)*m_params.drop_impulse, false, 1.0f);
 				break;
 			}
-      break;
+	  break;
 		}
 	case ENTITY_EVENT_PICKUP:
 		{
@@ -551,7 +551,7 @@ void CItem::ProcessEvent(SEntityEvent &event)
 				}
 			}
 		}
-    break;
+	break;
 	}
 }
 
@@ -1124,8 +1124,8 @@ void CItem::Select(bool select)
 
 		AttachToBack(false);
 
-    if (owner)
-    {
+	if (owner)
+	{
 			// update smart objects states
 			if (pAISystem)
 			{
@@ -1134,10 +1134,10 @@ void CItem::Select(bool select)
 				pAISystem->ModifySmartObjectStates( pOwnerEntity, "WeaponDrawn" );
 			}
 
-      //[kirill] make sure AI gets passed the new weapon properties
-      if(GetIWeapon() && owner->GetEntity() && owner->GetEntity()->GetAI())
-        owner->GetEntity()->GetAI()->SetWeaponDescriptor(GetIWeapon()->GetAIWeaponDescriptor());
-    }    
+	  //[kirill] make sure AI gets passed the new weapon properties
+	  if(GetIWeapon() && owner->GetEntity() && owner->GetEntity()->GetAI())
+		owner->GetEntity()->GetAI()->SetWeaponDescriptor(GetIWeapon()->GetAIWeaponDescriptor());
+	}    
 	}
 	else
 	{
@@ -2132,7 +2132,7 @@ void CItem::StopUse(EntityId userId)
 
   if (m_stats.mounted)
   {
-    AttachArms(false, false);
+	AttachArms(false, false);
   }
 		
 	EnableUpdate(false);
@@ -2201,14 +2201,14 @@ void CItem::UseManualBlending(bool enable)
 {
   IActor* pActor = GetOwnerActor();
   if (!pActor)
-    return;
+	return;
 
   if (ICharacterInstance* pCharInstance = pActor->GetEntity()->GetCharacter(0))
   {
-    if (ISkeletonAnim* pSkeletonAnim = pCharInstance->GetISkeletonAnim())
-    { 
-      pSkeletonAnim->SetBlendSpaceOverride(eMotionParamID_TurnSpeed, 0.f, enable);
-    }        
+	if (ISkeletonAnim* pSkeletonAnim = pCharInstance->GetISkeletonAnim())
+	{ 
+	  pSkeletonAnim->SetBlendSpaceOverride(eMotionParamID_TurnSpeed, 0.f, enable);
+	}        
   } 
 }
 
@@ -2217,7 +2217,7 @@ bool CItem::AttachToHand(bool attach, bool checkAttachment)
 {
 	//Skip mounted and offhand
 	if (m_stats.mounted || (GetEntity()->GetClass()==CItem::sOffHandClass))
-    return false;
+	return false;
 
 	IEntity *pOwner = GetOwner();
 	if (!pOwner)
@@ -2556,17 +2556,17 @@ void CItem::Cloak(bool cloak, IMaterial *cloakMat)
 /*
 	if(cloak)	//when switching view there are some errors without this check
 	{
-    CActor* pActor = GetOwnerActor();
-    if (pActor && pActor->GetActorClass() == CPlayer::GetActorClassType())
-    {
-      CPlayer *plr = (CPlayer *)pActor;
-      if(plr->GetNanoSuit() && plr->GetNanoSuit()->GetMode() != NANOMODE_CLOAK)
+	CActor* pActor = GetOwnerActor();
+	if (pActor && pActor->GetActorClass() == CPlayer::GetActorClassType())
+	{
+	  CPlayer *plr = (CPlayer *)pActor;
+	  if(plr->GetNanoSuit() && plr->GetNanoSuit()->GetMode() != NANOMODE_CLOAK)
 			{
 				if (CItem *pSlave=static_cast<CItem *>(GetDualWieldSlave()))
 					pSlave->Cloak(cloak, cloakMat);
-        return;
+		return;
 			}
-    }
+	}
 	}
 */
 

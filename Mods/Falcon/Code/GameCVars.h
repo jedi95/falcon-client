@@ -13,34 +13,36 @@ enum EExplosiveType
 
 struct SCVars
 {
-
-	// Falcon cvars
-	ICVar* fn_version;
+	// Falcon system CVARs
 	ICVar* fn_build;
-	ICVar* fn_rconClientConsoleLineFormat;
+	ICVar* fn_version;
 	int fn_svFalcon;
-	int fn_fixHUD;
 
-	// misc
-	float fn_fov;
-	int   fn_disableShootZoom;
-	float fn_wallJumpMultiplier;
-	int	  fn_circleJump;
-	int fn_fastWeaponSwitch;
-	int fn_disableFreefall;
+	// RCON
+	ICVar* fn_rconClientConsoleLineFormat;
+
+	// Falcon server controlled
 	float fn_c4ThrowVelocityMultiplier;
-	int fn_constantMouseSensitivity;
-	int fn_fixExplosivePlant;
+	int fn_circleJump;
+	int fn_disableFreefall;
 	int fn_fastWeaponMenu;
-	float fn_weaponMassMultiplier;
+	int fn_fastWeaponSwitch;
 	int fn_playerLeaning;
+	int fn_radarClearOnDeath;
+	int fn_simpleGameMechanics;
+	float fn_wallJumpMultiplier;
+	float fn_weaponMassMultiplier;
+
+	// Falcon client options
+	int fn_constantMouseSensitivity;
+	int fn_disableShootZoom;
+	int fn_enableFpBody;
+	int fn_fixExplosivePlant;
+	int fn_fixHUD;
+	float fn_fov;
 	int sys_MaxFps;
 
-	// Crafty
-	int fn_radarclearondeath;
-
-	// Custom characters
-	int fn_enableFpBody;
+	// State only
 	int fn_fpBody;
 
 	static const float v_altitudeLimitDefault()
@@ -230,15 +232,10 @@ struct SCVars
 	int		g_tk_punish_limit;
 
 	float g_trooperProneMinDistance;
-	/*	float g_trooperMaxPhysicAnimBlend;
-	float g_trooperPhysicAnimBlendSpeed;
-	float g_trooperPhysicsDampingAnim;
-	*/
 	float g_trooperTentacleAnimBlend;
 	float g_trooperBankingMultiplier;
 	float g_alienPhysicsAnimRatio;  
 
-	int		g_skipIntro;
 	int		g_resetActionmapOnStart;
 	int		g_useProfile;
 	int		g_startFirstTime;
@@ -354,7 +351,6 @@ struct SCVars
 	float hud_ctrl_Coeff_Z;
 	int		hud_ctrlZoomMode;
 	int		hud_attachBoughtEquipment;
-	int		hud_startPaused;
 	float hud_nightVisionRecharge;
 	float hud_nightVisionConsumption;
 	int		hud_showBigVehicleReload;
@@ -366,21 +362,9 @@ struct SCVars
 	int hud_iAlternateCrosshairSpread;
 	int hud_creategame_pb_server;
 
-	float aim_assistSearchBox;
 	float aim_assistMaxDistance;
-	float aim_assistSnapDistance;
 	float aim_assistVerticalScale;
-	float aim_assistSingleCoeff;
-	float aim_assistAutoCoeff;
-	float aim_assistRestrictionTimeout;
 
-	int aim_assistAimEnabled;
-	int aim_assistTriggerEnabled;
-	int hit_assistSingleplayerEnabled;
-	int hit_assistMultiplayerEnabled;
-
-  int aim_assistCrosshairSize;
-		
 	float g_combatFadeTime;
 	float g_combatFadeTimeDelay;
 	float g_battleRange;
@@ -449,7 +433,11 @@ struct SCVars
 
 protected:
 	static void RestrictedItemsChanged( ICVar* var );
+
+	static void SetupAdmins(ICVar *pVar);
+	static void SetupModerators(ICVar *pVar);
 	static void SetupCVarsToUnlock(ICVar *pVar);
+
 };
 
 #endif //__GAMECVARS_H__

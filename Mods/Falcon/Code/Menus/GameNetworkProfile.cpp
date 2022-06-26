@@ -42,25 +42,25 @@ struct CGameNetworkProfile::SChatText
 {
   struct SChatLine 
   {
-    string  text;
-    int     id;
+	string  text;
+	int     id;
   };
   SChatText():m_viewed(false),m_size(1000)
   {}
   void AddText(const char* str, int text_id)
   {
-    m_viewed = false;
-    m_text.push_back(SChatLine());
-    m_text.back().text = str;
-    m_text.back().id = text_id;
-    while(m_size && m_text.size()>m_size)
-    {
-      int id = m_text.front().id;
-      do
-      {
-        m_text.pop_front();
-      }while(m_text.front().id == id);
-    }
+	m_viewed = false;
+	m_text.push_back(SChatLine());
+	m_text.back().text = str;
+	m_text.back().id = text_id;
+	while(m_size && m_text.size()>m_size)
+	{
+	  int id = m_text.front().id;
+	  do
+	  {
+		m_text.pop_front();
+	  }while(m_text.front().id == id);
+	}
   }
   int                     m_size;
   bool                    m_viewed;
@@ -688,37 +688,37 @@ struct CGameNetworkProfile::SBuddies  : public INetworkProfileListener
 {
   enum EQueryReason
   {
-    eQR_addBuddy,
-    eQR_showInfo,
-    eQR_addIgnore,
-    eQR_stopIgnore,
-    eQR_getStats,
-    eQR_buddyRequest,
+	eQR_addBuddy,
+	eQR_showInfo,
+	eQR_addIgnore,
+	eQR_stopIgnore,
+	eQR_getStats,
+	eQR_buddyRequest,
   };
 
   struct SPendingOperation
   {
-    SPendingOperation(){}
-    SPendingOperation(EQueryReason t):m_id(0),m_type(t)
-    {}
-    string        m_nick;
-    int           m_id;
-    string        m_param;
-    EQueryReason  m_type;
+	SPendingOperation(){}
+	SPendingOperation(EQueryReason t):m_id(0),m_type(t)
+	{}
+	string        m_nick;
+	int           m_id;
+	string        m_param;
+	EQueryReason  m_type;
   };
 
 
   struct SBuddyRequest
   {
 		SBuddyRequest(const string& n, const string& m):nick(n),message(m){}
-    string nick;
-    string message;
+	string nick;
+	string message;
   };
 
   struct SIgnoredProfile
   {
-    int id;
-    string nick;
+	int id;
+	string nick;
 
 		void Serialize(IStoredSerialize* ser)
 		{
@@ -736,90 +736,90 @@ struct CGameNetworkProfile::SBuddies  : public INetworkProfileListener
 
   void UpdateFriend(int id, const char* nick, EUserStatus s, const char* location, bool foreign)
   {
-    SChatUser *u = 0;
-    for(int i=0;i<m_buddyList.size();++i)
-    {
-      if(m_buddyList[i].m_id == id)
-      {
-        u = &m_buddyList[i];
-        break;
-      }
-    }
-    bool added = false;
-    if(!u)
-    {
-      m_buddyList.push_back(SChatUser());
-      u = &m_buddyList.back();
-      added = true;
-    }
-    u->m_nick = nick;
-    u->m_status = s;
-    u->m_id = id;
-    u->m_location = location;
+	SChatUser *u = 0;
+	for(int i=0;i<m_buddyList.size();++i)
+	{
+	  if(m_buddyList[i].m_id == id)
+	  {
+		u = &m_buddyList[i];
+		break;
+	  }
+	}
+	bool added = false;
+	if(!u)
+	{
+	  m_buddyList.push_back(SChatUser());
+	  u = &m_buddyList.back();
+	  added = true;
+	}
+	u->m_nick = nick;
+	u->m_status = s;
+	u->m_id = id;
+	u->m_location = location;
 		u->m_foreign = foreign;
-    //updated user with id
-    if(m_ui)
-    {
-      if(added)
-        m_ui->AddBuddy(*u);
-      else
-        m_ui->UpdateBuddy(*u);
-    }
+	//updated user with id
+	if(m_ui)
+	{
+	  if(added)
+		m_ui->AddBuddy(*u);
+	  else
+		m_ui->UpdateBuddy(*u);
+	}
   }
 
   void RemoveFriend(int id)
   {
-    for(int i=0;i<m_buddyList.size();++i)
-    {
-      if(m_buddyList[i].m_id == id)
-      {
-        //remove
-        if(m_ui)
-          m_ui->RemoveBuddy(id);
-        m_buddyList.erase(m_buddyList.begin()+i);
-        break;
-      }
-    }
+	for(int i=0;i<m_buddyList.size();++i)
+	{
+	  if(m_buddyList[i].m_id == id)
+	  {
+		//remove
+		if(m_ui)
+		  m_ui->RemoveBuddy(id);
+		m_buddyList.erase(m_buddyList.begin()+i);
+		break;
+	  }
+	}
   }
 
   void AddIgnore(int id, const char* nick)
   {
-    SIgnoredProfile ip;
-    ip.id = id;
-    ip.nick = nick;
-    m_ignoreList.push(ip);
+	SIgnoredProfile ip;
+	ip.id = id;
+	ip.nick = nick;
+	m_ignoreList.push(ip);
 
-    SaveIgnoreList();
+	SaveIgnoreList();
 
-    if(m_ui)
-    {
-      SChatUser u;
-      u.m_id = id;
-      u.m_nick = nick;
-      m_ui->AddIgnore(u);
-    }
+	if(m_ui)
+	{
+	  SChatUser u;
+	  u.m_id = id;
+	  u.m_nick = nick;
+	  m_ui->AddIgnore(u);
+	}
   }
 
   void RemoveIgnore(int id)
   {
-    for(int i=0;i<m_ignoreList.size();++i)
-    {
-      if(m_ignoreList[i].id == id)
-      {
-        m_ignoreList.erase(i);
-        if(m_ui)
-          m_ui->RemoveIgnore(id);
-        SaveIgnoreList();
-        break;
-      }
-    }
+	for(int i=0;i<m_ignoreList.size();++i)
+	{
+	  if(m_ignoreList[i].id == id)
+	  {
+		m_ignoreList.erase(i);
+		if(m_ui)
+		  m_ui->RemoveIgnore(id);
+		SaveIgnoreList();
+		break;
+	  }
+	}
   }
 
   void OnFriendRequest(int id, const char* message)
   {
 		if(IsIgnoring(id))
 		{
-      m_parent->m_profile->AuthFriend(id,false);
+	  m_parent->m_profile->AuthFriend(id,false);
 			return;
 		}
 
@@ -832,49 +832,49 @@ struct CGameNetworkProfile::SBuddies  : public INetworkProfileListener
 
   void OnMessage(int id, const char* message)
   {
-    if(IsIgnoring(id))
-      return;
-      
-    TChatTextMap::iterator it = m_buddyChats.find(id);
-    if(it==m_buddyChats.end())
-      it = m_buddyChats.insert(std::make_pair(id,SChatText())).first;
-    
-    m_textId++;
-    it->second.AddText(message,m_textId);
-    if(m_ui)
-      m_ui->OnMessage(id,message);
+	if(IsIgnoring(id))
+	  return;
+	  
+	TChatTextMap::iterator it = m_buddyChats.find(id);
+	if(it==m_buddyChats.end())
+	  it = m_buddyChats.insert(std::make_pair(id,SChatText())).first;
+	
+	m_textId++;
+	it->second.AddText(message,m_textId);
+	if(m_ui)
+	  m_ui->OnMessage(id,message);
 
-    if(m_parent->m_hub->IsIngame() && g_pGame->GetCVars()->g_buddyMessagesIngame)
-    {
-      if(CHUDTextChat *pChat = SAFE_HUD_FUNC_RET(GetMPChat()))
-      {
-        const char* name = "";
-        for(int i=0;i<m_buddyList.size();++i)
-        {
-          if(m_buddyList[i].m_id == id)
-          {
-            name = m_buddyList[i].m_nick.c_str();
-            break;
-          }
-        }
-        pChat->AddChatMessage(string().Format("From [%s] :",name), message, 0, false);
-      }
-    }
+	if(m_parent->m_hub->IsIngame() && g_pGame->GetCVars()->g_buddyMessagesIngame)
+	{
+	  if(CHUDTextChat *pChat = SAFE_HUD_FUNC_RET(GetMPChat()))
+	  {
+		const char* name = "";
+		for(int i=0;i<m_buddyList.size();++i)
+		{
+		  if(m_buddyList[i].m_id == id)
+		  {
+			name = m_buddyList[i].m_nick.c_str();
+			break;
+		  }
+		}
+		pChat->AddChatMessage(string().Format("From [%s] :",name), message, 0, false);
+	  }
+	}
   }
 
   void LoginResult(ENetworkProfileError res, const char* descr, int id, const char* nick)
   {
-    if(res == eNPE_ok)
-    {
-      m_parent->OnLoggedIn(id, nick);
-    }
-    else
-    {
+	if(res == eNPE_ok)
+	{
+	  m_parent->OnLoggedIn(id, nick);
+	}
+	else
+	{
 			m_parent->m_loggingIn = false;
 			
 			const char* err = VALUE_BY_KEY(res,gProfileErrors);
 			m_parent->m_hub->OnLoginFailed(err);
-    }
+	}
   }
 
   void OnError(ENetworkProfileError res, const char* descr)
@@ -902,65 +902,65 @@ struct CGameNetworkProfile::SBuddies  : public INetworkProfileListener
 
   void OnProfileInfo(int id, const char* key, const char* value)
   {
-    TUserInfoMap::iterator it = m_infoCache.find(id);
-    if(it == m_infoCache.end())
-    {
-      it = m_infoCache.insert(std::make_pair(id,SUserInfo())).first;
-    }
-    SUserInfo &u = it->second;
-    EUserInfoKey k = KEY_BY_VALUE(string(key),gUserInfoKeys);
-    switch(k)
-    {
-    case eUIK_nick:
-      u.m_nick = value;
-      break;
+	TUserInfoMap::iterator it = m_infoCache.find(id);
+	if(it == m_infoCache.end())
+	{
+	  it = m_infoCache.insert(std::make_pair(id,SUserInfo())).first;
+	}
+	SUserInfo &u = it->second;
+	EUserInfoKey k = KEY_BY_VALUE(string(key),gUserInfoKeys);
+	switch(k)
+	{
+	case eUIK_nick:
+	  u.m_nick = value;
+	  break;
 		case eUIK_namespace:
 			u.m_foreignName = !strcmp(value,"foreign");
 			break;
-    case eUIK_country:
-      u.m_country = value;
+	case eUIK_country:
+	  u.m_country = value;
 			if(id == m_parent->m_profileId)
 				m_parent->m_country = value;
-      break;
-    default:;
-    }		
+	  break;
+	default:;
+	}		
   }
 
   virtual void OnProfileComplete(int id)
   {
-    TUserInfoMap::iterator iit = m_infoCache.find(id);
-    if(iit == m_infoCache.end())
-      return;
-    if(m_ui)
-      m_ui->ProfileInfo(id,iit->second);
+	TUserInfoMap::iterator iit = m_infoCache.find(id);
+	if(iit == m_infoCache.end())
+	  return;
+	if(m_ui)
+	  m_ui->ProfileInfo(id,iit->second);
   }
 
   virtual void OnSearchResult(int id, const char* nick)
   {
-    if(m_ui)
-      m_ui->SearchResult(id,nick);
+	if(m_ui)
+	  m_ui->SearchResult(id,nick);
   }
 
   virtual void OnSearchComplete()
   {
-    if(m_ui && !m_uisearch.empty())
-    {
-      m_uisearch.resize(0);
-      m_ui->SearchCompleted();
-    }
+	if(m_ui && !m_uisearch.empty())
+	{
+	  m_uisearch.resize(0);
+	  m_ui->SearchCompleted();
+	}
   }
 
   virtual void OnUserId(const char* nick, int id)
   {
-    for(int i=0;i<m_operations.size();++i)
-    {
-      if(m_operations[i].m_nick == nick)
-      {
-        m_operations[i].m_id = id;
-        ExecuteOperation(i);
-        break;
-      }
-    }
+	for(int i=0;i<m_operations.size();++i)
+	{
+	  if(m_operations[i].m_nick == nick)
+	  {
+		m_operations[i].m_id = id;
+		ExecuteOperation(i);
+		break;
+	  }
+	}
   }
   
   virtual void OnUserNick(int id, const char* nick, bool foreign_name)
@@ -971,15 +971,15 @@ struct CGameNetworkProfile::SBuddies  : public INetworkProfileListener
 			OnProfileInfo(id,"nick",nick);
 		}
 
-    for(int i=0;i<m_operations.size();++i)
-    {
-      if(m_operations[i].m_id == id && m_operations[i].m_nick.empty())
-      {
-        m_operations[i].m_nick = nick;
-        ExecuteOperation(i);
-        break;
-      }
-    }
+	for(int i=0;i<m_operations.size();++i)
+	{
+	  if(m_operations[i].m_id == id && m_operations[i].m_nick.empty())
+	  {
+		m_operations[i].m_nick = nick;
+		ExecuteOperation(i);
+		break;
+	  }
+	}
   }
 
 	bool GetUserInfo(int id, SUserInfo& info)
@@ -1035,27 +1035,27 @@ struct CGameNetworkProfile::SBuddies  : public INetworkProfileListener
 
   void ExecuteOperation(int idx)
   {
-    SPendingOperation &o = m_operations[idx];
+	SPendingOperation &o = m_operations[idx];
 
-    switch(o.m_type)
-    {
-    case eQR_addBuddy:
-      m_parent->m_profile->AddFriend(o.m_id,o.m_param);
-      break;
-    case eQR_showInfo:
-      m_parent->m_profile->GetProfileInfo(o.m_id);
-      break;
-    case eQR_addIgnore:
-      AddIgnore(o.m_id,o.m_nick);
-      break;
-    case eQR_stopIgnore:
-      RemoveIgnore(o.m_id);
-      break;
-    case eQR_getStats:
-      m_parent->m_profile->GetProfileInfo(o.m_id);
+	switch(o.m_type)
+	{
+	case eQR_addBuddy:
+	  m_parent->m_profile->AddFriend(o.m_id,o.m_param);
+	  break;
+	case eQR_showInfo:
+	  m_parent->m_profile->GetProfileInfo(o.m_id);
+	  break;
+	case eQR_addIgnore:
+	  AddIgnore(o.m_id,o.m_nick);
+	  break;
+	case eQR_stopIgnore:
+	  RemoveIgnore(o.m_id);
+	  break;
+	case eQR_getStats:
+	  m_parent->m_profile->GetProfileInfo(o.m_id);
 			m_parent->m_infoReader->ReadInfo(o.m_id);
-      break;
-    case eQR_buddyRequest:
+	  break;
+	case eQR_buddyRequest:
 			{
 				if(!strncmp(o.m_param.c_str(), AUTO_INVITE_TEXT, strlen(AUTO_INVITE_TEXT)))//this may be autogenerated
 				{
@@ -1078,72 +1078,72 @@ struct CGameNetworkProfile::SBuddies  : public INetworkProfileListener
 				}
 				m_requests.insert(std::make_pair(o.m_id,SBuddyRequest(o.m_nick,o.m_param)));
 				if(m_ui)
-	        m_ui->OnAuthRequest(o.m_id,o.m_nick,o.m_param);
+			m_ui->OnAuthRequest(o.m_id,o.m_nick,o.m_param);
 			}
-      break;
-    }
-    m_operations.erase(m_operations.begin()+idx);
+	  break;
+	}
+	m_operations.erase(m_operations.begin()+idx);
   }
 
   void Accept(int id, bool accept)
   {
-    TBuddyRequestsMap::iterator it = m_requests.find(id);
-    if(it!= m_requests.end())  
-    {
-      m_parent->m_profile->AuthFriend(it->first,accept);
-      m_requests.erase(it);
-    }
+	TBuddyRequestsMap::iterator it = m_requests.find(id);
+	if(it!= m_requests.end())  
+	{
+	  m_parent->m_profile->AuthFriend(it->first,accept);
+	  m_requests.erase(it);
+	}
   }
 
   void Request(const char* nick, const char* reason)
   {
-    SPendingOperation op(eQR_addBuddy);
-    op.m_nick = nick;
-    op.m_param = reason;
-    m_operations.push_back(op);
-    if(!CheckNick(nick))
-      m_parent->m_profile->GetUserId(nick);
+	SPendingOperation op(eQR_addBuddy);
+	op.m_nick = nick;
+	op.m_param = reason;
+	m_operations.push_back(op);
+	if(!CheckNick(nick))
+	  m_parent->m_profile->GetUserId(nick);
   }
 
   void Request(int id, const char* reason)
   {
-    m_parent->m_profile->AddFriend(id,reason);
+	m_parent->m_profile->AddFriend(id,reason);
   }
 
   bool CheckNick(const char* nick)
   {
-    for(TUserInfoMap::iterator it = m_infoCache.begin();it!=m_infoCache.end();++it)
-    {
-      if(it->second.m_nick == nick)
-      {
-        OnUserId(nick,it->first);
-        return true;
-      }
-    }
-    return false;
+	for(TUserInfoMap::iterator it = m_infoCache.begin();it!=m_infoCache.end();++it)
+	{
+	  if(it->second.m_nick == nick)
+	  {
+		OnUserId(nick,it->first);
+		return true;
+	  }
+	}
+	return false;
   }
 
   bool CheckId(int id)
   {
-    TUserInfoMap::iterator it = m_infoCache.find(id);
-    if(it!=m_infoCache.end())
-    {
-      OnUserNick(id,it->second.m_nick,it->second.m_foreignName);
-      return true;
-    }
-    return false;
+	TUserInfoMap::iterator it = m_infoCache.find(id);
+	if(it!=m_infoCache.end())
+	{
+	  OnUserNick(id,it->second.m_nick,it->second.m_foreignName);
+	  return true;
+	}
+	return false;
   }
 
   void Remove(const char* nick)
   {
-    for(int i=0;i<m_buddyList.size();++i)
-    {
-      if(m_buddyList[i].m_nick == nick)
-      {
-        m_parent->m_profile->RemoveFriend(m_buddyList[i].m_id,false);
-        break;
-      }
-    }
+	for(int i=0;i<m_buddyList.size();++i)
+	{
+	  if(m_buddyList[i].m_nick == nick)
+	  {
+		m_parent->m_profile->RemoveFriend(m_buddyList[i].m_id,false);
+		break;
+	  }
+	}
   }
 
   void Ignore(const char* nick)
@@ -1151,65 +1151,65 @@ struct CGameNetworkProfile::SBuddies  : public INetworkProfileListener
 		if(!CanIgnore(nick))
 			return;
 
-    Remove(nick);
+	Remove(nick);
 
-    SPendingOperation op(eQR_addIgnore);
-    op.m_nick = nick;
-    m_operations.push_back(op);
-    if(!CheckNick(nick))
-      m_parent->m_profile->GetUserId(nick);
+	SPendingOperation op(eQR_addIgnore);
+	op.m_nick = nick;
+	m_operations.push_back(op);
+	if(!CheckNick(nick))
+	  m_parent->m_profile->GetUserId(nick);
   }
   
   void QueryUserInfo(const char* nick)
   {
-    SPendingOperation op(eQR_getStats);
-    op.m_nick = nick;
-    m_operations.push_back(op);
-    if(!CheckNick(nick))
-      m_parent->m_profile->GetUserId(nick);
+	SPendingOperation op(eQR_getStats);
+	op.m_nick = nick;
+	m_operations.push_back(op);
+	if(!CheckNick(nick))
+	  m_parent->m_profile->GetUserId(nick);
   }
 
   void QueryUserInfo(int id)
   {
-    SPendingOperation op(eQR_getStats);
-    op.m_id = id;
-    m_operations.push_back(op);
-    if(!CheckId(id))
-      m_parent->m_profile->GetUserNick(id);
+	SPendingOperation op(eQR_getStats);
+	op.m_id = id;
+	m_operations.push_back(op);
+	if(!CheckId(id))
+	  m_parent->m_profile->GetUserNick(id);
   }
 
   void StopIgnore(const char* nick)
   {
-    SPendingOperation op(eQR_stopIgnore);
-    op.m_nick = nick;
-    m_operations.push_back(op);
-    if(!CheckNick(nick))
-      m_parent->m_profile->GetUserId(nick);
+	SPendingOperation op(eQR_stopIgnore);
+	op.m_nick = nick;
+	m_operations.push_back(op);
+	if(!CheckNick(nick))
+	  m_parent->m_profile->GetUserId(nick);
   }
 
   bool IsIgnoring(int id)
   {
-    for(int i=0;i<m_ignoreList.size();++i)
-    {
-      if(m_ignoreList[i].id == id)
-        return true;
-    }
-    return false;
+	for(int i=0;i<m_ignoreList.size();++i)
+	{
+	  if(m_ignoreList[i].id == id)
+		return true;
+	}
+	return false;
   }
 
   bool IsIgnoring(const char* nick)
   {
-    for(int i=0;i<m_ignoreList.size();++i)
-    {
-      if(m_ignoreList[i].nick == nick)
-        return true;
-    }
-    return false;
+	for(int i=0;i<m_ignoreList.size();++i)
+	{
+	  if(m_ignoreList[i].nick == nick)
+		return true;
+	}
+	return false;
   }
 
   void SendUserMessage(int id, const char* message)
   {
-    m_parent->m_profile->SendFriendMessage(id,message);
+	m_parent->m_profile->SendFriendMessage(id,message);
   }
 
 	void OnUserStats(int id, const SUserStats& stats, EUserInfoSource src)
@@ -1248,68 +1248,68 @@ struct CGameNetworkProfile::SBuddies  : public INetworkProfileListener
 
   bool CanInvite(const char* nick)
   {
-    if(!strcmp(nick,"ChatMonitor"))
-      return false;
-    for(TUserInfoMap::iterator it = m_infoCache.begin();it!=m_infoCache.end();++it)
-    {
-      if(it->second.m_nick == nick)
-      {
-        return CanInvite(it->first);
-      }
-    }
-    return true;
+	if(!strcmp(nick,"ChatMonitor"))
+	  return false;
+	for(TUserInfoMap::iterator it = m_infoCache.begin();it!=m_infoCache.end();++it)
+	{
+	  if(it->second.m_nick == nick)
+	  {
+		return CanInvite(it->first);
+	  }
+	}
+	return true;
   }
 
   bool CanInvite(int id)
   {
-    for(int i=0;i<m_buddyList.size();++i)
-      if(m_buddyList[i].m_id == id)
-        return false;
+	for(int i=0;i<m_buddyList.size();++i)
+	  if(m_buddyList[i].m_id == id)
+		return false;
 
-    return true;
+	return true;
   }
 
   bool CanIgnore(const char* nick)
   {
-    for(int i=0;i<m_ignoreList.size();++i)
-    {
-      if(m_ignoreList[i].nick == nick)
-      {
-        return false;
-      }
-    }
-    return true;
+	for(int i=0;i<m_ignoreList.size();++i)
+	{
+	  if(m_ignoreList[i].nick == nick)
+	  {
+		return false;
+	  }
+	}
+	return true;
   }
 
   bool CanIgnore(int id)
   {
-    for(int i=0;i<m_ignoreList.size();++i)
-    {
-      if(m_ignoreList[i].id == id)
-      {
-        return false;
-      }
-    }
-    return true;
+	for(int i=0;i<m_ignoreList.size();++i)
+	{
+	  if(m_ignoreList[i].id == id)
+	  {
+		return false;
+	  }
+	}
+	return true;
   }
 
   void UIActivated(INProfileUI* ui)
   {
-    m_ui = ui;
-    if(!m_ui)
-      return;
+	m_ui = ui;
+	if(!m_ui)
+	  return;
 
-    for(int i=0;i<m_buddyList.size();++i)
-    {
-      m_ui->AddBuddy(m_buddyList[i]);
-    }
-    for(int i=0;i<m_ignoreList.size();++i)
-    {
-      SChatUser u;
-      u.m_id = m_ignoreList[i].id;
-      u.m_nick = m_ignoreList[i].nick;
-      m_ui->AddIgnore(u);
-    }
+	for(int i=0;i<m_buddyList.size();++i)
+	{
+	  m_ui->AddBuddy(m_buddyList[i]);
+	}
+	for(int i=0;i<m_ignoreList.size();++i)
+	{
+	  SChatUser u;
+	  u.m_id = m_ignoreList[i].id;
+	  u.m_nick = m_ignoreList[i].nick;
+	  m_ui->AddIgnore(u);
+	}
   }
 
   std::vector<SChatUser>        m_buddyList;
@@ -1367,43 +1367,43 @@ struct CGameNetworkProfile::SStoredServerLists
 
   void UIActivated(INProfileUI* ui)
   {
-    m_ui = ui;
-    if(!m_ui)
-      return;
-    for(int i=0;i<m_favorites.size();++i)
-      m_ui->AddFavoriteServer(m_favorites[i].ip,m_favorites[i].port);
-    for(int i=0;i<m_recent.size();++i)
-      m_ui->AddRecentServer(m_recent[i].ip,m_recent[i].port);
+	m_ui = ui;
+	if(!m_ui)
+	  return;
+	for(int i=0;i<m_favorites.size();++i)
+	  m_ui->AddFavoriteServer(m_favorites[i].ip,m_favorites[i].port);
+	for(int i=0;i<m_recent.size();++i)
+	  m_ui->AddRecentServer(m_recent[i].ip,m_recent[i].port);
   }
 
   void AddFavoriteServer(uint ip, ushort port)
   {
-    SStoredServer s;
-    s.ip = ip;
-    s.port = port;
-    m_favorites.push(s);
+	SStoredServer s;
+	s.ip = ip;
+	s.port = port;
+	m_favorites.push(s);
 		SaveFavoritesList();
   }
 
   void RemoveFavoriteServer(uint ip, ushort port)
   {
-    for(int i=0;i<m_favorites.size();++i)
-    {
-      if(m_favorites[i].ip==ip && m_favorites[i].port==port)
-      {
-        m_favorites.erase(i);
+	for(int i=0;i<m_favorites.size();++i)
+	{
+	  if(m_favorites[i].ip==ip && m_favorites[i].port==port)
+	  {
+		m_favorites.erase(i);
 				SaveFavoritesList();
-        break;
-      }
-    }
+		break;
+	  }
+	}
   }
 
   void AddRecentServer(uint ip, ushort port)
   {
-    SStoredServer s;
-    s.ip = ip;
-    s.port = port;
-    m_recent.push(s);
+	SStoredServer s;
+	s.ip = ip;
+	s.port = port;
+	m_recent.push(s);
 		if(m_recent.size()>20)
 			m_recent.erase(0);
 		SaveRecentList();
@@ -1422,19 +1422,19 @@ m_hub(hub),m_loggingIn(false),m_profileId(-1)
   INetworkService *serv = gEnv->pNetwork->GetService("GameSpy");
   if(serv)
   {
-    m_profile = serv->GetNetworkProfile();
+	m_profile = serv->GetNetworkProfile();
 		m_infoReader.reset(new SUserInfoReader(this));
   }
   else
   {
-    m_profile = 0;
+	m_profile = 0;
   }
 }
 
 CGameNetworkProfile::~CGameNetworkProfile()
 {
   if(m_profile)
-     m_profile->RemoveListener(m_buddies.get());
+	 m_profile->RemoveListener(m_buddies.get());
 }
 
 void CGameNetworkProfile::Login(const char* login, const char* password)
@@ -1531,15 +1531,15 @@ void CGameNetworkProfile::SendBuddyMessage(int id, const char* message)
 void CGameNetworkProfile::InitUI(INProfileUI* a)
 {
   if(m_buddies.get())
-    m_buddies->UIActivated(a);
+	m_buddies->UIActivated(a);
   if(m_stroredServers.get())
-    m_stroredServers->UIActivated(a);
+	m_stroredServers->UIActivated(a);
 }
 
 void CGameNetworkProfile::DestroyUI()
 {
   if(m_buddies.get())
-    m_buddies->m_ui = 0;
+	m_buddies->m_ui = 0;
 }
 
 void CGameNetworkProfile::AddFavoriteServer(uint ip, ushort port)
@@ -1597,28 +1597,28 @@ void CGameNetworkProfile::SearchUsers(const char* nick)
 bool CGameNetworkProfile::CanInvite(const char* nick)
 {
   if(!stricmp(m_login.c_str(),nick))
-    return false;
+	return false;
   return m_buddies->CanInvite(nick);
 }
 
 bool CGameNetworkProfile::CanIgnore(const char* nick)
 {
   if(!stricmp(m_login.c_str(),nick))
-    return false;
+	return false;
   return m_buddies->CanIgnore(nick);
 }
 
 bool CGameNetworkProfile::CanInvite(int id)
 {
   if(m_profileId == id)
-    return false;
+	return false;
   return m_buddies->CanInvite(id);
 }
 
 bool CGameNetworkProfile::CanIgnore(int id)
 {
   if(m_profileId == id)
-    return false;
+	return false;
   return m_buddies->CanIgnore(id);
 }
 
@@ -1703,7 +1703,7 @@ void CGameNetworkProfile::RetrievePassword(const char *email)
 void CGameNetworkProfile::CleanUpQueries()
 {
   for(int i=0;i<m_queries.size();++i)
-    m_queries[i]->m_parent = 0;
+	m_queries[i]->m_parent = 0;
 }
 
 bool CGameNetworkProfile::IsDead() const

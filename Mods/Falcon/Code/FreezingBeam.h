@@ -29,19 +29,19 @@ public:
 
   typedef struct SFreezingBeamParams
   {
-    SFreezingBeamParams() { Reset(); };
-    void Reset(const IItemParamsNode *params=0, bool defaultInit=true)
-    {
-      CItemParamReader reader(params);      
-      ResetValue(freeze_speed, 0.f);
-    };
+	SFreezingBeamParams() { Reset(); };
+	void Reset(const IItemParamsNode *params=0, bool defaultInit=true)
+	{
+	  CItemParamReader reader(params);      
+	  ResetValue(freeze_speed, 0.f);
+	};
 
-    void GetMemoryStatistics(ICrySizer * s)
-    {
-      s->Add(freeze_speed);      
-    }
-    
-    float		freeze_speed;    
+	void GetMemoryStatistics(ICrySizer * s)
+	{
+	  s->Add(freeze_speed);      
+	}
+	
+	float		freeze_speed;    
   } SFreezingBeamParams;
 
 	CFreezingBeam();

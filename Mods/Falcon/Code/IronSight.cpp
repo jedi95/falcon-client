@@ -285,8 +285,6 @@ bool CIronSight::StartZoom(bool stayZoomed, bool fullZoomout, int zoomStep)
 		EnterZoom(m_zoomparams.zoom_in_time, m_zoomparams.layer.c_str(), true, zoomStep);
 		m_prevStep = m_currentStep;
 		m_currentStep = zoomStep;
-
-		m_pWeapon->AssistAiming(m_zoomparams.stages[m_currentStep-1], true);
 	}
 	else
 	{
@@ -321,8 +319,6 @@ bool CIronSight::StartZoom(bool stayZoomed, bool fullZoomout, int zoomStep)
 
 			m_prevStep = m_currentStep;
 			m_currentStep = nextStep;
-
-			m_pWeapon->AssistAiming(m_zoomparams.stages[m_currentStep-1], true);
 			return true;
 		}
 	}

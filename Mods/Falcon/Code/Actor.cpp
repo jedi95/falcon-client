@@ -575,15 +575,15 @@ void CActor::Revive( bool fromInit )
 
   if (IPhysicalEntity* pPhysics = GetEntity()->GetPhysics())
   {
-    pe_action_move actionMove;    
-    actionMove.dir.zero();
-    actionMove.iJump = 1;
+	pe_action_move actionMove;    
+	actionMove.dir.zero();
+	actionMove.iJump = 1;
 
 		pe_action_set_velocity actionVel;
 		actionVel.v.zero();
 		actionVel.w.zero();
-    
-    pPhysics->Action(&actionMove);
+	
+	pPhysics->Action(&actionMove);
 		pPhysics->Action(&actionVel);
   }
 
@@ -771,7 +771,7 @@ void CActor::Physicalize(EStance stance)
 		IGeometry *pPrimGeom = gEnv->pPhysicalWorld->GetGeomManager()->CreatePrimitive(primitives::capsule::type, &prim);
 		phys_geometry *pGeom = gEnv->pPhysicalWorld->GetGeomManager()->RegisterGeometry(pPrimGeom, 0);
 		pe_geomparams gp;
- 		gp.pos = Vec3(0.0f,0.2f,0.7f);
+		gp.pos = Vec3(0.0f,0.2f,0.7f);
 		gp.flags = geom_colltype_foliage;
 		gp.flagsCollider = 0;
 		pGeom->nRefCount = 0;
@@ -1199,9 +1199,9 @@ IEntity *CActor::LinkToVehicle(EntityId vehicleId)
 	}
   
   if (pLinked)  
-    pLinked->AttachChild(GetEntity(), ENTITY_XFORM_USER|IEntity::ATTACHMENT_KEEP_TRANSFORMATION);
+	pLinked->AttachChild(GetEntity(), ENTITY_XFORM_USER|IEntity::ATTACHMENT_KEEP_TRANSFORMATION);
   else
-    GetEntity()->DetachThis(IEntity::ATTACHMENT_KEEP_TRANSFORMATION, 0);
+	GetEntity()->DetachThis(IEntity::ATTACHMENT_KEEP_TRANSFORMATION, 0);
   
 	return pLinked;
 }
@@ -1241,7 +1241,7 @@ IEntity *CActor::LinkToEntity(EntityId entityId, bool bKeepTransformOnDetach)
 	}
 
   if (pLinked)
-    pLinked->AttachChild(GetEntity(), 0);
+	pLinked->AttachChild(GetEntity(), 0);
   else
 		GetEntity()->DetachThis(bKeepTransformOnDetach ? IEntity::ATTACHMENT_KEEP_TRANSFORMATION : 0, bKeepTransformOnDetach ? ENTITY_XFORM_USER : 0);
 
@@ -1278,9 +1278,9 @@ void CActor::ProcessEvent(SEntityEvent& event)
 		GetGameObject()->RequestRemoteUpdate(eEA_Physics | eEA_GameClientDynamic | eEA_GameServerDynamic | eEA_GameClientStatic | eEA_GameServerStatic);
 		break;
   case ENTITY_EVENT_RESET:
-    Reset(event.nParam[0]==1);
+	Reset(event.nParam[0]==1);
 		GetGameObject()->RequestRemoteUpdate(eEA_Physics | eEA_GameClientDynamic | eEA_GameServerDynamic | eEA_GameClientStatic | eEA_GameServerStatic);
-    break;
+	break;
 	case ENTITY_EVENT_ANIM_EVENT:
 		{
 			const AnimEventInstance* pAnimEvent = reinterpret_cast<const AnimEventInstance*>(event.nParam[0]);
@@ -1614,7 +1614,7 @@ bool CActor::CreateCodeEvent(SmartScriptTable &rTable)
 {
 	const char *event = NULL;
   if (!rTable->GetValue("event",event))
-    return false;
+	return false;
 
 	if (!strcmp(event,"grabObject"))
 	{
@@ -1635,11 +1635,11 @@ bool CActor::CreateCodeEvent(SmartScriptTable &rTable)
 		rTable->GetValue("material",strMat);
 		ReplaceMaterial(strMat);
 
-    int cloaked = 0;
-    if (rTable->GetValue("cloak", cloaked))
-      OnCloaked(cloaked!=0);
+	int cloaked = 0;
+	if (rTable->GetValue("cloak", cloaked))
+	  OnCloaked(cloaked!=0);
 
-    return true;
+	return true;
 	}
 
 	return false;
@@ -1765,8 +1765,8 @@ void CActor::PostSerialize()
 	}
 
   if(ICharacterInstance *pCharacter = GetEntity()->GetCharacter(0))
-    if(ISkeletonPose *pSkelPose = pCharacter->GetISkeletonPose())
-      pSkelPose->SetForceSkeletonUpdate(2);
+	if(ISkeletonPose *pSkelPose = pCharacter->GetISkeletonPose())
+	  pSkelPose->SetForceSkeletonUpdate(2);
 }
 
 void CActor::SetChannelId(uint16 id)
@@ -1863,13 +1863,13 @@ void CActor::AddFrost(float frost)
   // add scaling/multipliers here if needed    
   
   if (!IsFrozen())
-    SetFrozenAmount(m_frozenAmount+frost);
+	SetFrozenAmount(m_frozenAmount+frost);
 }
 
 bool CActor::IsFrozen() 
 { 
   if (SActorStats* pStats = GetActorStats())
-    return pStats->isFrozen.Value();
+	return pStats->isFrozen.Value();
   
   return false;
 }
@@ -2493,7 +2493,6 @@ bool CActor::CheckInventoryRestrictions(const char *itemClassName)
 	const char *itemCategory = m_pItemSystem->GetItemCategory(itemClassName);
 	if (!itemCategory)
 	{
-		GameWarning("Item class %s has no category", itemClassName);
 		return false;
 	}
 
@@ -2526,7 +2525,6 @@ bool CActor::CheckVirtualInventoryRestrictions(const std::vector<string> &invent
 	const char *itemCategory = m_pItemSystem->GetItemCategory(itemClassName);
 	if (!itemCategory)
 	{
-		GameWarning("Item class %s has no category", itemClassName);
 		return false;
 	}
 
@@ -2845,7 +2843,6 @@ void CActor::SelectItem(EntityId itemId, bool keepHistory)
 
 		if (pInventory->FindItem(itemId) < 0)
 		{
-			//GameWarning("Trying to select an item which is not in %s's inventory!", GetEntity()->GetName());
 			return;
 		}
 
@@ -3039,11 +3036,11 @@ EntityId CActor::GetCurrentItemId(bool includeVehicle) const
 {
   if (includeVehicle)
   {
-    if (IVehicle* pVehicle = GetLinkedVehicle())
-    {
-      if (EntityId itemId = pVehicle->GetCurrentWeaponId(GetEntityId()))
-        return itemId;
-    }
+	if (IVehicle* pVehicle = GetLinkedVehicle())
+	{
+	  if (EntityId itemId = pVehicle->GetCurrentWeaponId(GetEntityId()))
+		return itemId;
+	}
   }
   
 	IInventory *pInventory = GetInventory();
@@ -3265,11 +3262,8 @@ IMPLEMENT_RMI(CActor, SvRequestDropItem)
 	CItem *pItem = GetItem(params.itemId);
 	if (!pItem)
 	{
-		GameWarning("[gamenet] Failed to drop item. Item not found!");
 		return false;
 	}
-
-	//CryLogAlways("%s::SvRequestDropItem(%s)", GetEntity()->GetName(), pItem->GetEntity()->GetName());
 
 	pItem->Drop(params.impulseScale, params.selectNext, params.byDeath);
 
@@ -3283,7 +3277,6 @@ IMPLEMENT_RMI(CActor, SvRequestPickUpItem)
 	if (!pItem)
 	{
 		// this may occur if the item has been deleted but the client has not yet been informed
-		//GameWarning("[gamenet] Failed to pickup item. Item not found!");
 		return true;
 	}
 

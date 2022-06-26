@@ -38,7 +38,7 @@ CVehicleWeapon::CVehicleWeapon()
 bool CVehicleWeapon::Init( IGameObject * pGameObject )
 {
   if (!CWeapon::Init(pGameObject))
-    return false;
+	return false;
 
 	m_properties.mounted=true;
 
@@ -71,13 +71,13 @@ void CVehicleWeapon::StartUse(EntityId userId)
 
   if (GetEntity()->GetParent())
   { 
-    m_pVehicle = gEnv->pGame->GetIGameFramework()->GetIVehicleSystem()->GetVehicle(GetEntity()->GetParent()->GetId());
-    if (m_pVehicle)
-    {   
-      m_pPart = m_pVehicle->GetWeaponParentPart(GetEntityId()); 
-      m_pOwnerSeat = m_pVehicle->GetWeaponParentSeat(GetEntityId());
-      m_pSeatUser = m_pVehicle->GetSeatForPassenger(userId);
-    }
+	m_pVehicle = gEnv->pGame->GetIGameFramework()->GetIVehicleSystem()->GetVehicle(GetEntity()->GetParent()->GetId());
+	if (m_pVehicle)
+	{   
+	  m_pPart = m_pVehicle->GetWeaponParentPart(GetEntityId()); 
+	  m_pOwnerSeat = m_pVehicle->GetWeaponParentSeat(GetEntityId());
+	  m_pSeatUser = m_pVehicle->GetSeatForPassenger(userId);
+	}
   }
   
 	SetOwnerId(userId);
@@ -88,7 +88,7 @@ void CVehicleWeapon::StartUse(EntityId userId)
 	RequireUpdate(eIUS_General);
 
   if (OutOfAmmo(false))
-    Reload(false);
+	Reload(false);
 
   UseManualBlending(true);
 
@@ -136,7 +136,7 @@ void CVehicleWeapon::StopUse(EntityId userId)
 void CVehicleWeapon::StartFire()
 {
   if (!CheckWaterLevel())
-    return;
+	return;
 
 	if(!CanFire())
 		return;
@@ -159,19 +159,19 @@ void CVehicleWeapon::Update( SEntityUpdateContext& ctx, int update)
 
 	if(update==eIUS_General)
   { 
-    if (m_fm && m_fm->IsFiring())
-    {
-      m_dtWaterLevelCheck -= ctx.fFrameTime;      
-      
-      if (m_dtWaterLevelCheck <= 0.f)
-      { 
-        if (!CheckWaterLevel())        
-          StopFire();          
-        
-        m_dtWaterLevelCheck = 2.0f;
-      }
-    }
-    
+	if (m_fm && m_fm->IsFiring())
+	{
+	  m_dtWaterLevelCheck -= ctx.fFrameTime;      
+	  
+	  if (m_dtWaterLevelCheck <= 0.f)
+	  { 
+		if (!CheckWaterLevel())        
+		  StopFire();          
+		
+		m_dtWaterLevelCheck = 2.0f;
+	  }
+	}
+	
 		CheckForFriendlyAI(ctx.fFrameTime);
 		CheckForFriendlyPlayers(ctx.fFrameTime);
   }
@@ -182,10 +182,10 @@ bool CVehicleWeapon::CheckWaterLevel() const
 {
   // if not submerged at all, skip water level check
   if (m_pVehicle && m_pVehicle->GetStatus().submergedRatio < 0.01f)
-    return true;
+	return true;
   
   if (gEnv->p3DEngine->IsUnderWater(GetEntity()->GetWorldPos()))
-    return false;
+	return false;
 
   return true;
 }
@@ -196,7 +196,7 @@ void CVehicleWeapon::SetAmmoCount(IEntityClass* pAmmoType, int count)
   IActor* pOwner = GetOwnerActor();
   
   if (pOwner && !pOwner->IsPlayer() && count < m_ammo[pAmmoType])
-    return;
+	return;
   
   CWeapon::SetAmmoCount(pAmmoType, count);    
 }
@@ -208,8 +208,8 @@ void CVehicleWeapon::SetInventoryAmmoCount(IEntityClass* pAmmoType, int count)
 
   if (pOwner && !pOwner->IsPlayer() && m_pVehicle)
   {
-    if (count < m_pVehicle->GetAmmoCount(pAmmoType))
-      return;
+	if (count < m_pVehicle->GetAmmoCount(pAmmoType))
+	  return;
   }
 
   CWeapon::SetInventoryAmmoCount(pAmmoType, count);
@@ -219,14 +219,14 @@ void CVehicleWeapon::SetInventoryAmmoCount(IEntityClass* pAmmoType, int count)
 bool CVehicleWeapon::FilterView(SViewParams& viewParams)
 { 
   if (m_pOwnerSeat != m_pSeatUser)
-    return false;
+	return false;
 
   if (m_camerastats.animating && !m_camerastats.helper.empty())
   { 
-    viewParams.position = GetSlotHelperPos(eIGS_FirstPerson, m_camerastats.helper, true);
-    viewParams.rotation = Quat(GetSlotHelperRotation(eIGS_FirstPerson, m_camerastats.helper, true));    
-    viewParams.blend = false;
-    return true;
+	viewParams.position = GetSlotHelperPos(eIGS_FirstPerson, m_camerastats.helper, true);
+	viewParams.rotation = Quat(GetSlotHelperRotation(eIGS_FirstPerson, m_camerastats.helper, true));    
+	viewParams.blend = false;
+	return true;
   }
 
   return false;
@@ -238,17 +238,17 @@ bool CVehicleWeapon::GetAimBlending(OldBlendSpace& params)
   float anglemin=0.f, anglemax=0.f;
   if (m_pPart && m_pPart->GetRotationLimits(0, anglemin, anglemax))
   { 
-    if (!(anglemin == 0.f && anglemax == 0.f)) // no limits
-    {
-      Ang3 angles( m_pPart->GetLocalTM(true) );
+	if (!(anglemin == 0.f && anglemax == 0.f)) // no limits
+	{
+	  Ang3 angles( m_pPart->GetLocalTM(true) );
 
-      float limit = isneg(angles.x) ? anglemin : anglemax;
-      float ratio = (limit != 0.f) ? min(1.f, angles.x/limit) : 0.f;
+	  float limit = isneg(angles.x) ? anglemin : anglemax;
+	  float ratio = (limit != 0.f) ? min(1.f, angles.x/limit) : 0.f;
 
-      params.m_turn = sgn(angles.x) * ratio;
-      
-      return true;
-    }
+	  params.m_turn = sgn(angles.x) * ratio;
+	  
+	  return true;
+	}
   }
 
   return false;
@@ -259,14 +259,14 @@ void CVehicleWeapon::UpdateIKMounted(IActor* pActor, const Vec3& vGunXAxis)
 {
   // only apply IK when the weapons user is in the weapons owner seat
   if (m_pSeatUser == m_pOwnerSeat)
-    CWeapon::UpdateIKMounted(pActor,vGunXAxis);
+	CWeapon::UpdateIKMounted(pActor,vGunXAxis);
 }
 
 //------------------------------------------------------------------------
 void CVehicleWeapon::AttachArms(bool attach, bool shadow)
 {
   if (attach && m_pSeatUser != m_pOwnerSeat)
-    return;
+	return;
 
   CWeapon::AttachArms(attach, shadow);
 }
@@ -275,14 +275,14 @@ void CVehicleWeapon::AttachArms(bool attach, bool shadow)
 bool CVehicleWeapon::CanZoom() const
 {
   if (!CWeapon::CanZoom())
-    return false;
+	return false;
 
   if (m_pSeatUser != m_pOwnerSeat)
-    return false;
+	return false;
 
   IActor* pActor = GetOwnerActor();
   if (pActor && pActor->IsThirdPerson())
-    return false;
+	return false;
 
   return true;
 }

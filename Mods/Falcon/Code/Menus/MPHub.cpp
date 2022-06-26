@@ -169,10 +169,10 @@ bool CMPHub::HandleFSCommand(const char* pCmd, const char* pArgs)
 
   for(int i=m_dialogs.size()-1;i>=0;--i)
   {
-    if(m_dialogs[i]->OnCommand(cmd,pArgs))
-    {
-      return true;
-    }
+	if(m_dialogs[i]->OnCommand(cmd,pArgs))
+	{
+	  return true;
+	}
   }
 
   bool handled = true;
@@ -180,42 +180,42 @@ bool CMPHub::HandleFSCommand(const char* pCmd, const char* pArgs)
   switch(cmd)
   {
   case eGUC_opened:
-    OnMenuOpened();
-    break;
+	OnMenuOpened();
+	break;
   case eGUC_register:
-    m_reginfo = SRegisterInfo();
-    break;
+	m_reginfo = SRegisterInfo();
+	break;
   case eGUC_registerNick:
-    m_reginfo.nick = pArgs;
-    break;
+	m_reginfo.nick = pArgs;
+	break;
   case eGUC_registerEmail:
-    m_reginfo.email = pArgs;
-    break;
+	m_reginfo.email = pArgs;
+	break;
   case eGUC_registerDateDD:
-    m_reginfo.day = atoi(pArgs);
-    break;
+	m_reginfo.day = atoi(pArgs);
+	break;
   case eGUC_registerDateMM:
-    m_reginfo.month = atoi(pArgs);
-    break;
+	m_reginfo.month = atoi(pArgs);
+	break;
   case eGUC_registerDateYY:
-    m_reginfo.year = atoi(pArgs);
-    break;
+	m_reginfo.year = atoi(pArgs);
+	break;
 	case eGUC_registerCountry:
 		m_reginfo.country = pArgs;
 		if(m_reginfo.country.size()>2)
 			m_reginfo.country = "";
 		break;
   case eGUC_registerEnd:
-    {
-      {
-        INetworkService *serv = gEnv->pNetwork->GetService("GameSpy");
-        if(!serv || serv->GetState()!= eNSS_Ok)
-          break;
-      }
-      SFlashVarValue val("");
-      m_currentScreen->GetVariable("_root.MPAccount_Password",&val);
-      string pass = val.GetConstStrPtr();
-      m_profile.reset(new CGameNetworkProfile(this));
+	{
+	  {
+		INetworkService *serv = gEnv->pNetwork->GetService("GameSpy");
+		if(!serv || serv->GetState()!= eNSS_Ok)
+		  break;
+	  }
+	  SFlashVarValue val("");
+	  m_currentScreen->GetVariable("_root.MPAccount_Password",&val);
+	  string pass = val.GetConstStrPtr();
+	  m_profile.reset(new CGameNetworkProfile(this));
 			if(!m_profile->IsDead())
 			{
 				m_loggingIn = true;
@@ -223,10 +223,10 @@ bool CMPHub::HandleFSCommand(const char* pCmd, const char* pArgs)
 				ShowLoadingDlg("@ui_menu_register");
 				m_profile->Register(m_reginfo.nick, m_reginfo.email, pass, m_reginfo.country, SRegisterDayOfBirth(m_reginfo.day,m_reginfo.month,m_reginfo.year));
 			}
-    }
-    break;
+	}
+	break;
   case eGUC_rememberPassword:
-    m_options.remeber = atoi(pArgs)!=0;
+	m_options.remeber = atoi(pArgs)!=0;
 		if(!m_options.remeber)
 			m_options.autologin = false; 
 		if(m_profile.get() && m_profile->IsLoggedIn() && m_options.remeber)
@@ -235,30 +235,30 @@ bool CMPHub::HandleFSCommand(const char* pCmd, const char* pArgs)
 			m_options.password = m_profile->GetPassword();
 		}
 		SaveOptions();
-    break;
+	break;
   case eGUC_autoLogin:
-    m_options.autologin = atoi(pArgs)!=0; 
+	m_options.autologin = atoi(pArgs)!=0; 
 		SaveOptions();
-    break;
+	break;
   case eGUC_login:
-    {
-      {
-        INetworkService *serv = gEnv->pNetwork->GetService("GameSpy");
-        if(!serv || serv->GetState()!= eNSS_Ok)
-          break;
-      }
-      SFlashVarValue val("");
-      m_currentScreen->GetVariable("_root.MPAccount_Password",&val);
-      string pass = val.GetConstStrPtr();
-      string login(pArgs);
-      if(m_options.remeber || m_options.autologin)
-      {
-        m_options.login = login;
-        m_options.password = pass;
-      }
-      DoLogin(login,pass);
-    }
-    break;
+	{
+	  {
+		INetworkService *serv = gEnv->pNetwork->GetService("GameSpy");
+		if(!serv || serv->GetState()!= eNSS_Ok)
+		  break;
+	  }
+	  SFlashVarValue val("");
+	  m_currentScreen->GetVariable("_root.MPAccount_Password",&val);
+	  string pass = val.GetConstStrPtr();
+	  string login(pArgs);
+	  if(m_options.remeber || m_options.autologin)
+	  {
+		m_options.login = login;
+		m_options.password = pass;
+	  }
+	  DoLogin(login,pass);
+	}
+	break;
 	case eGUC_accountInfo:
 		{
 			SFlashVarValue infoArgs[2] = {m_options.remeber, m_options.autologin};
@@ -330,8 +330,8 @@ bool CMPHub::HandleFSCommand(const char* pCmd, const char* pArgs)
 		SaveOptions();
 		break;
 	case eGUC_logoff:
-    DoLogoff();
-    break;
+	DoLogoff();
+	break;
   case eGUC_enterlobby:
 		if(m_currentScreen)
 		{
@@ -345,35 +345,35 @@ bool CMPHub::HandleFSCommand(const char* pCmd, const char* pArgs)
   case eGUC_leaveLANlobby:
 		if(!IsIngame())
 			m_lastMenu = 0;
-    m_menu.reset(0);
-    break;
+	m_menu.reset(0);
+	break;
   case eGUC_internetGame:
-    {
-      INetworkService *serv = gEnv->pNetwork->GetService("GameSpy");
-      if(!serv || serv->GetState() == eNSS_Initializing)
-        break;
+	{
+	  INetworkService *serv = gEnv->pNetwork->GetService("GameSpy");
+	  if(!serv || serv->GetState() == eNSS_Initializing)
+		break;
 			if(serv->GetState() == eNSS_Failed)
 			{
 				ShowError("Online support for Crysis Wars is no longer available.");
 				break;
 			}
-    }
+	}
 		if(!m_profile.get() || !m_profile->IsLoggedIn())
-    {
-      TryLogin(true);
-    }
-    else
-      SwitchToLobby();
-    break;
+	{
+	  TryLogin(true);
+	}
+	else
+	  SwitchToLobby();
+	break;
   case eGUC_recordedGames:
 		SAFE_MENU_FUNC(PlayTutorialVideo());
-    break;
+	break;
   case eGUC_enterLANlobby:
-    {
-      INetworkService *serv = gEnv->pNetwork->GetService("GameSpy");
-      if(!serv || serv->GetState()!= eNSS_Ok)
-        break;
-    }
+	{
+	  INetworkService *serv = gEnv->pNetwork->GetService("GameSpy");
+	  if(!serv || serv->GetState()!= eNSS_Ok)
+		break;
+	}
 		if(!IsIngame())
 			m_lastMenu = 3;
 
@@ -382,17 +382,17 @@ bool CMPHub::HandleFSCommand(const char* pCmd, const char* pArgs)
 			m_menu.reset(0);
 			m_menu.reset(new CMultiPlayerMenu(true,m_currentScreen,this));
 		}
-    break;
+	break;
   case eGUC_quickGame:
-    OnQuickGame();
-    break;
+	OnQuickGame();
+	break;
   case eGUC_back:
-    if(m_quickGame.get())
-    {
-      m_quickGame->Cancel();
-      m_quickGame.reset(0);
-    }
-    break;
+	if(m_quickGame.get())
+	{
+	  m_quickGame->Cancel();
+	  m_quickGame.reset(0);
+	}
+	break;
 	case eGUC_forgotPassword:
 		if(m_currentScreen)
 		{
@@ -410,12 +410,12 @@ bool CMPHub::HandleFSCommand(const char* pCmd, const char* pArgs)
 		}
 		else
 			gEnv->pGame->GetIGameFramework()->ExecuteCommandNextFrame("disconnect");
-    break;
+	break;
   case eGUC_dialogYes:
-    if(!strcmp(pArgs,"tutorial"))
-    {
-      g_pGame->GetIGameFramework()->ShowPageInBrowser("Power Struggle Tutorial.wmv");
-    }
+	if(!strcmp(pArgs,"tutorial"))
+	{
+	  g_pGame->GetIGameFramework()->ShowPageInBrowser("Power Struggle Tutorial.wmv");
+	}
 		else if(!strcmp(pArgs,"quickgame"))
 		{
 			gEnv->pConsole->ExecuteString("disconnect");
@@ -425,7 +425,7 @@ bool CMPHub::HandleFSCommand(const char* pCmd, const char* pArgs)
 		{
 			handled = false;
 		}
-    break;
+	break;
 	case eGUC_downloadErrorYes:
 		if (!strcmp(pArgs, "download_notPresent") || (!strcmp(pArgs, "download_update")) || (!strcmp(pArgs, "download_Retry")))
 		{
@@ -508,12 +508,12 @@ bool CMPHub::HandleFSCommand(const char* pCmd, const char* pArgs)
 		}
 		break;
   default:
-    handled = false;
+	handled = false;
   }
 
   if(m_menu.get() && !handled)
   {
-    handled = m_menu->HandleFSCommand(cmd,pArgs);
+	handled = m_menu->HandleFSCommand(cmd,pArgs);
   }
   return handled;
 }
@@ -523,12 +523,12 @@ void CMPHub::OnUIEvent(const SUIEvent& event)
   switch(event.event)
   {
   case eUIE_disconnect:
-    if(int(eDC_NubDestroyed) == event.param)
-    {
-       if(!gEnv->bServer)
+	if(int(eDC_NubDestroyed) == event.param)
+	{
+	   if(!gEnv->bServer)
 				 ShowError("@ui_menu_disconnect_ServerQuit");
-    }
-    else if(int(eDC_UserRequested) != event.param)
+	}
+	else if(int(eDC_UserRequested) != event.param)
 		{
 			EDisconnectionCause reason = static_cast<EDisconnectionCause>(event.param);
 			SServerConnectionInfo* pInfo = g_pGame->GetIGameFramework()->GetStoredServerInfo();
@@ -548,15 +548,15 @@ void CMPHub::OnUIEvent(const SUIEvent& event)
 				DisconnectError(reason,false, event.descrpition);
 		}
 		CloseLoadingDlg();
-    break;
+	break;
   }
 
   if(m_menu.get())
-    m_menu->OnUIEvent(event);
+	m_menu->OnUIEvent(event);
 
   for(int i=m_dialogs.size()-1;i>=0;--i)
   {
-    m_dialogs[i]->OnUIEvent(event);
+	m_dialogs[i]->OnUIEvent(event);
   }
 }
 
@@ -589,10 +589,10 @@ void CMPHub::SetCurrentFlashScreen(IFlashPlayer* screen, bool ingame)
    
   if(m_currentScreen)
   {
-    if(gEnv->bMultiplayer)
-    {
-      OnShowIngameMenu();
-    }
+	if(gEnv->bMultiplayer)
+	{
+	  OnShowIngameMenu();
+	}
   }
 }
 
@@ -612,7 +612,7 @@ void CMPHub::OnLoginSuccess(const char* nick)
 
 	if(m_enteringLobby)
 	{
-    SwitchToLobby();
+	SwitchToLobby();
 		m_enteringLobby = false;
 	}
 	if(m_searchingQuickGame)
@@ -667,12 +667,12 @@ void CMPHub::TryLogin( bool lobby )
 void CMPHub::ShowLoginDlg()
 {
   if(!m_currentScreen)
-    return;
+	return;
   SFlashVarValue params[] = {"1",m_options.remeber,m_options.autologin};
   m_currentScreen->Invoke("_root.Root.MainMenu.MultiPlayer.openLoginScreen",params,sizeof(params)/sizeof(params[0]));
   m_currentScreen->SetVariable("_root.Root.MainMenu.MultiPlayer.LoginScreen.Login_Controls.LoginStats.Colorset.Nickname.text",m_options.login.c_str());
   if(m_options.remeber)
-    m_currentScreen->SetVariable("_root.Root.MainMenu.MultiPlayer.LoginScreen.Login_Controls.LoginStats.Colorset.Password.text",m_options.password.c_str());
+	m_currentScreen->SetVariable("_root.Root.MainMenu.MultiPlayer.LoginScreen.Login_Controls.LoginStats.Colorset.Password.text",m_options.password.c_str());
 	else
 		m_currentScreen->SetVariable("_root.Root.MainMenu.MultiPlayer.LoginScreen.Login_Controls.LoginStats.Colorset.Password.text","");
 	m_currentScreen->Invoke0("_root.Root.MainMenu.MultiPlayer.updateLoginScreen");
@@ -681,14 +681,14 @@ void CMPHub::ShowLoginDlg()
 void CMPHub::CloseLoginDlg()
 {
   if(m_currentScreen)
-    m_currentScreen->Invoke1("_root.Root.MainMenu.MultiPlayer.openLoginScreen", false);
+	m_currentScreen->Invoke1("_root.Root.MainMenu.MultiPlayer.openLoginScreen", false);
 }
 
 void CMPHub::SwitchToLobby()
 {
   if(m_currentScreen)
   {
-    m_currentScreen->Invoke1("_root.Root.MainMenu.MultiPlayer.MultiPlayer.gotoAndPlay", "internetgame");
+	m_currentScreen->Invoke1("_root.Root.MainMenu.MultiPlayer.MultiPlayer.gotoAndPlay", "internetgame");
 		if(!IsIngame())
 			m_lastMenu = 2;
   }
@@ -697,7 +697,7 @@ void CMPHub::SwitchToLobby()
 void CMPHub::ShowLoadingDlg(const char* message)
 {
   if(m_currentScreen)
-    m_currentScreen->Invoke1("showLOADING",true);
+	m_currentScreen->Invoke1("showLOADING",true);
   //TODO : set header
   SetLoadingDlgText(message,true);
 }
@@ -714,7 +714,7 @@ void CMPHub::SetLoadingDlgText(const char* text, bool localize)
 {
   SFlashVarValue args[]={text,localize};
   if(m_currentScreen)
-    m_currentScreen->Invoke("setLOADINGText",args,sizeof(args)/sizeof(args[0]));
+	m_currentScreen->Invoke("setLOADINGText",args,sizeof(args)/sizeof(args[0]));
 }
 
 void CMPHub::SetLoadingDlgText(const char* fmt, const char* param)
@@ -734,14 +734,14 @@ void CMPHub::SetLoadingDlgText(const char* fmt, const char* param)
 void CMPHub::CloseLoadingDlg()
 {
   if(m_currentScreen)
-    m_currentScreen->Invoke1("showLOADING",false);
+	m_currentScreen->Invoke1("showLOADING",false);
 }
 
 void CMPHub::OnQuickGame()
 {
   INetworkService *serv = gEnv->pNetwork->GetService("GameSpy");
   if(!serv || serv->GetState()!= eNSS_Ok)
-    return;
+	return;
 
 	if(IsIngame())
 	{
@@ -757,14 +757,14 @@ void CMPHub::OnQuickGame()
 void CMPHub::SetLoginInfo(const char* nick)
 {
   if(!m_menuOpened || !m_currentScreen)
-    return;
+	return;
   if(nick)
   {
-    m_currentScreen->Invoke0("GSConnect");
+	m_currentScreen->Invoke0("GSConnect");
   }
   else
   {
-    m_currentScreen->Invoke0("GSDisconnect");
+	m_currentScreen->Invoke0("GSDisconnect");
   }
 }
 
@@ -951,13 +951,13 @@ void CMPHub::DoLoginProfile(const char* email, const char* pwd, const char* prof
 void CMPHub::DoLogoff()
 {
   if(!m_profile.get())
-    return;
+	return;
   m_login.resize(0);
   m_profile->Logoff();
   m_profile.reset(0);
   SetLoginInfo(0);
   if(m_menu.get())
-    SwitchToMainScreen();
+	SwitchToMainScreen();
 	m_menu.reset(0);
 	if(m_lastMenu == 2)
 		m_lastMenu = 0;
@@ -1103,10 +1103,10 @@ void CMPHub::OnMenuOpened()
 void CMPHub::OnShowIngameMenu()
 {
   if(!m_currentScreen)
-    return;
+	return;
   m_currentScreen->SetVariable("MainWindow",2);
   if(m_lastMenu)
-    m_currentScreen->SetVariable("SubWindow",m_lastMenu);
+	m_currentScreen->SetVariable("SubWindow",m_lastMenu);
 }
 
 
@@ -1140,7 +1140,7 @@ void CMPHub::AddGameModToList(const char* mod)
 {
   if(m_currentScreen)
   {
-    m_currentScreen->Invoke1("_root.Root.MainMenu.MultiPlayer.AddGameMode",mod);
+	m_currentScreen->Invoke1("_root.Root.MainMenu.MultiPlayer.AddGameMode",mod);
   }
 }
 
@@ -1165,7 +1165,7 @@ void CMPHub::CDialog::Show(CMPHub* hub)
 void CMPHub::CDialog::Close()
 {
   if(!m_hub)
-    return;
+	return;
   OnClose();
   //hide in UI
   m_hub->m_dialogs.pop_back();

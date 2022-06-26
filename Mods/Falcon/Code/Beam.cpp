@@ -180,12 +180,12 @@ void CBeam::Update(float frameTime, uint frameId)
    
 		}
 
-    if (m_fireLoopId != INVALID_SOUNDID)
-    {
-      ISound *pSound = m_pWeapon->GetSoundProxy()->GetSound(m_fireLoopId);
-      if (pSound)
-        pSound->SetLineSpec(pos, hit);
-    }    
+	if (m_fireLoopId != INVALID_SOUNDID)
+	{
+	  ISound *pSound = m_pWeapon->GetSoundProxy()->GetSound(m_fireLoopId);
+	  if (pSound)
+		pSound->SetLineSpec(pos, hit);
+	}    
 
 		if (hitValid)
 		{
@@ -242,7 +242,7 @@ void CBeam::Update(float frameTime, uint frameId)
 				}
 			}
 
-      Hit(rayhit, dir);
+	  Hit(rayhit, dir);
 
 			m_lastOrg = pos;
 			m_lastHit = rayhit.pt;
@@ -489,7 +489,7 @@ void CBeam::DecalLine(const Vec3 &org0, const Vec3 &org1, const Vec3 &hit0, cons
 
 		ray_hit rayhit;
 		IPhysicalEntity *pSkipEnts[10];
-    int nSkip = GetSkipEntities(m_pWeapon, pSkipEnts, 10);
+	int nSkip = GetSkipEntities(m_pWeapon, pSkipEnts, 10);
 
 		if (gEnv->pPhysicalWorld->RayWorldIntersection(org, dir, ent_all,
 			rwi_stop_at_pierceable|rwi_colltype_any, &rayhit, 1, pSkipEnts, nSkip))
@@ -512,7 +512,7 @@ void CBeam::Decal(const ray_hit &rayhit, const Vec3 &dir)
 	decal.vNormal = rayhit.n;
 	decal.fSize = m_beamparams.hit_decal_size;
   if (m_beamparams.hit_decal_size_min != 0.f)
-    decal.fSize -= Random()*max(0.f, m_beamparams.hit_decal_size-m_beamparams.hit_decal_size_min);
+	decal.fSize -= Random()*max(0.f, m_beamparams.hit_decal_size-m_beamparams.hit_decal_size_min);
 	decal.fLifeTime = m_beamparams.hit_decal_lifetime;
 	decal.bAdjustPos = true;
 

@@ -70,7 +70,7 @@ bool CScout::CreateCodeEvent(SmartScriptTable &rTable)
 {
 	const char *event = 0;
 	if (!rTable->GetValue("event",event))
-    return false;
+	return false;
   
 	if (!strcmp(event,"spawnDebris"))
 	{
@@ -85,11 +85,11 @@ bool CScout::CreateCodeEvent(SmartScriptTable &rTable)
 	}
   else if (!strcmp(event,"searchBeam"))
   {
-    bool bEnable = false;
-    if (!(rTable->GetValue("enable", bEnable)))
-      return false;
-    
-    return EnableSearchBeam(bEnable);
+	bool bEnable = false;
+	if (!(rTable->GetValue("enable", bEnable)))
+	  return false;
+	
+	return EnableSearchBeam(bEnable);
   }
 	else
 		return CAlien::CreateCodeEvent(rTable);
@@ -98,14 +98,14 @@ bool CScout::CreateCodeEvent(SmartScriptTable &rTable)
 bool CScout::EnableSearchBeam(bool enable)
 {
   if (!(m_searchbeam.itemId && m_searchbeam.pAttachment))
-    return false;
+	return false;
 
   m_searchbeam.active = enable;
   
   if (CLam* pLam = (CLam*)g_pGame->GetIGameFramework()->GetIItemSystem()->GetItem(m_searchbeam.itemId))
   {
-    pLam->ActivateLight(enable, true);
-    return true;
+	pLam->ActivateLight(enable, true);
+	return true;
   }    
 
   return false;
@@ -136,24 +136,24 @@ void CScout::Revive(bool fromInit)
   
   if (m_searchbeam.itemId)
   {
-    if (!m_searchbeam.pAttachment)
-    {
-      if (ICharacterInstance *pCharacter = GetEntity()->GetCharacter(0)) 
-      {
-        IAttachmentManager* pAttachMan = pCharacter->GetIAttachmentManager();
-        m_searchbeam.pAttachment = pAttachMan->GetInterfaceByName("searchlight_attachment");
+	if (!m_searchbeam.pAttachment)
+	{
+	  if (ICharacterInstance *pCharacter = GetEntity()->GetCharacter(0)) 
+	  {
+		IAttachmentManager* pAttachMan = pCharacter->GetIAttachmentManager();
+		m_searchbeam.pAttachment = pAttachMan->GetInterfaceByName("searchlight_attachment");
 
-        if (!m_searchbeam.pAttachment)    
-          m_searchbeam.pAttachment = pAttachMan->CreateAttachment("searchlight_attachment", CA_BONE, "weapon_bone");
-      }
-    } 
+		if (!m_searchbeam.pAttachment)    
+		  m_searchbeam.pAttachment = pAttachMan->CreateAttachment("searchlight_attachment", CA_BONE, "weapon_bone");
+	  }
+	} 
 
-    if (m_searchbeam.pAttachment)
-    {
-      CEntityAttachment *pEntityAttachment = new CEntityAttachment();
-      pEntityAttachment->SetEntityId(m_searchbeam.itemId);
-      m_searchbeam.pAttachment->AddBinding(pEntityAttachment);
-    }   
+	if (m_searchbeam.pAttachment)
+	{
+	  CEntityAttachment *pEntityAttachment = new CEntityAttachment();
+	  pEntityAttachment->SetEntityId(m_searchbeam.itemId);
+	  m_searchbeam.pAttachment->AddBinding(pEntityAttachment);
+	}   
   }  
 }
 
@@ -318,7 +318,7 @@ void CScout::ProcessMovementNew(float frameTime)
 
 		// commit the result interpolation & set velocity immidiately
 		m_moveRequest.rotation = GetEntity()->GetRotation().GetInverted() * modelRot;
-    m_moveRequest.rotation.Normalize();
+	m_moveRequest.rotation.Normalize();
 		m_moveRequest.velocity = m_velocity;
 		m_moveRequest.type = eCMT_Fly;
 
@@ -381,7 +381,7 @@ void CScout::ProcessMovement(float frameTime)
 	if (m_stats.sprintLeft)
 		move *= m_params.sprintMultiplier;
 
- 	m_desiredVelocity = move;
+	m_desiredVelocity = move;
 
 	Matrix33 velMtx;
 	Vec3 vecRefRoll;

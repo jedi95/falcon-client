@@ -220,7 +220,7 @@ struct SPlayerParams : public SActorParams
 
 	SPlayerParams()
 	{
- 		memset(this,0,sizeof(SPlayerParams));
+		memset(this,0,sizeof(SPlayerParams));
 		new (this) SActorParams();
 
 		sprintMultiplier = 1.25f;
@@ -404,10 +404,10 @@ protected:
 public:
   struct SAlienInterferenceParams
   {
-    SAlienInterferenceParams() : maxdist(0.f) {}
-    SAlienInterferenceParams(float dist) : maxdist(dist) {}
+	SAlienInterferenceParams() : maxdist(0.f) {}
+	SAlienInterferenceParams(float dist) : maxdist(dist) {}
 
-    float maxdist;
+	float maxdist;
   };
 
 	struct UnfreezeParams
@@ -685,14 +685,11 @@ public:
 	void ResetScreenFX();
 	void ResetFPView();
 
-	//Hit assistance
-	bool HasHitAssistance();
-
-	void CreateVoiceListener();	
+	void CreateVoiceListener();
 
 	struct SStagingParams
 	{
-		SStagingParams() : 
+		SStagingParams() :
 			bActive(false), bLocked(false), vLimitDir(ZERO), vLimitRangeH(0.0f), vLimitRangeV(0.0f), stance(STANCE_NULL)
 		{
 		}
@@ -716,7 +713,7 @@ public:
 		}
 	};
 
-	void StagePlayer(bool bStage, SStagingParams* pStagingParams = 0); 
+	void StagePlayer(bool bStage, SStagingParams* pStagingParams = 0);
 
 	void NotifyObjectGrabbed(bool bIsGrab, EntityId objectId, bool bIsNPC, bool bIsTwoHanded = false); // called from OffHand.cpp. bIsGrab always true atm
 
@@ -827,14 +824,14 @@ protected:
 	float m_underwaterBubblesDelay;
 	float m_stickySurfaceTimer;
 
-	// used by parachute. 
-	int			m_nParachuteSlot;
-	float		m_fParachuteMorph; //0..1 to play morph targets
-	bool		m_parachuteEnabled;
-	float		m_openParachuteTimer;
-	bool    m_openingParachute;
+	// used by parachute.
+	int		m_nParachuteSlot;
+	float	m_fParachuteMorph; //0..1 to play morph targets
+	bool	m_parachuteEnabled;
+	float	m_openParachuteTimer;
+	bool	m_openingParachute;
 
-	bool		m_sufferingHighLatency;
+	bool	m_sufferingHighLatency;
 
 	CVehicleClient* m_pVehicleClient;
 	Vec3 m_vehicleViewDir;
@@ -845,17 +842,16 @@ protected:
 	//client / localActor active first person effects
 	std::vector<EClientPostEffect> m_clientPostEffects;
 
-  typedef std::map<IEntityClass*, const SAlienInterferenceParams> TAlienInterferenceParams;
-  static TAlienInterferenceParams m_interferenceParams;
+	typedef std::map<IEntityClass*, const SAlienInterferenceParams> TAlienInterferenceParams;
+	static TAlienInterferenceParams m_interferenceParams;
 
-	std::list<EntityId>			m_explosiveList[eET_NumTypes];
-  bool                    m_bSpeedSprint;
-	bool										m_bHasAssistance;
-	bool                    m_bVoiceSoundPlaying;
-	bool                    m_bVoiceSoundRecursionFlag;
-	IGameObjectExtension*		m_pVoiceListener;
-	IGameObjectExtension*		m_pInteractor;
-	IEntitySoundProxy*      m_pSoundProxy;
+	std::list<EntityId>		m_explosiveList[eET_NumTypes];
+	bool					m_bSpeedSprint;
+	bool					m_bVoiceSoundPlaying;
+	bool					m_bVoiceSoundRecursionFlag;
+	IGameObjectExtension*	m_pVoiceListener;
+	IGameObjectExtension*	m_pInteractor;
+	IEntitySoundProxy*		m_pSoundProxy;
 
 	SStagingParams m_stagingParams;
 

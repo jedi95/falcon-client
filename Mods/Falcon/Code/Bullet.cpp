@@ -45,7 +45,7 @@ void CBullet::HandleEvent(const SGameObjectEvent &event)
 		EventPhysCollision *pCollision = reinterpret_cast<EventPhysCollision *>(event.ptr);
 		if (!pCollision)
 			return;
-        
+		
 		IEntity *pTarget = pCollision->iForeignData[1]==PHYS_FOREIGN_ID_ENTITY ? (IEntity*)pCollision->pForeignData[1]:0;
 
 		//Only process hits that have a target

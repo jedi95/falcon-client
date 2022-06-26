@@ -268,10 +268,6 @@ CHUD::CHUD()
 	m_bCutsceneAbortPressed = false;
 	m_bCutsceneCanBeAborted = true;
 	m_fCutsceneSkipTimer = 0.0f;
-
-	//just a small enough value to have no restrictions at startup
-	m_lastNonAssistedInput=-3600.0f;
-	m_hitAssistanceAvailable=false;
 	m_quietMode = false;
 
 	m_buyMenuKeyLog.Clear();
@@ -322,9 +318,9 @@ CHUD::~CHUD()
 	CPlayer *pPlayer = static_cast<CPlayer *>(gEnv->pGame->GetIGameFramework()->GetClientActor());
   if(pPlayer)
   {
-    pPlayer->UnregisterPlayerEventListener(this);
-    if(CNanoSuit *pSuit=pPlayer->GetNanoSuit())
-      pSuit->RemoveListener(this);
+	pPlayer->UnregisterPlayerEventListener(this);
+	if(CNanoSuit *pSuit=pPlayer->GetNanoSuit())
+	  pSuit->RemoveListener(this);
   }
 
 	ISubtitleManager* pSubtitleManager = pGF->GetISubtitleManager();
@@ -801,7 +797,7 @@ void CHUD::PlayerIdSet(EntityId playerId)
 		pPlayer = static_cast<CPlayer *>(gEnv->pGame->GetIGameFramework()->GetClientActor());
 		if(pPlayer)
 		{
-      pPlayer->UnregisterPlayerEventListener(this);
+	  pPlayer->UnregisterPlayerEventListener(this);
 			if(CNanoSuit *pSuit=pPlayer->GetNanoSuit())
 				pSuit->RemoveListener(this);
 		}
@@ -814,10 +810,10 @@ void CHUD::GameRulesSet(const char* name)
 
   if(gEnv->bMultiplayer)
   {
-    if(!stricmp(name, "InstantAction"))
-      gameRules = EHUD_INSTANTACTION;
-    else if(!stricmp(name, "PowerStruggle"))
-      gameRules = EHUD_POWERSTRUGGLE;
+	if(!stricmp(name, "InstantAction"))
+	  gameRules = EHUD_INSTANTACTION;
+	else if(!stricmp(name, "PowerStruggle"))
+	  gameRules = EHUD_POWERSTRUGGLE;
 		else if(!stricmp(name, "TeamAction"))
 			gameRules = EHUD_TEAMACTION;
 		else if(!stricmp(name, "TeamInstantAction"))
@@ -826,8 +822,8 @@ void CHUD::GameRulesSet(const char* name)
 
   if(m_currentGameRules != gameRules)//unload stuff
   {
-    LoadGameRulesHUD(false);
-    m_currentGameRules = gameRules;
+	LoadGameRulesHUD(false);
+	m_currentGameRules = gameRules;
   }
 
   LoadGameRulesHUD(true);
@@ -1974,21 +1970,6 @@ bool CHUD::OnInputEvent(const SInputEvent &rInputEvent)
 	}
 
 	if(gEnv->pSystem->IsEditor() || gEnv->pSystem->IsDedicated()) return false;
-
-	// Prevent cheating with using mouse and assisted controller at the same time
-	if (rInputEvent.deviceId == eDI_Mouse)
-		m_lastNonAssistedInput=gEnv->pTimer->GetCurrTime();
-
-	bool assistance=IsInputAssisted();
-	if (m_hitAssistanceAvailable != assistance)
-	{
-		// Notify server on the change
-		IActor *pSelfActor=g_pGame->GetIGameFramework()->GetClientActor();
-		if (pSelfActor)
-			pSelfActor->GetGameObject()->InvokeRMI(CPlayer::SvRequestHitAssistance(), CPlayer::HitAssistanceParams(assistance), eRMI_ToServer);
-
-		m_hitAssistanceAvailable=assistance;
-	}
 
 	bool sittingInVehicle = false;
 
@@ -4478,7 +4459,7 @@ void CHUD::ActorDeath(IActor* pActor)
 			OnAction(g_pGame->Actions().hud_suit_menu, eIS_Released, 1);
 
 		if(m_currentGameRules == EHUD_SINGLEPLAYER)
-    {
+	{
 			ShowPDA(false);
 			ShowBuyMenu(false);
 			m_fPlayerDeathTime = gEnv->pTimer->GetFrameStartTime().GetSeconds();
@@ -4487,7 +4468,7 @@ void CHUD::ActorDeath(IActor* pActor)
 		{
 			ShowPDA(true);
 			m_spawnWarningTimer = 1.0f;
-    } 
+	} 
 
 		m_pHUDCrosshair->SetUsability(0);
 
@@ -4894,16 +4875,6 @@ void CHUD::StartPlayerFallAndPlay()
 
 //-----------------------------------------------------------------------------------------------------
 
-bool CHUD::IsInputAssisted()
-{
-	if (gEnv->pInput)
-		return gEnv->pInput->HasInputDeviceOfType(eIDT_Gamepad) && gEnv->pTimer->GetCurrTime()-m_lastNonAssistedInput > g_pGameCVars->aim_assistRestrictionTimeout;
-	else
-		return false;
-}
-
-//-----------------------------------------------------------------------------------------------------
-
 void CHUD::OnEntityAddedToRadar(EntityId entityId)
 {
 	HUD_CALL_LISTENERS(OnEntityAddedToRadar(entityId));
@@ -5021,61 +4992,61 @@ void CHUD::LoadGameRulesHUD(bool load)
   switch(m_currentGameRules)
   {
   case EHUD_SINGLEPLAYER:
-    if(load)
-    {
-      if(!m_animObjectivesTab.IsLoaded())
-      {
-        m_animObjectivesTab.Load("Libs/UI/HUD_MissionObjectives.gfx", eFD_Left, eFAF_Visible);
-        m_animObjectivesTab.Invoke("showObjectives", "noAnim");
-        m_animObjectivesTab.SetVisible(false);
-      }
+	if(load)
+	{
+	  if(!m_animObjectivesTab.IsLoaded())
+	  {
+		m_animObjectivesTab.Load("Libs/UI/HUD_MissionObjectives.gfx", eFD_Left, eFAF_Visible);
+		m_animObjectivesTab.Invoke("showObjectives", "noAnim");
+		m_animObjectivesTab.SetVisible(false);
+	  }
 			if(!m_animMessages.IsLoaded())
 				m_animMessages.Load("Libs/UI/HUD_Messages.gfx");
-    }
-    else
-    {
-      m_animObjectivesTab.Unload();
+	}
+	else
+	{
+	  m_animObjectivesTab.Unload();
 			m_animMessages.Unload();
-    }
-    break;
+	}
+	break;
   case EHUD_INSTANTACTION:
-    if(load)
-    {
+	if(load)
+	{
 			m_pHUDInstantAction->Show(true);
-      if(!m_animScoreBoard.IsLoaded())
-      {
-        m_animScoreBoard.Load("Libs/UI/HUD_MultiplayerScoreboard_DM.gfx");
-        SetFlashColor(&m_animScoreBoard);
-      }
-      if(!m_animChat.IsLoaded())
-      {
-        m_animChat.Load("Libs/UI/HUD_ChatSystem.gfx", eFD_Left);
+	  if(!m_animScoreBoard.IsLoaded())
+	  {
+		m_animScoreBoard.Load("Libs/UI/HUD_MultiplayerScoreboard_DM.gfx");
+		SetFlashColor(&m_animScoreBoard);
+	  }
+	  if(!m_animChat.IsLoaded())
+	  {
+		m_animChat.Load("Libs/UI/HUD_ChatSystem.gfx", eFD_Left);
 				if(m_pHUDTextChat)
 					m_pHUDTextChat->Init(&m_animChat);
-      }
-      if(!m_animVoiceChat.IsLoaded())
-        m_animVoiceChat.Load("Libs/UI/HUD_MultiPlayer_VoiceChat.gfx", eFD_Right, eFAF_ThisHandler);
-      if(!m_animBattleLog.IsLoaded())
-        m_animBattleLog.Load("Libs/UI/HUD_MP_Log.gfx", eFD_Left);
+	  }
+	  if(!m_animVoiceChat.IsLoaded())
+		m_animVoiceChat.Load("Libs/UI/HUD_MultiPlayer_VoiceChat.gfx", eFD_Right, eFAF_ThisHandler);
+	  if(!m_animBattleLog.IsLoaded())
+		m_animBattleLog.Load("Libs/UI/HUD_MP_Log.gfx", eFD_Left);
 			// This one is on top of others because it displays important
 			// messages, so let's put it at the end of the rendering list
 			if(!m_animMessages.IsLoaded())
 				m_animMessages.Load("Libs/UI/HUD_Messages.gfx");
 			if(!m_animMPMessages.IsLoaded())
 				m_animMPMessages.Load("Libs/UI/HUD_MP_Messages.gfx", eFD_Center, eFAF_Visible);
-    }
-    else
-    {
-      m_animScoreBoard.Unload();
+	}
+	else
+	{
+	  m_animScoreBoard.Unload();
 			if(m_pHUDTextChat)
 				m_pHUDTextChat->Init(0);
-      m_animChat.Unload();
-      m_animVoiceChat.Unload();
-      m_animBattleLog.Unload();
+	  m_animChat.Unload();
+	  m_animVoiceChat.Unload();
+	  m_animBattleLog.Unload();
 			m_animMessages.Unload();
 			m_animMPMessages.Unload();
-    }
-    break;
+	}
+	break;
   case EHUD_POWERSTRUGGLE:
 		if(load)
 		{
@@ -5181,54 +5152,54 @@ void CHUD::LoadGameRulesHUD(bool load)
 		}
 		break;
 	case EHUD_TEAMACTION:
-    if(load)
-    {
-      if(!m_animScoreBoard.IsLoaded())
-      {
-        m_animScoreBoard.Load("Libs/UI/HUD_MultiplayerScoreboard_TDM.gfx");
-        SetFlashColor(&m_animScoreBoard);
-      }
-      if(!m_animChat.IsLoaded())
-      {
-        m_animChat.Load("Libs/UI/HUD_ChatSystem.gfx", eFD_Left);
+	if(load)
+	{
+	  if(!m_animScoreBoard.IsLoaded())
+	  {
+		m_animScoreBoard.Load("Libs/UI/HUD_MultiplayerScoreboard_TDM.gfx");
+		SetFlashColor(&m_animScoreBoard);
+	  }
+	  if(!m_animChat.IsLoaded())
+	  {
+		m_animChat.Load("Libs/UI/HUD_ChatSystem.gfx", eFD_Left);
 				if(m_pHUDTextChat)
 					m_pHUDTextChat->Init(&m_animChat);
-      }
+	  }
 			if(!m_animObjectivesTab.IsLoaded())
 			{
 				m_animObjectivesTab.Load("Libs/UI/HUD_MissionObjectives.gfx", eFD_Left, eFAF_Visible);
 				m_animObjectivesTab.Invoke("showObjectives", "noAnim");
 				m_animObjectivesTab.SetVisible(false);
 			}
-      if(!m_animVoiceChat.IsLoaded())
-        m_animVoiceChat.Load("Libs/UI/HUD_MultiPlayer_VoiceChat.gfx", eFD_Right, eFAF_ThisHandler);
-      if(!m_animBattleLog.IsLoaded())
-        m_animBattleLog.Load("Libs/UI/HUD_MP_Log.gfx", eFD_Left);
+	  if(!m_animVoiceChat.IsLoaded())
+		m_animVoiceChat.Load("Libs/UI/HUD_MultiPlayer_VoiceChat.gfx", eFD_Right, eFAF_ThisHandler);
+	  if(!m_animBattleLog.IsLoaded())
+		m_animBattleLog.Load("Libs/UI/HUD_MP_Log.gfx", eFD_Left);
 
-      if(!m_animRadioButtons.IsLoaded())
-        m_animRadioButtons.Load("Libs/UI/HUD_MP_Radio_Buttons.gfx", eFD_Center, eFAF_ThisHandler);
+	  if(!m_animRadioButtons.IsLoaded())
+		m_animRadioButtons.Load("Libs/UI/HUD_MP_Radio_Buttons.gfx", eFD_Center, eFAF_ThisHandler);
 
-      if(!m_animBuyMenu.IsLoaded())
-        m_animBuyMenu.Load("Libs/UI/HUD_PDA_Buy.gfx", eFD_Right, eFAF_ThisHandler);
-      if(!m_animPlayerPP.IsLoaded())
-        m_animPlayerPP.Load("Libs/UI/HUD_MP_PPoints.gfx", eFD_Right);
+	  if(!m_animBuyMenu.IsLoaded())
+		m_animBuyMenu.Load("Libs/UI/HUD_PDA_Buy.gfx", eFD_Right, eFAF_ThisHandler);
+	  if(!m_animPlayerPP.IsLoaded())
+		m_animPlayerPP.Load("Libs/UI/HUD_MP_PPoints.gfx", eFD_Right);
 			if(!m_animPlayerPPChange.IsLoaded())
 				m_animPlayerPPChange.Load("Libs/UI/HUD_MP_PPoints_Log.gfx", eFD_Right, eFAF_Visible);
-    }
-    else
-    {
-      m_animScoreBoard.Unload();
+	}
+	else
+	{
+	  m_animScoreBoard.Unload();
 			if(m_pHUDTextChat)
 				m_pHUDTextChat->Init(0);
-      m_animChat.Unload();
-      m_animVoiceChat.Unload();
-      m_animBattleLog.Unload();
-      m_animBuyMenu.Unload();
+	  m_animChat.Unload();
+	  m_animVoiceChat.Unload();
+	  m_animBattleLog.Unload();
+	  m_animBuyMenu.Unload();
 			m_animPlayerPP.Unload();
 			m_animPlayerPPChange.Unload();
 			m_animObjectivesTab.Unload();
-    }
-    break;
+	}
+	break;
   }
 }
 

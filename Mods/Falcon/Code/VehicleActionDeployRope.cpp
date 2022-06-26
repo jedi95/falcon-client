@@ -102,7 +102,7 @@ void CVehicleActionDeployRope::Reset()
 //------------------------------------------------------------------------
 void CVehicleActionDeployRope::OnAction(const TVehicleActionId actionId, int activationMode, float value)
 {
- 	if (actionId == eVAI_Attack1 && activationMode == eAAM_OnPress)
+	if (actionId == eVAI_Attack1 && activationMode == eAAM_OnPress)
 	{
 		if (m_pDeployAnim)
 			m_pDeployAnim->ChangeState(m_deployAnimOpenedId);

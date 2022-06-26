@@ -116,7 +116,7 @@ CScriptBind_Actor::CScriptBind_Actor(ISystem *pSystem)
 	SCRIPT_REG_TEMPLFUNC(SetSpectatorMode,"mode, target");
 	SCRIPT_REG_TEMPLFUNC(GetSpectatorMode,"");
 	SCRIPT_REG_TEMPLFUNC(GetSpectatorTarget, "");
-	
+
 	SCRIPT_REG_TEMPLFUNC(Fall,"hitPosX, hitPosY, hitPosZ");
 	SCRIPT_REG_FUNC(IsFallen);
 	SCRIPT_REG_FUNC(GetFallenTime);
@@ -222,7 +222,7 @@ CActor *CScriptBind_Actor::GetActor(IFunctionHandler *pH)
 //------------------------------------------------------------------------
 int CScriptBind_Actor::DumpActorInfo(IFunctionHandler *pH)
 {
-  return pH->EndFunction();
+	return pH->EndFunction();
 }
 
 //------------------------------------------------------------------------
@@ -609,12 +609,11 @@ int CScriptBind_Actor::CameraShake(IFunctionHandler *pH,float amount,float durat
 	if (!pActor)
 		return pH->EndFunction();
 
-  const char* source = "";
-  if (pH->GetParamType(5) != svtNull)
-    pH->GetParam(5, source);
-    
+	const char* source = "";
+	if (pH->GetParamType(5) != svtNull)
+		pH->GetParam(5, source);
+
 	pActor->CameraShake(amount,0,duration,frequency,pos,0,source);
-		
 	return pH->EndFunction();
 }
 
@@ -892,14 +891,14 @@ int CScriptBind_Actor::GetHealth(IFunctionHandler *pH)
 //------------------------------------------------------------------------
 int CScriptBind_Actor::GetMaxHealth(IFunctionHandler *pH)
 {
-  CActor *pActor = GetActor(pH);
+	CActor *pActor = GetActor(pH);
 	if (!pActor)
 		return pH->EndFunction();
 
-  if (pActor)
-    return pH->EndFunction(pActor->GetMaxHealth());
+	if (pActor)
+		return pH->EndFunction(pActor->GetMaxHealth());
 
-  return pH->EndFunction();
+	return pH->EndFunction();
 }
 
 //------------------------------------------------------------------------
@@ -1210,7 +1209,7 @@ int CScriptBind_Actor::AttachVulnerabilityEffect(IFunctionHandler *pH, int chara
 	{
 		IAttachment* pAtt = pMan->GetInterfaceByIndex(i);
 
-		float diff = (hitPos - pAtt->GetAttWorldAbsolute().t).len2();        
+		float diff = (hitPos - pAtt->GetAttWorldAbsolute().t).len2();
 		if (diff < minDiff)
 		{
 			// only use specified attachments 
@@ -1246,7 +1245,7 @@ int CScriptBind_Actor::GetClosestAttachment(IFunctionHandler *pH, int characterS
 		return pH->EndFunction();
 
 	//fallback: use nearest attachment
-	float minDiff = maxDistance*maxDistance;  
+	float minDiff = maxDistance*maxDistance;
 	IAttachment* pClosestAtt = 0;
 
 	IAttachmentManager* pMan = pChar->GetIAttachmentManager();
@@ -1369,7 +1368,7 @@ int CScriptBind_Actor::GetCloseColliderParts(IFunctionHandler *pH, int character
 			if (pPhysics->GetParams(&params))
 			{
 				phys_geometry* pGeom = params.pPhysGeomProxy ? params.pPhysGeomProxy : params.pPhysGeom;
-				if (pGeom->surface_idx > 0 &&  pGeom->surface_idx < params.nMats)
+				if (pGeom->surface_idx > 0 && pGeom->surface_idx < params.nMats)
 				{
 					if (ISurfaceType *pSurfaceType=pSurfaceMan->GetSurfaceType(pGeom->pMatMapping[pGeom->surface_idx]))
 						return pH->EndFunction(params.partid, pSurfaceType->GetName(), pSurfaceType->GetType());
@@ -1742,7 +1741,6 @@ int CScriptBind_Actor::IsFlying(IFunctionHandler *pH)
 	return pH->EndFunction();
 }
 
-
 // Crafty #CustomCharacters
 //------------------------------------------------------------------------
 int CScriptBind_Actor::SetCustomSuitMats(IFunctionHandler* pH, bool bSupports)
@@ -1793,3 +1791,5 @@ int CScriptBind_Actor::ResetAnimationGraph(IFunctionHandler* pH)
 
 	return pH->EndFunction();
 }
+
+//------------------------------------------------------------------------

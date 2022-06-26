@@ -100,7 +100,7 @@ void CScriptBind_Item::RegisterMethods()
 	SCRIPT_REG_TEMPLFUNC(StopUse, "userId");
 	SCRIPT_REG_TEMPLFUNC(Use, "userId");
 	SCRIPT_REG_TEMPLFUNC(IsUsed, "");
- 	SCRIPT_REG_TEMPLFUNC(GetMountedDir, "");
+	SCRIPT_REG_TEMPLFUNC(GetMountedDir, "");
 	SCRIPT_REG_TEMPLFUNC(GetMountedAngleLimits, "");
 	SCRIPT_REG_TEMPLFUNC(SetMountedAngleLimits,"min_pitch, max_pitch, yaw_range");
 
@@ -399,7 +399,7 @@ int CScriptBind_Item::OnHit(IFunctionHandler *pH, SmartScriptTable hitTable)
 {
   CItem *pItem = GetItem(pH);
   if (!pItem)
-    return pH->EndFunction();
+	return pH->EndFunction();
 
   float damage = 0.f;
   hitTable->GetValue("damage", damage);
@@ -416,7 +416,7 @@ int CScriptBind_Item::IsDestroyed(IFunctionHandler *pH)
 {
   CItem *pItem = GetItem(pH);
   if (!pItem)
-    return pH->EndFunction(false);
+	return pH->EndFunction(false);
 
   return pH->EndFunction(pItem->IsDestroyed());
 }

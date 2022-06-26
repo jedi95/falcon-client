@@ -32,11 +32,11 @@ inline T CreateRotation(int axis, float rad)
   switch (axis)
   {
   case AXIS_X:
-    return T::CreateRotationX(rad);    
+	return T::CreateRotationX(rad);    
   case AXIS_Y:
-    return T::CreateRotationY(rad);
+	return T::CreateRotationY(rad);
   case AXIS_Z:
-    return T::CreateRotationZ(rad);  
+	return T::CreateRotationZ(rad);  
   }
   return T::CreateIdentity();
 }
@@ -71,10 +71,10 @@ bool CVehicleMovementWarrior::Init(IVehicle* pVehicle, const SmartScriptTable &t
 {
   SmartScriptTable hovercraftTable;
   if (!table->GetValue("Hovercraft", hovercraftTable))
-    return false;
+	return false;
 
   if (!CVehicleMovementHovercraft::Init(pVehicle, hovercraftTable))
-    return false;
+	return false;
 
   table->GetValue("maxThrustersDamaged", m_maxThrustersDamaged);
   table->GetValue("collapsedFeetAngle", m_collapsedFeetAngle);
@@ -86,7 +86,7 @@ bool CVehicleMovementWarrior::Init(IVehicle* pVehicle, const SmartScriptTable &t
 
   for (TThrusters::iterator it=m_vecThrusters.begin(); it!=m_vecThrusters.end(); ++it)
   {
-    m_thrustersInit.push_back( new SThruster(**it) );
+	m_thrustersInit.push_back( new SThruster(**it) );
   }
 
   m_pTurret = m_pVehicle->GetPart("turret1");
@@ -106,19 +106,19 @@ void CVehicleMovementWarrior::Reset()
 
   if (IsCollapsing() || IsCollapsed())
   {
-    m_pVehicle->GetGameObject()->DisableUpdateSlot(m_pVehicle, IVehicle::eVUS_EnginePowered); 
+	m_pVehicle->GetGameObject()->DisableUpdateSlot(m_pVehicle, IVehicle::eVUS_EnginePowered); 
   }
 
   if (IsCollapsing())
   {
-    m_bEngineAlwaysOn = false;
+	m_bEngineAlwaysOn = false;
   }
 
   m_thrustersDamaged = 0;
   m_collapseTimer = -1.f;
   m_platformDown = false;
   m_collapsed = false;
-    
+	
   ResetThrusters();
 }
 
@@ -127,12 +127,12 @@ void CVehicleMovementWarrior::ResetThrusters()
 {
   for (int i=0; i<m_numThrusters; ++i)
   { 
-    SThruster* curr = m_vecThrusters[i];
-    SThruster* prev = m_thrustersInit[i];
+	SThruster* curr = m_vecThrusters[i];
+	SThruster* prev = m_thrustersInit[i];
 
-    curr->heightAdaption = prev->heightAdaption;
-    curr->hoverHeight    = prev->hoverHeight;
-    curr->hoverVariance  = prev->hoverVariance;
+	curr->heightAdaption = prev->heightAdaption;
+	curr->hoverHeight    = prev->hoverHeight;
+	curr->hoverVariance  = prev->hoverVariance;
   }
 }
 
@@ -147,25 +147,25 @@ bool CVehicleMovementWarrior::IsCollapsing()
 void CVehicleMovementWarrior::EnableThruster(SThruster* pThruster, bool enable)
 {
   pThruster->enabled = enable;
-    
+	
   if (!pThruster->pHelper)
   {
-    // disable exhaust
-    // todo: add direct access to these
-    for (std::vector<SExhaustStatus>::iterator it = m_paStats.exhaustStats.begin(); it != m_paStats.exhaustStats.end(); ++it)
-    {
-      if (it->pHelper == pThruster->pHelper)
-      {
-        it->enabled = (int)enable;
-      }
-    }
+	// disable exhaust
+	// todo: add direct access to these
+	for (std::vector<SExhaustStatus>::iterator it = m_paStats.exhaustStats.begin(); it != m_paStats.exhaustStats.end(); ++it)
+	{
+	  if (it->pHelper == pThruster->pHelper)
+	  {
+		it->enabled = (int)enable;
+	  }
+	}
   }
 
   int nDamaged = m_thrustersDamaged + (enable ? -1 : 1);
 
   if (m_maxThrustersDamaged >= 0 && nDamaged >= m_maxThrustersDamaged && m_thrustersDamaged < m_maxThrustersDamaged)
   {
-    Collapse();
+	Collapse();
   }
   m_thrustersDamaged = nDamaged;
 }
@@ -177,47 +177,47 @@ void CVehicleMovementWarrior::OnEvent(EVehicleMovementEvent event, const SVehicl
 
   if (event == eVME_Damage && params.pComponent && params.fValue >= 1.f)
   {
-    // disable nearest thruster
-    const AABB& bounds = params.pComponent->GetBounds();
-    float minDistSq = 10000.f;    
-    SThruster* pThrusterNearest = 0;
-    bool bContained = false;
+	// disable nearest thruster
+	const AABB& bounds = params.pComponent->GetBounds();
+	float minDistSq = 10000.f;    
+	SThruster* pThrusterNearest = 0;
+	bool bContained = false;
 
-    for (TThrusters::iterator it=m_vecThrusters.begin(); it!=m_vecThrusters.end(); ++it)
-    {       
-      if (bounds.IsContainPoint((*it)->pos))
-      {
-        EnableThruster(*it, false);
-        bContained = true;
-        break;
-      }
-        
-      float distSq = Vec3((*it)->pos - params.vParam).len2();
+	for (TThrusters::iterator it=m_vecThrusters.begin(); it!=m_vecThrusters.end(); ++it)
+	{       
+	  if (bounds.IsContainPoint((*it)->pos))
+	  {
+		EnableThruster(*it, false);
+		bContained = true;
+		break;
+	  }
+		
+	  float distSq = Vec3((*it)->pos - params.vParam).len2();
 
-      if (distSq < minDistSq)
-      {
-        minDistSq = distSq;
-        pThrusterNearest = *it;
-      }
-    }
+	  if (distSq < minDistSq)
+	  {
+		minDistSq = distSq;
+		pThrusterNearest = *it;
+	  }
+	}
 
-    // if none inside component bbox, disable nearest one
-    if (pThrusterNearest && !bContained)
-      EnableThruster(pThrusterNearest, false);
+	// if none inside component bbox, disable nearest one
+	if (pThrusterNearest && !bContained)
+	  EnableThruster(pThrusterNearest, false);
   }
   else if (event == eVME_GroundCollision && params.iValue)
   { 
-    // register first ground contacts after platform is down
-    // maybe hold a map for this
-    for (TThrusters::iterator it=m_vecThrusters.begin(); it!=m_vecThrusters.end(); ++it)
-    {
-      SThruster* pThruster = *it;
-      if  (pThruster->pPart && pThruster->pPart->GetPhysId() == params.iValue)
-      {
-        pThruster->groundContact = true;
-      }
-    }
-    
+	// register first ground contacts after platform is down
+	// maybe hold a map for this
+	for (TThrusters::iterator it=m_vecThrusters.begin(); it!=m_vecThrusters.end(); ++it)
+	{
+	  SThruster* pThruster = *it;
+	  if  (pThruster->pPart && pThruster->pPart->GetPhysId() == params.iValue)
+	  {
+		pThruster->groundContact = true;
+	  }
+	}
+	
   }
 }
 
@@ -229,7 +229,7 @@ void CVehicleMovementWarrior::ProcessMovement(const float deltaTime)
 {
   if (!IsCollapsed())
   {
-    CVehicleMovementHovercraft::ProcessMovement(deltaTime);
+	CVehicleMovementHovercraft::ProcessMovement(deltaTime);
   }
 }
 
@@ -237,25 +237,25 @@ void CVehicleMovementWarrior::ProcessMovement(const float deltaTime)
 void CVehicleMovementWarrior::Collapse()
 {
   if (IsCollapsing() || IsCollapsed())
-    return;
+	return;
 
   // start collapsing
   m_collapseTimer = 0.f;
 
   for (TThrusters::iterator it=m_vecThrusters.begin(); it!=m_vecThrusters.end(); ++it)
   {
-    SThruster* pThruster = *it;
+	SThruster* pThruster = *it;
 
-    if (pThruster->pPart && pThruster->heightAdaption > 0.f)
-    {
-      pThruster->enabled = true; // enable all for collapsing
-      pThruster->heightAdaption *= 2.f;
-    }
-    else
-    {
-      pThruster->enabled = true;      
-      pThruster->hoverVariance = 0.f;      
-    }
+	if (pThruster->pPart && pThruster->heightAdaption > 0.f)
+	{
+	  pThruster->enabled = true; // enable all for collapsing
+	  pThruster->heightAdaption *= 2.f;
+	}
+	else
+	{
+	  pThruster->enabled = true;      
+	  pThruster->hoverVariance = 0.f;      
+	}
   }
 
   // make sure engine gets updated
@@ -272,33 +272,33 @@ void CVehicleMovementWarrior::Collapsed(bool collapsed)
 {
   if (collapsed && !m_collapsed)
   {
-    m_collapsed = true;
-    EnableMovementProcessing(false);
-    m_bEngineAlwaysOn = false;
-        
-    SGameObjectEvent event(eCGE_Event_Collapsed, eGOEF_ToScriptSystem);          
-    m_pVehicle->GetGameObject()->SendEvent(event);
+	m_collapsed = true;
+	EnableMovementProcessing(false);
+	m_bEngineAlwaysOn = false;
+		
+	SGameObjectEvent event(eCGE_Event_Collapsed, eGOEF_ToScriptSystem);          
+	m_pVehicle->GetGameObject()->SendEvent(event);
 
   }
   else if (!collapsed && m_collapsed)
   {
-    m_collapsed = false;      
-    m_collapseTimer = -1.f;
-    m_platformDown = false;    
-    
-    // just reset damage for now
-    m_damage = 0.f; 
-    m_thrustersDamaged = 0;
-    
-    ResetThrusters();
-    
-    for (std::vector<SExhaustStatus>::iterator it = m_paStats.exhaustStats.begin(); it != m_paStats.exhaustStats.end(); ++it)
-    {
-      it->enabled = 1;      
-    }
+	m_collapsed = false;      
+	m_collapseTimer = -1.f;
+	m_platformDown = false;    
+	
+	// just reset damage for now
+	m_damage = 0.f; 
+	m_thrustersDamaged = 0;
+	
+	ResetThrusters();
+	
+	for (std::vector<SExhaustStatus>::iterator it = m_paStats.exhaustStats.begin(); it != m_paStats.exhaustStats.end(); ++it)
+	{
+	  it->enabled = 1;      
+	}
 
-    m_pVehicle->GetGameObject()->DisableUpdateSlot(m_pVehicle, IVehicle::eVUS_EnginePowered);
-    EnableMovementProcessing(true);
+	m_pVehicle->GetGameObject()->DisableUpdateSlot(m_pVehicle, IVehicle::eVUS_EnginePowered);
+	EnableMovementProcessing(true);
   }
 }
 
@@ -306,7 +306,7 @@ void CVehicleMovementWarrior::Collapsed(bool collapsed)
 float CVehicleMovementWarrior::RotatePart(IVehiclePart* pPart, float angleGoal, int axis, float speed, float deltaTime, float maxDelta)
 {
   if (!pPart)
-    return 0.f;
+	return 0.f;
 
   const Matrix34& tm = pPart->GetLocalBaseTM();
   Matrix33 tm33(tm);
@@ -316,17 +316,17 @@ float CVehicleMovementWarrior::RotatePart(IVehiclePart* pPart, float angleGoal, 
   float absDelta = abs(angleGoal - ang);
   if (absDelta > 0.01f)
   {
-    float angleDelta = min(absDelta, speed*deltaTime);
+	float angleDelta = min(absDelta, speed*deltaTime);
 
-    if (maxDelta > 0.f)
-      angleDelta = min(angleDelta, maxDelta);
+	if (maxDelta > 0.f)
+	  angleDelta = min(angleDelta, maxDelta);
 
-    angleDelta *= sgn(angleGoal-ang); 
+	angleDelta *= sgn(angleGoal-ang); 
 
-    Matrix34 newTM( tm33 * CreateRotation<Matrix33>(axis, angleDelta), tm.GetTranslation() );
-    pPart->SetLocalBaseTM(newTM);          
+	Matrix34 newTM( tm33 * CreateRotation<Matrix33>(axis, angleDelta), tm.GetTranslation() );
+	pPart->SetLocalBaseTM(newTM);          
 
-    return angleDelta;
+	return angleDelta;
   }
 
   return 0.f;
@@ -349,11 +349,11 @@ bool CVehicleMovementWarrior::StartEngine(EntityId driverId)
 {	
   if (IsCollapsing())
   {
-    return false;
+	return false;
   }
 
   if (!CVehicleMovementHovercraft::StartEngine(driverId))
-    return false;
+	return false;
 
   return true;
 }
@@ -371,21 +371,21 @@ void CVehicleMovementWarrior::Serialize(TSerialize ser, unsigned aspects)
 
   if (ser.GetSerializationTarget() != eST_Network)
   {
-    ser.Value("m_thrustersDamaged", m_thrustersDamaged);
-    ser.Value("m_collapseTimer", m_collapseTimer);
-    ser.Value("m_collapsed", m_collapsed);
-    ser.Value("m_platformDown", m_platformDown);
+	ser.Value("m_thrustersDamaged", m_thrustersDamaged);
+	ser.Value("m_collapseTimer", m_collapseTimer);
+	ser.Value("m_collapsed", m_collapsed);
+	ser.Value("m_platformDown", m_platformDown);
 
-    char buf[16];    
-    for (int i=0; i<m_numThrusters; ++i)
-    {
-      _snprintf(buf, 16, "thruster_%d", i);
-      ser.BeginGroup(buf);
-      ser.Value("enabled", m_vecThrusters[i]->enabled);
-      ser.Value("heightAdaption", m_vecThrusters[i]->heightAdaption);
-      ser.Value("hoverVariance", m_vecThrusters[i]->hoverVariance);            
-      ser.EndGroup();
-    }    
+	char buf[16];    
+	for (int i=0; i<m_numThrusters; ++i)
+	{
+	  _snprintf(buf, 16, "thruster_%d", i);
+	  ser.BeginGroup(buf);
+	  ser.Value("enabled", m_vecThrusters[i]->enabled);
+	  ser.Value("heightAdaption", m_vecThrusters[i]->heightAdaption);
+	  ser.Value("hoverVariance", m_vecThrusters[i]->hoverVariance);            
+	  ser.EndGroup();
+	}    
   }
 }
 
@@ -393,15 +393,15 @@ void CVehicleMovementWarrior::Serialize(TSerialize ser, unsigned aspects)
 void CVehicleMovementWarrior::Update(const float deltaTime)
 {  
   if (!IsCollapsing())
-    CVehicleMovementHovercraft::Update(deltaTime);
+	CVehicleMovementHovercraft::Update(deltaTime);
   else
-    CVehicleMovementBase::Update(deltaTime);
+	CVehicleMovementBase::Update(deltaTime);
   
   if (IsCollapsing())
   {
-    m_collapseTimer += deltaTime; 
+	m_collapseTimer += deltaTime; 
 
-    // check platform
+	// check platform
 		Vec3 platformPos;
 
 		if (m_pPlatformPos)
@@ -409,113 +409,113 @@ void CVehicleMovementWarrior::Update(const float deltaTime)
 		else
 			platformPos.zero();
 
-    float dist = platformPos.z - GetISystem()->GetI3DEngine()->GetTerrainElevation(platformPos.x, platformPos.y);
-    if (dist < 1.f)
-    {
-      m_platformDown = true;      
-    }
+	float dist = platformPos.z - GetISystem()->GetI3DEngine()->GetTerrainElevation(platformPos.x, platformPos.y);
+	if (dist < 1.f)
+	{
+	  m_platformDown = true;      
+	}
 
-    // center turret
-    RotatePart(m_pTurret, DEG2RAD(0.f), AXIS_Z, DEG2RAD(2.5f), deltaTime);
+	// center turret
+	RotatePart(m_pTurret, DEG2RAD(0.f), AXIS_Z, DEG2RAD(2.5f), deltaTime);
 
-    // take down wing and cannon
-    RotatePart(m_pWing, DEG2RAD(-12.5f), AXIS_X, DEG2RAD(3.f), deltaTime);
-    RotatePart(m_pCannon, DEG2RAD(-20.f), AXIS_X, DEG2RAD(2.5f), deltaTime);
+	// take down wing and cannon
+	RotatePart(m_pWing, DEG2RAD(-12.5f), AXIS_X, DEG2RAD(3.f), deltaTime);
+	RotatePart(m_pCannon, DEG2RAD(-20.f), AXIS_X, DEG2RAD(2.5f), deltaTime);
 
-    if (!m_platformDown)
-    { 
-      // handle legs to bring down platform
-      TThrusters::iterator iter;
-      for (iter=m_vecThrusters.begin(); iter!=m_vecThrusters.end(); ++iter)
-      {
-        SThruster* pThruster = *iter;
+	if (!m_platformDown)
+	{ 
+	  // handle legs to bring down platform
+	  TThrusters::iterator iter;
+	  for (iter=m_vecThrusters.begin(); iter!=m_vecThrusters.end(); ++iter)
+	  {
+		SThruster* pThruster = *iter;
 
-        if (pThruster->heightAdaption <= 0.f)        
-        {
-          pThruster->hoverHeight = max(0.1f, pThruster->hoverHeight - 0.6f*deltaTime);
-          continue;
-        }
-      }      
-    }
-    else
-    {
-      if (!m_collapsed)
-      {
-        Collapsed(true); 
-      }
-    }
+		if (pThruster->heightAdaption <= 0.f)        
+		{
+		  pThruster->hoverHeight = max(0.1f, pThruster->hoverHeight - 0.6f*deltaTime);
+		  continue;
+		}
+	  }      
+	}
+	else
+	{
+	  if (!m_collapsed)
+	  {
+		Collapsed(true); 
+	  }
+	}
   }
   
   if (IsPowered() && !IsCollapsed())
   { 
-    // "normal" legs control here   
+	// "normal" legs control here   
 
-    bool bStartComplete = (m_startComplete > 1.5f);
-    float adaptionSpeed = IsCollapsing() ? 0.8f : 1.5f;
-    int t = 0;
+	bool bStartComplete = (m_startComplete > 1.5f);
+	float adaptionSpeed = IsCollapsing() ? 0.8f : 1.5f;
+	int t = 0;
 
-    for (TThrusters::iterator iter=m_vecThrusters.begin(); iter!=m_vecThrusters.end(); ++iter)
-    {
-      SThruster* pThruster = *iter;
-      ++t;
+	for (TThrusters::iterator iter=m_vecThrusters.begin(); iter!=m_vecThrusters.end(); ++iter)
+	{
+	  SThruster* pThruster = *iter;
+	  ++t;
 
-      if (pThruster->heightAdaption > 0.f && bStartComplete && pThruster->pPart && pThruster->pParentPart)
-      {         
-        const char* footName = pThruster->pPart->GetName().c_str();        
-        EWarriorMovement mode = eWM_Hovering;
-        float correction = 0.f, maxCorrection = 0.f;        
+	  if (pThruster->heightAdaption > 0.f && bStartComplete && pThruster->pPart && pThruster->pParentPart)
+	  {         
+		const char* footName = pThruster->pPart->GetName().c_str();        
+		EWarriorMovement mode = eWM_Hovering;
+		float correction = 0.f, maxCorrection = 0.f;        
 
-        // adjust legs        
-        float error = 0.f; 
+		// adjust legs        
+		float error = 0.f; 
 
-        if (!pThruster->hit)
-          error = pThruster->hoverHeight; // when not hit, correct downwards 
-        else if (pThruster->prevDist > 0.f)
-          error = pThruster->prevDist - pThruster->hoverHeight; 
-        
-        if (mode != eWM_None && abs(error) > 0.05f)
-        {
-          float speed = max(0.1f, min(1.f, abs(error))) * adaptionSpeed;
-          correction = -sgn(error) * min(speed*deltaTime, abs(error)); // correct up to error
+		if (!pThruster->hit)
+		  error = pThruster->hoverHeight; // when not hit, correct downwards 
+		else if (pThruster->prevDist > 0.f)
+		  error = pThruster->prevDist - pThruster->hoverHeight; 
+		
+		if (mode != eWM_None && abs(error) > 0.05f)
+		{
+		  float speed = max(0.1f, min(1.f, abs(error))) * adaptionSpeed;
+		  correction = -sgn(error) * min(speed*deltaTime, abs(error)); // correct up to error
 
-          // don't correct more than heightAdaption allows
-          maxCorrection = abs((pThruster->heightInitial + sgn(correction)*pThruster->heightAdaption) - pThruster->pos.z);          
-          float minCorrection = (pThruster->groundContact) ? 0.f : -maxCorrection;          
+		  // don't correct more than heightAdaption allows
+		  maxCorrection = abs((pThruster->heightInitial + sgn(correction)*pThruster->heightAdaption) - pThruster->pos.z);          
+		  float minCorrection = (pThruster->groundContact) ? 0.f : -maxCorrection;          
 
-          correction = CLAMP(correction, minCorrection, maxCorrection);
+		  correction = CLAMP(correction, minCorrection, maxCorrection);
 
-          if (abs(correction) > 0.0001f)
-          { 
-            // positive correction for leg, negative for foot
-            Matrix34 legLocal  = pThruster->pParentPart->GetLocalBaseTM();
-            Matrix34 footLocal = pThruster->pPart->GetLocalBaseTM();
+		  if (abs(correction) > 0.0001f)
+		  { 
+			// positive correction for leg, negative for foot
+			Matrix34 legLocal  = pThruster->pParentPart->GetLocalBaseTM();
+			Matrix34 footLocal = pThruster->pPart->GetLocalBaseTM();
 
-            float radius = footLocal.GetTranslation().len();
-            float deltaAngle = correction / radius; // this assumes correction on circle (accurate enough for large radius)
+			float radius = footLocal.GetTranslation().len();
+			float deltaAngle = correction / radius; // this assumes correction on circle (accurate enough for large radius)
 
-            Matrix34 legTM  = Matrix33(legLocal) * Matrix33::CreateRotationX(deltaAngle);
-            Matrix34 footTM = Matrix33(footLocal) * Matrix33::CreateRotationX(-deltaAngle);
+			Matrix34 legTM  = Matrix33(legLocal) * Matrix33::CreateRotationX(deltaAngle);
+			Matrix34 footTM = Matrix33(footLocal) * Matrix33::CreateRotationX(-deltaAngle);
 
-            legTM.SetTranslation(legLocal.GetTranslation());
-            footTM.SetTranslation(footLocal.GetTranslation());
+			legTM.SetTranslation(legLocal.GetTranslation());
+			footTM.SetTranslation(footLocal.GetTranslation());
 
-            pThruster->pParentPart->SetLocalBaseTM(legTM);
-            pThruster->pPart->SetLocalBaseTM(footTM);
-          }
-        }
-      }
-    }
+			pThruster->pParentPart->SetLocalBaseTM(legTM);
+			pThruster->pPart->SetLocalBaseTM(footTM);
+		  }
+		}
+	  }
+	}
   }
 
   // regain control
   if (m_collapseTimer > m_recoverTime)
   {     
-    Collapsed(false);
+	Collapsed(false);
   }
 
   for (TThrusters::iterator it=m_vecThrusters.begin(); it!=m_vecThrusters.end(); ++it)
   {
-    (*it)->groundContact = false;
+	(*it)->groundContact = false;
   }
 }
 
@@ -524,7 +524,7 @@ void CVehicleMovementWarrior::Update(const float deltaTime)
 bool CVehicleMovementWarrior::RequestMovement(CMovementRequest& movementRequest)
 {
   if (IsCollapsing() || IsCollapsed())
-    return false;
+	return false;
  
   return CVehicleMovementHovercraft::RequestMovement(movementRequest);  
 }

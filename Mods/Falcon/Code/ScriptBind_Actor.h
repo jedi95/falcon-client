@@ -39,7 +39,7 @@ public:
 
 	//------------------------------------------------------------------------
 	virtual int DumpActorInfo(IFunctionHandler *pH);
-  virtual int SetViewAngleOffset(IFunctionHandler *pH);
+	virtual int SetViewAngleOffset(IFunctionHandler *pH);
 	virtual int GetViewAngleOffset(IFunctionHandler *pH);
 	virtual int Revive(IFunctionHandler *pH);
 	virtual int Kill(IFunctionHandler *pH);
@@ -57,7 +57,7 @@ public:
 	virtual int LinkToVehicle(IFunctionHandler *pH);
 	virtual int LinkToVehicleRemotely(IFunctionHandler *pH);
 	virtual int LinkToEntity(IFunctionHandler *pH);
-  virtual int IsGhostPit(IFunctionHandler *pH);
+	virtual int IsGhostPit(IFunctionHandler *pH);
 	virtual int IsFlying(IFunctionHandler *pH);
 	virtual int SetAngles(IFunctionHandler *pH,Ang3 vAngles );
 	virtual int GetAngles(IFunctionHandler *pH);
@@ -83,11 +83,11 @@ public:
 	virtual int SetHealth(IFunctionHandler *pH, float health);
 	virtual int SetMaxHealth(IFunctionHandler *pH, float health);
 	virtual int GetHealth(IFunctionHandler *pH);
-  virtual int GetMaxHealth(IFunctionHandler *pH);
+	virtual int GetMaxHealth(IFunctionHandler *pH);
 	virtual int GetArmor(IFunctionHandler *pH);
 	virtual int GetMaxArmor(IFunctionHandler *pH);
-  virtual int GetFrozenAmount(IFunctionHandler *pH);
-  virtual int AddFrost(IFunctionHandler *pH, float frost);
+	virtual int GetFrozenAmount(IFunctionHandler *pH);
+	virtual int AddFrost(IFunctionHandler *pH, float frost);
 	virtual int DamageInfo(IFunctionHandler *pH, ScriptHandle shooter, ScriptHandle target, ScriptHandle weapon, float damage, const char *damageType);
 
 	virtual int ActivateNanoSuit(IFunctionHandler *pH, int on);
@@ -137,26 +137,26 @@ public:
 
 	virtual int GetClosestAttachment(IFunctionHandler *pH, int characterSlot, Vec3 testPos, float maxDistance, const char* suffix);
 	virtual int AttachVulnerabilityEffect(IFunctionHandler *pH, int characterSlot, int partid, Vec3 hitPos, float radius, const char* effect, const char* attachmentIdentifier);
-  virtual int ResetVulnerabilityEffects(IFunctionHandler *pH, int characterSlot);
-  virtual int GetCloseColliderParts(IFunctionHandler *pH, int characterSlot, Vec3 hitPos, float radius);
+	virtual int ResetVulnerabilityEffects(IFunctionHandler *pH, int characterSlot);
+	virtual int GetCloseColliderParts(IFunctionHandler *pH, int characterSlot, Vec3 hitPos, float radius);
 	virtual int CreateIKLimb( IFunctionHandler *pH, int slot, const char *limbName, const char *rootBone, const char *midBone, const char *endBone, int flags);
 	virtual int ResetScores(IFunctionHandler *pH);
 	virtual int RenderScore(IFunctionHandler *pH, ScriptHandle player, int kills, int deaths, int ping, int teamKills);
 
-  virtual int SetSearchBeam(IFunctionHandler *pH, Vec3 dir);
+	virtual int SetSearchBeam(IFunctionHandler *pH, Vec3 dir);
 
-  // Crafty #CustomCharacters
-  virtual int SetCustomSuitMats(IFunctionHandler* pH, bool bCustom);
-  virtual int ResetNanoSuit(IFunctionHandler* pH);
-  virtual int ResetAnimationGraph(IFunctionHandler* pH);
+	// Crafty #CustomCharacters
+	virtual int SetCustomSuitMats(IFunctionHandler* pH, bool bCustom);
+	virtual int ResetNanoSuit(IFunctionHandler* pH);
+	virtual int ResetAnimationGraph(IFunctionHandler* pH);
 
 protected:
 	CActor *GetActor(IFunctionHandler *pH);
 
-	SmartScriptTable m_pParams;
+	SmartScriptTable	m_pParams;
 
-	ISystem					*m_pSystem;
-	IGameFramework	*m_pGameFW;
+	ISystem				*m_pSystem;
+	IGameFramework		*m_pGameFW;
 };
 
 #endif //__SCRIPTBIND_ACTOR_H__

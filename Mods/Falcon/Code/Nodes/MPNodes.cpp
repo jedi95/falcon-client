@@ -164,7 +164,7 @@ public:
 						else
 						{
 							// entity no longer exists - remove from list.
- 							m_MDList.erase(it);
+							m_MDList.erase(it);
 						}
 					}
 				}

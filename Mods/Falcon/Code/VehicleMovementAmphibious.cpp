@@ -38,17 +38,17 @@ bool CVehicleMovementAmphibious::Init(IVehicle* pVehicle, const SmartScriptTable
 {
   SmartScriptTable stdWheeled, stdBoat;
   if (!table->GetValue("StdWheeled", stdWheeled) || !table->GetValue("StdBoat", stdBoat))
-    return false;
+	return false;
 
   if (!CVehicleMovementStdWheeled::Init(pVehicle, stdWheeled))
-    return false;
+	return false;
 
   if (!m_boat.Init(pVehicle, stdBoat))
-    return false;
+	return false;
 
 	// prevent assert in UpdateRunSound
 	m_boat.m_PhysPos.q = Quat::CreateIdentity();
-    
+	
   return true;
 }
 
@@ -80,7 +80,7 @@ void CVehicleMovementAmphibious::PostPhysicalize()
 bool CVehicleMovementAmphibious::StartEngine(EntityId driverId)
 {
   if (!CVehicleMovementStdWheeled::StartEngine(driverId))
-    return false;
+	return false;
 
   m_boat.StartEngine(driverId);
 
@@ -136,7 +136,7 @@ void CVehicleMovementAmphibious::UpdateRunSound(const float deltaTime)
   SetSoundParam(eSID_Run, "swim", m_statusDyn.submergedFraction);
 
   if (Boosting())
-    SetSoundParam(eSID_Boost, "swim", m_statusDyn.submergedFraction);
+	SetSoundParam(eSID_Boost, "swim", m_statusDyn.submergedFraction);
 }
 
 
@@ -145,12 +145,12 @@ void CVehicleMovementAmphibious::UpdateRunSound(const float deltaTime)
 void CVehicleMovementAmphibious::ProcessMovement(const float deltaTime)
 {  
   CVehicleMovementStdWheeled::ProcessMovement(deltaTime);    
-    
+	
   if (Submerged())
   {
-    // assign movement action to boat (serialized by wheeled movement)
-    m_boat.m_movementAction = m_movementAction;      
-    m_boat.ProcessMovement(deltaTime);
+	// assign movement action to boat (serialized by wheeled movement)
+	m_boat.m_movementAction = m_movementAction;      
+	m_boat.ProcessMovement(deltaTime);
   }  
 }
 
@@ -161,7 +161,7 @@ void CVehicleMovementAmphibious::Serialize(TSerialize ser, unsigned aspects)
   
   if (ser.GetSerializationTarget() != eST_Network)
   {
-    m_boat.Serialize(ser, aspects);
+	m_boat.Serialize(ser, aspects);
   }
 }
 

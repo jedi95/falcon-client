@@ -87,10 +87,10 @@ void CDebrisSpawner::Reset()
   // clean up own pieces
   if (IDebrisMgr* pDebrisMgr = g_pGame->GetIGameFramework()->GetDebrisMgr())
   {
-    for (std::vector<EntityId>::const_iterator it=m_debrisParts.begin(),end=m_debrisParts.end(); it!=end; ++it)  
-      pDebrisMgr->RemovePiece(*it);
+	for (std::vector<EntityId>::const_iterator it=m_debrisParts.begin(),end=m_debrisParts.end(); it!=end; ++it)  
+	  pDebrisMgr->RemovePiece(*it);
   }
-    	
+		
 	m_debrisParts.erase (m_debrisParts.begin(), m_debrisParts.end());
 }
 
@@ -148,8 +148,8 @@ void CDebrisSpawner::OnKillEvent()
 		int i = it - m_debrisParts.begin();
 
 		IEntity * pSpawnedDebris = gEnv->pEntitySystem->GetEntity(*it);
-    if (!pSpawnedDebris)
-      continue;
+	if (!pSpawnedDebris)
+	  continue;
 
 		Matrix34 loc;
 		loc.SetTranslationMat(Vec3 (0, 0, 2.0f + i));
@@ -394,7 +394,7 @@ CAlien::~CAlien()
 	}
 
 	SAFE_DELETE(m_pGroundEffect);
-  	
+	
 	SAFE_DELETE(m_pBeamEffect);
 }
 
@@ -484,10 +484,10 @@ void CAlien::PostPhysicalize()
   for (uint32 i=0; i<numAttachmnets; ++i) 
   {
 		IAttachment* pIAttachment = pIAttachmentManager->GetInterfaceByIndex(i);			
-    IAttachmentObject* pIAttachmentObject = pIAttachment->GetIAttachmentObject();
+	IAttachmentObject* pIAttachmentObject = pIAttachment->GetIAttachmentObject();
 
-    if (pIAttachmentObject) 
-    {
+	if (pIAttachmentObject) 
+	{
 			ICharacterInstance* pITentacleInstance = pIAttachmentObject->GetICharacterInstance();
 			PushCharacterTentacles(pITentacleInstance);
 		}
@@ -527,7 +527,7 @@ void CAlien::PostPhysicalize()
 		if (pT)
 		{
 			pT->SetParams(&pRope);
- 			pT->SetParams(&pf);
+			pT->SetParams(&pf);
 			pT->SetParams(&sim);
 		}
 	}
@@ -553,7 +553,7 @@ void CAlien::DetachTentacle(ICharacterInstance *pCharacter,const char *tentacle)
   if (pIAttachmentObject) 
 	{
 	  //get character-instance of a tentacle 
-    ICharacterInstance *pITentacleInstance = pIAttachmentObject->GetICharacterInstance();
+	ICharacterInstance *pITentacleInstance = pIAttachmentObject->GetICharacterInstance();
 
 		//detach tentacle from methagen 
 		pIAttachment->ClearBinding();
@@ -724,49 +724,49 @@ void CAlien::Update(SEntityUpdateContext& ctx, int updateSlot)
 
 		//SetTentacles(pCharacter,animStiff);
 		//CryLogAlways("%.1f",animStiff);
-    if (gEnv->bClient)
-    {
-      float dist2 = (gEnv->pRenderer->GetCamera().GetPosition() - GetEntity()->GetWorldPos()).GetLengthSquared();
-        
+	if (gEnv->bClient)
+	{
+	  float dist2 = (gEnv->pRenderer->GetCamera().GetPosition() - GetEntity()->GetWorldPos()).GetLengthSquared();
+		
 		  //update ground effects, if any
 		  if (m_pGroundEffect)
-      { 
-        float cloakMult = (m_stats.cloaked) ? 0.5f : 1.f;      
-        float sizeScale = m_params.groundEffectBaseScale * cloakMult;
-        float countScale = 1.f * cloakMult;
-        float speedScale = 1.f * cloakMult; 
-        
-        if (m_params.groundEffectMaxSpeed != 0.f)
-        {
-          const static float minspeed = 1.f;
-          float speed = max(0.f, m_stats.speed + m_stats.angVelocity.len() - minspeed);
-          float speedScale = min(1.f, speed / m_params.groundEffectMaxSpeed);          
-          sizeScale *= speedScale;
-          countScale *= speedScale;
-        }
-        
-        m_pGroundEffect->SetBaseScale(sizeScale, countScale, speedScale);
-        m_pGroundEffect->Update();       
-      }
+	  { 
+		float cloakMult = (m_stats.cloaked) ? 0.5f : 1.f;      
+		float sizeScale = m_params.groundEffectBaseScale * cloakMult;
+		float countScale = 1.f * cloakMult;
+		float speedScale = 1.f * cloakMult; 
+		
+		if (m_params.groundEffectMaxSpeed != 0.f)
+		{
+		  const static float minspeed = 1.f;
+		  float speed = max(0.f, m_stats.speed + m_stats.angVelocity.len() - minspeed);
+		  float speedScale = min(1.f, speed / m_params.groundEffectMaxSpeed);          
+		  sizeScale *= speedScale;
+		  countScale *= speedScale;
+		}
+		
+		m_pGroundEffect->SetBaseScale(sizeScale, countScale, speedScale);
+		m_pGroundEffect->Update();       
+	  }
 
-      if (m_pTrailAttachment)
-      { 
-        CEffectAttachment* pEffectAttachment = (CEffectAttachment*)m_pTrailAttachment->GetIAttachmentObject();
-        if (pEffectAttachment)
-        {
-          float goalspeed = max(0.f, m_stats.speed - m_params.trailEffectMinSpeed);
-          Interpolate(m_trailSpeedScale, goalspeed, 3.f, frameTime);
-          
-          SpawnParams sp;          
-          if (m_params.trailEffectMaxSpeedSize != 0.f)
-            sp.fSizeScale = min(1.f, max(0.01f, m_trailSpeedScale/m_params.trailEffectMaxSpeedSize));
-          
-          if (m_params.trailEffectMaxSpeedCount != 0.f)
-            sp.fCountScale = min(1.f, m_trailSpeedScale / m_params.trailEffectMaxSpeedCount);
-          
-          pEffectAttachment->SetSpawnParams(sp);
-        }
-      }
+	  if (m_pTrailAttachment)
+	  { 
+		CEffectAttachment* pEffectAttachment = (CEffectAttachment*)m_pTrailAttachment->GetIAttachmentObject();
+		if (pEffectAttachment)
+		{
+		  float goalspeed = max(0.f, m_stats.speed - m_params.trailEffectMinSpeed);
+		  Interpolate(m_trailSpeedScale, goalspeed, 3.f, frameTime);
+		  
+		  SpawnParams sp;          
+		  if (m_params.trailEffectMaxSpeedSize != 0.f)
+			sp.fSizeScale = min(1.f, max(0.01f, m_trailSpeedScale/m_params.trailEffectMaxSpeedSize));
+		  
+		  if (m_params.trailEffectMaxSpeedCount != 0.f)
+			sp.fCountScale = min(1.f, m_trailSpeedScale / m_params.trailEffectMaxSpeedCount);
+		  
+		  pEffectAttachment->SetSpawnParams(sp);
+		}
+	  }
 
 			if (m_pHealthTrailAttachment)
 			{ 
@@ -787,28 +787,28 @@ void CAlien::Update(SEntityUpdateContext& ctx, int updateSlot)
 				}
 			}
 
-      if (m_searchbeam.active)
-        UpdateSearchBeam(frameTime);
+	  if (m_searchbeam.active)
+		UpdateSearchBeam(frameTime);
 
-      if (m_pTurnSound && m_params.turnSoundMaxVel != 0.f && m_params.turnSoundBoneId != -1 && !m_pTurnSound->IsPlaying() && dist2<sqr(60.f))
-      { 
-        if (IPhysicalEntity *pPhysics = GetEntity()->GetPhysics())
-        {
-          pe_status_dynamics dyn;
-          dyn.partid = m_params.turnSoundBoneId;
-          if (pPhysics->GetStatus(&dyn) && dyn.v.len2() > sqr(0.01f) && dyn.w.len2() > sqr(0.5f*m_params.turnSoundMaxVel))
-          {
-            float speedRel = min(1.f, dyn.w.len()/m_params.turnSoundMaxVel); 
-            
-            IEntitySoundProxy* pSoundProxy = (IEntitySoundProxy*)GetEntity()->CreateProxy(ENTITY_PROXY_SOUND);
-            int nIndex = m_pTurnSound->SetParam("acceleration", speedRel);
+	  if (m_pTurnSound && m_params.turnSoundMaxVel != 0.f && m_params.turnSoundBoneId != -1 && !m_pTurnSound->IsPlaying() && dist2<sqr(60.f))
+	  { 
+		if (IPhysicalEntity *pPhysics = GetEntity()->GetPhysics())
+		{
+		  pe_status_dynamics dyn;
+		  dyn.partid = m_params.turnSoundBoneId;
+		  if (pPhysics->GetStatus(&dyn) && dyn.v.len2() > sqr(0.01f) && dyn.w.len2() > sqr(0.5f*m_params.turnSoundMaxVel))
+		  {
+			float speedRel = min(1.f, dyn.w.len()/m_params.turnSoundMaxVel); 
+			
+			IEntitySoundProxy* pSoundProxy = (IEntitySoundProxy*)GetEntity()->CreateProxy(ENTITY_PROXY_SOUND);
+			int nIndex = m_pTurnSound->SetParam("acceleration", speedRel);
 						pSoundProxy->PlaySound(m_pTurnSound);        
 						pSoundProxy->SetStaticSound(m_pTurnSound->GetId(), true);
-            //CryLog("angSpeed %.2f (rel %.2f)", dyn.w.len(), speedRel);
-          } 
-        }    
-      }
-    }
+			//CryLog("angSpeed %.2f (rel %.2f)", dyn.w.len(), speedRel);
+		  } 
+		}    
+	  }
+	}
 	}
 
 	//update the character offset
@@ -1406,7 +1406,7 @@ void CAlien::ProcessBonesRotation(ICharacterInstance *pCharacter,float frameTime
 			if (idx>-1)
 			{
 				Vec3 rootPos(pCharacter->GetISkeletonPose()->GetAbsJointByID(idx).t*m_stats.physicsAnimationRatio);
-        m_stats.animationSpeedVec = frameTime>0.f ? Matrix33(GetEntity()->GetSlotWorldTM(0)) * ((rootPos - m_stats.lastRootPos) / frameTime) : Vec3(0);
+		m_stats.animationSpeedVec = frameTime>0.f ? Matrix33(GetEntity()->GetSlotWorldTM(0)) * ((rootPos - m_stats.lastRootPos) / frameTime) : Vec3(0);
 				m_stats.lastRootPos = rootPos;
 
 				m_charLocalMtx.SetTranslation(m_charLocalMtx.GetTranslation()-rootPos);
@@ -1572,7 +1572,7 @@ void CAlien::Reset(bool toGame)
 {
   if (m_pGroundEffect)
   {
-    m_pGroundEffect->Stop(!toGame);
+	m_pGroundEffect->Stop(!toGame);
   }
 }
 
@@ -1590,7 +1590,7 @@ void CAlien::Kill()
 		m_pBeamEffect->Stop();
 
   if (m_pTrailAttachment)  
-    m_pTrailAttachment->ClearBinding();    
+	m_pTrailAttachment->ClearBinding();    
 
 	if (m_pTurnSound)
 	{
@@ -1651,31 +1651,31 @@ void CAlien::Revive(bool fromInit)
 		{
 			m_pGroundEffect->SetInteraction(m_params.groundEffect);
 			m_pGroundEffect->SetHeight(m_params.groundEffectHeight);
-      m_pGroundEffect->SetHeightScale(m_params.groundEffectHeightScale, m_params.groundEffectHeightScale);
+	  m_pGroundEffect->SetHeightScale(m_params.groundEffectHeightScale, m_params.groundEffectHeightScale);
 			m_pGroundEffect->SetFlags(m_pGroundEffect->GetFlags() | IGroundEffect::eGEF_StickOnGround);
-      
-      if (gEnv->pSystem->IsEditor())
-        m_pGroundEffect->Stop(true);
+	  
+	  if (gEnv->pSystem->IsEditor())
+		m_pGroundEffect->Stop(true);
 		}
 	}
 
   if(!m_pTrailAttachment && m_params.trailEffect[0] && gEnv->p3DEngine->FindParticleEffect(m_params.trailEffect))
   {
-    if (ICharacterInstance* pCharInstance = GetEntity()->GetCharacter(0))
-    {
-      IAttachmentManager* pAttachmentManager = pCharInstance->GetIAttachmentManager(); 
-      if (IAttachment* pAttachment = pAttachmentManager->GetInterfaceByName("trail_attachment"))
-      { 
-        pAttachment->ClearBinding();
-        CEffectAttachment* pEffectAttachment = new CEffectAttachment(m_params.trailEffect, Vec3(0,0,0), m_params.trailEffectDir.GetNormalized(), 1);
-        pEffectAttachment->CreateEffect();
-        pAttachment->AddBinding(pEffectAttachment);
-        m_pTrailAttachment = pAttachment;
-        m_trailSpeedScale = 0.f;
-      } 
-      else
-        CryLog("[CAlien::Revive] %s: 'trail_attachment' not found.", GetEntity()->GetName());
-    }
+	if (ICharacterInstance* pCharInstance = GetEntity()->GetCharacter(0))
+	{
+	  IAttachmentManager* pAttachmentManager = pCharInstance->GetIAttachmentManager(); 
+	  if (IAttachment* pAttachment = pAttachmentManager->GetInterfaceByName("trail_attachment"))
+	  { 
+		pAttachment->ClearBinding();
+		CEffectAttachment* pEffectAttachment = new CEffectAttachment(m_params.trailEffect, Vec3(0,0,0), m_params.trailEffectDir.GetNormalized(), 1);
+		pEffectAttachment->CreateEffect();
+		pAttachment->AddBinding(pEffectAttachment);
+		m_pTrailAttachment = pAttachment;
+		m_trailSpeedScale = 0.f;
+	  } 
+	  else
+		CryLog("[CAlien::Revive] %s: 'trail_attachment' not found.", GetEntity()->GetName());
+	}
   }
   
 	if (m_params.healthTrailEffect[0] && gEnv->p3DEngine->FindParticleEffect(m_params.healthTrailEffect))
@@ -1778,7 +1778,7 @@ void CAlien::SetSearchBeamQuat(const Quat& rot)
 {
   ICharacterInstance* pChar = GetEntity()->GetCharacter(0);
   if (!pChar)
-    return;
+	return;
 
   // transform to attachment space
   Quat rotCharInv = Quat(GetEntity()->GetSlotLocalTM(0, false)).GetInverted();
@@ -1793,11 +1793,11 @@ void CAlien::UpdateSearchBeam(float frameTime)
 {
   ICharacterInstance* pChar = GetEntity()->GetCharacter(0);
   if (!pChar)
-    return;
+	return;
 
   Quat beamQuat = GetSearchBeamQuat();
   if (beamQuat.IsEquivalent(m_searchbeam.goalQuat))
-    return;
+	return;
 
   beamQuat.SetNlerp(beamQuat, m_searchbeam.goalQuat, frameTime*5.f);
   
@@ -2002,12 +2002,12 @@ void CAlien::SetParams(SmartScriptTable &rTable,bool resetFirst)
   m_params.trailEffect[0] = 0;
   if (rTable->GetValue("trailEffect",str))
   {
-    strncpy(m_params.trailEffect,str,128);
-    m_params.trailEffect[127] = 0;
-    
-    rTable->GetValue("trailEffectMinSpeed",m_params.trailEffectMinSpeed);
-    rTable->GetValue("trailEffectMaxSpeedSize",m_params.trailEffectMaxSpeedSize);
-    rTable->GetValue("trailEffectMaxSpeedCount",m_params.trailEffectMaxSpeedCount);
+	strncpy(m_params.trailEffect,str,128);
+	m_params.trailEffect[127] = 0;
+	
+	rTable->GetValue("trailEffectMinSpeed",m_params.trailEffectMinSpeed);
+	rTable->GetValue("trailEffectMaxSpeedSize",m_params.trailEffectMaxSpeedSize);
+	rTable->GetValue("trailEffectMaxSpeedCount",m_params.trailEffectMaxSpeedCount);
 		rTable->GetValue("trailEffectDir",m_params.trailEffectDir);
   }
   
@@ -2032,14 +2032,14 @@ void CAlien::SetParams(SmartScriptTable &rTable,bool resetFirst)
 			if (m_pTurnSound)
 				m_pTurnSound->SetSemantic(eSoundSemantic_Living_Entity);
 		}
-    
-    if (rTable->GetValue("turnSoundBone",str))
-    { 
-      if (ICharacterInstance *pCharacter = GetEntity()->GetCharacter(0))      
-        m_params.turnSoundBoneId = pCharacter->GetISkeletonPose()->GetJointIDByName(str);
-    }
-        
-    rTable->GetValue("turnSoundMaxVel", m_params.turnSoundMaxVel);
+	
+	if (rTable->GetValue("turnSoundBone",str))
+	{ 
+	  if (ICharacterInstance *pCharacter = GetEntity()->GetCharacter(0))      
+		m_params.turnSoundBoneId = pCharacter->GetISkeletonPose()->GetJointIDByName(str);
+	}
+		
+	rTable->GetValue("turnSoundMaxVel", m_params.turnSoundMaxVel);
   }  
 }
 
@@ -2108,8 +2108,8 @@ void CAlien::SetActorMovementCommon(SMovementRequestParams& control)
 
   if (!exactActive)
   {
-    m_input.posTarget.zero();
-    m_input.dirTarget.zero();
+	m_input.posTarget.zero();
+	m_input.dirTarget.zero();
   }
 
 	m_stats.fireDirGoal = (control.vShootTargetPos - state.weaponPosition).GetNormalizedSafe();

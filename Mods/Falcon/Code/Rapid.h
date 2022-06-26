@@ -38,7 +38,7 @@ protected:
 			ResetValue(barrel_attachment,	"");
 			ResetValue(engine_attachment,	"");      
 			ResetValue(camshake_rotate,	Vec3(0));
-      ResetValue(camshake_shift,	Vec3(0));
+	  ResetValue(camshake_shift,	Vec3(0));
 			ResetValue(camshake_perShot,	0.0f);
 		}
 
@@ -48,9 +48,9 @@ protected:
 			s->Add(engine_attachment);
 		}
 
-    Vec3 camshake_rotate;
-    Vec3 camshake_shift;
-    float camshake_perShot;
+	Vec3 camshake_rotate;
+	Vec3 camshake_shift;
+	float camshake_perShot;
 		float min_speed;
 		float max_speed;
 		float acceleration;

@@ -389,15 +389,15 @@ void CBattleDust::RecordEvent(EBattleDustEventType event, Vec3 worldPos, const I
 	if(newEvent)
 	{
 		IEntitySystem * pEntitySystem = gEnv->pEntitySystem;
- 		SEntitySpawnParams esp;
- 		esp.id = 0;
- 		esp.nFlags = 0;
- 		esp.pClass = m_pBattleEventClass;
- 		if (!esp.pClass)
- 			return;
- 		esp.pUserData = NULL;
- 		esp.sName = "BattleDust";
- 		esp.vPosition	= worldPos;
+		SEntitySpawnParams esp;
+		esp.id = 0;
+		esp.nFlags = 0;
+		esp.pClass = m_pBattleEventClass;
+		if (!esp.pClass)
+			return;
+		esp.pUserData = NULL;
+		esp.sName = "BattleDust";
+		esp.vPosition	= worldPos;
 	
 		// when CBattleEvent is created it will add itself to the list
 		IEntity * pEntity = pEntitySystem->SpawnEntity( esp );
@@ -433,7 +433,7 @@ void CBattleDust::NewBattleArea(CBattleEvent* pEvent)
 
 	int num = 0;
 	if (pEvent)
- 	{
+	{
 		m_eventIdList.push_back(pEvent->GetEntityId());
 		num = m_eventIdList.size();
 	}

@@ -319,7 +319,7 @@ void CVehicleMovementHelicopter::OnEvent(EVehicleMovementEvent event, const SVeh
 	}
   else if (event == eVME_Repair)
   {
-    m_steeringDamage = min(m_steeringDamage, params.fValue);
+	m_steeringDamage = min(m_steeringDamage, params.fValue);
 
 		// bit workaround - we never get a repair message for the last bit (as the damage level hasn't changed).
 		//	However, the helicopter only ever sends 1.0 or 0.0 to here...
@@ -357,7 +357,7 @@ void CVehicleMovementHelicopter::OnEvent(EVehicleMovementEvent event, const SVeh
 	}
 	else if (event == eVME_Turbulence)
 	{
- 		m_turbulence = max(m_turbulence, params.fValue);
+		m_turbulence = max(m_turbulence, params.fValue);
 	}
 }
 
@@ -1408,6 +1408,6 @@ void CNetworkMovementHelicopter::Serialize(TSerialize ser, unsigned aspects)
 		ser.Value("roll", m_actionRoll, 'vAng');
 		ser.Value("height", m_desiredHeight, 'iii');
 		ser.Value("dir", m_desiredDir, 'iii');
-    ser.Value("boost", m_boost, 'bool');
+	ser.Value("boost", m_boost, 'bool');
 	}
 }

@@ -58,31 +58,31 @@ enum EServerInfoKey
 
 static TKeyValuePair<EServerInfoKey,const char*>
 gServerKeyNames[] = { 
-                      {eSIK_unknown,""},
-                      {eSIK_hostname,"hostname"},
-                      {eSIK_mapname,"mapname"},
-                      {eSIK_numplayers,"numplayers"},
-                      {eSIK_maxplayers,"maxplayers"},
-                      {eSIK_gametype,"gametype"},
-                      {eSIK_dedicated,"dedicated"},
-                      {eSIK_official,"official"},
-                      {eSIK_frinedlyFire,"friendlyfire"},
+					  {eSIK_unknown,""},
+					  {eSIK_hostname,"hostname"},
+					  {eSIK_mapname,"mapname"},
+					  {eSIK_numplayers,"numplayers"},
+					  {eSIK_maxplayers,"maxplayers"},
+					  {eSIK_gametype,"gametype"},
+					  {eSIK_dedicated,"dedicated"},
+					  {eSIK_official,"official"},
+					  {eSIK_frinedlyFire,"friendlyfire"},
 											{eSIK_timeleft,"timeleft"},
-                      {eSIK_timelimit,"timelimit"},
-                      {eSIK_gamever,"gamever"}, 
-                      {eSIK_anticheat,"anticheat"},
+					  {eSIK_timelimit,"timelimit"},
+					  {eSIK_gamever,"gamever"}, 
+					  {eSIK_anticheat,"anticheat"},
 											{eSIK_voicecomm,"voicecomm"},
 											{eSIK_gamepadsonly,"gamepadsonly"},
-                      {eSIK_private,"password"},
+					  {eSIK_private,"password"},
 											{eSIK_dx10,"dx10"},
-                      {eSIK_playerName,"player"},
-                      {eSIK_playerTeam,"team"},
-                      {eSIK_playerRank,"rank"},
+					  {eSIK_playerName,"player"},
+					  {eSIK_playerTeam,"team"},
+					  {eSIK_playerRank,"rank"},
 											{eSIK_playerKills,"kills"},
 											{eSIK_playerDeaths,"deaths"},
 											{eSIK_modName,"modname"},
 											{eSIK_modVersion,"modversion"}
-                    };
+					};
 
 
 enum EChannelKey
@@ -127,11 +127,11 @@ public:
 
   void SetMenu(CMultiPlayerMenu* m)
   {
-    m_menu = m;
+	m_menu = m;
   }
   int GetCurTab()const
   {
-    return m_curTab;
+	return m_curTab;
   }
 	void JoinSelectedServer();
 
@@ -185,59 +185,59 @@ struct CMultiPlayerMenu::SGSBrowser : public IServerListener
 
   void  SetMenu(CMultiPlayerMenu* menu)
   {
-    m_menu = menu;
+	m_menu = menu;
   }
 
   virtual void UpdateServer(const int id,const SBasicServerInfo* info)
   {
-    OnServer(id,info,true);
+	OnServer(id,info,true);
   }
 
   virtual void NewServer(const int id,const SBasicServerInfo* info)
   {
-    OnServer(id,info,false);
+	OnServer(id,info,false);
   }
 
   void OnServer(const int id,const SBasicServerInfo* info, bool update)
   {
-    CMPLobbyUI::SServerInfo si;
-    si.m_numPlayers   = info->m_numPlayers;
-    si.m_maxPlayers   = info->m_maxPlayers;
-    si.m_private      = info->m_private;
-    si.m_hostName     = info->m_hostName;
-    si.m_publicIP     = info->m_publicIP;
-    si.m_publicPort   = info->m_publicPort;
-    si.m_hostPort     = info->m_hostPort;
-    si.m_privateIP    = info->m_privateIP;
-    si.m_hostName     = info->m_hostName;
-    si.m_mapName      = info->m_mapName;
-    si.m_gameVersion  = info->m_gameVersion;
-    si.m_gameTypeName = GetGameType(info->m_gameType);
-    si.m_gameType     = info->m_gameType;
+	CMPLobbyUI::SServerInfo si;
+	si.m_numPlayers   = info->m_numPlayers;
+	si.m_maxPlayers   = info->m_maxPlayers;
+	si.m_private      = info->m_private;
+	si.m_hostName     = info->m_hostName;
+	si.m_publicIP     = info->m_publicIP;
+	si.m_publicPort   = info->m_publicPort;
+	si.m_hostPort     = info->m_hostPort;
+	si.m_privateIP    = info->m_privateIP;
+	si.m_hostName     = info->m_hostName;
+	si.m_mapName      = info->m_mapName;
+	si.m_gameVersion  = info->m_gameVersion;
+	si.m_gameTypeName = GetGameType(info->m_gameType);
+	si.m_gameType     = info->m_gameType;
 	si.m_official = false;
-    si.m_anticheat    = info->m_anticheat;
-    si.m_voicecomm    = info->m_voicecomm; 
-    si.m_friendlyfire = info->m_friendlyfire;
-    si.m_dx10         = info->m_dx10;
-    si.m_dedicated    = info->m_dedicated;
+	si.m_anticheat    = info->m_anticheat;
+	si.m_voicecomm    = info->m_voicecomm; 
+	si.m_friendlyfire = info->m_friendlyfire;
+	si.m_dx10         = info->m_dx10;
+	si.m_dedicated    = info->m_dedicated;
 		si.m_gamepadsonly = info->m_gamepadsonly;
 		si.m_serverId     = id;
 		si.m_ping         = 10000;
 		si.m_modName			= info->m_modName;
 		si.m_modVersion		= info->m_modVersion;
-    for(int i=0;i<m_menu->m_favouriteServers.size();++i)
-    {
-      SStoredServer &srv = m_menu->m_favouriteServers[i];
-      if(srv.ip == si.m_publicIP && srv.port == si.m_hostPort)
-        si.m_favorite = true;
-    }
+	for(int i=0;i<m_menu->m_favouriteServers.size();++i)
+	{
+	  SStoredServer &srv = m_menu->m_favouriteServers[i];
+	  if(srv.ip == si.m_publicIP && srv.port == si.m_hostPort)
+		si.m_favorite = true;
+	}
 
-    for(int i=0;i<m_menu->m_recentServers.size();++i)
-    {
-      SStoredServer &srv = m_menu->m_recentServers[i];
-      if(srv.ip == si.m_publicIP && srv.port == si.m_hostPort)
-        si.m_recent = true;
-    }
+	for(int i=0;i<m_menu->m_recentServers.size();++i)
+	{
+	  SStoredServer &srv = m_menu->m_recentServers[i];
+	  if(srv.ip == si.m_publicIP && srv.port == si.m_hostPort)
+		si.m_recent = true;
+	}
 		
 		if(!si.m_favorite)
 		{
@@ -255,61 +255,61 @@ struct CMultiPlayerMenu::SGSBrowser : public IServerListener
 
 		si.m_canjoin = (m_version.empty() || m_version == si.m_gameVersion) && (m_modName==si.m_modName) && (m_modVersion==si.m_modVersion);
 
-    if(update)
-      m_menu->m_ui->UpdateServer(si);
-    else
-      m_menu->m_ui->AddServer(si);
+	if(update)
+	  m_menu->m_ui->UpdateServer(si);
+	else
+	  m_menu->m_ui->AddServer(si);
   }
 
   virtual void RemoveServer(const int id)
   {
-    m_menu->m_ui->RemoveServer(id);
+	m_menu->m_ui->RemoveServer(id);
   }
 
   virtual void UpdatePing(const int id, const int ping)
   {
-    m_menu->m_ui->UpdatePing(id,ping);
+	m_menu->m_ui->UpdatePing(id,ping);
   }
 
   virtual void UpdateValue(const int id,const char* name,const char* value)
   {
-    EServerInfoKey key = KEY_BY_VALUE(CONST_TEMP_STRING(name),gServerKeyNames);
+	EServerInfoKey key = KEY_BY_VALUE(CONST_TEMP_STRING(name),gServerKeyNames);
 
-    CMPLobbyUI::SServerInfo si;
-    if(m_menu->m_ui->GetServer(id,si))
-    {
-      bool basic = true;
-      switch(key)
-      {
-      case eSIK_hostname:
-        si.m_hostName = value;
-        break;
-      case eSIK_mapname:
-        si.m_mapName = value;
-        break;
-      case eSIK_numplayers:
+	CMPLobbyUI::SServerInfo si;
+	if(m_menu->m_ui->GetServer(id,si))
+	{
+	  bool basic = true;
+	  switch(key)
+	  {
+	  case eSIK_hostname:
+		si.m_hostName = value;
+		break;
+	  case eSIK_mapname:
+		si.m_mapName = value;
+		break;
+	  case eSIK_numplayers:
 				si.m_numPlayers = atoi(value);
 				if(si.m_numPlayers)
 					m_details.m_players.resize(si.m_numPlayers);
-        break;
-      case eSIK_maxplayers:
-        si.m_maxPlayers = atoi(value);
-        break;
-      case eSIK_gametype:
-        si.m_gameTypeName = GetGameType(value);
-        si.m_gameType = value;
-        break;
-      case eSIK_official:
-        break;
-      case eSIK_anticheat:
-        si.m_anticheat = atoi(value)!=0;
-        break;
+		break;
+	  case eSIK_maxplayers:
+		si.m_maxPlayers = atoi(value);
+		break;
+	  case eSIK_gametype:
+		si.m_gameTypeName = GetGameType(value);
+		si.m_gameType = value;
+		break;
+	  case eSIK_official:
+		break;
+	  case eSIK_anticheat:
+		si.m_anticheat = atoi(value)!=0;
+		break;
 			case eSIK_gamepadsonly:
 				si.m_gamepadsonly = atoi(value)!=0;
 				break;
-      case eSIK_private:
-        si.m_private = atoi(value)!=0;
-        break;
+	  case eSIK_private:
+		si.m_private = atoi(value)!=0;
+		break;
 			case eSIK_dx10:
 				si.m_dx10 = atoi(value)!=0;
 				break;
@@ -319,45 +319,45 @@ struct CMultiPlayerMenu::SGSBrowser : public IServerListener
 			case eSIK_modVersion:
 				si.m_modVersion = value;
 				break;
-      default:
-        basic = false;
-      }
+	  default:
+		basic = false;
+	  }
 
-      if(basic)
-      {
-        m_menu->m_ui->UpdateServer(si);
-      }
-    }
+	  if(basic)
+	  {
+		m_menu->m_ui->UpdateServer(si);
+	  }
+	}
 
-    if(id != m_pendingUpdate)
-      return;
+	if(id != m_pendingUpdate)
+	  return;
 
-    switch(key)
-    {
-    case eSIK_dedicated:
-      m_details.m_dedicated = IsTrue(value);
-      break;
-    case eSIK_frinedlyFire:
-      m_details.m_friendlyfire = IsTrue(value);
-      break;
-    case eSIK_timelimit:
-      m_details.m_timelimit = atoi(value);
-      break;
+	switch(key)
+	{
+	case eSIK_dedicated:
+	  m_details.m_dedicated = IsTrue(value);
+	  break;
+	case eSIK_frinedlyFire:
+	  m_details.m_friendlyfire = IsTrue(value);
+	  break;
+	case eSIK_timelimit:
+	  m_details.m_timelimit = atoi(value);
+	  break;
 		case eSIK_timeleft:
 			m_details.m_timeleft = atoi(value);
 			break;
-    case eSIK_gamever:
-      m_details.m_gamever = value;
-      break;
-    case eSIK_gametype:
-      m_details.m_gamemode = value;
-      break;
-    case eSIK_voicecomm:
-      m_details.m_voicecomm = IsTrue(value);
-      break;
-    case eSIK_anticheat:
-      m_details.m_anticheat = IsTrue(value);
-      break;
+	case eSIK_gamever:
+	  m_details.m_gamever = value;
+	  break;
+	case eSIK_gametype:
+	  m_details.m_gamemode = value;
+	  break;
+	case eSIK_voicecomm:
+	  m_details.m_voicecomm = IsTrue(value);
+	  break;
+	case eSIK_anticheat:
+	  m_details.m_anticheat = IsTrue(value);
+	  break;
 		case eSIK_gamepadsonly:
 			m_details.m_gamepadsonly = IsTrue(value);
 			break;
@@ -367,49 +367,49 @@ struct CMultiPlayerMenu::SGSBrowser : public IServerListener
 		case eSIK_modVersion:
 			m_details.m_modversion = value;
 			break;
-    default:
-      return;
-    } 
+	default:
+	  return;
+	} 
   }
 
   virtual void UpdatePlayerValue(const int id,const int playerNum,const char* name,const char* value)
   {
-    if(id != m_pendingUpdate)
-      return;
-    if(playerNum>=m_details.m_players.size())
-      return;
-    CMPLobbyUI::SServerDetails::SPlayerDetails& pl = m_details.m_players[playerNum];
-    string val(name);
-    EServerInfoKey key = KEY_BY_VALUE(CONST_TEMP_STRING(val),gServerKeyNames);
-    switch(key)
-    {
-    case eSIK_playerName:
-      pl.m_name = value;
-      break;
-    case eSIK_playerTeam:
-      pl.m_team = atoi(value);
-      break;
-    case eSIK_playerRank:
-      {
-        int rank = atoi(value);
-        if(rank)
-        {
-          pl.m_rank.Format("@ui_short_rank_%d",rank);
-        }
-        else
-        {
-          pl.m_rank="";
-        }
+	if(id != m_pendingUpdate)
+	  return;
+	if(playerNum>=m_details.m_players.size())
+	  return;
+	CMPLobbyUI::SServerDetails::SPlayerDetails& pl = m_details.m_players[playerNum];
+	string val(name);
+	EServerInfoKey key = KEY_BY_VALUE(CONST_TEMP_STRING(val),gServerKeyNames);
+	switch(key)
+	{
+	case eSIK_playerName:
+	  pl.m_name = value;
+	  break;
+	case eSIK_playerTeam:
+	  pl.m_team = atoi(value);
+	  break;
+	case eSIK_playerRank:
+	  {
+		int rank = atoi(value);
+		if(rank)
+		{
+		  pl.m_rank.Format("@ui_short_rank_%d",rank);
+		}
+		else
+		{
+		  pl.m_rank="";
+		}
 				pl.m_iRank = rank;
-      }
-      break;
-    case eSIK_playerKills:
-      pl.m_kills = atoi(value);
-      break;
-    case eSIK_playerDeaths:
-      pl.m_deaths = atoi(value);
-      break;
-    }
+	  }
+	  break;
+	case eSIK_playerKills:
+	  pl.m_kills = atoi(value);
+	  break;
+	case eSIK_playerDeaths:
+	  pl.m_deaths = atoi(value);
+	  break;
+	}
   }
 
   virtual void UpdateTeamValue(const int id,const int teamNum,const char *name,const char* value)
@@ -476,47 +476,47 @@ struct CMultiPlayerMenu::SGSBrowser : public IServerListener
 
   virtual void ServerUpdateComplete(const int id)
   {
-    if(id == m_pendingUpdate)
-    {
+	if(id == m_pendingUpdate)
+	{
 			std::sort(m_details.m_players.begin(),m_details.m_players.end(),&CompareScores);
-      m_menu->m_ui->SetServerDetails(m_details);
-      m_pendingUpdate = -1;
+	  m_menu->m_ui->SetServerDetails(m_details);
+	  m_pendingUpdate = -1;
 			m_menu->OnRefreshComplete(true);
-    }
+	}
   }
 
   virtual void ServerDirectConnect(bool neednat, uint ip, ushort port)
   {
-    string connect;
-    if(neednat)
-    {
-      int cookie = rand() + (rand()<<16);
+	string connect;
+	if(neednat)
+	{
+	  int cookie = rand() + (rand()<<16);
 			connect.Format("connect <nat>%d|%d.%d.%d.%d:%d",cookie,ip&0xFF,(ip>>8)&0xFF,(ip>>16)&0xFF,(ip>>24)&0xFF,port);
-      m_menu->m_browser->SendNatCookie(ip,port,cookie);
-    }
-    else
-    {
-      connect.Format("connect %d.%d.%d.%d:%d",ip&0xFF,(ip>>8)&0xFF,(ip>>16)&0xFF,(ip>>24)&0xFF,port);
-    }
-    g_pGame->GetIGameFramework()->ExecuteCommandNextFrame(connect.c_str());
+	  m_menu->m_browser->SendNatCookie(ip,port,cookie);
+	}
+	else
+	{
+	  connect.Format("connect %d.%d.%d.%d:%d",ip&0xFF,(ip>>8)&0xFF,(ip>>16)&0xFF,(ip>>24)&0xFF,port);
+	}
+	g_pGame->GetIGameFramework()->ExecuteCommandNextFrame(connect.c_str());
   }
 
   const wstring& GetGameType(const char* gt)
   {
-    std::map<string,wstring>::const_iterator it = m_gameTypes.find(CONST_TEMP_STRING(gt));
-    if(it==m_gameTypes.end())
-    {
-      CryFixedStringT<128>  cType;
-      cType = "@ui_rules_";
-      cType += gt;
-      if(gEnv->pSystem->GetLocalizationManager()->LocalizeLabel(cType,m_tempWString) == false)
+	std::map<string,wstring>::const_iterator it = m_gameTypes.find(CONST_TEMP_STRING(gt));
+	if(it==m_gameTypes.end())
+	{
+	  CryFixedStringT<128>  cType;
+	  cType = "@ui_rules_";
+	  cType += gt;
+	  if(gEnv->pSystem->GetLocalizationManager()->LocalizeLabel(cType,m_tempWString) == false)
 			{
 				SUIWideString mode(gt);
 				m_tempWString = mode.c_str();
 			}
-      it = m_gameTypes.insert(std::make_pair(gt,m_tempWString)).first;
-    }
-    return it->second;
+	  it = m_gameTypes.insert(std::make_pair(gt,m_tempWString)).first;
+	}
+	return it->second;
   }
 
   std::map<string,wstring>     m_gameTypes;
@@ -543,61 +543,61 @@ struct CMultiPlayerMenu::SGSNetworkProfile : public INProfileUI
 
   void  SetMenu(CMultiPlayerMenu* menu)
   {
-    m_menu = menu;
+	m_menu = menu;
   }
 
   virtual void AddBuddy(SChatUser usr)
   {
-    m_nicks[usr.m_id] = usr.m_nick;
-    m_menu->m_ui->AddChatUser(eCC_buddy, usr.m_id, usr.m_nick, usr.m_foreign);
-    m_menu->m_ui->ChatUserStatus(eCC_buddy, usr.m_id, usr.m_status, usr.m_location);
+	m_nicks[usr.m_id] = usr.m_nick;
+	m_menu->m_ui->AddChatUser(eCC_buddy, usr.m_id, usr.m_nick, usr.m_foreign);
+	m_menu->m_ui->ChatUserStatus(eCC_buddy, usr.m_id, usr.m_status, usr.m_location);
   }
 
   virtual void UpdateBuddy(SChatUser usr)
   {
 //    m_menu->m_ui->ClearUserList();
-    m_menu->m_ui->ChatUserStatus(eCC_buddy, usr.m_id, usr.m_status, usr.m_location);
+	m_menu->m_ui->ChatUserStatus(eCC_buddy, usr.m_id, usr.m_status, usr.m_location);
   }
   
   virtual void RemoveBuddy(int id)
   {
-    m_menu->m_ui->RemoveCharUser(eCC_buddy,id);
+	m_menu->m_ui->RemoveCharUser(eCC_buddy,id);
   }
   
   virtual void AddIgnore(SChatUser s)
   {
-    m_menu->m_ui->AddChatUser(eCC_ignored, s.m_id, s.m_nick, s.m_foreign);
-    m_menu->m_ui->UpdateUsers();
+	m_menu->m_ui->AddChatUser(eCC_ignored, s.m_id, s.m_nick, s.m_foreign);
+	m_menu->m_ui->UpdateUsers();
   }
 
   virtual void RemoveIgnore(int id)
   {
-    m_menu->m_ui->RemoveCharUser(eCC_ignored,id);
+	m_menu->m_ui->RemoveCharUser(eCC_ignored,id);
   }
 
   virtual void OnMessage(int id, const char* message)
   {
-    string msg = message;
-    
-    TNicksMap::iterator it = m_nicks.find(id);
-    if(it!=m_nicks.end())
-      msg = string("From [") + it->second + "] : " + msg;
-    
-    m_menu->m_ui->AddChatText(msg);
+	string msg = message;
+	
+	TNicksMap::iterator it = m_nicks.find(id);
+	if(it!=m_nicks.end())
+	  msg = string("From [") + it->second + "] : " + msg;
+	
+	m_menu->m_ui->AddChatText(msg);
   }
 
   virtual void OnAuthRequest(int id, const char* nick, const char* reason)
   {
-    m_menu->m_ui->ShowInvitation(id,nick,reason);
+	m_menu->m_ui->ShowInvitation(id,nick,reason);
   }
 
   virtual void ProfileInfo(int id, SUserInfo ui)
   {
 		if(!(m_profileInfoNick.empty() || m_profileInfoNick == ui.m_nick) && !(m_profileInfoId == 0 || m_profileInfoId == id))
 			return;
-    m_menu->m_ui->SetInfoScreenId(id);
+	m_menu->m_ui->SetInfoScreenId(id);
 		m_menu->m_ui->EnableInfoScreenContorls(m_menu->m_profile->CanInvite(id),m_menu->m_profile->CanIgnore(id));
-    m_menu->m_ui->SetProfileInfo(ui);
+	m_menu->m_ui->SetProfileInfo(ui);
   }
 
 	void ProfileInfoNick(const char* nick)//called from CMultiplayerMenu
@@ -622,50 +622,50 @@ struct CMultiPlayerMenu::SGSNetworkProfile : public INProfileUI
 
   virtual void SearchResult(int id, const char* nick)
   {
-    m_menu->m_ui->AddSearchResult(id,nick);
+	m_menu->m_ui->AddSearchResult(id,nick);
   }
 
   virtual void SearchCompleted()
   {
-    m_menu->m_ui->EnableSearchButton(true);
+	m_menu->m_ui->EnableSearchButton(true);
   }
 
 
   void SelectUser( int id )
   {
-    m_selectedBuddy = id;
+	m_selectedBuddy = id;
   }
 
   void SendMessage(const char* message)
   {
-    if(m_selectedBuddy==-1)
-      return;
+	if(m_selectedBuddy==-1)
+	  return;
 
-    string msg = message;
-    
-    TNicksMap::iterator it = m_nicks.find(m_selectedBuddy);
-    if(it!=m_nicks.end())
-    {
-      msg = string("To [") + it->second + "] : " + message;
-      m_menu->m_ui->AddChatText(msg);
-    }
-    m_menu->m_profile->SendBuddyMessage(m_selectedBuddy,message);
+	string msg = message;
+	
+	TNicksMap::iterator it = m_nicks.find(m_selectedBuddy);
+	if(it!=m_nicks.end())
+	{
+	  msg = string("To [") + it->second + "] : " + message;
+	  m_menu->m_ui->AddChatText(msg);
+	}
+	m_menu->m_profile->SendBuddyMessage(m_selectedBuddy,message);
   }
 
   virtual void AddFavoriteServer(uint ip, ushort port)
   {
-    SStoredServer s;
-    s.ip = ip;
-    s.port = port;
-    m_menu->m_favouriteServers.push_back(s);
+	SStoredServer s;
+	s.ip = ip;
+	s.port = port;
+	m_menu->m_favouriteServers.push_back(s);
   }
 
   virtual void AddRecentServer(uint ip, ushort port)
   {
-    SStoredServer s;
-    s.ip = ip;
-    s.port = port;
-    m_menu->m_recentServers.push_back(s);
+	SStoredServer s;
+	s.ip = ip;
+	s.port = port;
+	m_menu->m_recentServers.push_back(s);
   }
 
 	int                         m_selectedBuddy;
@@ -680,8 +680,8 @@ struct CMultiPlayerMenu::SChat : public IChatListener
 {
   struct SChatUser
   {
-    int    id;
-    string nick;    
+	int    id;
+	string nick;    
   };
 
   SChat(CMultiPlayerMenu* p):m_parent(p),m_userId(0)
@@ -749,59 +749,59 @@ struct CMultiPlayerMenu::SChat : public IChatListener
 
   virtual void Message(const char* from, const char* message, ENetworkChatMessageType t)
   {
-    switch(t)
-    {
-    case eNCMT_say:
-      {
-        string msg;
-        msg.Format("[%s] : %s",from,message);
+	switch(t)
+	{
+	case eNCMT_say:
+	  {
+		string msg;
+		msg.Format("[%s] : %s",from,message);
 				if(!m_parent->m_profile->IsIgnored(from))
 					m_parent->m_ui->AddChatText(msg);
-      }
-      break;
-    case eNCMT_server:
-      break;
-    case eNCMT_data:
-      break;
-    }
+	  }
+	  break;
+	case eNCMT_server:
+	  break;
+	case eNCMT_data:
+	  break;
+	}
   }
 
   virtual void ChatUser(const char* nick, EChatUserStatus st)
   {
-    switch(st)
-    {
-    case eCUS_inchannel:
-      {
-        SChatUser u;
-        u.id = m_userId++;
-        u.nick = nick;
-        m_userlist.push_back(u);
-        m_parent->m_ui->AddChatUser(eCC_global, u.id, nick, false);
-      }
-      break;
-    case eCUS_joined:
-      {
-        SChatUser u;
-        u.id = m_userId++;
-        u.nick = nick;
-        m_userlist.push_back(u);
-        m_parent->m_ui->AddChatUser(eCC_global, u.id, nick, false);
-      }
-      break;
-    case eCUS_left:
-      {
-        for(int i=0;i<m_userlist.size();++i)
-        {
-          if(m_userlist[i].nick == nick)
-          {
-            m_parent->m_ui->RemoveCharUser(eCC_global,m_userlist[i].id);
-            m_userlist.erase(m_userlist.begin()+i);
-            break;
-          }
-        }
-      }
-      break;
-    }
+	switch(st)
+	{
+	case eCUS_inchannel:
+	  {
+		SChatUser u;
+		u.id = m_userId++;
+		u.nick = nick;
+		m_userlist.push_back(u);
+		m_parent->m_ui->AddChatUser(eCC_global, u.id, nick, false);
+	  }
+	  break;
+	case eCUS_joined:
+	  {
+		SChatUser u;
+		u.id = m_userId++;
+		u.nick = nick;
+		m_userlist.push_back(u);
+		m_parent->m_ui->AddChatUser(eCC_global, u.id, nick, false);
+	  }
+	  break;
+	case eCUS_left:
+	  {
+		for(int i=0;i<m_userlist.size();++i)
+		{
+		  if(m_userlist[i].nick == nick)
+		  {
+			m_parent->m_ui->RemoveCharUser(eCC_global,m_userlist[i].id);
+			m_userlist.erase(m_userlist.begin()+i);
+			break;
+		  }
+		}
+	  }
+	  break;
+	}
   }
   virtual void OnError(int code)
   {
@@ -915,23 +915,23 @@ m_joiningServer(false)
   INetworkService *serv=GetISystem()->GetINetwork()->GetService("GameSpy");
   if(serv)
   {
-    m_browser = serv->GetServerBrowser();
-    if(m_browser->IsAvailable())
-    {
-        m_browser->SetListener(m_serverlist.get());
-        m_browser->Start(m_lan);
-        m_browser->Update();
-    }
-    m_serverlist->SetMenu(this);
-    if(!lan)
-    {
-      m_chat = serv->GetNetworkChat();
-      m_chatlist.reset(new SChat(this));
-      m_chat->SetListener(m_chatlist.get());
-      m_chat->Join();
+	m_browser = serv->GetServerBrowser();
+	if(m_browser->IsAvailable())
+	{
+		m_browser->SetListener(m_serverlist.get());
+		m_browser->Start(m_lan);
+		m_browser->Update();
+	}
+	m_serverlist->SetMenu(this);
+	if(!lan)
+	{
+	  m_chat = serv->GetNetworkChat();
+	  m_chatlist.reset(new SChat(this));
+	  m_chat->SetListener(m_chatlist.get());
+	  m_chat->Join();
 			if(m_hub->GetProfile())
 				m_hub->GetProfile()->InitUI(m_buddylist.get());
-    }
+	}
   }
 
   m_ui->SetJoinButtonMode(m_hub->IsIngame()?eJBM_disconnect:eJBM_default);
@@ -954,18 +954,18 @@ CMultiPlayerMenu::~CMultiPlayerMenu()
 {
   m_ui->SetStatusString("");
   if(m_hub && m_hub->GetProfile())
-    m_hub->GetProfile()->DestroyUI();
+	m_hub->GetProfile()->DestroyUI();
 
   if(m_chat)
   {
-    m_chat->Leave();
-    m_chat->SetListener(0);
+	m_chat->Leave();
+	m_chat->SetListener(0);
   }
 
 	if(m_browser)
   {
-    m_browser->SetListener(0);
-    m_browser->Stop();
+	m_browser->SetListener(0);
+	m_browser->Stop();
   }
 }
 
@@ -979,7 +979,7 @@ bool CMultiPlayerMenu::HandleFSCommand(EGsUiCommand cmd, const char* pArgs)
   handled = m_ui->HandleFSCommand(cmd,pArgs) || handled;
 
   if(m_creategame.get())
-    handled = m_creategame->HandleFSCommand(cmd,pArgs) || handled;
+	handled = m_creategame->HandleFSCommand(cmd,pArgs) || handled;
 
   return handled;
 }
@@ -988,7 +988,7 @@ void CMultiPlayerMenu::OnUIEvent(const SUIEvent& event)
 {
   if(event.event == eUIE_connectFailed)
   {
-    m_hub->CloseLoadingDlg();
+	m_hub->CloseLoadingDlg();
 		m_hub->DisconnectError(EDisconnectionCause(event.param),true);
   }
 	else if(event.event == eUIE_disconnect)
@@ -1014,26 +1014,26 @@ void    CMultiPlayerMenu::UpdateServerList()
   switch(m_ui->GetCurTab())
   {
   case 0:
-    m_ui->ClearServerList();
-    m_ui->StartUpdate();
-    m_ui->SetUpdateProgress(0,-1);
-    m_browser->Update();
-    break;
+	m_ui->ClearServerList();
+	m_ui->StartUpdate();
+	m_ui->SetUpdateProgress(0,-1);
+	m_browser->Update();
+	break;
   case 1:
-    for(int i=0;i<m_favouriteServers.size();++i)
-      m_browser->BrowseForServer(m_favouriteServers[i].ip,m_favouriteServers[i].port);
-    break;
+	for(int i=0;i<m_favouriteServers.size();++i)
+	  m_browser->BrowseForServer(m_favouriteServers[i].ip,m_favouriteServers[i].port);
+	break;
   case 2:
-    for(int i=0;i<m_recentServers.size();++i)
-      m_browser->BrowseForServer(m_recentServers[i].ip,m_recentServers[i].port);
-    break;
+	for(int i=0;i<m_recentServers.size();++i)
+	  m_browser->BrowseForServer(m_recentServers[i].ip,m_recentServers[i].port);
+	break;
   }
 }
 
 void    CMultiPlayerMenu::StopServerListUpdate()
 {
-    m_browser->Stop();
-    m_ui->FinishUpdate();
+	m_browser->Stop();
+	m_ui->FinishUpdate();
 }
   
 void CMultiPlayerMenu::SelectServer(int id)
@@ -1047,17 +1047,17 @@ void CMultiPlayerMenu::JoinServer()
 	CMPLobbyUI::SServerInfo serv;
   if(m_ui->GetSelectedServer(serv))
 	{
-    if(m_profile)
-      m_profile->SetPlayingStatus(serv.m_publicIP,serv.m_hostPort,serv.m_publicPort,serv.m_gameType);
-    if(m_lan)
-    {
-      uint ip = serv.m_publicIP;
-      string connect;
-      connect.Format("connect %d.%d.%d.%d:%d",ip&0xFF,(ip>>8)&0xFF,(ip>>16)&0xFF,(ip>>24)&0xFF,serv.m_hostPort);
-      g_pGame->GetIGameFramework()->ExecuteCommandNextFrame(connect.c_str());
-    } 
-    else
-      m_browser->CheckDirectConnect(serv.m_serverId,serv.m_hostPort);
+	if(m_profile)
+	  m_profile->SetPlayingStatus(serv.m_publicIP,serv.m_hostPort,serv.m_publicPort,serv.m_gameType);
+	if(m_lan)
+	{
+	  uint ip = serv.m_publicIP;
+	  string connect;
+	  connect.Format("connect %d.%d.%d.%d:%d",ip&0xFF,(ip>>8)&0xFF,(ip>>16)&0xFF,(ip>>24)&0xFF,serv.m_hostPort);
+	  g_pGame->GetIGameFramework()->ExecuteCommandNextFrame(connect.c_str());
+	} 
+	else
+	  m_browser->CheckDirectConnect(serv.m_serverId,serv.m_hostPort);
 		if(m_profile && !m_lan)
 			m_profile->AddRecentServer(serv.m_publicIP,serv.m_hostPort);
 		serv.m_recent = true;
@@ -1072,31 +1072,31 @@ bool CMultiPlayerMenu::CUI::OnHandleCommand(EGsUiCommand cmd, const char* pArgs)
   switch(cmd)
   {
   case eGUC_update:
-    m_menu->UpdateServerList();
-    break;
+	m_menu->UpdateServerList();
+	break;
   case eGUC_stop:
-    m_menu->StopServerListUpdate();
-    break;
+	m_menu->StopServerListUpdate();
+	break;
   case eGUC_acceptBuddy:
-    {
-      int id = atoi(pArgs);
+	{
+	  int id = atoi(pArgs);
 			if(m_menu->m_profile)
 			{
 				m_menu->m_profile->AcceptBuddy(id,true);
 				if(m_menu->m_profile->CanInvite(id))
 					m_menu->m_profile->RequestBuddy(id, AUTO_INVITE_TEXT);
 			}
-    }
-    break;
+	}
+	break;
   case eGUC_declineBuddy:
-    {
-      int id = atoi(pArgs);
+	{
+	  int id = atoi(pArgs);
 			if(m_menu->m_profile)
 				m_menu->m_profile->AcceptBuddy(id,false);
-    }
-    break;
+	}
+	break;
   case eGUC_join:
-    {
+	{
 			if(m_menu->m_hub->IsIngame())
 			{
 				m_menu->m_hub->ShowYesNoDialog("@ui_disconnect_warning","disconnect_join");
@@ -1112,10 +1112,10 @@ bool CMultiPlayerMenu::CUI::OnHandleCommand(EGsUiCommand cmd, const char* pArgs)
 					RefreshServer();
 				}
 			}
-    }
-    break;
+	}
+	break;
   case eGUC_joinIP:
-    {
+	{
 			m_joinIpCmd.Format("connect %s",pArgs);
 			m_joinServerName = pArgs;
 			if(m_joinIpCmd[m_joinIpCmd.size()-1]==':')
@@ -1131,8 +1131,8 @@ bool CMultiPlayerMenu::CUI::OnHandleCommand(EGsUiCommand cmd, const char* pArgs)
 				m_menu->m_hub->ShowLoadingDlg("@ui_connecting_to",pArgs);
 				g_pGame->GetIGameFramework()->ExecuteCommandNextFrame(m_joinIpCmd.c_str());
 			}
-    }
-    break;
+	}
+	break;
 	case eGUC_dialogYes:
 		if (!strcmp(pArgs,"disconnect_joinIp"))
 		{
@@ -1150,42 +1150,42 @@ bool CMultiPlayerMenu::CUI::OnHandleCommand(EGsUiCommand cmd, const char* pArgs)
 			handled = false;
 		break;
   case eGUC_joinBuddy:
-    break;
+	break;
   case eGUC_disconnect:
 		g_pGame->GetIGameFramework()->ExecuteCommandNextFrame("disconnect");
-    break;
+	break;
   case eGUC_displayServerList:
-    SetUpdateProgress(m_menu->m_browser->GetPendingQueryCount(),m_menu->m_browser->GetServerCount());
-    break;
+	SetUpdateProgress(m_menu->m_browser->GetPendingQueryCount(),m_menu->m_browser->GetServerCount());
+	break;
   case eGUC_chat:
-    {
-      if(m_menu->m_buddylist->m_selectedBuddy!=-1)
-        m_menu->m_buddylist->SendMessage(pArgs);
-      else
-      {
-        if(m_menu->m_chat)
-          m_menu->m_chat->Say(pArgs);
-      }
-    }
-    break;
+	{
+	  if(m_menu->m_buddylist->m_selectedBuddy!=-1)
+		m_menu->m_buddylist->SendMessage(pArgs);
+	  else
+	  {
+		if(m_menu->m_chat)
+		  m_menu->m_chat->Say(pArgs);
+	  }
+	}
+	break;
   case eGUC_find:
-    EnableSearchButton(false);
-    ClearSearchResults();
+	EnableSearchButton(false);
+	ClearSearchResults();
 		if(m_menu->m_profile)
 			m_menu->m_profile->SearchUsers(pArgs);
-    break;
+	break;
   case eGUC_selectServer:
 
-    //break;
+	//break;
   case eGUC_refreshServer:
-    {
-      ResetServerDetails();
+	{
+	  ResetServerDetails();
 			m_menu->m_joiningServer = false;
 			RefreshServer();
-    }
-    break;
+	}
+	break;
   default:
-    handled = false;
+	handled = false;
   }
   return handled;
 }
@@ -1195,17 +1195,17 @@ void CMultiPlayerMenu::CUI::OnActivateTab(int tab)
   switch(tab)
   {
   case 0:
-    break;
+	break;
   case 1:
-    break;
+	break;
   case 2:
-    break;
+	break;
   case 3:
-    //m_menu->m_buddylist->m_nicks.clear();
-    //ClearUserList();
-    //m_menu->m_profile->UpdateBuddies();
-    //m_menu->m_buddylist->AddIgnore(0,"asdasd");
-    break;
+	//m_menu->m_buddylist->m_nicks.clear();
+	//ClearUserList();
+	//m_menu->m_profile->UpdateBuddies();
+	//m_menu->m_buddylist->AddIgnore(0,"asdasd");
+	break;
   }
   m_curTab = tab;
 }
@@ -1215,13 +1215,13 @@ void CMultiPlayerMenu::CUI::OnDeactivateTab(int tab)
   switch(tab)
   {
   case 0:
-    break;
+	break;
   case 1:
-    break;
+	break;
   case 2:
-    break;
+	break;
   case 3:
-    break;
+	break;
   }  
 }
 
@@ -1253,9 +1253,9 @@ bool CMultiPlayerMenu::CUI::CanAdd(EChatCategory cat, int id, const char* nick)
 	if(!m_menu->m_profile)
 		return false;
   if(cat == eCC_buddy || cat == eCC_ignored)
-    return m_menu->m_profile->CanInvite(id);
+	return m_menu->m_profile->CanInvite(id);
   else
-    return m_menu->m_profile->CanInvite(nick);
+	return m_menu->m_profile->CanInvite(nick);
 }
 
 bool CMultiPlayerMenu::CUI::CanIgnore(EChatCategory cat, int id, const char* nick)
@@ -1263,9 +1263,9 @@ bool CMultiPlayerMenu::CUI::CanIgnore(EChatCategory cat, int id, const char* nic
 	if(!m_menu->m_profile)
 		return false;
   if(cat == eCC_buddy || cat == eCC_ignored)
-    return m_menu->m_profile->CanIgnore(id);
+	return m_menu->m_profile->CanIgnore(id);
   else
-    return m_menu->m_profile->CanIgnore(nick);
+	return m_menu->m_profile->CanIgnore(nick);
 }
 
 void CMultiPlayerMenu::CUI::OnShowUserInfo(int id, const char* nick)

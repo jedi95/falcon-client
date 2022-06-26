@@ -557,7 +557,7 @@ void CHUDRadar::Update(float fDeltaTime)
 			{
 				if (tempActor->GetHealth() <= 0)
 				{
-					if (g_pGameCVars->fn_radarclearondeath > 0)
+					if (g_pGameCVars->fn_radarClearOnDeath > 0)
 					{
 						m_tempEntitiesOnRadar.erase(m_tempEntitiesOnRadar.begin() + t);
 					}

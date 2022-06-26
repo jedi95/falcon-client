@@ -186,10 +186,10 @@ void CSingle::Update(float frameTime, uint frameId)
 		{
 			m_mflTimer = 0.0f;
 			
-      if (m_mflightId[0])
-        m_pWeapon->EnableLight(false, m_mflightId[0]);
-      if (m_mflightId[1])
-        m_pWeapon->EnableLight(false, m_mflightId[1]);
+	  if (m_mflightId[0])
+		m_pWeapon->EnableLight(false, m_mflightId[0]);
+	  if (m_mflightId[1])
+		m_pWeapon->EnableLight(false, m_mflightId[1]);
 		}
 
 		keepUpdating=true;
@@ -259,7 +259,7 @@ void CSingle::PostUpdate(float frameTime)
 				float speed = pAmmoParams->speed;
 				if (speed == 0.0f)
 					speed = 60.0f;
-        Vec3 hit = m_targetSpot;
+		Vec3 hit = m_targetSpot;
 				Vec3 pos = m_lastAimSpot;
 
 				float x, y;
@@ -309,7 +309,7 @@ bool CSingle::IsValidAutoAimTarget(IEntity* pEntity, int partId)
   IVehicle* pVehicle = 0;
   
   if (pEntity->IsHidden())
-    return false;
+	return false;
 
   AABB box;
   pEntity->GetLocalBounds(box);
@@ -317,7 +317,7 @@ bool CSingle::IsValidAutoAimTarget(IEntity* pEntity, int partId)
   
   if (vol < m_fireparams.autoaim_minvolume || vol > m_fireparams.autoaim_maxvolume)
   {
-    return false;
+	return false;
   }
  
 	CActor* pPlayer = m_pWeapon->GetOwnerActor();
@@ -328,7 +328,7 @@ bool CSingle::IsValidAutoAimTarget(IEntity* pEntity, int partId)
   pActor = gEnv->pGame->GetIGameFramework()->GetIActorSystem()->GetActor(pEntity->GetId());
   if (pActor && pActor->GetHealth() > 0.f && 
 		pActor->GetEntity()->GetAI() && pActor->GetEntity()->GetAI()->IsHostile(pPlayer->GetEntity()->GetAI(),false))
-    return true;
+	return true;
   
   pVehicle = gEnv->pGame->GetIGameFramework()->GetIVehicleSystem()->GetVehicle(pEntity->GetId()); 
   if (gEnv->bMultiplayer && pVehicle && pVehicle->GetStatus().health > 0.f)
@@ -345,8 +345,8 @@ bool CSingle::IsValidAutoAimTarget(IEntity* pEntity, int partId)
 
 	if (pVehicle && pVehicle->GetStatus().health > 0.f &&
 		pVehicle->GetEntity()->GetAI() && pVehicle->GetEntity()->GetAI()->IsHostile(pPlayer->GetEntity()->GetAI(),false))
-    return true;
-    
+	return true;
+	
   return false;
 }
 
@@ -452,7 +452,7 @@ void CSingle::UpdateAutoAim(float frameTime)
 
 	CActor *pOwner = m_pWeapon->GetOwnerActor();
   if (!pOwner || !pOwner->IsPlayer())
-    return;
+	return;
 	
   // todo: use crosshair/aiming dir
 	IMovementController *pMC = pOwner->GetMovementController();
@@ -471,7 +471,7 @@ void CSingle::UpdateAutoAim(float frameTime)
   
   IPhysicalEntity* pSkipEnts[10];
   int nSkipEnts = GetSkipEntities(m_pWeapon, pSkipEnts, 10);
-  	
+	
 	const int objects = ent_all;
 	const int flags = (geom_colltype_ray << rwi_colltype_bit) | rwi_colltype_any | (8 & rwi_pierceability_mask) | (geom_colltype14 << rwi_colltype_bit);
 
@@ -484,8 +484,8 @@ void CSingle::UpdateAutoAim(float frameTime)
   if (result && ray.pCollider)
 	{	
 		pEntity = (IEntity *)ray.pCollider->GetForeignData(PHYS_FOREIGN_ID_ENTITY);    	        
-    if (pEntity && IsValidAutoAimTarget(pEntity))
-      hitValidTarget = true;
+	if (pEntity && IsValidAutoAimTarget(pEntity))
+	  hitValidTarget = true;
   }
 
 	if(m_bLocked)
@@ -493,7 +493,7 @@ void CSingle::UpdateAutoAim(float frameTime)
 
   if (hitValidTarget && ray.dist <= maxDistance)
   {	
-    if (m_bLocked)
+	if (m_bLocked)
 		{
 			if ((m_lockedTarget != pEntity->GetId()) && m_autoaimTimeOut<=0.0f)
 				StartLocking(pEntity->GetId());
@@ -515,13 +515,13 @@ void CSingle::UpdateAutoAim(float frameTime)
 	{
 		// check if we're looking far away from our locked target
 		if ((m_bLocked && !(ray.dist<=maxDistance && CheckAutoAimTolerance(aimPos, aimDir))) || (!m_bLocked && m_lockedTarget && m_fStareTime != 0.0f))
-    { 
+	{ 
 			if(!m_fireparams.autoaim_timeout)
 			{
 				m_pWeapon->RequestUnlock();
 				Unlock();
 			}
-    }
+	}
 	}
 
   if (m_bLocking && !m_bLocked && m_fStareTime >= m_fireparams.autoaim_locktime && m_lockedTarget)
@@ -530,8 +530,8 @@ void CSingle::UpdateAutoAim(float frameTime)
 		m_pWeapon->RequestLock(pEntity->GetId());
   else if (m_bLocked)
 	{
-    // check if target still valid (can e.g. be killed)
-    IEntity *pEntity = gEnv->pEntitySystem->GetEntity(m_lockedTarget);	
+	// check if target still valid (can e.g. be killed)
+	IEntity *pEntity = gEnv->pEntitySystem->GetEntity(m_lockedTarget);	
 		if ((pEntity && !IsValidAutoAimTarget(pEntity)) || (m_fireparams.autoaim_timeout && m_autoaimTimeOut<=0.0f))
 		{
 			m_pWeapon->RequestUnlock();
@@ -646,7 +646,7 @@ void CSingle::Activate(bool activate)
   m_heatSoundId = INVALID_SOUNDID;  
   
   if (!activate && m_heatEffectId)
-    m_heatEffectId = m_pWeapon->AttachEffect(0, m_heatEffectId, false);
+	m_heatEffectId = m_pWeapon->AttachEffect(0, m_heatEffectId, false);
 	if (!activate && m_smokeEffectId)
 		m_heatEffectId = m_pWeapon->AttachEffect(0, m_smokeEffectId, false);
 
@@ -655,7 +655,7 @@ void CSingle::Activate(bool activate)
 
   if (!activate)
 	  MuzzleFlashEffect(false);
-  	
+	
   SpinUpEffect(false);
 
   m_firstShot = activate;
@@ -663,7 +663,7 @@ void CSingle::Activate(bool activate)
 	ResetLock();
 
   if (activate && m_fireparams.autoaim)
-    m_pWeapon->RequireUpdate(eIUS_FireMode);  
+	m_pWeapon->RequireUpdate(eIUS_FireMode);  
 
   m_fStareTime = 0.f;    
 
@@ -1106,144 +1106,15 @@ namespace
 {
   struct CompareEntityDist
   {
-    CompareEntityDist(const Vec3& to) : m_to(to) {}
-    
-    ILINE bool operator()( const IEntity* lhs, const IEntity* rhs ) const
-    { 
-      return m_to.GetSquaredDistance(lhs->GetWorldPos()) < m_to.GetSquaredDistance(rhs->GetWorldPos());
-    }
-    
-    Vec3 m_to;
+	CompareEntityDist(const Vec3& to) : m_to(to) {}
+	
+	ILINE bool operator()( const IEntity* lhs, const IEntity* rhs ) const
+	{ 
+	  return m_to.GetSquaredDistance(lhs->GetWorldPos()) < m_to.GetSquaredDistance(rhs->GetWorldPos());
+	}
+	
+	Vec3 m_to;
   };
-}
-
-bool CSingle::CrosshairAssistAiming(const Vec3& firingPos, Vec3& firingDir, ray_hit* pRayhit)
-{ 
-  // farcry-style crosshair-overlap aim assistance
-  
-  IEntity* pSelf = m_pWeapon->GetOwner();
-  if (!pSelf || !g_pGame->GetHUD())
-    return false;
-
-  IEntity* pEntity = pRayhit->pCollider ? gEnv->pEntitySystem->GetEntityFromPhysics(pRayhit->pCollider) : 0;  
-  if (pEntity && m_pWeapon->IsValidAssistTarget(pEntity, pSelf, false))
-    return false;
-
-  const CCamera& cam = gEnv->pRenderer->GetCamera();
-  Lineseg lineseg(cam.GetPosition(), cam.GetPosition()+m_fireparams.crosshair_assist_range*cam.GetViewdir());  
-  
-  float t = 0.f;  
-  AABB bounds;
-  std::vector<IEntity*> ents;
-    
-  const std::vector<EntityId> *pEntities = g_pGame->GetHUD()->GetRadar()->GetNearbyEntities();
-  for(int i=0,n=pEntities->size(); i<n; ++i)  
-  {
-    // fast reject everything behind player, or too far away from line of view
-    // rest is sorted by distance and checked against the crosshair in screen-space    
-    IEntity* pEntity = gEnv->pEntitySystem->GetEntity((*pEntities)[i]);
-		if(!pEntity)
-			continue;
-
-    Vec3 wpos = pEntity->GetWorldPos();
-    
-    if (!(pEntity && firingPos.GetSquaredDistance(wpos) < sqr(m_fireparams.crosshair_assist_range) && firingDir.Dot((wpos-firingPos).GetNormalized()) > 0.5f))
-      continue;
-
-    if (!m_pWeapon->IsValidAssistTarget(pEntity, pSelf, false))
-      continue;
-    
-    pEntity->GetLocalBounds(bounds);
-    
-    // sufficient for entities of interest
-    if (bounds.GetVolume() > 1000.f || Distance::Point_LinesegSq(pEntity->GetWorldTM()*bounds.GetCenter(), lineseg, t) > sqr(10.f)) 
-      continue;
-
-    ents.push_back(pEntity);
-  }
-
-  if (ents.empty())
-    return false;
-
-  // make sure camera is set correctly; can still be set to ortho projection by text rendering or similar (ask Andrej)  
-  gEnv->pRenderer->PushMatrix();
-  gEnv->pRenderer->SetCamera(cam);
-
-  const float crosshairSize = g_pGameCVars->aim_assistCrosshairSize; // should be queried from HUD, but not possible yet            
-  float cx = crosshairSize/gEnv->pRenderer->GetWidth() * 100.f / 2.f;
-  float cy = crosshairSize/gEnv->pRenderer->GetHeight() * 100.f / 2.f;            
-   
-  std::sort(ents.begin(), ents.end(), CompareEntityDist(firingPos));  
-  
-  IEntity* pTarget = 0;
-  Vec3 newPos, curr;
-  
-  for (int i=0,n=ents.size(); i<n; ++i)
-  {
-    IEntity* pEntity = ents[i];
-    
-    Vec3 wpos = pEntity->GetWorldPos();
-    Quat rot = pEntity->GetWorldRotation();
-    pEntity->GetLocalBounds(bounds);
-
-    static Vec3 points[8];
-    points[0] = wpos + rot * bounds.min;
-    points[1] = wpos + rot * Vec3(bounds.min.x, bounds.max.y, bounds.min.z);
-    points[2] = wpos + rot * Vec3(bounds.max.x, bounds.max.y, bounds.min.z);
-    points[3] = wpos + rot * Vec3(bounds.max.x, bounds.min.y, bounds.min.z);
-    points[4] = wpos + rot * Vec3(bounds.min.x, bounds.min.y, bounds.max.z);
-    points[5] = wpos + rot * Vec3(bounds.min.x, bounds.max.y, bounds.max.z);    
-    points[6] = wpos + rot * Vec3(bounds.max.x, bounds.min.y, bounds.max.z);
-    points[7] = wpos + rot * bounds.max;
-    
-    Vec2 smin(100,100), smax(-100,-100);
-
-    for (int i=0; i<8; ++i)
-    {
-      gEnv->pRenderer->ProjectToScreen(points[i].x, points[i].y, points[i].z, &curr.x, &curr.y, &curr.z);
-      smin.x = min(smin.x, curr.x); smin.y = min(smin.y, curr.y);
-      smax.x = max(smax.x, curr.x); smax.y = max(smax.y, curr.y);      
-    }
-
-    smin.x -= 50.f; smin.y -= 50.f;
-    smax.x -= 50.f; smax.y -= 50.f;
-
-    bool xin = smin.x <= -cx && smax.x >= cx;
-    bool yin = smin.y <= -cy && smax.y >= cy;    
-    bool overlap = (xin || abs(smin.x) <= cx || abs(smax.x) <= cx) && (yin || abs(smin.y) <= cy || abs(smax.y) <= cy);
-    
-    if (overlap && !pTarget)
-    { 
-      pe_status_dynamics dyn;
-      if (pEntity->GetPhysics() && pEntity->GetPhysics()->GetStatus(&dyn))
-        newPos = dyn.centerOfMass;
-      else
-        newPos = wpos + rot*bounds.GetCenter();  
-
-      // check path to new target pos 
-      ray_hit chkhit;
-      IPhysicalEntity* pSkip = m_pWeapon->GetEntity()->GetPhysics(); // we shouldn't need all child entities for skipping at this point (subject to be proven)
-      if (gEnv->pPhysicalWorld->RayWorldIntersection(firingPos, 1.1f*(newPos-firingPos), ent_all, (13&rwi_pierceability_mask), &chkhit, 1, &pSkip, 1))
-      {
-        IEntity *pFound = chkhit.pCollider ? gEnv->pEntitySystem->GetEntityFromPhysics(chkhit.pCollider) : 0;
-        if (pFound != pEntity)
-          continue;
-      }
-
-      pTarget = pEntity;
-	  break;
-    }
-  }   
-
-  gEnv->pRenderer->PopMatrix();
-
-  if (pTarget)
-  { 
-    firingDir = newPos - firingPos;
-    firingDir.Normalize();
-  }
-  
-  return true;
 }
 
 struct CSingle::EndCockingAction
@@ -1278,9 +1149,9 @@ bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool 
 	int ammoCount = m_pWeapon->GetAmmoCount(ammo);
 
 	CActor *pActor = m_pWeapon->GetOwnerActor();
-	
+
 	bool playerIsShooter = pActor?pActor->IsPlayer():false;
-  bool clientIsShooter = pActor?pActor->IsClient():false;
+	bool clientIsShooter = pActor?pActor->IsClient():false;
 
 	if (m_fireparams.clip_size==0)
 		ammoCount = m_pWeapon->GetInventoryAmmoCount(ammo);
@@ -1291,7 +1162,7 @@ bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool 
 		{
 			m_pWeapon->PlayAction(m_actions.empty_clip);
 			//Auto reload
-			m_pWeapon->Reload();			
+			m_pWeapon->Reload();
 		}
 
 		return false;
@@ -1302,14 +1173,11 @@ bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool 
 		return false;
 	}
 
-	// Aim assistance
-	m_pWeapon->AssistAiming();
+	bool bHit = false;
+	ray_hit rayhit;
+	rayhit.pCollider = 0;
 
-  bool bHit = false;
-  ray_hit rayhit;	 
-  rayhit.pCollider = 0;
-  
-  Vec3 hit = GetProbableHit(WEAPON_HIT_RANGE, &bHit, &rayhit);
+	Vec3 hit = GetProbableHit(WEAPON_HIT_RANGE, &bHit, &rayhit);
 	Vec3 pos = GetFiringPos(hit);
 	Vec3 dir = ApplySpread(GetFiringDir(hit, pos), GetSpread());
 	Vec3 vel = GetFiringVelocity(dir);
@@ -1317,9 +1185,6 @@ bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool 
 	// Advanced aiming (VTOL Ascension)
 	if(m_fireparams.advanced_AAim)
 		m_pWeapon->AdvancedAssistAiming(m_fireparams.advanced_AAim_Range,pos,dir);
-
-  if (!gEnv->bMultiplayer && clientIsShooter && m_fireparams.crosshair_assist_range > 0.0f && !m_pWeapon->IsZoomed())  
-    CrosshairAssistAiming(pos, dir, &rayhit);      
 
 	const char *action = m_actions.fire_cock.c_str();
 	bool zoomedCock = m_fireparams.unzoomed_cock && (m_pWeapon->IsZoomed() || m_pWeapon->IsZooming()) && (ammoCount != 1);
@@ -1358,7 +1223,7 @@ bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool 
 		if (m_fireparams.track_projectiles && (gEnv->bServer || pAmmo->IsPredicted()))
 			pAmmo->SetTracked(true);
 
-    CGameRules* pGameRules = g_pGame->GetGameRules();
+	CGameRules* pGameRules = g_pGame->GetGameRules();
 
 		float damage = m_fireparams.damage;
 		if(m_fireparams.secondary_damage && !playerIsShooter)
@@ -1369,14 +1234,14 @@ bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool 
 		pAmmo->SetSequence(m_pWeapon->GenerateShootSeqN());
 		// this must be done after owner is set
 		pAmmo->InitWithAI();
-    
-    if (m_bLocked)
-      pAmmo->SetDestination(m_lockedTarget);
-    else
-      pAmmo->SetDestination(m_pWeapon->GetDestination());
+	
+	if (m_bLocked)
+	  pAmmo->SetDestination(m_lockedTarget);
+	else
+	  pAmmo->SetDestination(m_pWeapon->GetDestination());
 
-    pAmmo->Launch(pos, dir, vel, m_speed_scale);
-    
+	pAmmo->Launch(pos, dir, vel, m_speed_scale);
+	
 		int frequency = m_tracerparams.frequency;
 		bool emit = false;
 		if(m_pWeapon->GetStats().fp)
@@ -1393,18 +1258,18 @@ bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool 
 
   if (playerIsShooter && pActor->IsClient())
   {			
-    pActor->ExtendCombat();
-    // Only start a zoom in if we're not zooming in or out
-    if (m_fireparams.autozoom &&
+	pActor->ExtendCombat();
+	// Only start a zoom in if we're not zooming in or out
+	if (m_fireparams.autozoom &&
 	  !g_pGameCVars->fn_disableShootZoom &&
-      pActor->GetScreenEffects() != 0 &&
-      !pActor->GetScreenEffects()->HasJobs(pActor->m_autoZoomInID) &&
-      !pActor->GetScreenEffects()->HasJobs(pActor->m_autoZoomOutID))
-    {
-      CLinearBlend *blend = new CLinearBlend(1);
-      CFOVEffect *fovEffect = new CFOVEffect(pActor->GetEntityId(), .75f);
-      pActor->GetScreenEffects()->StartBlend(fovEffect, blend, 1.0f/5.0f, pActor->m_autoZoomInID);
-    } 
+	  pActor->GetScreenEffects() != 0 &&
+	  !pActor->GetScreenEffects()->HasJobs(pActor->m_autoZoomInID) &&
+	  !pActor->GetScreenEffects()->HasJobs(pActor->m_autoZoomOutID))
+	{
+	  CLinearBlend *blend = new CLinearBlend(1);
+	  CFOVEffect *fovEffect = new CFOVEffect(pActor->GetEntityId(), .75f);
+	  pActor->GetScreenEffects()->StartBlend(fovEffect, blend, 1.0f/5.0f, pActor->m_autoZoomInID);
+	} 
   }
 
 	if (pAmmo && pAmmo->IsPredicted() && gEnv->bClient && gEnv->bServer && pActor && pActor->IsClient())
@@ -1424,7 +1289,7 @@ bool CSingle::InternalShoot(IEntityClass* spawn_ammo, bool resetAnimation, bool 
 	m_zoomtimeout = m_next_shot + 0.5f;
 
   if (++m_barrelId == m_fireparams.barrel_count)
-    m_barrelId = 0;
+	m_barrelId = 0;
 	
 	if(g_pGameCVars->i_unlimitedammo==0)
 		ammoCount--;
@@ -1484,10 +1349,10 @@ Vec3 CSingle::GetFireHelperPos() const
 {
   if (HasFireHelper())
   {
-    int id = m_pWeapon->GetStats().fp?0:1;
-    int slot = id?CItem::eIGS_ThirdPerson:CItem::eIGS_FirstPerson;
+	int id = m_pWeapon->GetStats().fp?0:1;
+	int slot = id?CItem::eIGS_ThirdPerson:CItem::eIGS_FirstPerson;
 
-    return m_pWeapon->GetSlotHelperPos(slot, m_fireparams.helper[id].c_str(), true);
+	return m_pWeapon->GetSlotHelperPos(slot, m_fireparams.helper[id].c_str(), true);
   }
 
   return Vec3(ZERO);
@@ -1498,10 +1363,10 @@ Vec3 CSingle::GetFireHelperDir() const
 {
   if (HasFireHelper())
   {
-    int id = m_pWeapon->GetStats().fp?0:1;
-    int slot = id?CItem::eIGS_ThirdPerson:CItem::eIGS_FirstPerson;
+	int id = m_pWeapon->GetStats().fp?0:1;
+	int slot = id?CItem::eIGS_ThirdPerson:CItem::eIGS_FirstPerson;
 
-    return m_pWeapon->GetSlotHelperRotation(slot, m_fireparams.helper[id].c_str(), true).GetColumn(1);
+	return m_pWeapon->GetSlotHelperRotation(slot, m_fireparams.helper[id].c_str(), true).GetColumn(1);
   }  
 
   return FORWARD_DIRECTION;
@@ -1511,16 +1376,16 @@ namespace
 {
   IPhysicalEntity* GetSkipPhysics(IEntity* pEntity)
   {
-    IPhysicalEntity* pPhysics = pEntity->GetPhysics();    
-    if (pPhysics && pPhysics->GetType() == PE_LIVING)
-    {
-      if (ICharacterInstance* pCharacter = pEntity->GetCharacter(0)) 
-      {
-        if (IPhysicalEntity* pCharPhys = pCharacter->GetISkeletonPose()->GetCharacterPhysics())
-          pPhysics = pCharPhys;
-      }
-    }    
-    return pPhysics;
+	IPhysicalEntity* pPhysics = pEntity->GetPhysics();    
+	if (pPhysics && pPhysics->GetType() == PE_LIVING)
+	{
+	  if (ICharacterInstance* pCharacter = pEntity->GetCharacter(0)) 
+	  {
+		if (IPhysicalEntity* pCharPhys = pCharacter->GetISkeletonPose()->GetCharacterPhysics())
+		  pPhysics = pCharPhys;
+	  }
+	}    
+	return pPhysics;
   }
 }
 
@@ -1531,39 +1396,39 @@ int CSingle::GetSkipEntities(CWeapon* pWeapon, IPhysicalEntity** pSkipEnts, int 
   
   if (CActor *pActor = pWeapon->GetOwnerActor())  
   { 
-    if (IVehicle* pVehicle = pActor->GetLinkedVehicle())
-    {
+	if (IVehicle* pVehicle = pActor->GetLinkedVehicle())
+	{
 			if(nSkip < nMaxSkip)
 				if (IPhysicalEntity* pPhysics = GetSkipPhysics(pActor->GetEntity()))
 					pSkipEnts[nSkip++] = pPhysics;
 
-      // skip vehicle and all child entities
-      IEntity* pVehicleEntity = pVehicle->GetEntity();
-      
-      if (nSkip < nMaxSkip)
-        pSkipEnts[nSkip++] = pVehicleEntity->GetPhysics();
+	  // skip vehicle and all child entities
+	  IEntity* pVehicleEntity = pVehicle->GetEntity();
+	  
+	  if (nSkip < nMaxSkip)
+		pSkipEnts[nSkip++] = pVehicleEntity->GetPhysics();
 
-      int count = pVehicleEntity->GetChildCount(); 
-      for (int c=0; c<count&&nSkip<nMaxSkip; ++c)
-      {
-        if (IPhysicalEntity* pPhysics = GetSkipPhysics(pVehicleEntity->GetChild(c)))        
-          pSkipEnts[nSkip++] = pPhysics;        
-      }
-    }
-    else
-    {
-      if (nSkip < nMaxSkip)
-      {
+	  int count = pVehicleEntity->GetChildCount(); 
+	  for (int c=0; c<count&&nSkip<nMaxSkip; ++c)
+	  {
+		if (IPhysicalEntity* pPhysics = GetSkipPhysics(pVehicleEntity->GetChild(c)))        
+		  pSkipEnts[nSkip++] = pPhysics;        
+	  }
+	}
+	else
+	{
+	  if (nSkip < nMaxSkip)
+	  {
 				if (IPhysicalEntity* pPhysics = GetSkipPhysics(pActor->GetEntity()))
 					pSkipEnts[nSkip++] = pPhysics;
-      }
+	  }
 
-      if (nSkip < nMaxSkip)
-      {
-        if (IPhysicalEntity* pPhysics = pWeapon->GetEntity()->GetPhysics())
-          pSkipEnts[nSkip++] = pPhysics;
-      }
-    }
+	  if (nSkip < nMaxSkip)
+	  {
+		if (IPhysicalEntity* pPhysics = pWeapon->GetEntity()->GetPhysics())
+		  pSkipEnts[nSkip++] = pPhysics;
+	  }
+	}
   }  
 
   return nSkip;
@@ -1575,33 +1440,33 @@ Vec3 CSingle::GetProbableHit(float range, bool *pbHit, ray_hit *pHit) const
   static Vec3 pos,dir; 
 
   CActor *pActor = m_pWeapon->GetOwnerActor();
-    
+	
   static IPhysicalEntity* pSkipEntities[10];
   int nSkip = GetSkipEntities(m_pWeapon, pSkipEntities, 10);
   
   IWeaponFiringLocator *pLocator = m_pWeapon->GetFiringLocator();      
   if (pLocator)
   {
-    Vec3 hit;
-    if (pLocator->GetProbableHit(m_pWeapon->GetEntityId(), this, hit))
-      return hit;
+	Vec3 hit;
+	if (pLocator->GetProbableHit(m_pWeapon->GetEntityId(), this, hit))
+	  return hit;
   }
   
   IMovementController * pMC = pActor ? pActor->GetMovementController() : 0;
   if (pMC)
   { 
-    SMovementState info;
-    pMC->GetMovementState(info);
-    
-    pos = info.weaponPosition;
-    
-    if (!pActor->IsPlayer())
-    {
-      dir = range * (info.fireTarget-pos).normalized();
-    }
-    else
+	SMovementState info;
+	pMC->GetMovementState(info);
+	
+	pos = info.weaponPosition;
+	
+	if (!pActor->IsPlayer())
+	{
+	  dir = range * (info.fireTarget-pos).normalized();
+	}
+	else
 		{
-      dir = range * info.fireDirection;    
+	  dir = range * info.fireDirection;    
 
 			// marcok: leave this alone
 			if (g_pGameCVars->goc_enable && pActor->IsClient())
@@ -1614,9 +1479,9 @@ Vec3 CSingle::GetProbableHit(float range, bool *pbHit, ray_hit *pHit) const
   }
   else
   { 
-    // fallback    
-    pos = GetFiringPos(Vec3Constants<float>::fVec3_Zero);
-    dir = range * GetFiringDir(Vec3Constants<float>::fVec3_Zero, pos);
+	// fallback    
+	pos = GetFiringPos(Vec3Constants<float>::fVec3_Zero);
+	dir = range * GetFiringDir(Vec3Constants<float>::fVec3_Zero, pos);
   }
 
 	static ray_hit hit;	
@@ -1636,7 +1501,7 @@ Vec3 CSingle::GetProbableHit(float range, bool *pbHit, ray_hit *pHit) const
 
 	if (gEnv->pPhysicalWorld->RayWorldIntersection(pos, dir, ent_all, flags, &hit, 1, pSkipEntities, nSkip))
 	{
- 		if (pbHit)
+		if (pbHit)
 			*pbHit=true;
 		if (pHit)
 			*pHit=hit;
@@ -1689,7 +1554,7 @@ Vec3 CSingle::GetFiringPos(const Vec3 &probableHit) const
 	if (pLocator)
   { 
 		if (pLocator->GetFiringPos(m_pWeapon->GetEntityId(), this, pos))
-      return pos;
+	  return pos;
   }
 	
   int id = m_pWeapon->GetStats().fp?0:1;
@@ -1729,11 +1594,11 @@ Vec3 CSingle::GetFiringPos(const Vec3 &probableHit) const
 	}
   else
   {
-    // when no MC, fall back to helper
-    if (HasFireHelper())
-    {
-      pos = m_pWeapon->GetSlotHelperPos(slot, m_fireparams.helper[id].c_str(), true);
-    }
+	// when no MC, fall back to helper
+	if (HasFireHelper())
+	{
+	  pos = m_pWeapon->GetSlotHelperPos(slot, m_fireparams.helper[id].c_str(), true);
+	}
   }
 
 	if(pActor && pActor->IsPlayer())
@@ -1787,8 +1652,8 @@ Vec3 CSingle::GetFiringDir(const Vec3 &probableHit, const Vec3& firingPos) const
 	IWeaponFiringLocator *pLocator = m_pWeapon->GetFiringLocator();
 	if (pLocator)
   { 
-    if (pLocator->GetFiringDir(m_pWeapon->GetEntityId(), this, dir, probableHit, firingPos))
-      return dir;		
+	if (pLocator->GetFiringDir(m_pWeapon->GetEntityId(), this, dir, probableHit, firingPos))
+	  return dir;		
   }
 
   int id = m_pWeapon->GetStats().fp?0:1;
@@ -1805,21 +1670,21 @@ Vec3 CSingle::GetFiringDir(const Vec3 &probableHit, const Vec3& firingPos) const
 
 		dir = info.fireDirection;
 
-    if (HasFireHelper() && ShootFromHelper(info.weaponPosition, probableHit))
-    {
-      if (!pActor->IsPlayer())      
-        dir = (info.fireTarget-firingPos).normalized();
-      else
-        dir = (probableHit-firingPos).normalized();
-    }
+	if (HasFireHelper() && ShootFromHelper(info.weaponPosition, probableHit))
+	{
+	  if (!pActor->IsPlayer())      
+		dir = (info.fireTarget-firingPos).normalized();
+	  else
+		dir = (probableHit-firingPos).normalized();
+	}
 	}  
   else
   {
-    // if no MC, fall back to helper    
-    if (HasFireHelper())
-    { 
-      dir = m_pWeapon->GetSlotHelperRotation(slot, m_fireparams.helper[id].c_str(), true).GetColumn(1);
-    }
+	// if no MC, fall back to helper    
+	if (HasFireHelper())
+	{ 
+	  dir = m_pWeapon->GetSlotHelperRotation(slot, m_fireparams.helper[id].c_str(), true).GetColumn(1);
+	}
   }
   
 	return dir;
@@ -1831,9 +1696,9 @@ Vec3 CSingle::GetFiringVelocity(const Vec3 &dir) const
 	IWeaponFiringLocator *pLocator = m_pWeapon->GetFiringLocator();
 	if (pLocator)
   {
-    Vec3 vel;
-    if (pLocator->GetFiringVelocity(m_pWeapon->GetEntityId(), this, vel, dir))
-      return vel;
+	Vec3 vel;
+	if (pLocator->GetFiringVelocity(m_pWeapon->GetEntityId(), this, vel, dir))
+	  return vel;
   }
 
 	CActor *pActor=m_pWeapon->GetOwnerActor();
@@ -1873,9 +1738,9 @@ Vec3 CSingle::NetGetFiringPos(const Vec3 &probableHit) const
 	IWeaponFiringLocator *pLocator = m_pWeapon->GetFiringLocator();
 	if (pLocator)
   {
-    Vec3 pos;
+	Vec3 pos;
 		if (pLocator->GetFiringPos(m_pWeapon->GetEntityId(), this, pos))
-      return pos;
+	  return pos;
   }
 
 	int id = m_pWeapon->GetStats().fp?0:1;
@@ -1908,9 +1773,9 @@ Vec3 CSingle::NetGetFiringDir(const Vec3 &probableHit, const Vec3& firingPos) co
 	IWeaponFiringLocator *pLocator = m_pWeapon->GetFiringLocator();
 	if (pLocator)
   {
-    Vec3 dir;
+	Vec3 dir;
 		if (pLocator->GetFiringDir(m_pWeapon->GetEntityId(), this, dir, probableHit, firingPos))
-      return dir;
+	  return dir;
   }
 	
 	Vec3 dir = (probableHit-firingPos).normalized();
@@ -1961,21 +1826,21 @@ void CSingle::SetupEmitters(bool attach)
 	if (attach)
 	{		
 		int id = m_pWeapon->GetStats().fp ? 0 : 1;
-    Vec3 offset(ZERO);
+	Vec3 offset(ZERO);
 
-    if (m_muzzleflash.helper[id].empty())
-    { 
-      // if no helper specified, try getting pos from firing locator
-      IWeaponFiringLocator *pLocator = m_pWeapon->GetFiringLocator();            
-      
-      if (pLocator && pLocator->GetFiringPos(m_pWeapon->GetEntityId(), this, offset))
-        offset = m_pWeapon->GetEntity()->GetWorldTM().GetInvertedFast() * offset;
-    }
-            
+	if (m_muzzleflash.helper[id].empty())
+	{ 
+	  // if no helper specified, try getting pos from firing locator
+	  IWeaponFiringLocator *pLocator = m_pWeapon->GetFiringLocator();            
+	  
+	  if (pLocator && pLocator->GetFiringPos(m_pWeapon->GetEntityId(), this, offset))
+		offset = m_pWeapon->GetEntity()->GetWorldTM().GetInvertedFast() * offset;
+	}
+			
 		if (!m_muzzleflash.effect[0].empty())
 		{   
 			m_mfIds[m_barrelId].mfId[0] = m_pWeapon->AttachEffect(CItem::eIGS_FirstPerson, -1, true, m_muzzleflash.effect[0].c_str(), 
-        m_muzzleflash.helper[0].c_str(), offset, Vec3Constants<float>::fVec3_OneY, 1.0f, false);
+		m_muzzleflash.helper[0].c_str(), offset, Vec3Constants<float>::fVec3_OneY, 1.0f, false);
 		}
 		if (!m_muzzleflash.effect[1].empty())
 		{
@@ -1985,11 +1850,11 @@ void CSingle::SetupEmitters(bool attach)
 	}
 	else
 	{
-    for (int i=0; i<m_mfIds.size(); ++i)
-    {
-      m_mfIds[i].mfId[0] = m_pWeapon->AttachEffect(CItem::eIGS_FirstPerson, m_mfIds[i].mfId[0], false);
-      m_mfIds[i].mfId[1] = m_pWeapon->AttachEffect(CItem::eIGS_ThirdPerson, m_mfIds[i].mfId[1], false);
-    }
+	for (int i=0; i<m_mfIds.size(); ++i)
+	{
+	  m_mfIds[i].mfId[0] = m_pWeapon->AttachEffect(CItem::eIGS_FirstPerson, m_mfIds[i].mfId[0], false);
+	  m_mfIds[i].mfId[1] = m_pWeapon->AttachEffect(CItem::eIGS_ThirdPerson, m_mfIds[i].mfId[1], false);
+	}
 	}
 }
 
@@ -2024,7 +1889,7 @@ void CSingle::MuzzleFlashEffect(bool attach, bool light, bool effect)
 				m_mflightId[id] = m_pWeapon->AttachLight(slot, 0, true, m_muzzleflash.light_radius[id],          
 				m_muzzleflash.light_color[id], 1.0f, 0, 0, m_muzzleflash.light_helper[id].c_str());
 			}
-      
+	  
 			m_pWeapon->EnableLight(true, m_mflightId[id]);
 			m_mflTimer = m_muzzleflash.light_time[id];
 			m_mflFrameId = gEnv->pRenderer->GetFrameID();
@@ -2123,28 +1988,28 @@ void CSingle::DustEffect(const Vec3& pos)
 {
   if (!m_dustparams.mfxtag.empty())
   { 
-    IPhysicalEntity* pSkipEnts[10];
-    int nSkip = GetSkipEntities(m_pWeapon, pSkipEnts, 10);
-    ray_hit hit;    
-    
-    if (gEnv->pPhysicalWorld->RayWorldIntersection(pos, m_dustparams.maxheight*Vec3(0,0,-1), ent_static|ent_terrain|ent_water, 0, &hit, 1, pSkipEnts, nSkip))
-    {
-      IMaterialEffects* pMaterialEffects = gEnv->pGame->GetIGameFramework()->GetIMaterialEffects();
-      
-      TMFXEffectId effectId = pMaterialEffects->GetEffectId(m_dustparams.mfxtag.c_str(), hit.surface_idx);
-      if (effectId != InvalidEffectId)
-      {
-        SMFXRunTimeEffectParams params;
-        params.pos = hit.pt;           
-        params.normal = hit.n;
+	IPhysicalEntity* pSkipEnts[10];
+	int nSkip = GetSkipEntities(m_pWeapon, pSkipEnts, 10);
+	ray_hit hit;    
+	
+	if (gEnv->pPhysicalWorld->RayWorldIntersection(pos, m_dustparams.maxheight*Vec3(0,0,-1), ent_static|ent_terrain|ent_water, 0, &hit, 1, pSkipEnts, nSkip))
+	{
+	  IMaterialEffects* pMaterialEffects = gEnv->pGame->GetIGameFramework()->GetIMaterialEffects();
+	  
+	  TMFXEffectId effectId = pMaterialEffects->GetEffectId(m_dustparams.mfxtag.c_str(), hit.surface_idx);
+	  if (effectId != InvalidEffectId)
+	  {
+		SMFXRunTimeEffectParams params;
+		params.pos = hit.pt;           
+		params.normal = hit.n;
 				params.soundSemantic = eSoundSemantic_Player_Foley;
-        
-        if (m_dustparams.maxheightscale < 1.f)
-          params.scale = 1.f - (hit.dist/m_dustparams.maxheight)*(1.f-m_dustparams.maxheightscale);
-        
-        pMaterialEffects->ExecuteEffect(effectId, params);
-      }
-    }
+		
+		if (m_dustparams.maxheightscale < 1.f)
+		  params.scale = 1.f - (hit.dist/m_dustparams.maxheight)*(1.f-m_dustparams.maxheightscale);
+		
+		pMaterialEffects->ExecuteEffect(effectId, params);
+	  }
+	}
   }
 }
 
@@ -2404,7 +2269,7 @@ void CSingle::UpdateHeat(float frameTime)
 			{
 				m_overheat=0.0f;
 				
-        m_pWeapon->StopSound(m_heatSoundId);
+		m_pWeapon->StopSound(m_heatSoundId);
 				m_pWeapon->PlayAction(m_actions.cooldown);				
 			}
 		}
@@ -2432,12 +2297,12 @@ void CSingle::UpdateHeat(float frameTime)
 
 				int slot=m_pWeapon->GetStats().fp?CItem::eIGS_FirstPerson:CItem::eIGS_ThirdPerson;
 				if (!m_heatingparams.effect[slot].empty())
-        {
-          if (m_heatEffectId)
-            m_heatEffectId = m_pWeapon->AttachEffect(0, m_heatEffectId, false);
+		{
+		  if (m_heatEffectId)
+			m_heatEffectId = m_pWeapon->AttachEffect(0, m_heatEffectId, false);
 
 					m_heatEffectId = m_pWeapon->AttachEffect(slot, 0, true, m_heatingparams.effect[slot].c_str(), m_heatingparams.helper[slot].c_str());
-        }
+		}
 			}
 		}
 
@@ -2685,7 +2550,7 @@ void CSingle::InternalNetShootEx(IEntityClass* spawn_ammo, const Vec3 &pos, cons
 		if (m_fireparams.track_projectiles && gEnv->bServer)
 			pAmmo->SetTracked(true);
 
-    int hitTypeId = g_pGame->GetGameRules()->GetHitTypeId(m_fireparams.hit_type.c_str());			
+	int hitTypeId = g_pGame->GetGameRules()->GetHitTypeId(m_fireparams.hit_type.c_str());			
 		pAmmo->SetParams(m_pWeapon->GetOwnerId(), m_pWeapon->GetHostId(), m_pWeapon->GetEntityId(), m_pWeapon->GetFireModeIdx(GetName()),
 			m_fireparams.damage, hitTypeId);
 		
@@ -2719,7 +2584,7 @@ void CSingle::InternalNetShootEx(IEntityClass* spawn_ammo, const Vec3 &pos, cons
 	m_next_shot = 0.0f;
 
   if (++m_barrelId == m_fireparams.barrel_count)
-    m_barrelId = 0;
+	m_barrelId = 0;
 
 	ammoCount--;
 
@@ -2769,16 +2634,16 @@ void CSingle::RecoilImpulse(const Vec3& firingPos, const Vec3& firingDir)
   // todo: integrate the impulse params when time..
   if (m_recoilparams.impulse > 0.f)
   {
-    EntityId id = (m_pWeapon->GetHostId()) ? m_pWeapon->GetHostId() : m_pWeapon->GetOwnerId();
-    IEntity* pEntity = gEnv->pEntitySystem->GetEntity(id);
+	EntityId id = (m_pWeapon->GetHostId()) ? m_pWeapon->GetHostId() : m_pWeapon->GetOwnerId();
+	IEntity* pEntity = gEnv->pEntitySystem->GetEntity(id);
 
-    if (pEntity && pEntity->GetPhysics())
-    {        
-      pe_action_impulse impulse;
-      impulse.impulse = -firingDir * m_recoilparams.impulse; 
-      impulse.point = firingPos;
-      pEntity->GetPhysics()->Action(&impulse);
-    }
+	if (pEntity && pEntity->GetPhysics())
+	{        
+	  pe_action_impulse impulse;
+	  impulse.impulse = -firingDir * m_recoilparams.impulse; 
+	  impulse.point = firingPos;
+	  pEntity->GetPhysics()->Action(&impulse);
+	}
   }
   
   CActor* pActor = m_pWeapon->GetOwnerActor();

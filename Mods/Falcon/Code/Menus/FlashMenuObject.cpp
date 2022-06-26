@@ -1015,13 +1015,6 @@ void CFlashMenuObject::OnLoadingStart(ILevelInfo *pLevel)
 
 //-----------------------------------------------------------------------------------------------------
 
-bool CFlashMenuObject::ShouldIgnoreInGameEvent()
-{
-	return !gEnv->pSystem->IsEditor() && !gEnv->bMultiplayer && m_apFlashMenuScreens[MENUSCREEN_FRONTENDLOADING]->IsLoaded() && gEnv->pSystem->IsSerializingFile() != 1 && !g_pGame->IsReloading() && g_pGameCVars->hud_startPaused;
-}
-
-//-----------------------------------------------------------------------------------------------------
-
 void CFlashMenuObject::OnLoadingComplete(ILevel *pLevel)
 {
 	SAFE_HUD_FUNC(OnLoadingComplete(pLevel));
@@ -1038,16 +1031,6 @@ void CFlashMenuObject::OnLoadingComplete(ILevel *pLevel)
 	}
 
 	m_nBlackGraceFrames = gEnv->pRenderer->GetFrameID(false) + BLACK_FRAMES;
-
-	if (ShouldIgnoreInGameEvent())
-	{
-		if(!gEnv->bMultiplayer)
-			g_pGame->GetIGameFramework()->PauseGame(true ,false);
-
-		m_bLoadingDone = true;
-		m_apFlashMenuScreens[MENUSCREEN_FRONTENDLOADING]->Invoke("setLoadingDone");
-	}
-
 	m_bInLoading = false;
 }
 
@@ -1100,7 +1083,7 @@ void CFlashMenuObject::OnLoadingProgress(ILevelInfo *pLevel, int progressAmount)
 void CFlashMenuObject::ShowMainMenu()
 {
 	if(gEnv->pSystem->IsEditor() || gEnv->pSystem->IsDedicated())
-    return;
+	return;
 
 	// reset any game volume back to normal
 	if (gEnv->pSoundSystem)
@@ -1135,10 +1118,6 @@ void CFlashMenuObject::LockPlayerInputs(bool bLock)
 void CFlashMenuObject::ShowInGameMenu(bool bShow)
 {
 	if(gEnv->pSystem->IsEditor() || gEnv->pSystem->IsDedicated()) return;
-
-	// prevent the menu of showing if the 'Press Fire to start level' screen is present
-	if (m_bLoadingDone && g_pGameCVars->hud_startPaused && bShow)
-		return;
 
 	if(m_bUpdate != bShow)
 	{
@@ -1252,13 +1231,13 @@ void CFlashMenuObject::ReloadHUDMovies()
   CGameFlashAnimation *mapAnim = SAFE_HUD_FUNC_RET(GetMapAnim());
   if(mapAnim)
   {
-    mapAnim->Reload();
-    SAFE_HUD_FUNC(GetRadar()->ReloadMiniMap());
-    if(mapAnim == SAFE_HUD_FUNC_RET(GetModalHUD()))
-    {
+	mapAnim->Reload();
+	SAFE_HUD_FUNC(GetRadar()->ReloadMiniMap());
+	if(mapAnim == SAFE_HUD_FUNC_RET(GetModalHUD()))
+	{
 			SAFE_HUD_FUNC(ShowPDA(false));
 			SAFE_HUD_FUNC(ShowPDA(true));
-    }
+	}
   }
   SAFE_HUD_FUNC(UnloadVehicleHUD(false));	//removes vehicle hud to save memory (pool spike)
 }
@@ -1480,7 +1459,7 @@ bool CFlashMenuObject::StopTutorialVideo()
 bool CFlashMenuObject::IsOnScreen(EMENUSCREEN screen)
 {
   if(m_apFlashMenuScreens[screen] && m_pCurrentFlashMenuScreen == m_apFlashMenuScreens[screen])
-    return m_bUpdate;
+	return m_bUpdate;
   return false;
 }
 
@@ -1748,8 +1727,8 @@ void CFlashMenuObject::UpdateLevels(const char* gamemode)
 	CryFixedStringT<128> mode(gamemode);
 	if(pLevelSystem)
 	{
-    SFlashVarValue args[2] = {"","@ui_ANY"};
-    m_pCurrentFlashMenuScreen->Invoke("addMultiplayerLevel", args, 2);
+	SFlashVarValue args[2] = {"","@ui_ANY"};
+	m_pCurrentFlashMenuScreen->Invoke("addMultiplayerLevel", args, 2);
 		for(int l = 0; l < pLevelSystem->GetLevelCount(); ++l)
 		{
 			ILevelInfo *pLevelInfo = pLevelSystem->GetLevelInfo(l);
@@ -1989,7 +1968,7 @@ void CFlashMenuObject::HandleFSCommand(const char *szCommand,const char *szArgs)
 	{
 		if(m_multiplayerMenu)
 			m_multiplayerMenu->HandleFSCommand(szCommand,szArgs);
-    
+	
 		m_pCurrentFlashMenuScreen = m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART];
 		if(m_pMusicSystem)
 		{
@@ -2725,8 +2704,8 @@ void CFlashMenuObject::DestroyStartMenu()
 {
 	if(m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART] && m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->IsLoaded())
 	{
-    if(m_multiplayerMenu)
-      m_multiplayerMenu->SetCurrentFlashScreen(0,false);
+	if(m_multiplayerMenu)
+	  m_multiplayerMenu->SetCurrentFlashScreen(0,false);
 		SAFE_HARDWARE_MOUSE_FUNC(DecrementCounter());
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDSTART]->Unload();
 	}
@@ -2815,13 +2794,13 @@ void CFlashMenuObject::DestroyIngameMenu()
 {
 	if(m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME] && m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->IsLoaded())
 	{
-    if(m_multiplayerMenu)
-      m_multiplayerMenu->SetCurrentFlashScreen(0,true);
+	if(m_multiplayerMenu)
+	  m_multiplayerMenu->SetCurrentFlashScreen(0,true);
 		SAFE_HARDWARE_MOUSE_FUNC(DecrementCounter());
 		m_apFlashMenuScreens[MENUSCREEN_FRONTENDINGAME]->Unload();
 	}
   if(g_pGame->GetIGameFramework()->IsGameStarted())
-    ReloadHUDMovies();
+	ReloadHUDMovies();
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -2935,7 +2914,7 @@ void CFlashMenuObject::OnPostUpdate(float fDeltaTime)
 		UpdateRatio();
 	}
 
-	if(m_bLoadingDone && !g_pGameCVars->hud_startPaused)
+	if(m_bLoadingDone)
 	{
 		CloseWaitingScreen();
 		return;
@@ -3526,7 +3505,7 @@ void CFlashMenuObject::OnActionEvent(const SActionEvent& event)
 		MP_ResetProgress(event.m_value);
 		break;
 	case eAE_inGame:
-		if (!ShouldIgnoreInGameEvent() && m_apFlashMenuScreens[MENUSCREEN_FRONTENDLOADING] && m_apFlashMenuScreens[MENUSCREEN_FRONTENDLOADING]->IsLoaded())
+		if (m_apFlashMenuScreens[MENUSCREEN_FRONTENDLOADING] && m_apFlashMenuScreens[MENUSCREEN_FRONTENDLOADING]->IsLoaded())
 		{
 			m_apFlashMenuScreens[MENUSCREEN_FRONTENDLOADING]->Unload();
 			m_bLoadingDone = false;
@@ -3534,12 +3513,6 @@ void CFlashMenuObject::OnActionEvent(const SActionEvent& event)
 		}
 		break;
 	case eAE_earlyPreUpdate:
-		// we might have to re-pause the game here on early update so subsystem's don't get updated
-		if(gEnv->bEditor == false && m_bLoadingDone && g_pGameCVars->hud_startPaused)
-		{
-			if(!gEnv->bMultiplayer && !g_pGame->GetIGameFramework()->IsGamePaused())
-				g_pGame->GetIGameFramework()->PauseGame(true ,false);
-		}
 		break;
 	}
 }
@@ -3673,7 +3646,7 @@ void CFlashMenuObject::CloseWaitingScreen()
 {
 	if(!gEnv->bMultiplayer)
 	{
-    if(m_pMusicSystem)
+	if(m_pMusicSystem)
 		{
 		  m_pMusicSystem->EndTheme(EThemeFade_FadeOut, 0, true);
 			PlaySound(ESound_MenuAmbience,false);

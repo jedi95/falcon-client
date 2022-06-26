@@ -751,7 +751,7 @@ void CHUD::IndicateHit(bool enemyIndicator,IEntity *pEntity, bool explosionFeedb
 	if(explosionFeedback && g_pGameCVars->g_useHitSoundFeedback)
 		PlaySound(ESound_SpecialHitFeedback);
 
-	//Vader mod HUD fix
+	//Falcon hud fix. Disables visual hit indicator
 	if (!g_pGameCVars->fn_fixHUD)
 		m_animHitIndicator.Invoke("indicateHit");
 

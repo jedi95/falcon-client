@@ -446,8 +446,8 @@ bool CItem::SetGeometry(int slot, const ItemString& name, const Vec3& poffset, c
 					pCharacter->SetFlags(pCharacter->GetFlags()&(~CS_FLAG_UPDATE));
 				}
 			}
-      else if (slot == eIGS_Destroyed)
-        DrawSlot(eIGS_Destroyed, false);
+	  else if (slot == eIGS_Destroyed)
+		DrawSlot(eIGS_Destroyed, false);
 		}
 		break;
 	}
@@ -740,7 +740,7 @@ tSoundID CItem::PlayAction(const ItemString& actionName, int layer, bool loop, u
 
 				if (!pInstanceAudio || pInstanceAudio->id == INVALID_SOUNDID)
 				{
-          result = pSoundProxy->PlaySoundEx(name, vOffset, FORWARD_DIRECTION, nSoundFlags, 1.0f, 0, 0, eSoundSemantic_Weapon, pSkipEnts, nSkipEnts);
+		  result = pSoundProxy->PlaySoundEx(name, vOffset, FORWARD_DIRECTION, nSoundFlags, 1.0f, 0, 0, eSoundSemantic_Weapon, pSkipEnts, nSkipEnts);
 					ISound *pSound = pSoundProxy->GetSound(result);
 					
 					if (pSound && action.sound[sid].sphere>0.0f)
@@ -871,8 +871,8 @@ tSoundID CItem::PlayAction(const ItemString& actionName, int layer, bool loop, u
 
   if (flags&eIPAF_Effect && !action.effect[sid].name.empty())
   {
-    // change this to attach, if needed
-    SpawnEffect(sid, action.effect[sid].name.c_str(), action.effect[sid].helper.c_str());
+	// change this to attach, if needed
+	SpawnEffect(sid, action.effect[sid].name.c_str(), action.effect[sid].helper.c_str());
   }
 
 	if (action.children)
@@ -1166,13 +1166,13 @@ const Matrix33 &CItem::GetSlotHelperRotation(int slot, const char *helper, bool 
 	SEntitySlotInfo info;
 	if (pEntity->GetSlotInfo(slot, info))
 	{
-    if (info.pStatObj)
-    {
-      IStatObj *pStatObj = info.pStatObj;
-      rotation = Matrix33(pStatObj->GetHelperTM(helper));
-      rotation.OrthonormalizeFast();
-      rotation = Matrix33(GetEntity()->GetSlotLocalTM(slot, false))*rotation;        
-    }
+	if (info.pStatObj)
+	{
+	  IStatObj *pStatObj = info.pStatObj;
+	  rotation = Matrix33(pStatObj->GetHelperTM(helper));
+	  rotation.OrthonormalizeFast();
+	  rotation = Matrix33(GetEntity()->GetSlotLocalTM(slot, false))*rotation;        
+	}
 		else if (info.pCharacter)
 		{
 			ICharacterInstance *pCharacter = info.pCharacter;
@@ -1202,7 +1202,7 @@ const Matrix33 &CItem::GetSlotHelperRotation(int slot, const char *helper, bool 
 void CItem::StopSound(tSoundID id)
 {
   if (id == INVALID_SOUNDID)
-    return;
+	return;
 
 	bool synchSound = false;
 	IEntitySoundProxy *pSoundProxy = GetSoundProxy(false);
@@ -1366,13 +1366,13 @@ void CItem::DestroyedGeometry(bool use)
 {
   if (!m_geometry[eIGS_Destroyed].empty())
   {    
-    DrawSlot(eIGS_Destroyed, use);
+	DrawSlot(eIGS_Destroyed, use);
 		if (m_stats.viewmode&eIVM_FirstPerson)
 			DrawSlot(eIGS_FirstPerson, !use);
 		else
 			DrawSlot(eIGS_ThirdPerson, !use);
 
-    if (use)
-      GetEntity()->SetSlotLocalTM(eIGS_Destroyed, GetEntity()->GetSlotLocalTM(eIGS_ThirdPerson, false));
+	if (use)
+	  GetEntity()->SetSlotLocalTM(eIGS_Destroyed, GetEntity()->GetSlotLocalTM(eIGS_ThirdPerson, false));
   }  
 }

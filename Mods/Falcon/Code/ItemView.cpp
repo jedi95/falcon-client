@@ -279,7 +279,7 @@ void CItem::UpdateMounted(float frameTime)
 			Vec3 vInitialAimDirection = m_stats.mount_dir;
 			Matrix33 vInitialPlayerOrientation = Matrix33::CreateRotationVDir(vInitialAimDirection);
 
-	  		Vec3 newp;
+			Vec3 newp;
 			if (pActor->IsThirdPerson())
 			{
 				//third person
@@ -323,7 +323,7 @@ void CItem::UpdateMounted(float frameTime)
 		}
 	}
  
-    if (ICharacterInstance* pCharInstance = pActor->GetEntity()->GetCharacter(0))
+	if (ICharacterInstance* pCharInstance = pActor->GetEntity()->GetCharacter(0))
 	{
 		if (ISkeletonAnim* pSkeletonAnim = pCharInstance->GetISkeletonAnim())
 		{
@@ -333,7 +333,7 @@ void CItem::UpdateMounted(float frameTime)
 				pSkeletonAnim->SetBlendSpaceOverride(eMotionParamID_TurnSpeed, 0.5f + 0.5f * ap.m_turn, true);
 			}
 		}
-    }
+	}
 
 	UpdateIKMounted(pActor, vGunXAxis*0.1f);
 	RequireUpdate(eIUS_General);
@@ -366,23 +366,23 @@ void CItem::CheckViewChange()
   
   if (m_stats.mounted)
 	{
-    bool fp = pOwner?!pOwner->IsThirdPerson():false;
+	bool fp = pOwner?!pOwner->IsThirdPerson():false;
 
-    if (fp!=m_stats.fp)
-    {
-      if (fp || !(m_stats.viewmode&eIVM_FirstPerson))
-        OnEnterFirstPerson();
-      else if (!fp)
-        AttachArms(false, false);
-    }
-    
-    m_stats.fp = fp;
+	if (fp!=m_stats.fp)
+	{
+	  if (fp || !(m_stats.viewmode&eIVM_FirstPerson))
+		OnEnterFirstPerson();
+	  else if (!fp)
+		AttachArms(false, false);
+	}
+	
+	m_stats.fp = fp;
  
 		return;
 	}
 
   if (!pOwner)
-    return;
+	return;
 
 	if (!pOwner->IsThirdPerson())
 	{

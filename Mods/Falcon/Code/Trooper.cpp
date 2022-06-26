@@ -797,7 +797,7 @@ void CTrooper::ProcessMovement(float frameTime)
 								float anglez = RAD2DEG(cry_acosf(CLAMP(dot,-1.f,1.f))*sgn(vNx.Cross(viewDir).z));
 								pAGState->SetInput( m_idAngleZInput, anglez);
 
-						 		if(m_jumpParams.bUseSpecialAnim && m_jumpParams.specialAnimType == JUMP_ANIM_LAND)
+								if(m_jumpParams.bUseSpecialAnim && m_jumpParams.specialAnimType == JUMP_ANIM_LAND)
 								{
 									if(m_jumpParams.specialAnimAGInput == AIANIM_ACTION)
 										pAGState->SetInput( m_idActionInput, m_jumpParams.specialAnimAGInputValue );
@@ -868,7 +868,7 @@ void CTrooper::ProcessMovement(float frameTime)
 				simParSet.bSwimming = false;
 				phys->SetParams(&simParSet);
 			}
-      JumpEffect();
+	  JumpEffect();
 		}	
 
 	}
@@ -1137,10 +1137,10 @@ void CTrooper::JumpEffect()
   TMFXEffectId effectId = pMaterialEffects->GetEffectId("trooper_jump", m_stats.groundMaterialIdx);
   if (effectId != InvalidEffectId)
   {
-    SMFXRunTimeEffectParams fxparams;
-    fxparams.pos = GetEntity()->GetWorldPos();   
+	SMFXRunTimeEffectParams fxparams;
+	fxparams.pos = GetEntity()->GetWorldPos();   
 		fxparams.soundSemantic = eSoundSemantic_Physics_Footstep;
-    pMaterialEffects->ExecuteEffect(effectId, fxparams);
+	pMaterialEffects->ExecuteEffect(effectId, fxparams);
   }
 }
 

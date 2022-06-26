@@ -300,8 +300,6 @@ private:
 	void PushButton(ButtonPosMap::iterator button, bool press, bool force);
 	ButtonPosMap::iterator FindButton(const TKeyName &shortcut);
 
-	bool ShouldIgnoreInGameEvent();
-
 	int m_iMaxProgress;
 
 	bool m_bExclusiveVideo;

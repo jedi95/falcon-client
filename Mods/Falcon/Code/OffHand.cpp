@@ -635,7 +635,7 @@ void COffHand::UpdateFPView(float frameTime)
 		//Fix offhand floating on spawn (not really nice fix...)
 		if(m_stats.hand==0)
 		{
- 			SetHand(eIH_Left);					//This will be only done once after loading
+			SetHand(eIH_Left);					//This will be only done once after loading
 			Select(true);Select(false);
 		}
 		//=========================================================
@@ -2841,7 +2841,7 @@ bool COffHand::GrabNPC()
 void COffHand::ThrowNPC(bool kill /*= true*/)
 {
 	//Get actor
- 	CActor  *pActor  = static_cast<CActor*>(g_pGame->GetIGameFramework()->GetIActorSystem()->GetActor(m_heldEntityId));
+	CActor  *pActor  = static_cast<CActor*>(g_pGame->GetIGameFramework()->GetIActorSystem()->GetActor(m_heldEntityId));
 
 	if(!pActor)
 		return;

@@ -68,7 +68,7 @@ void CVehicleDamageBehaviorExplosion::Reset()
 void CVehicleDamageBehaviorExplosion::OnDamageEvent(EVehicleDamageBehaviorEvent event, const SVehicleDamageBehaviorEventParams& behaviorParams)
 {
   if (event == eVDBE_Repair)
-    return;
+	return;
 
 	if (!m_exploded && behaviorParams.componentDamageRatio >= 1.0f)
 	{
@@ -81,8 +81,8 @@ void CVehicleDamageBehaviorExplosion::OnDamageEvent(EVehicleDamageBehaviorEvent 
 
 			if (m_pHelper)
 				explosionInfo.pos = m_pHelper->GetWorldTM().GetTranslation();
-      else if (behaviorParams.pVehicleComponent)
-        explosionInfo.pos = m_pVehicle->GetEntity()->GetWorldTM() * behaviorParams.pVehicleComponent->GetBounds().GetCenter();
+	  else if (behaviorParams.pVehicleComponent)
+		explosionInfo.pos = m_pVehicle->GetEntity()->GetWorldTM() * behaviorParams.pVehicleComponent->GetBounds().GetCenter();
 			else
 				explosionInfo.pos = m_pVehicle->GetEntity()->GetWorldTM().GetTranslation();
 
@@ -99,7 +99,7 @@ void CVehicleDamageBehaviorExplosion::OnDamageEvent(EVehicleDamageBehaviorEvent 
 				pBD->RecordEvent(eBDET_VehicleExplosion, explosionInfo.pos, m_pVehicle->GetEntity()->GetClass());
 		}
 
-    m_exploded = true;
+	m_exploded = true;
 	}
 }
 
@@ -108,7 +108,7 @@ void CVehicleDamageBehaviorExplosion::Serialize(TSerialize ser, unsigned aspects
 {
   if (ser.GetSerializationTarget() != eST_Network)
   {
-    ser.Value("exploded", m_exploded);
+	ser.Value("exploded", m_exploded);
   }
 }
 

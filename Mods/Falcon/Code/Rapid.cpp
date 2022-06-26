@@ -249,8 +249,8 @@ void CRapid::StopFire()
   {
 		Accelerate(m_rapidparams.deceleration);
 
-    if (m_pWeapon->IsDestroyed())
-      FinishDeceleration();
+	if (m_pWeapon->IsDestroyed())
+	  FinishDeceleration();
   }
 
   SpinUpEffect(false);
@@ -308,8 +308,8 @@ void CRapid::Accelerate(float acc)
 
 	if (acc > 0.0f)
 	{
-    if (!IsFiring())
-      SpinUpEffect(true);
+	if (!IsFiring())
+	  SpinUpEffect(true);
 
 		m_accelerating = true;
 		m_decelerating = false;
@@ -332,7 +332,7 @@ void CRapid::Accelerate(float acc)
 			m_spinUpSoundId = INVALID_SOUNDID;
 		}
 		
-    if (IsFiring())
+	if (IsFiring())
 		  SpinUpEffect(false);
 	}
 }
@@ -346,8 +346,8 @@ void CRapid::FinishDeceleration()
   
   if (m_soundId != INVALID_SOUNDID)
   {
-    m_pWeapon->StopSound(m_soundId);
-    m_soundId = INVALID_SOUNDID;
+	m_pWeapon->StopSound(m_soundId);
+	m_soundId = INVALID_SOUNDID;
   }
   
   m_pWeapon->EnableUpdate(false, eIUS_FireMode);

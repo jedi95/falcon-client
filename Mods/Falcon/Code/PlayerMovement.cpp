@@ -15,9 +15,9 @@
 	  CPlayer::TPlayerEventListeners::const_iterator cur; \
 	  while (iter != m_player.m_playerEventListeners.end()) \
 	  { \
-	  	cur = iter; \
-	  	++iter; \
-	  	(*cur)->func; \
+		cur = iter; \
+		++iter; \
+		(*cur)->func; \
 	  } \
 	} \
 }
@@ -110,7 +110,7 @@ void CPlayerMovement::Commit( CPlayer& player )
 	player.m_stickySurfaceTimer = m_stickySurfaceTimer;
 	
 	if(!player.m_stats.bIgnoreSprinting)
-		player.m_stats.bSprinting = ((m_stats.onGround>0.1f || (m_stats.inWaterTimer > 0.0f)) && m_stats.inMovement>0.1f && m_actions & ACTION_SPRINT && !player.IsFiring());
+		player.m_stats.bSprinting = ((m_stats.onGround>0.1f || (m_stats.inWaterTimer > 0.0f)) && m_stats.inMovement>0.1f && m_actions & ACTION_SPRINT && (g_pGameCVars->fn_simpleGameMechanics || !player.IsFiring()));
 	if(player.m_stats.isOnLadder)
 		player.m_stats.bSprinting = ((m_actions&ACTION_SPRINT) && (m_movement.desiredVelocity.len2()>0.0f));
 }
@@ -144,7 +144,7 @@ void CPlayerMovement::ProcessFlyMode()
 	float moveModule(move.len());
 
 	if (moveModule > 1.0f)
- 		move /= moveModule;
+		move /= moveModule;
 
 	move *= m_params.speedMultiplier*m_player.GetZoomSpeedMultiplier();  // respect speed multiplier as well
 	move *= 30.0f;
@@ -434,7 +434,7 @@ void CPlayerMovement::ProcessSwimming()
 	//--------------------
 
 	// Apply gravity when above the surface.
- 	if (m_swimJumping || (m_stats.relativeWaterLevel > 0.2f))
+	if (m_swimJumping || (m_stats.relativeWaterLevel > 0.2f))
 	{
 		float gravityScaling = 0.5f;
 		if (!m_stats.gravity.IsZero())
@@ -453,7 +453,7 @@ void CPlayerMovement::ProcessSwimming()
 	// Apply jump impulse when below but close to the surface (if in water for long enough).
 	if (!m_swimJumping && (m_actions & ACTION_JUMP) && (m_velocity.z >= -0.2f) && (m_stats.relativeWaterLevel > -0.1f) && (m_stats.relativeWaterLevel < 0.1f))
 	{
- 		float jumpMul = 1.0f;
+		float jumpMul = 1.0f;
 		if (pSuit != NULL)
 		{
 			float jumpEnergyCost = 0.0f;
@@ -672,7 +672,7 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 
 		//going back?
 		if (m_player.IsPlayer())	//[Mikko] Do not limit backwards movement when controlling AI.
-    {
+	{
 			if (desiredVelocityClamped.y < 0.0f)
 				backwardMul = LERP(backwardMul, m_params.backwardMultiplier, -desiredVelocityClamped.y);
 		}
@@ -733,7 +733,7 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
   // the choice of animation/parameters.
 		//-> please adjust the prediction
   if (m_player.IsPlayer())
-    AdjustMovementForEnvironment( move, (m_actions&ACTION_SPRINT)!=0 );
+	AdjustMovementForEnvironment( move, (m_actions&ACTION_SPRINT)!=0 );
 
 	//adjust prone movement for slopes
 	if (m_player.GetStance()==STANCE_PRONE && move.len2()>0.01f)
@@ -783,7 +783,7 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 	bool isRemoteClient=!gEnv->bServer && !m_player.IsClient();
 	if (m_movement.jump && allowJump)
 	{
- 		if ((m_stats.onGround > 0.2f || dt_jumpCondition) && m_player.GetStance() != STANCE_PRONE)
+		if ((m_stats.onGround > 0.2f || dt_jumpCondition) && m_player.GetStance() != STANCE_PRONE)
 		{
 			//mul * gravity * jump height
 			float mult = 1.0f;
@@ -810,14 +810,14 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 			}
 
 			{
- 				m_request.type = eCMT_JumpAccumulate;//eCMT_Fly;
+				m_request.type = eCMT_JumpAccumulate;//eCMT_Fly;
 				float g = m_stats.gravity.len();
 				float t = 0.0f;
 				if (g > 0.0f)
 				{
 					t = cry_sqrtf( 2.0f * g * m_params.jumpHeight * mult)/g - m_stats.inAir*0.5f;
 				}
- 				jumpVec += m_baseQuat.GetColumn2() * g * t;
+				jumpVec += m_baseQuat.GetColumn2() * g * t;
 
 				if (m_stats.groundNormal.len2() > 0.0f)
 				{
@@ -853,7 +853,7 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 				{
 					if(m_stats.inZeroG)
 						pSuit->SetSuitEnergy(pSuit->GetSuitEnergy()-10.0f);
- 					else 
+					else 
 					{
 						if (g_pGameCVars->dt_enable)
 						{
@@ -931,7 +931,7 @@ void CPlayerMovement::ProcessOnGroundOrJumping(CPlayer& player)
 	}
 	else if (move.len2()>0.01f)//"passive" air control, the player can air control as long as it is to decelerate
 	{	
- 		Vec3 currVelFlat(m_stats.velocity - m_stats.velocity * baseMtxZ);
+		Vec3 currVelFlat(m_stats.velocity - m_stats.velocity * baseMtxZ);
 		Vec3 moveFlat(move - move * baseMtxZ);
  
 		float dot(currVelFlat.GetNormalizedSafe(ZERO) * moveFlat.GetNormalizedSafe(ZERO));
@@ -1113,7 +1113,7 @@ void CPlayerMovement::ProcessMovementOnLadder(CPlayer &player)
 		return;
 	}
 
- 	Vec3 mypos = m_worldPos;
+	Vec3 mypos = m_worldPos;
 	Vec3 move(m_stats.ladderTop - m_stats.ladderBottom);
 	move.NormalizeSafe();
 
@@ -1144,18 +1144,18 @@ void CPlayerMovement::ProcessMovementOnLadder(CPlayer &player)
 	{
 		if(m_movement.desiredVelocity.y>0.01f)
 		{
- 			// check if player can move forward from top of ladder before getting off. If they can't,
- 			//	they'll need to strafe / jump off.
- 			ray_hit hit;
+			// check if player can move forward from top of ladder before getting off. If they can't,
+			//	they'll need to strafe / jump off.
+			ray_hit hit;
 			static const int obj_types = ent_static|ent_terrain|ent_rigid|ent_sleeping_rigid;
- 			static const unsigned int flags = rwi_stop_at_pierceable|rwi_colltype_any;
+			static const unsigned int flags = rwi_stop_at_pierceable|rwi_colltype_any;
 			static float backDist = 0.15f;
- 			Vec3 currentPos = player.m_stats.ladderTop + backDist * player.m_stats.ladderOrientation;
- 			Vec3 newPos = player.m_stats.ladderTop-player.m_stats.ladderOrientation;
+			Vec3 currentPos = player.m_stats.ladderTop + backDist * player.m_stats.ladderOrientation;
+			Vec3 newPos = player.m_stats.ladderTop-player.m_stats.ladderOrientation;
 			currentPos.z += 0.35f;
 			newPos.z +=0.35f;
- 			bool rayHitAny = 0 != gEnv->pPhysicalWorld->RayWorldIntersection( currentPos, newPos-currentPos, obj_types, flags, &hit, 1, player.GetEntity()->GetPhysics() );
-  			if (!rayHitAny)
+			bool rayHitAny = 0 != gEnv->pPhysicalWorld->RayWorldIntersection( currentPos, newPos-currentPos, obj_types, flags, &hit, 1, player.GetEntity()->GetPhysics() );
+			if (!rayHitAny)
 			{
 				if(player.IsClient())
 				{
@@ -1163,9 +1163,9 @@ void CPlayerMovement::ProcessMovementOnLadder(CPlayer &player)
 					return;
 				}
 			}
- 			else
+			else
 			{
- 				m_movement.desiredVelocity.y = 0.0f;
+				m_movement.desiredVelocity.y = 0.0f;
 			}
 		}
 		else if(player.IsClient())

@@ -237,8 +237,8 @@ bool CPlant::GetPlantingParameters(Vec3& pos, Vec3& dir, Vec3& vel) const
 			if(hit.n.z < 0.8f)
 				return false;
 
- 			// special case to stop stacking of claymores/mines (they are static so are hit by the ray)
- 			if(hit.pCollider && hit.pCollider->GetiForeignData() == PHYS_FOREIGN_ID_ENTITY)
+			// special case to stop stacking of claymores/mines (they are static so are hit by the ray)
+			if(hit.pCollider && hit.pCollider->GetiForeignData() == PHYS_FOREIGN_ID_ENTITY)
 			{
 				IEntity * pEntity = (IEntity*)hit.pCollider->GetForeignData(PHYS_FOREIGN_ID_ENTITY);
 				if(pEntity)
@@ -251,7 +251,7 @@ bool CPlant::GetPlantingParameters(Vec3& pos, Vec3& dir, Vec3& vel) const
 					if(pEntity->GetClass() == m_pClaymoreClass || pEntity->GetClass() == m_pAVMineClass)
 						return false;
 				}
- 			}
+			}
 
 			// second check to see if there is another object in the way
 			float hitDist = hit.dist;
@@ -314,9 +314,9 @@ struct CPlant::StartPlantAction
 		{
 			//Plant speed multiplier
 			float aniSpeedMultiplier = -1.0f;
-            if (g_pGameCVars->fn_fixExplosivePlant) {
-                aniSpeedMultiplier = 2.0f;
-            }
+			if (g_pGameCVars->fn_fixExplosivePlant) {
+				aniSpeedMultiplier = 2.0f;
+			}
 			pPlant->m_pWeapon->PlayAction(g_pItemStrings->select.c_str(),0,false,CItem::eIPAF_Default|CItem::eIPAF_NoBlend|CItem::eIPAF_CleanBlending, aniSpeedMultiplier);
 			pPlant->m_pWeapon->HideItem(false);
 		}
@@ -343,10 +343,10 @@ void CPlant::StartFire()
 		//Plant speed multiplier
 		float plantSpeedMult = 1.0f;
 		float aniSpeedMultiplier = -1.0f;
-        if (g_pGameCVars->fn_fixExplosivePlant) {
-            plantSpeedMult = 0.5f;
-            aniSpeedMultiplier = 2.0f;
-        }
+		if (g_pGameCVars->fn_fixExplosivePlant) {
+			plantSpeedMult = 0.5f;
+			aniSpeedMultiplier = 2.0f;
+		}
 
 		m_pWeapon->PlayAction(m_plantactions.plant.c_str(),0,false,CItem::eIPAF_Default, aniSpeedMultiplier);
 

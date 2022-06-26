@@ -400,15 +400,15 @@ void CGameRules::ProcessEvent( SEntityEvent& event)
 			m_pShotValidator->Reset();
 		m_timeOfDayInitialized = false;
 		ResetFrozen();
-    
-    while (!m_queuedExplosions.empty())
-      m_queuedExplosions.pop();
+	
+	while (!m_queuedExplosions.empty())
+	  m_queuedExplosions.pop();
 
 		while (!m_queuedHits.empty())
 			m_queuedHits.pop();
 		m_processingHit=0;
 		
-      // TODO: move this from here
+	  // TODO: move this from here
 		g_pGame->GetWeaponSystem()->GetTracerManager().Reset();
 		m_respawns.clear();
 		m_removals.clear();
@@ -2044,8 +2044,8 @@ void CGameRules::ShatterEntity(EntityId entityId, const Vec3 &pos, const Vec3 &i
   int n=pEntity->GetChildCount();
   for (int i=n-1; i>=0; --i)
   {
-    if (IEntity *pChild=pEntity->GetChild(i))
-      ShatterEntity(pChild->GetId(), pos, impulse);
+	if (IEntity *pChild=pEntity->GetChild(i))
+	  ShatterEntity(pChild->GetId(), pos, impulse);
   }
 
   FreezeEntity(entityId, false, false);
@@ -3296,22 +3296,7 @@ void CGameRules::CreateScriptHitInfo(SmartScriptTable &scriptHitInfo, const HitI
 		hit.SetValue("remote", hitInfo.remote);
 		hit.SetValue("bulletType", hitInfo.bulletType);
 
-		// Check for hit assistance
-		float assist=0.0f;
-		if (pShooter && 
-			((g_pGameCVars->hit_assistSingleplayerEnabled && !gEnv->bMultiplayer) ||
-			(g_pGameCVars->hit_assistMultiplayerEnabled && gEnv->bMultiplayer)))
-		{
-			IActor *pActor = gEnv->pGame->GetIGameFramework()->GetIActorSystem()->GetActor(pShooter->GetId());
-
-			if (pActor && pActor->IsPlayer())
-			{
-				CPlayer *player = (CPlayer *)pActor;
-				assist=player->HasHitAssistance() ? 1.0f : 0.0f;
-			}
-		}
-
-		hit.SetValue("assistance", assist);
+		hit.SetValue("assistance", 0.0f);
 	}
 }
 
@@ -3511,7 +3496,7 @@ void CGameRules::Restart()
 void CGameRules::NextLevel()
 {
   if (!gEnv->bServer)
-    return;
+	return;
 
 	ILevelRotation *pLevelRotation=m_pGameFramework->GetILevelSystem()->GetLevelRotation();
 	if (!pLevelRotation->GetLength())

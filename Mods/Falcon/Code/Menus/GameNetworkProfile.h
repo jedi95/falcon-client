@@ -140,19 +140,19 @@ private:
 
 	struct SStorageQuery
   {
-    SStorageQuery(CGameNetworkProfile* p):m_parent(p)	
-    {
-      m_parent->m_queries.push_back(this);
-    }
-    virtual ~SStorageQuery()
-    {
-      if(m_parent)
+	SStorageQuery(CGameNetworkProfile* p):m_parent(p)	
+	{
+	  m_parent->m_queries.push_back(this);
+	}
+	virtual ~SStorageQuery()
+	{
+	  if(m_parent)
 			{
-        stl::find_and_erase(m_parent->m_queries,this);
+		stl::find_and_erase(m_parent->m_queries,this);
 				m_parent->OnEndQuery();
 			}
-    }
-    CGameNetworkProfile *m_parent;
+	}
+	CGameNetworkProfile *m_parent;
   };
 
   typedef std::map<int, SChatText> TChatTextMap;

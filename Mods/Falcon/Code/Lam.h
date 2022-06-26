@@ -31,24 +31,24 @@ public:
 
   typedef struct SLAMParams
   {   
-    SLAMParams() 
-    { 
-      Reset(); 
-    }
-    
-    void Reset(const IItemParamsNode *params=0, bool defaultInit=true)
-    { 
-      if (defaultInit)
-      { 
-        light_range[0] = light_range[1] = 0.f;
-        light_fov[0] = light_fov[1] = 0.f;        
-        light_color[0] = light_color[1] = Vec3(1,1,1);
-        light_diffuse_mul[0] = light_diffuse_mul[1] = 1.f;        
-        light_hdr_dyn[0] = light_hdr_dyn[1] = 0.f;
-        light_dir[0] = light_dir[1] = Vec3(0,1,0);
-        light_texture[0].clear(); light_texture[1].clear();
-        light_material[0].clear(); light_material[1].clear();
-        laser_geometry_tp.clear();
+	SLAMParams() 
+	{ 
+	  Reset(); 
+	}
+	
+	void Reset(const IItemParamsNode *params=0, bool defaultInit=true)
+	{ 
+	  if (defaultInit)
+	  { 
+		light_range[0] = light_range[1] = 0.f;
+		light_fov[0] = light_fov[1] = 0.f;        
+		light_color[0] = light_color[1] = Vec3(1,1,1);
+		light_diffuse_mul[0] = light_diffuse_mul[1] = 1.f;        
+		light_hdr_dyn[0] = light_hdr_dyn[1] = 0.f;
+		light_dir[0] = light_dir[1] = Vec3(0,1,0);
+		light_texture[0].clear(); light_texture[1].clear();
+		light_material[0].clear(); light_material[1].clear();
+		laser_geometry_tp.clear();
 				fake_laser_geometry_tp.clear();
 				laser_dot[0].clear(); laser_dot[1].clear();
 				laser_range[0] = laser_range[1] = 50.0f;
@@ -61,43 +61,43 @@ public:
 				giveExtraAccessory = false;
 				extraAccessoryName.clear();
 				isLamRifle = false;
-      }   
-      
-      const IItemParamsNode* fp = params?params->GetChild("firstperson"):0;
-      const IItemParamsNode* tp = params?params->GetChild("thirdperson"):0;
+	  }   
+	  
+	  const IItemParamsNode* fp = params?params->GetChild("firstperson"):0;
+	  const IItemParamsNode* tp = params?params->GetChild("thirdperson"):0;
 			const IItemParamsNode* special = params?params->GetChild("special"):0;
 
-      if (fp)
-      {
-        fp->GetAttribute("light_range", light_range[0]);
-        fp->GetAttribute("light_fov", light_fov[0]);
-        fp->GetAttribute("light_color", light_color[0]);
-        fp->GetAttribute("light_diffuse_mul", light_diffuse_mul[0]);
-        fp->GetAttribute("light_hdr_dyn", light_hdr_dyn[0]);
-        fp->GetAttribute("light_dir", light_dir[0]);
-        light_texture[0] = fp->GetAttribute("light_texture");
-        light_material[0] = fp->GetAttribute("light_material");
+	  if (fp)
+	  {
+		fp->GetAttribute("light_range", light_range[0]);
+		fp->GetAttribute("light_fov", light_fov[0]);
+		fp->GetAttribute("light_color", light_color[0]);
+		fp->GetAttribute("light_diffuse_mul", light_diffuse_mul[0]);
+		fp->GetAttribute("light_hdr_dyn", light_hdr_dyn[0]);
+		fp->GetAttribute("light_dir", light_dir[0]);
+		light_texture[0] = fp->GetAttribute("light_texture");
+		light_material[0] = fp->GetAttribute("light_material");
 				laser_dot[0] = fp->GetAttribute("laser_dot");
 				fp->GetAttribute("laser_range",laser_range[0]);
-      }
-      
-      if (tp)
-      {
-        tp->GetAttribute("light_range", light_range[1]);
-        tp->GetAttribute("light_fov", light_fov[1]);
-        tp->GetAttribute("light_color", light_color[1]);
-        tp->GetAttribute("light_diffuse_mul", light_diffuse_mul[1]);
-        tp->GetAttribute("light_hdr_dyn", light_hdr_dyn[1]);
-        tp->GetAttribute("light_dir", light_dir[1]);
-        light_texture[1] = tp->GetAttribute("light_texture");
-        light_material[1] = tp->GetAttribute("light_material");
-        laser_geometry_tp = tp->GetAttribute("laser_geometry_tp");
+	  }
+	  
+	  if (tp)
+	  {
+		tp->GetAttribute("light_range", light_range[1]);
+		tp->GetAttribute("light_fov", light_fov[1]);
+		tp->GetAttribute("light_color", light_color[1]);
+		tp->GetAttribute("light_diffuse_mul", light_diffuse_mul[1]);
+		tp->GetAttribute("light_hdr_dyn", light_hdr_dyn[1]);
+		tp->GetAttribute("light_dir", light_dir[1]);
+		light_texture[1] = tp->GetAttribute("light_texture");
+		light_material[1] = tp->GetAttribute("light_material");
+		laser_geometry_tp = tp->GetAttribute("laser_geometry_tp");
 				fake_laser_geometry_tp = tp->GetAttribute("fake_laser_geometry_tp");
 				laser_dot[1] = tp->GetAttribute("laser_dot");
 				tp->GetAttribute("laser_range",laser_range[1]);
 				tp->GetAttribute("laser_max_scale",laser_max_scale);
 				tp->GetAttribute("laser_max_len", laser_max_len);
-      }
+	  }
 
 			if(special)
 			{
@@ -113,7 +113,7 @@ public:
 				extraAccessoryName = special->GetAttribute("extraAccessoryName");
 
 			}
-    }
+	}
 
 		void GetMemoryStatistics(ICrySizer * s)
 		{
@@ -122,16 +122,16 @@ public:
 			s->Add(laser_dot[0]);s->Add(laser_dot[1]);
 			s->Add(laser_geometry_tp);
 		}
-        
-    Vec3  light_color[2];
-    Vec3  light_dir[2];
-    float light_diffuse_mul[2];
-    float light_range[2];
-    float light_fov[2];
-    float light_hdr_dyn[2];
-    ItemString light_texture[2];
-    ItemString light_material[2];    
-    ItemString laser_geometry_tp;
+		
+	Vec3  light_color[2];
+	Vec3  light_dir[2];
+	float light_diffuse_mul[2];
+	float light_range[2];
+	float light_fov[2];
+	float light_hdr_dyn[2];
+	ItemString light_texture[2];
+	ItemString light_material[2];    
+	ItemString laser_geometry_tp;
 		ItemString fake_laser_geometry_tp;
 		ItemString laser_dot[2];
 		float			 laser_range[2];

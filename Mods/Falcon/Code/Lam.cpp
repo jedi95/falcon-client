@@ -83,7 +83,7 @@ bool CLam::Init(IGameObject * pGameObject )
 bool CLam::ReadItemParams(const IItemParamsNode *root)
 {
   if (!CItem::ReadItemParams(root))
-    return false;
+	return false;
 
   const IItemParamsNode* pLamParams = root->GetChild("lam");
   m_lamparams.Reset(pLamParams);    
@@ -132,13 +132,13 @@ void CLam::ActivateLaser(bool activate, bool aiRequest /* = false */)
 	}
   else
   {
-    pParent = this;
-    ownerId = GetOwnerId();
+	pParent = this;
+	ownerId = GetOwnerId();
   }
 
   IActor *pOwnerActor = gEnv->pGame->GetIGameFramework()->GetIActorSystem()->GetActor(ownerId);
   if(!pOwnerActor)
-    return;
+	return;
 
 	if(activate && !aiRequest && !pOwnerActor->IsPlayer())
 		return;
@@ -152,12 +152,12 @@ void CLam::ActivateLaser(bool activate, bool aiRequest /* = false */)
 	//Activate or deactivate effect??
 	if (!m_laserActivated)
 	{
-    AttachLAMLaser(false, eIGS_FirstPerson);
-    AttachLAMLaser(false, eIGS_ThirdPerson);
+	AttachLAMLaser(false, eIGS_FirstPerson);
+	AttachLAMLaser(false, eIGS_ThirdPerson);
 	}
 	else
 	{
-    bool tp = pOwnerActor->IsThirdPerson();
+	bool tp = pOwnerActor->IsThirdPerson();
 		if(!tp && ok)
 		{
 			SAccessoryParams *params = pParent->GetAccessoryParams(GetEntity()->GetClass()->GetName());
@@ -168,7 +168,7 @@ void CLam::ActivateLaser(bool activate, bool aiRequest /* = false */)
 			m_laserHelperFP = params->attach_helper.c_str();
 			m_laserHelperFP.replace("_LAM","");
 		}
-    AttachLAMLaser(true, tp?eIGS_ThirdPerson:eIGS_FirstPerson);      
+	AttachLAMLaser(true, tp?eIGS_ThirdPerson:eIGS_FirstPerson);      
 	}
 
 	if (m_laserActivated || m_lightActivated)
@@ -194,13 +194,13 @@ void CLam::ActivateLight(bool activate, bool aiRequest /* = false */)
 	}
 	else   
   {
-    pParent = this;
-    ownerId = GetOwnerId();
+	pParent = this;
+	ownerId = GetOwnerId();
   }
 
   IActor *pOwnerActor = gEnv->pGame->GetIGameFramework()->GetIActorSystem()->GetActor(ownerId);
   if (activate && !pOwnerActor)
-    return;
+	return;
 
 	//Special FP stuff
 	if(pOwnerActor && pOwnerActor->IsPlayer() && !m_lamparams.isFlashLight)
@@ -215,18 +215,18 @@ void CLam::ActivateLight(bool activate, bool aiRequest /* = false */)
 	//Activate or deactivate effect
 	if (!m_lightActivated)
 	{
-    AttachLAMLight(false, pParent, eIGS_FirstPerson);
-    AttachLAMLight(false, pParent, eIGS_ThirdPerson);
-    
+	AttachLAMLight(false, pParent, eIGS_FirstPerson);
+	AttachLAMLight(false, pParent, eIGS_ThirdPerson);
+	
 		//GameWarning("Global light count = %d", s_lightCount);		
 	}
 	else
 	{
-    uint8 id = pOwnerActor->IsThirdPerson() ? 1 : 0;
-    if (m_lightID[id] == 0)
-    {
-      AttachLAMLight(true, pParent, id?eIGS_ThirdPerson:eIGS_FirstPerson);      
-    }		
+	uint8 id = pOwnerActor->IsThirdPerson() ? 1 : 0;
+	if (m_lightID[id] == 0)
+	{
+	  AttachLAMLight(true, pParent, id?eIGS_ThirdPerson:eIGS_FirstPerson);      
+	}		
 	}
 
 	if (m_laserActivated || m_lightActivated)
@@ -261,7 +261,7 @@ void CLam::OnParentSelect(bool select)
 
   //Track previous state if deselected
   if(!select)
-    SaveLastState();
+	SaveLastState();
 
 }
 
@@ -314,30 +314,30 @@ void CLam::AttachLAMLight(bool attach, CItem* pLightAttach, eGeometrySlot slot)
 
   if (attach)
   {
-    if (m_lamparams.light_range[id] == 0.f)
-      return;
+	if (m_lamparams.light_range[id] == 0.f)
+	  return;
 
 		Vec3 color = m_lamparams.light_color[id] * m_lamparams.light_diffuse_mul[id];
-    float specular = 1.0f/m_lamparams.light_diffuse_mul[id];
+	float specular = 1.0f/m_lamparams.light_diffuse_mul[id];
 		
-    string helper;
-    Vec3 dir(-1,0,0);
+	string helper;
+	Vec3 dir(-1,0,0);
 		Vec3 localOffset(0.0f,0.0f,0.0f);
 
-    if (this != pLightAttach)
-    {
-      SAccessoryParams *params = pLightAttach->GetAccessoryParams(GetEntity()->GetClass()->GetName());
-      if (!params)
-        return;
+	if (this != pLightAttach)
+	{
+	  SAccessoryParams *params = pLightAttach->GetAccessoryParams(GetEntity()->GetClass()->GetName());
+	  if (!params)
+		return;
 
-      helper = params->attach_helper.c_str();
+	  helper = params->attach_helper.c_str();
 			if(slot==eIGS_FirstPerson)
 				helper.append("_light");
-       
+	   
 			//Assets don't have same orientation for pistol/rifle.. 8/
-      dir = (m_lamparams.isLamRifle && id==0) ? Vec3(-0.1f,-1.0f,0.0f) : Vec3(-1.0f,-0.1f,0.0f);
+	  dir = (m_lamparams.isLamRifle && id==0) ? Vec3(-0.1f,-1.0f,0.0f) : Vec3(-1.0f,-0.1f,0.0f);
 			dir.Normalize();
-    }
+	}
 
 		bool fakeLight = false;
 		bool castShadows = false;
@@ -350,9 +350,9 @@ void CLam::AttachLAMLight(bool attach, CItem* pLightAttach, eGeometrySlot slot)
 			{
 				if(!pOwner->IsClient())
 				{
- 					static ICVar* pVar = gEnv->pConsole->GetCVar("r_beams");
- 					if(pVar && pVar->GetIVal() == 4)
- 						color *= 0.3f;	// fake lights can be a bit overbright in low spec
+					static ICVar* pVar = gEnv->pConsole->GetCVar("r_beams");
+					if(pVar && pVar->GetIVal() == 4)
+						color *= 0.3f;	// fake lights can be a bit overbright in low spec
 					fakeLight = true;
 				}
 				else
@@ -372,38 +372,38 @@ void CLam::AttachLAMLight(bool attach, CItem* pLightAttach, eGeometrySlot slot)
 			}
 		}
 		
-    m_lightID[id] = pLightAttach->AttachLightEx(slot, 0, true, fakeLight, castShadows, pCasterException, m_lamparams.light_range[id], color, specular, m_lamparams.light_texture[id], m_lamparams.light_fov[id], helper.c_str(), localOffset, dir, m_lamparams.light_material[id].c_str(), m_lamparams.light_hdr_dyn[id]);
+	m_lightID[id] = pLightAttach->AttachLightEx(slot, 0, true, fakeLight, castShadows, pCasterException, m_lamparams.light_range[id], color, specular, m_lamparams.light_texture[id], m_lamparams.light_fov[id], helper.c_str(), localOffset, dir, m_lamparams.light_material[id].c_str(), m_lamparams.light_hdr_dyn[id]);
 
-    if (m_lightID[id])
-      ++s_lightCount;
+	if (m_lightID[id])
+	  ++s_lightCount;
 
-    // sounds
-    pLightAttach->PlayAction(g_pItemStrings->enable_light);
+	// sounds
+	pLightAttach->PlayAction(g_pItemStrings->enable_light);
 
-    if (m_lightSoundId == INVALID_SOUNDID)      
-      m_lightSoundId = pLightAttach->PlayAction(g_pItemStrings->use_light);
+	if (m_lightSoundId == INVALID_SOUNDID)      
+	  m_lightSoundId = pLightAttach->PlayAction(g_pItemStrings->use_light);
 
-    //Detach the non-needed light 
-    uint8 other = id^1;
-    if (m_lightID[other])
-    {
-      pLightAttach->AttachLightEx(other, m_lightID[other], false, true),
-        m_lightID[other] = 0;
-      --s_lightCount;
-    }
+	//Detach the non-needed light 
+	uint8 other = id^1;
+	if (m_lightID[other])
+	{
+	  pLightAttach->AttachLightEx(other, m_lightID[other], false, true),
+		m_lightID[other] = 0;
+	  --s_lightCount;
+	}
   }
   else
   {
-    if (m_lightID[id])    
-    {
-      pLightAttach->AttachLightEx(slot, m_lightID[id], false, true);           
-      m_lightID[id] = 0;
-      --s_lightCount;
+	if (m_lightID[id])    
+	{
+	  pLightAttach->AttachLightEx(slot, m_lightID[id], false, true);           
+	  m_lightID[id] = 0;
+	  --s_lightCount;
 
-      PlayAction(g_pItemStrings->disable_light);
-      StopSound(m_lightSoundId);    
-      m_lightSoundId = INVALID_SOUNDID;      
-    }        
+	  PlayAction(g_pItemStrings->disable_light);
+	  StopSound(m_lightSoundId);    
+	  m_lightSoundId = INVALID_SOUNDID;      
+	}        
   }  
 	
 	//GameWarning("Global light count = %d", s_lightCount);

@@ -88,8 +88,8 @@ bool CPlayerMovementController::RequestMovement( CMovementRequest& request )
 		{
 			if (IMovementController* pController = pVehicle->GetPassengerMovementController(m_pPlayer->GetEntityId()))
 			{
-        IVehicleSeat* pSeat = pVehicle->GetSeatForPassenger(m_pPlayer->GetEntityId());
-        if (!pSeat->IsDriver())
+		IVehicleSeat* pSeat = pVehicle->GetSeatForPassenger(m_pPlayer->GetEntityId());
+		if (!pSeat->IsDriver())
 				  pController->RequestMovement(request);
 			}
 		}
@@ -435,9 +435,9 @@ bool CPlayerMovementController::CTargetInterpolator::GetTarget(
 			Quat::CreateIdentity(), 
 			Quat::CreateRotationV0V1(clampedDirection, moveDirection), 
 			min(viewFollowMovement, 1.0f)) * clampedDirection;
-      // return false to indicate that the direction is out of range. This stops the gun
-      // being held up in the aiming pose, but not pointing at the target, whilst running
-      retVal = false;
+	  // return false to indicate that the direction is out of range. This stops the gun
+	  // being held up in the aiming pose, but not pointing at the target, whilst running
+	  retVal = false;
 		}
 		// Clamped, rotate the body until it is facing towards the target.
 	}
@@ -613,15 +613,15 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 	}
 	if (pAnimTarget != NULL)
 	{
-    static float criticalDistance = 5.0f;
-    float distance = (pAnimTarget->position - playerPos).GetLength();
+	static float criticalDistance = 5.0f;
+	float distance = (pAnimTarget->position - playerPos).GetLength();
 		// workaround: DistanceToPathEnd is bogus values. Using true distance to anim target pos instead.
 		pAnimTarget->allowActivation = m_state.GetDistanceToPathEnd() < criticalDistance && distance < criticalDistance;
 	}
 
 	m_animTargetSpeedCounter -= m_animTargetSpeedCounter!=0;
 
- 	// speed control
+	// speed control
 	if (hasMoveTarget)
 	{
 		Vec3 desiredMovement = moveTarget - playerPos;
@@ -662,8 +662,8 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 			if (pAnimTarget && (pAnimTarget->activated || m_animTargetSpeedCounter) && m_animTargetSpeed >= 0.0f)
 			{
 				desiredSpeed = m_animTargetSpeed;
-        if (pAnimTarget->activated)
-  				m_animTargetSpeedCounter = 4;
+		if (pAnimTarget->activated)
+				m_animTargetSpeedCounter = 4;
 			}
 
 			float stanceSpeed=m_pPlayer->GetStanceMaxSpeed(m_pPlayer->GetStance());
@@ -975,18 +975,18 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 
   if (params.aimIK)
   {
-    m_aimTarget = params.aimTarget;
-    // if aiming force looking as well
-    // In spite of what it may look like with eye/look IK, the look/aim target tends
-    // to be right on/in the target's head so doesn't need any extra offset
-    params.lookTarget = params.aimTarget;
-    params.lookIK = true;
-    m_lookTarget = params.lookTarget;
+	m_aimTarget = params.aimTarget;
+	// if aiming force looking as well
+	// In spite of what it may look like with eye/look IK, the look/aim target tends
+	// to be right on/in the target's head so doesn't need any extra offset
+	params.lookTarget = params.aimTarget;
+	params.lookIK = true;
+	m_lookTarget = params.lookTarget;
   }
   else
   {
-    m_aimTarget = m_lookTarget;
-    if (params.lookIK)
+	m_aimTarget = m_lookTarget;
+	if (params.lookIK)
 		  m_lookTarget = params.lookTarget;
 	  else
 		  m_lookTarget = m_currentMovementState.eyePosition + m_pPlayer->GetEntity()->GetRotation() * FORWARD_DIRECTION * 10.0f;
@@ -1021,7 +1021,7 @@ bool CPlayerMovementController::UpdateNormal( float frameTime, SActorFrameMoveme
 	}
 	else
 	{
-    params.prediction.nStates = 0;
+	params.prediction.nStates = 0;
 	 }
 
 	return true;

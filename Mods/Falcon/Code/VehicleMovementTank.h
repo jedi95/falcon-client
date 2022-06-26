@@ -28,7 +28,7 @@ public:
   virtual bool Init(IVehicle* pVehicle, const SmartScriptTable &table);  
   virtual void PostInit();
   virtual void Reset();
-  	
+	
 	virtual void ProcessAI(const float deltaTime);
 	virtual void ProcessMovement(const float deltaTime);
 	virtual bool RequestMovement(CMovementRequest& movementRequest);

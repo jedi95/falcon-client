@@ -406,32 +406,32 @@ void CProjectile::HandleEvent(const SGameObjectEvent &event)
 
 	if (event.event == eGFE_OnCollision)
 	{
-    EventPhysCollision *pCollision = (EventPhysCollision *)event.ptr;
+	EventPhysCollision *pCollision = (EventPhysCollision *)event.ptr;
 
 		IEntity *pCollidee = pCollision->iForeignData[0]==PHYS_FOREIGN_ID_ENTITY ? (IEntity*)pCollision->pForeignData[0]:0;
 
 		const SCollisionParams* pCollisionParams = m_pAmmoParams->pCollision;
-    if (pCollisionParams)
-    {
+	if (pCollisionParams)
+	{
 			if (pCollisionParams->pParticleEffect)
-          pCollisionParams->pParticleEffect->Spawn(true, IParticleEffect::ParticleLoc(pCollision->pt, pCollision->n, pCollisionParams->scale));
+		  pCollisionParams->pParticleEffect->Spawn(true, IParticleEffect::ParticleLoc(pCollision->pt, pCollision->n, pCollisionParams->scale));
 
-      if (pCollisionParams->sound)
-      {
-        _smart_ptr<ISound> pSound = gEnv->pSoundSystem->CreateSound(pCollisionParams->sound, FLAG_SOUND_DEFAULT_3D);
+	  if (pCollisionParams->sound)
+	  {
+		_smart_ptr<ISound> pSound = gEnv->pSoundSystem->CreateSound(pCollisionParams->sound, FLAG_SOUND_DEFAULT_3D);
 				pSound->SetSemantic(eSoundSemantic_Projectile);
-        pSound->SetPosition(pCollision->pt);
-        pSound->Play();
-      }
+		pSound->SetPosition(pCollision->pt);
+		pSound->Play();
+	  }
 
-      IStatObj *statObj = 0;
-      if (pCollision->iForeignData[1] == PHYS_FOREIGN_ID_STATIC)
-      {
-        IRenderNode * pRN = (IRenderNode*)pCollision->pForeignData[1];
-        if (pRN && pRN->GetEntityStatObj(0))
-          statObj = pRN->GetEntityStatObj(0);
-      }
-    }
+	  IStatObj *statObj = 0;
+	  if (pCollision->iForeignData[1] == PHYS_FOREIGN_ID_STATIC)
+	  {
+		IRenderNode * pRN = (IRenderNode*)pCollision->pForeignData[1];
+		if (pRN && pRN->GetEntityStatObj(0))
+		  statObj = pRN->GetEntityStatObj(0);
+	  }
+	}
 
 		// add battledust for bulletimpact
 		if(gEnv->bServer && g_pGame->GetGameRules())
@@ -442,7 +442,7 @@ void CProjectile::HandleEvent(const SGameObjectEvent &event)
 			}
 		}
 
-    Ricochet(pCollision);
+	Ricochet(pCollision);
   }
 }
 
@@ -1076,7 +1076,7 @@ CWeapon *CProjectile::GetWeapon()
 
 EntityId CProjectile::GetOwnerId()const
 {
-    return m_ownerId;
+	return m_ownerId;
 }
 
 float CProjectile::GetSpeed() const

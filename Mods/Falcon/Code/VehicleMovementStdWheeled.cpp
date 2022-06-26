@@ -93,7 +93,7 @@ bool CVehicleMovementStdWheeled::Init(IVehicle* pVehicle, const SmartScriptTable
 {
 	if (!CVehicleMovementBase::Init(pVehicle, table))
 	{
-        return false;
+		return false;
 	}
 
   m_carParams.enginePower = 0.f;
@@ -120,10 +120,10 @@ bool CVehicleMovementStdWheeled::Init(IVehicle* pVehicle, const SmartScriptTable
   SmartScriptTable soundParams;
   if (table->GetValue("SoundParams", soundParams))
   {
-    soundParams->GetValue("roadBumpMinSusp", m_bumpMinSusp);
-    soundParams->GetValue("roadBumpMinSpeed", m_bumpMinSpeed);
-    soundParams->GetValue("roadBumpIntensity", m_bumpIntensityMult);
-    soundParams->GetValue("airbrake", m_airbrakeTime);
+	soundParams->GetValue("roadBumpMinSusp", m_bumpMinSusp);
+	soundParams->GetValue("roadBumpMinSpeed", m_bumpMinSpeed);
+	soundParams->GetValue("roadBumpIntensity", m_bumpIntensityMult);
+	soundParams->GetValue("airbrake", m_airbrakeTime);
   }
   
 	m_action.steer = 0.0f;
@@ -152,10 +152,10 @@ bool CVehicleMovementStdWheeled::InitPhysics(const SmartScriptTable &table)
 {
 	SmartScriptTable wheeledTable;
 	if (!table->GetValue("Wheeled", wheeledTable))
-    return false;
+	return false;
 
   m_carParams.maxTimeStep = 0.02f;
-    
+	
 	MOVEMENT_VALUE_REQ("axleFriction", m_axleFrictionMin, wheeledTable);
 	MOVEMENT_VALUE_OPT("axleFrictionMax", m_axleFrictionMax, wheeledTable);
 	MOVEMENT_VALUE_REQ("brakeTorque", m_carParams.brakeTorque, wheeledTable);
@@ -188,12 +188,12 @@ bool CVehicleMovementStdWheeled::InitPhysics(const SmartScriptTable &table)
   
   int maxGear = 0;
   if (wheeledTable->GetValue("maxGear", maxGear) && maxGear>0)
-    m_carParams.maxGear = maxGear+1; // to zero-based indexing
-    
+	m_carParams.maxGear = maxGear+1; // to zero-based indexing
+	
   m_carParams.axleFriction = m_axleFrictionMin;
   m_axleFriction = m_axleFrictionMin;
   m_stabi = m_carParams.kStabilizer;
-  	
+	
 	if (wheeledTable->GetValue("enginePower", m_carParams.enginePower))
 	{
 		m_carParams.enginePower *= 1000.0f;
@@ -206,7 +206,7 @@ bool CVehicleMovementStdWheeled::InitPhysics(const SmartScriptTable &table)
 	}
 
 	if (g_pGameCVars->pVehicleQuality->GetIVal()==1)
-    m_carParams.maxTimeStep = max(m_carParams.maxTimeStep, 0.04f);
+	m_carParams.maxTimeStep = max(m_carParams.maxTimeStep, 0.04f);
 
 	// don't submit maxBrakingFriction or rearWheelBrakingFrictionMult to physics, it's controlled by gamecode
 	MOVEMENT_VALUE_OPT("maxBrakingFriction", m_maxBrakingFriction, wheeledTable);
@@ -253,12 +253,12 @@ void CVehicleMovementStdWheeled::PostInit()
 
   for (int i=0; i<nParts; ++i)
   {      
-    IVehiclePart* pPart = m_pVehicle->GetPart(i);
-    if (pPart->GetIWheel())
-    { 
-      m_wheelParts.push_back(pPart);
-      m_wheelStats[m_wheelParts.size()-1].friction = pPart->GetIWheel()->GetCarGeomParams()->kLatFriction;
-    }
+	IVehiclePart* pPart = m_pVehicle->GetPart(i);
+	if (pPart->GetIWheel())
+	{ 
+	  m_wheelParts.push_back(pPart);
+	  m_wheelStats[m_wheelParts.size()-1].friction = pPart->GetIWheel()->GetCarGeomParams()->kLatFriction;
+	}
   }
 }
 
@@ -276,7 +276,7 @@ void CVehicleMovementStdWheeled::Physicalize()
   physicsParams.pCar = &carParams;
 
   m_pVehicle->GetEntity()->Physicalize(physicsParams);
-    
+	
   m_engineMaxRPM = m_carParams.engineMaxRPM;
   m_engineIdleRPM = m_carParams.engineIdleRPM;
   m_engineShiftDownRPM = m_carParams.engineShiftDownRPM;
@@ -298,9 +298,9 @@ void CVehicleMovementStdWheeled::PostPhysicalize()
   
   if (m_maxSpeed == 0.f)
   {
-    pe_status_vehicle_abilities ab;    
-    if (GetPhysics()->GetStatus(&ab))
-      m_maxSpeed = ab.maxVelocity * 0.5f; // fixme! maxVelocity too high
+	pe_status_vehicle_abilities ab;    
+	if (GetPhysics()->GetStatus(&ab))
+	  m_maxSpeed = ab.maxVelocity * 0.5f; // fixme! maxVelocity too high
   }
 }
 
@@ -321,58 +321,58 @@ void CVehicleMovementStdWheeled::InitSurfaceEffects()
   
   for (int iLayer=0; iLayer<envParams->GetLayerCount(); ++iLayer)
   {
-    const SEnvironmentLayer& layer = envParams->GetLayer(iLayer);
-    
-    m_paStats.envStats.emitters.reserve(m_paStats.envStats.emitters.size() + layer.GetGroupCount());
+	const SEnvironmentLayer& layer = envParams->GetLayer(iLayer);
+	
+	m_paStats.envStats.emitters.reserve(m_paStats.envStats.emitters.size() + layer.GetGroupCount());
 
-    for (int i=0; i<layer.GetGroupCount(); ++i)
-    { 
-      Matrix34 tm;
-      tm.SetIdentity();
-      
-      if (layer.GetHelperCount() == layer.GetGroupCount() && layer.GetHelper(i))
-      {
-        // use helper pos if specified
+	for (int i=0; i<layer.GetGroupCount(); ++i)
+	{ 
+	  Matrix34 tm;
+	  tm.SetIdentity();
+	  
+	  if (layer.GetHelperCount() == layer.GetGroupCount() && layer.GetHelper(i))
+	  {
+		// use helper pos if specified
 				if (IVehicleHelper* pHelper = layer.GetHelper(i))
 					tm = pHelper->GetVehicleTM();
 				else
 					tm.SetIdentity();
-      }
-      else
-      {
-        // else use wheels' center
-        Vec3 pos(ZERO);
-        
-        for (int w=0; w<layer.GetWheelCount(i); ++w)
-        {       
-          int ipart = numParts - numWheels + layer.GetWheelAt(i,w)-1; // wheels are last
+	  }
+	  else
+	  {
+		// else use wheels' center
+		Vec3 pos(ZERO);
+		
+		for (int w=0; w<layer.GetWheelCount(i); ++w)
+		{       
+		  int ipart = numParts - numWheels + layer.GetWheelAt(i,w)-1; // wheels are last
 
-          if (ipart < 0 || ipart >= numParts)
-          {
-            CryLog("%s invalid wheel index: %i, maybe asset/setup mismatch", m_pEntity->GetName(), ipart);
-            continue;
-          }
+		  if (ipart < 0 || ipart >= numParts)
+		  {
+			CryLog("%s invalid wheel index: %i, maybe asset/setup mismatch", m_pEntity->GetName(), ipart);
+			continue;
+		  }
 
-          pe_status_pos spos;
-          spos.ipart = ipart;
-          if (pPhysics->GetStatus(&spos))
-          {
-            spos.pos.z += spos.BBox[0].z;
-            pos = (pos.IsZero()) ? spos.pos : 0.5f*(pos + spos.pos);        
-          }
-        }
-        tm = Matrix34::CreateRotationX(DEG2RAD(90.f));      
-        tm.SetTranslation( m_pEntity->GetWorldTM().GetInverted().TransformPoint(pos) );
-      }     
+		  pe_status_pos spos;
+		  spos.ipart = ipart;
+		  if (pPhysics->GetStatus(&spos))
+		  {
+			spos.pos.z += spos.BBox[0].z;
+			pos = (pos.IsZero()) ? spos.pos : 0.5f*(pos + spos.pos);        
+		  }
+		}
+		tm = Matrix34::CreateRotationX(DEG2RAD(90.f));      
+		tm.SetTranslation( m_pEntity->GetWorldTM().GetInverted().TransformPoint(pos) );
+	  }     
 
-      TEnvEmitter emitter;
-      emitter.layer = iLayer;        
-      emitter.slot = -1;
-      emitter.group = i;
-      emitter.active = layer.IsGroupActive(i);
-      emitter.quatT = QuatT(tm);
-      m_paStats.envStats.emitters.push_back(emitter); 
-    }
+	  TEnvEmitter emitter;
+	  emitter.layer = iLayer;        
+	  emitter.slot = -1;
+	  emitter.group = i;
+	  emitter.active = layer.IsGroupActive(i);
+	  emitter.quatT = QuatT(tm);
+	  m_paStats.envStats.emitters.push_back(emitter); 
+	}
   }
   
   m_paStats.envStats.initalized = true;  
@@ -395,12 +395,12 @@ void CVehicleMovementStdWheeled::Reset()
   m_wheelContacts = 0;
   
   if (m_blownTires)
-    SetEngineRPMMult(1.0f);
+	SetEngineRPMMult(1.0f);
   m_blownTires = 0;
 
   if (m_bForceSleep)
   {
-    IPhysicalEntity* pPhysics = GetPhysics();
+	IPhysicalEntity* pPhysics = GetPhysics();
 	if (pPhysics)
 	{
 		pe_params_car params;
@@ -427,7 +427,7 @@ void CVehicleMovementStdWheeled::Release()
 bool CVehicleMovementStdWheeled::StartEngine(EntityId driverId)
 {
   if (!CVehicleMovementBase::StartEngine(driverId))
-    return false;
+	return false;
 
   m_brakeTimer = 0.f;
   m_action.pedal = 0.f;
@@ -454,45 +454,45 @@ void CVehicleMovementStdWheeled::OnEvent(EVehicleMovementEvent event, const SVeh
 
   if (event == eVME_TireBlown || event == eVME_TireRestored)
   {		
-    int wheelIndex = params.iValue;
-    
-    if (m_carParams.steerTrackNeutralTurn == 0.f)
-    {
-      int blownTiresPrev = m_blownTires;    
-      m_blownTires = max(0, min(m_pVehicle->GetWheelCount(), event==eVME_TireBlown ? m_blownTires+1 : m_blownTires-1));
-      
-      // reduce speed based on number of tyres blown out        
-      if (m_blownTires != blownTiresPrev)
-      {	
-        SetEngineRPMMult(GetWheelCondition());
-      }
-    }
+	int wheelIndex = params.iValue;
+	
+	if (m_carParams.steerTrackNeutralTurn == 0.f)
+	{
+	  int blownTiresPrev = m_blownTires;    
+	  m_blownTires = max(0, min(m_pVehicle->GetWheelCount(), event==eVME_TireBlown ? m_blownTires+1 : m_blownTires-1));
+	  
+	  // reduce speed based on number of tyres blown out        
+	  if (m_blownTires != blownTiresPrev)
+	  {	
+		SetEngineRPMMult(GetWheelCondition());
+	  }
+	}
 
-    // handle particles (sparks etc.)
-    SEnvironmentParticles* envParams = m_pPaParams->GetEnvironmentParticles();    
-    
-    SEnvParticleStatus::TEnvEmitters::iterator emitterIt = m_paStats.envStats.emitters.begin();
-    SEnvParticleStatus::TEnvEmitters::iterator emitterItEnd = m_paStats.envStats.emitters.end();
-    for (; emitterIt != emitterItEnd; ++emitterIt)
-    { 
-      // disable this wheel in layer 0, enable in layer 1            
-      if (emitterIt->group >= 0)
-      {
-        const SEnvironmentLayer& layer = envParams->GetLayer(emitterIt->layer);
+	// handle particles (sparks etc.)
+	SEnvironmentParticles* envParams = m_pPaParams->GetEnvironmentParticles();    
+	
+	SEnvParticleStatus::TEnvEmitters::iterator emitterIt = m_paStats.envStats.emitters.begin();
+	SEnvParticleStatus::TEnvEmitters::iterator emitterItEnd = m_paStats.envStats.emitters.end();
+	for (; emitterIt != emitterItEnd; ++emitterIt)
+	{ 
+	  // disable this wheel in layer 0, enable in layer 1            
+	  if (emitterIt->group >= 0)
+	  {
+		const SEnvironmentLayer& layer = envParams->GetLayer(emitterIt->layer);
 
-        for (int i=0; i<layer.GetWheelCount(emitterIt->group); ++i)
-        {
-          if (layer.GetWheelAt(emitterIt->group, i)-1 == wheelIndex)
-          {
-            bool bEnable = !strcmp(layer.GetName(), "rims");
+		for (int i=0; i<layer.GetWheelCount(emitterIt->group); ++i)
+		{
+		  if (layer.GetWheelAt(emitterIt->group, i)-1 == wheelIndex)
+		  {
+			bool bEnable = !strcmp(layer.GetName(), "rims");
 						if (event == eVME_TireRestored)
 							bEnable=!bEnable;
-            EnableEnvEmitter(*emitterIt, bEnable);
-            emitterIt->active = bEnable;
-          }
-        } 
-      }
-    }     
+			EnableEnvEmitter(*emitterIt, bEnable);
+			emitterIt->active = bEnable;
+		  }
+		} 
+	  }
+	}     
   }  
 }
 
@@ -510,7 +510,7 @@ void CVehicleMovementStdWheeled::OnAction(const TVehicleActionId actionId, int a
 float CVehicleMovementStdWheeled::GetWheelCondition() const
 {
   if (0 == m_blownTires)
-    return 1.0f;
+	return 1.0f;
 
   // for a 4-wheel vehicle, want to reduce speed by 20% for each wheel shot out. So I'm assuming that for an 8-wheel
   //	vehicle we'd want to reduce by 10% per wheel.
@@ -524,14 +524,14 @@ void CVehicleMovementStdWheeled::SetEngineRPMMult(float mult, int threadSafe)
 {
   if (IPhysicalEntity* pPhysics = GetPhysics())
   {
-    pe_params_car params;
-    params.engineMaxRPM = m_engineMaxRPM * mult;
-    params.engineMinRPM = m_carParams.engineMinRPM * mult;
-    params.engineShiftDownRPM = m_engineShiftDownRPM * mult;
-    params.engineShiftUpRPM = m_carParams.engineShiftUpRPM * mult;
-    params.engineIdleRPM = m_engineIdleRPM * mult;
-    params.engineStartRPM = m_carParams.engineStartRPM * mult;    
-    pPhysics->SetParams(&params, threadSafe);
+	pe_params_car params;
+	params.engineMaxRPM = m_engineMaxRPM * mult;
+	params.engineMinRPM = m_carParams.engineMinRPM * mult;
+	params.engineShiftDownRPM = m_engineShiftDownRPM * mult;
+	params.engineShiftUpRPM = m_carParams.engineShiftUpRPM * mult;
+	params.engineIdleRPM = m_engineIdleRPM * mult;
+	params.engineStartRPM = m_carParams.engineStartRPM * mult;    
+	pPhysics->SetParams(&params, threadSafe);
   }
 }
 
@@ -550,38 +550,38 @@ void CVehicleMovementStdWheeled::UpdateAxleFriction(float pedal, bool backward, 
 
   if (m_axleFrictionMax > m_axleFrictionMin)
   {
-    float fric;
+	float fric;
 
-    if ((!backward || m_vehicleStatus.iCurGear != 0) && pedalGearDir > 0)      
-      fric = m_axleFrictionMin; 
-    else
-      fric = m_axleFrictionMax;
+	if ((!backward || m_vehicleStatus.iCurGear != 0) && pedalGearDir > 0)      
+	  fric = m_axleFrictionMin; 
+	else
+	  fric = m_axleFrictionMax;
 
-    if (m_axleFriction != fric)
-    {
-      m_axleFriction = fric;
+	if (m_axleFriction != fric)
+	{
+	  m_axleFriction = fric;
 
-      pe_params_car carparams;
-      carparams.axleFriction = m_axleFriction;
-      GetPhysics()->SetParams(&carparams,THREAD_SAFE);
-    }
+	  pe_params_car carparams;
+	  carparams.axleFriction = m_axleFriction;
+	  GetPhysics()->SetParams(&carparams,THREAD_SAFE);
+	}
   }
 
   if (m_brakeImpulse != 0.f && m_wheelContacts && pedal != 0.f && m_PhysDyn.v.len2()>1.f)
   {
 	Matrix33 worldTM( m_PhysPos.q );
-    Vec3 vel = worldTM.GetInverted()* m_PhysDyn.v;
+	Vec3 vel = worldTM.GetInverted()* m_PhysDyn.v;
 
-    if (sgn(vel.y)*sgn(pedal) < 0)
-    {
-      // add helper impulse for braking
-      pe_action_impulse imp;
-      imp.impulse = -m_PhysDyn.v.GetNormalized();
-      imp.impulse *= m_brakeImpulse * abs(vel.y) * ((float)m_wheelContacts/m_pVehicle->GetWheelCount()) * deltaTime * m_PhysDyn.mass;      
-      imp.point = m_PhysDyn.centerOfMass;
-      imp.iApplyTime = 0;
-      GetPhysics()->Action(&imp, THREAD_SAFE);
-    }
+	if (sgn(vel.y)*sgn(pedal) < 0)
+	{
+	  // add helper impulse for braking
+	  pe_action_impulse imp;
+	  imp.impulse = -m_PhysDyn.v.GetNormalized();
+	  imp.impulse *= m_brakeImpulse * abs(vel.y) * ((float)m_wheelContacts/m_pVehicle->GetWheelCount()) * deltaTime * m_PhysDyn.mass;      
+	  imp.point = m_PhysDyn.centerOfMass;
+	  imp.iApplyTime = 0;
+	  GetPhysics()->Action(&imp, THREAD_SAFE);
+	}
   }
 }
 
@@ -618,16 +618,16 @@ void CVehicleMovementStdWheeled::ApplyBoost(float speed, float maxSpeed, float s
 
   if (m_action.pedal > 0.01f && m_wheelContacts >= 0.5f*m_pVehicle->GetWheelCount() && speed < maxSpeed)
   {     
-    float fraction = 0.0f;
+	float fraction = 0.0f;
 		if ( fabsf( maxSpeed-fullBoostMaxSpeed ) > 0.001f )
 			fraction = max(0.f, 1.f - max(0.f, speed-fullBoostMaxSpeed)/(maxSpeed-fullBoostMaxSpeed));
-    float amount = fraction * strength * m_action.pedal * m_PhysDyn.mass * deltaTime;
+	float amount = fraction * strength * m_action.pedal * m_PhysDyn.mass * deltaTime;
   
-    float angle = DEG2RAD(m_carParams.steerTrackNeutralTurn == 0.f ? 30.f : 0.f);
-    Vec3 dir(0, cosf(angle), -sinf(angle));
+	float angle = DEG2RAD(m_carParams.steerTrackNeutralTurn == 0.f ? 30.f : 0.f);
+	Vec3 dir(0, cosf(angle), -sinf(angle));
 
-    AABB bounds;
-    m_pVehicle->GetEntity()->GetLocalBounds(bounds);
+	AABB bounds;
+	m_pVehicle->GetEntity()->GetLocalBounds(bounds);
 
 		const Vec3 worldPos =  m_PhysPos.pos;
 		const Matrix33 worldMat( m_PhysPos.q);
@@ -657,7 +657,7 @@ void CVehicleMovementStdWheeled::Update(const float deltaTime)
   m_passengerCount = status.passengerCount;
 
   if (!pPhysics->GetStatus(&m_vehicleStatus))
-    return;
+	return;
 
 
 	CVehicleMovementBase::Update(deltaTime);
@@ -666,11 +666,11 @@ void CVehicleMovementStdWheeled::Update(const float deltaTime)
 	UpdateBrakes(deltaTime);
 
   if (gEnv->bClient)
-    UpdateSounds(deltaTime);    
+	UpdateSounds(deltaTime);    
 
 	bool distant = m_pVehicle->GetGameObject()->IsProbablyDistant();
   if (!distant && m_blownTires && m_carParams.steerTrackNeutralTurn == 0.f)
-    m_tireBlownTimer += deltaTime;       
+	m_tireBlownTimer += deltaTime;       
 
 	const SVehicleDamageParams& damageParams = m_pVehicle->GetDamageParams();
 	m_submergedRatioMax = damageParams.submergedRatioMax;
@@ -683,7 +683,7 @@ void CVehicleMovementStdWheeled::UpdateGameTokens(const float deltaTime)
 
   if(m_pVehicle->IsPlayerDriving(true)||m_pVehicle->IsPlayerPassenger())
   { 
-    m_pGameTokenSystem->SetOrCreateToken("vehicle.rpmNorm", TFlowInputData(m_rpmScale, true));
+	m_pGameTokenSystem->SetOrCreateToken("vehicle.rpmNorm", TFlowInputData(m_rpmScale, true));
   }    
 }
 
@@ -697,100 +697,100 @@ void CVehicleMovementStdWheeled::UpdateSounds(const float deltaTime)
   // update engine sound
   if (m_isEnginePowered && !m_isEngineGoingOff)
   {
-    float rpmScale = min(m_vehicleStatus.engineRPM / m_engineMaxRPM, 1.f);
-    
-    if (rpmScale < GetMinRPMSoundRatio())
-    {
-      // pitch rpm with pedal, if MinSoundRatio is used and rpm is below that
-      rpmScale = min(GetMinRPMSoundRatio(), max(m_action.pedal, rpmScale));
-    }
+	float rpmScale = min(m_vehicleStatus.engineRPM / m_engineMaxRPM, 1.f);
+	
+	if (rpmScale < GetMinRPMSoundRatio())
+	{
+	  // pitch rpm with pedal, if MinSoundRatio is used and rpm is below that
+	  rpmScale = min(GetMinRPMSoundRatio(), max(m_action.pedal, rpmScale));
+	}
 
-    if (m_vehicleStatus.bHandBrake)
-    {
-      Interpolate(m_rpmScale, rpmScale, 2.5f, deltaTime);
-      m_rpmTarget = 0.f;
-      loadTarget = 0.f;
-    }
-    else if (m_rpmTarget)
-    {
-      if (m_rpmTarget < m_rpmScale && DoGearSound())
-      {
-        loadTarget = 0.f;
-      }
+	if (m_vehicleStatus.bHandBrake)
+	{
+	  Interpolate(m_rpmScale, rpmScale, 2.5f, deltaTime);
+	  m_rpmTarget = 0.f;
+	  loadTarget = 0.f;
+	}
+	else if (m_rpmTarget)
+	{
+	  if (m_rpmTarget < m_rpmScale && DoGearSound())
+	  {
+		loadTarget = 0.f;
+	  }
 
-      Interpolate(m_rpmScale, m_rpmTarget, m_rpmGearShiftSpeed, deltaTime);
-      
-      float diff = abs(m_rpmScale-m_rpmTarget);
-      
-      if (m_gearSoundPending && m_currentGear >= 3) // only from 1st gear upward
-      {          
-        if (diff < 0.5f*abs(m_rpmScalePrev-m_rpmTarget))
-        {           
-          GetOrPlaySound(eSID_Gear, 0.f, m_enginePos);          
-          m_gearSoundPending = false;
-        }
-      }
-      
-      if (diff < 0.02)
-      {
-        m_rpmTarget = 0.f;        
-      }
-    }
-    else
-    {
-      // don't allow rpm to rev up when in 1st forward/backward gear and clutch is disengaged.
-      // a bit workaround, but it prevents the sound glitch
-      if (m_vehicleStatus.clutch < 0.9f && (m_vehicleStatus.iCurGear == 0 || m_vehicleStatus.iCurGear == 2))
-      {
-        rpmScale = min(m_rpmScale, rpmScale);
-      }
+	  Interpolate(m_rpmScale, m_rpmTarget, m_rpmGearShiftSpeed, deltaTime);
+	  
+	  float diff = abs(m_rpmScale-m_rpmTarget);
+	  
+	  if (m_gearSoundPending && m_currentGear >= 3) // only from 1st gear upward
+	  {          
+		if (diff < 0.5f*abs(m_rpmScalePrev-m_rpmTarget))
+		{           
+		  GetOrPlaySound(eSID_Gear, 0.f, m_enginePos);          
+		  m_gearSoundPending = false;
+		}
+	  }
+	  
+	  if (diff < 0.02)
+	  {
+		m_rpmTarget = 0.f;        
+	  }
+	}
+	else
+	{
+	  // don't allow rpm to rev up when in 1st forward/backward gear and clutch is disengaged.
+	  // a bit workaround, but it prevents the sound glitch
+	  if (m_vehicleStatus.clutch < 0.9f && (m_vehicleStatus.iCurGear == 0 || m_vehicleStatus.iCurGear == 2))
+	  {
+		rpmScale = min(m_rpmScale, rpmScale);
+	  }
 
-      float interpspeed = (rpmScale < m_rpmScale) ? m_rpmRelaxSpeed : m_rpmInterpSpeed;
-      Interpolate(m_rpmScale, rpmScale, interpspeed, deltaTime);
-    }
-    
-    float rpmSound = max(ENGINESOUND_IDLE_RATIO, m_rpmScale);
-    SetSoundParam(eSID_Run, "rpm_scale", rpmSound);
-    SetSoundParam(eSID_Ambience, "rpm_scale", rpmSound);
+	  float interpspeed = (rpmScale < m_rpmScale) ? m_rpmRelaxSpeed : m_rpmInterpSpeed;
+	  Interpolate(m_rpmScale, rpmScale, interpspeed, deltaTime);
+	}
+	
+	float rpmSound = max(ENGINESOUND_IDLE_RATIO, m_rpmScale);
+	SetSoundParam(eSID_Run, "rpm_scale", rpmSound);
+	SetSoundParam(eSID_Ambience, "rpm_scale", rpmSound);
 
-    if (m_currentGear != m_vehicleStatus.iCurGear)
-    { 
-      // when shifting up from 1st upward, set sound target to low rpm to simulate dropdown 
-      // during clutch disengagement
-      if (m_currentGear >= 2 && m_vehicleStatus.iCurGear>m_currentGear)
-      {
-        m_rpmTarget = m_engineShiftDownRPM/m_engineMaxRPM;
-        m_rpmScalePrev = m_rpmScale;
-                
-        if (DoGearSound())
-        {
-          loadTarget = 0.f;
-          m_gearSoundPending = true;        
-        }
-      }
+	if (m_currentGear != m_vehicleStatus.iCurGear)
+	{ 
+	  // when shifting up from 1st upward, set sound target to low rpm to simulate dropdown 
+	  // during clutch disengagement
+	  if (m_currentGear >= 2 && m_vehicleStatus.iCurGear>m_currentGear)
+	  {
+		m_rpmTarget = m_engineShiftDownRPM/m_engineMaxRPM;
+		m_rpmScalePrev = m_rpmScale;
+				
+		if (DoGearSound())
+		{
+		  loadTarget = 0.f;
+		  m_gearSoundPending = true;        
+		}
+	  }
 
-      if (DoGearSound() && !m_rpmTarget && !(m_currentGear<=2 && m_vehicleStatus.iCurGear<=2) && m_vehicleStatus.iCurGear > m_currentGear)
-      {
-        // do gearshift sound only for gears higher than 1st forward
-        // in case rpmTarget has been set, shift is played upon reaching it        
-        GetOrPlaySound(eSID_Gear, 0.f, m_enginePos);        
-      }
+	  if (DoGearSound() && !m_rpmTarget && !(m_currentGear<=2 && m_vehicleStatus.iCurGear<=2) && m_vehicleStatus.iCurGear > m_currentGear)
+	  {
+		// do gearshift sound only for gears higher than 1st forward
+		// in case rpmTarget has been set, shift is played upon reaching it        
+		GetOrPlaySound(eSID_Gear, 0.f, m_enginePos);        
+	  }
 
-      m_currentGear = m_vehicleStatus.iCurGear;
-    }
+	  m_currentGear = m_vehicleStatus.iCurGear;
+	}
 
-    if (loadTarget < 0.f)
-    {
-      // if not yet set, set load according to pedal
-      loadTarget = abs(GetEnginePedal());
-    }
+	if (loadTarget < 0.f)
+	{
+	  // if not yet set, set load according to pedal
+	  loadTarget = abs(GetEnginePedal());
+	}
 
-    float loadSpeed = 1.f / (loadTarget >= m_load ? LOAD_RAMP_TIME : LOAD_RELAX_TIME);    
-    Interpolate(m_load, loadTarget, loadSpeed, deltaTime);    
+	float loadSpeed = 1.f / (loadTarget >= m_load ? LOAD_RAMP_TIME : LOAD_RELAX_TIME);    
+	Interpolate(m_load, loadTarget, loadSpeed, deltaTime);    
   }
   else
   {
-    m_load = 0.f;
+	m_load = 0.f;
   }
 
   SetSoundParam(eSID_Run, "surface", m_surfaceSoundStats.surfaceParam);  
@@ -798,38 +798,38 @@ void CVehicleMovementStdWheeled::UpdateSounds(const float deltaTime)
   // tire slip sound
   if (m_maxSoundSlipSpeed > 0.f)
   {
-    ISound* pSound = GetSound(eSID_Slip);
+	ISound* pSound = GetSound(eSID_Slip);
 
-    if (m_surfaceSoundStats.slipRatio > 0.08f)
-    { 
-      float slipTimerPrev = m_surfaceSoundStats.slipTimer;
-      m_surfaceSoundStats.slipTimer += deltaTime;
-      
-      const static float slipSoundMinTime = 0.12f;
-      if (!pSound && slipTimerPrev <= slipSoundMinTime && m_surfaceSoundStats.slipTimer > slipSoundMinTime)
-      {
-        pSound = PlaySound(eSID_Slip);
-      }      
-    }
-    else if (m_surfaceSoundStats.slipRatio < 0.03f && m_surfaceSoundStats.slipTimer > 0.f)
-    {
-      m_surfaceSoundStats.slipTimer -= deltaTime;
+	if (m_surfaceSoundStats.slipRatio > 0.08f)
+	{ 
+	  float slipTimerPrev = m_surfaceSoundStats.slipTimer;
+	  m_surfaceSoundStats.slipTimer += deltaTime;
+	  
+	  const static float slipSoundMinTime = 0.12f;
+	  if (!pSound && slipTimerPrev <= slipSoundMinTime && m_surfaceSoundStats.slipTimer > slipSoundMinTime)
+	  {
+		pSound = PlaySound(eSID_Slip);
+	  }      
+	}
+	else if (m_surfaceSoundStats.slipRatio < 0.03f && m_surfaceSoundStats.slipTimer > 0.f)
+	{
+	  m_surfaceSoundStats.slipTimer -= deltaTime;
 
-      if (m_surfaceSoundStats.slipTimer <= 0.f)
-      {
-        StopSound(eSID_Slip);
-        pSound = 0;
-        m_surfaceSoundStats.slipTimer = 0.f;
-      }      
-    }
+	  if (m_surfaceSoundStats.slipTimer <= 0.f)
+	  {
+		StopSound(eSID_Slip);
+		pSound = 0;
+		m_surfaceSoundStats.slipTimer = 0.f;
+	  }      
+	}
  
-    if (pSound)
-    {
-      SetSoundParam(eSID_Slip, "slip_speed", m_surfaceSoundStats.slipRatio);
-      SetSoundParam(eSID_Slip, "surface", m_surfaceSoundStats.surfaceParam);
-      SetSoundParam(eSID_Slip, "scratch", m_surfaceSoundStats.scratching);
-      SetSoundParam(eSID_Slip, "in_out", m_soundStats.inout);
-    }   
+	if (pSound)
+	{
+	  SetSoundParam(eSID_Slip, "slip_speed", m_surfaceSoundStats.slipRatio);
+	  SetSoundParam(eSID_Slip, "surface", m_surfaceSoundStats.surfaceParam);
+	  SetSoundParam(eSID_Slip, "scratch", m_surfaceSoundStats.scratching);
+	  SetSoundParam(eSID_Slip, "in_out", m_soundStats.inout);
+	}   
   }
 }
 
@@ -846,7 +846,7 @@ void CVehicleMovementStdWheeled::UpdateSuspension(const float deltaTime)
   // update suspension and friction, if needed      
   float speed = m_PhysDyn.v.len();
   bool bSuspUpdate = false;
-        
+		
   pe_status_nparts tmpStatus;
   int numParts = pPhysics->GetStatus(&tmpStatus);
 
@@ -858,28 +858,28 @@ void CVehicleMovementStdWheeled::UpdateSuspension(const float deltaTime)
   
   if (diffSusp || diffStabi)
   {
-    if (abs(m_speedSuspUpdated-speed) > 0.25f) // only update when speed changes
-    {
-      float maxSpeed = (m_suspDampingMaxSpeed > 0.f) ? m_suspDampingMaxSpeed : 0.15f*m_maxSpeed;
-      float speedNorm = min(1.f, speed/maxSpeed);
-      
-      if (diffSusp)
-      {
-        m_suspDamping = m_suspDampingMin + (speedNorm * diffSusp);
-        bSuspUpdate = true;
-      }           
+	if (abs(m_speedSuspUpdated-speed) > 0.25f) // only update when speed changes
+	{
+	  float maxSpeed = (m_suspDampingMaxSpeed > 0.f) ? m_suspDampingMaxSpeed : 0.15f*m_maxSpeed;
+	  float speedNorm = min(1.f, speed/maxSpeed);
+	  
+	  if (diffSusp)
+	  {
+		m_suspDamping = m_suspDampingMin + (speedNorm * diffSusp);
+		bSuspUpdate = true;
+	  }           
 
-      if (diffStabi)
-      {
-        m_stabi = m_stabiMin + (speedNorm * diffStabi);
-        
-        pe_params_car params;
-        params.kStabilizer = m_stabi;
-        pPhysics->SetParams(&params, 1);        
-      }
+	  if (diffStabi)
+	  {
+		m_stabi = m_stabiMin + (speedNorm * diffStabi);
+		
+		pe_params_car params;
+		params.kStabilizer = m_stabi;
+		pPhysics->SetParams(&params, 1);        
+	  }
 
-      m_speedSuspUpdated = speed;    
-    }
+	  m_speedSuspUpdated = speed;    
+	}
   }
   
   bool bBraking = m_movementAction.brake && m_isEnginePowered;
@@ -899,58 +899,58 @@ void CVehicleMovementStdWheeled::UpdateSuspension(const float deltaTime)
   int numWheels = m_pVehicle->GetWheelCount();
   for (int i=0; i<numWheels; ++i)
   { 
-    pe_params_wheel wheelParams;
-    bool bUpdate = bSuspUpdate;
-    IVehicleWheel* pWheel = m_wheelParts[i]->GetIWheel();
+	pe_params_wheel wheelParams;
+	bool bUpdate = bSuspUpdate;
+	IVehicleWheel* pWheel = m_wheelParts[i]->GetIWheel();
 
-    pe_status_wheel ws;
-    ws.iWheel = i;
-    if (!pPhysics->GetStatus(&ws))
-      continue;
+	pe_status_wheel ws;
+	ws.iWheel = i;
+	if (!pPhysics->GetStatus(&ws))
+	  continue;
 
-    const Matrix34& wheelTM = m_wheelParts[i]->GetLocalTM(false);
+	const Matrix34& wheelTM = m_wheelParts[i]->GetLocalTM(false);
 	//this is littlebit a problem( getting entity position )
-    const pe_cargeomparams* pGeomParams = pWheel->GetCarGeomParams();
-        
-    numDriving += pGeomParams->bDriving;
-    
-    if (ws.bContact != (int)m_wheelStats[i].bContact)
-    {
-      m_wheelStats[i].bContact = ws.bContact?true:false;
-      
-      if (pGeomParams->bDriving)
-        bContactsChanged = true;
-    }
+	const pe_cargeomparams* pGeomParams = pWheel->GetCarGeomParams();
+		
+	numDriving += pGeomParams->bDriving;
+	
+	if (ws.bContact != (int)m_wheelStats[i].bContact)
+	{
+	  m_wheelStats[i].bContact = ws.bContact?true:false;
+	  
+	  if (pGeomParams->bDriving)
+		bContactsChanged = true;
+	}
 
-    if (ws.bContact)
-    { 
-      m_avgWheelRot += abs(ws.w)*ws.r;
-      ++numRot;
-      numDrivingContacts += pGeomParams->bDriving;
+	if (ws.bContact)
+	{ 
+	  m_avgWheelRot += abs(ws.w)*ws.r;
+	  ++numRot;
+	  numDrivingContacts += pGeomParams->bDriving;
 
-      if (wheelTM.GetTranslation().x < 0.f)
-        ++m_wheelContactsLeft;
-      else
-        ++m_wheelContactsRight; 
-    }
-    
-    // update friction for handbraking
-    if ((!gEnv->bClient || !distant) && m_maxBrakingFriction > 0.f && ws.bContact && (bBraking || m_wheelStats[i].handBraking))
-    {
-      if (bBraking)
-      {
-        // apply maxBrakingFriction for handbraking
-        float friction = m_maxBrakingFriction;
+	  if (wheelTM.GetTranslation().x < 0.f)
+		++m_wheelContactsLeft;
+	  else
+		++m_wheelContactsRight; 
+	}
+	
+	// update friction for handbraking
+	if ((!gEnv->bClient || !distant) && m_maxBrakingFriction > 0.f && ws.bContact && (bBraking || m_wheelStats[i].handBraking))
+	{
+	  if (bBraking)
+	  {
+		// apply maxBrakingFriction for handbraking
+		float friction = m_maxBrakingFriction;
 
-        if (m_carParams.steerTrackNeutralTurn == 0.f)
-        {
-          // when steering, keep friction high at inner front wheels to achieve better turning
-          Vec3 pos = wheelTM.GetTranslation();
+		if (m_carParams.steerTrackNeutralTurn == 0.f)
+		{
+		  // when steering, keep friction high at inner front wheels to achieve better turning
+		  Vec3 pos = wheelTM.GetTranslation();
 
-          float diff = max(0.f, pGeomParams->maxFriction - m_maxBrakingFriction);
-          float steerAmt = abs(m_action.steer)/DEG2RAD(m_steerMax);
+		  float diff = max(0.f, pGeomParams->maxFriction - m_maxBrakingFriction);
+		  float steerAmt = abs(m_action.steer)/DEG2RAD(m_steerMax);
 
-          if (pos.y > 0.f)
+		  if (pos.y > 0.f)
 					{
 						if(sgn(m_action.steer)*sgn(pos.x)>0)
 							friction = m_maxBrakingFriction + diff * steerAmt;
@@ -959,87 +959,87 @@ void CVehicleMovementStdWheeled::UpdateSuspension(const float deltaTime)
 					}
 					else if(g_pGameCVars->v_newBrakingFriction)
 						friction = m_maxBrakingFriction * m_rearWheelBrakingFrictionMult;
-        }
-                        
-        wheelParams.maxFriction = friction;
-        wheelParams.minFriction = friction;
+		}
+						
+		wheelParams.maxFriction = friction;
+		wheelParams.minFriction = friction;
 
-        m_wheelStats[i].handBraking = true;        
-      }      
-      else
-      {
-        wheelParams.maxFriction = pGeomParams->maxFriction;
-        wheelParams.minFriction = pGeomParams->minFriction;
-        
-        m_wheelStats[i].handBraking = false;        
-      }
-      bUpdate = true;
-    }    
+		m_wheelStats[i].handBraking = true;        
+	  }      
+	  else
+	  {
+		wheelParams.maxFriction = pGeomParams->maxFriction;
+		wheelParams.minFriction = pGeomParams->minFriction;
+		
+		m_wheelStats[i].handBraking = false;        
+	  }
+	  bUpdate = true;
+	}    
 
-    
-    // update slip friction
-    if (!m_wheelStats[i].handBraking)
-    {
-      // update friction with slip vel
-      float lateralSlip(0.f);           
-      if (ws.bContact && ws.velSlip.GetLengthSquared() > sqr(0.01f))
-      {
-        if (m_carParams.steerTrackNeutralTurn == 0.f && (ipart = numParts - numWheels + i) >= 0)
-        { 
-          pe_status_pos wp;
-          wp.ipart = ipart;
-          if (pPhysics->GetStatus(&wp))
-            lateralSlip = abs(wp.q.GetColumn0() * ws.velSlip);         
-        }
-        else
-        {
-          lateralSlip = abs(worldTM.GetColumn0() * ws.velSlip);
-        }
-      }
-      
-      if (lateralSlip < 0.001f)
-        lateralSlip = 0.f;
+	
+	// update slip friction
+	if (!m_wheelStats[i].handBraking)
+	{
+	  // update friction with slip vel
+	  float lateralSlip(0.f);           
+	  if (ws.bContact && ws.velSlip.GetLengthSquared() > sqr(0.01f))
+	  {
+		if (m_carParams.steerTrackNeutralTurn == 0.f && (ipart = numParts - numWheels + i) >= 0)
+		{ 
+		  pe_status_pos wp;
+		  wp.ipart = ipart;
+		  if (pPhysics->GetStatus(&wp))
+			lateralSlip = abs(wp.q.GetColumn0() * ws.velSlip);         
+		}
+		else
+		{
+		  lateralSlip = abs(worldTM.GetColumn0() * ws.velSlip);
+		}
+	  }
+	  
+	  if (lateralSlip < 0.001f)
+		lateralSlip = 0.f;
 
-      if (ws.bContact)
-      {
-        m_avgLateralSlip += lateralSlip;
-        ++numSlip;
-      }
+	  if (ws.bContact)
+	  {
+		m_avgLateralSlip += lateralSlip;
+		++numSlip;
+	  }
 
 
-      if (lateralSlip != m_wheelStats[i].lateralSlip)
-      { 
-        if (m_carParams.steerTrackNeutralTurn == 0.f && pWheel->GetSlipFrictionMod(1.f) != 0.f)          
-        {
-          float slipMod = pWheel->GetSlipFrictionMod(lateralSlip);          
-          
-          wheelParams.kLatFriction = pGeomParams->kLatFriction + slipMod;
-          m_wheelStats[i].friction = wheelParams.kLatFriction;
-                      
-          bUpdate = true;
-        }
-                  
-        m_wheelStats[i].lateralSlip = lateralSlip;          
-      }    
-    }
+	  if (lateralSlip != m_wheelStats[i].lateralSlip)
+	  { 
+		if (m_carParams.steerTrackNeutralTurn == 0.f && pWheel->GetSlipFrictionMod(1.f) != 0.f)          
+		{
+		  float slipMod = pWheel->GetSlipFrictionMod(lateralSlip);          
+		  
+		  wheelParams.kLatFriction = pGeomParams->kLatFriction + slipMod;
+		  m_wheelStats[i].friction = wheelParams.kLatFriction;
+					  
+		  bUpdate = true;
+		}
+				  
+		m_wheelStats[i].lateralSlip = lateralSlip;          
+	  }    
+	}
 
-    if (bUpdate)
-    {
-      if (bSuspUpdate)
-        wheelParams.kDamping = m_suspDamping;
-      
-      wheelParams.iWheel = i;      
-      pPhysics->SetParams(&wheelParams, THREAD_SAFE);
-    }
+	if (bUpdate)
+	{
+	  if (bSuspUpdate)
+		wheelParams.kDamping = m_suspDamping;
+	  
+	  wheelParams.iWheel = i;      
+	  pPhysics->SetParams(&wheelParams, THREAD_SAFE);
+	}
 
-    // check for hard bump
-    if (visible && !distant && (m_bumpMinSusp + m_bumpMinSpeed > 0.f) && m_lastBump > 1.f && ws.suspLen0 > 0.01f && ws.suspLen < ws.suspLen0)
-    { 
-      // compression as fraction of relaxed length over time
+	// check for hard bump
+	if (visible && !distant && (m_bumpMinSusp + m_bumpMinSpeed > 0.f) && m_lastBump > 1.f && ws.suspLen0 > 0.01f && ws.suspLen < ws.suspLen0)
+	{ 
+	  // compression as fraction of relaxed length over time
 	  m_wheelStats[i].compression = ((m_wheelStats[i].suspLen-ws.suspLen)/ws.suspLen0) / dt;
-      m_compressionMax = max(m_compressionMax, m_wheelStats[i].compression);
-    }
-    m_wheelStats[i].suspLen = ws.suspLen;
+	  m_compressionMax = max(m_compressionMax, m_wheelStats[i].compression);
+	}
+	m_wheelStats[i].suspLen = ws.suspLen;
   }  
  
   // compute average lateral slip
@@ -1049,23 +1049,23 @@ void CVehicleMovementStdWheeled::UpdateSuspension(const float deltaTime)
   
   if (bContactsChanged && m_carParams.steerTrackNeutralTurn == 0.f)
   {
-    // bad, as we might be setting wheelParams twice this frame. optimize when room (move to physics)
-    pe_params_wheel pw;    
-    float tScale = numDrivingContacts ? float(numDriving)/numDrivingContacts : 1.f;
-            
-    for (int i=0; i<numWheels; ++i)
-    {
-      IVehicleWheel* pWheel = m_wheelParts[i]->GetIWheel();
-      
-      if (!pWheel->GetCarGeomParams()->bDriving)
-        continue;
+	// bad, as we might be setting wheelParams twice this frame. optimize when room (move to physics)
+	pe_params_wheel pw;    
+	float tScale = numDrivingContacts ? float(numDriving)/numDrivingContacts : 1.f;
+			
+	for (int i=0; i<numWheels; ++i)
+	{
+	  IVehicleWheel* pWheel = m_wheelParts[i]->GetIWheel();
+	  
+	  if (!pWheel->GetCarGeomParams()->bDriving)
+		continue;
 
 	  m_wheelStats[i].torqueScale = pWheel->GetTorqueScale() * numDrivingContacts ? (m_wheelStats[i].bContact)?tScale:0.f : 1.f;      
 
-      pw.iWheel = i;
-      pw.Tscale = m_wheelStats[i].torqueScale;
-      pPhysics->SetParams(&pw, THREAD_SAFE);
-    }    
+	  pw.iWheel = i;
+	  pw.Tscale = m_wheelStats[i].torqueScale;
+	  pPhysics->SetParams(&pw, THREAD_SAFE);
+	}    
   }
   
 }
@@ -1074,48 +1074,48 @@ void CVehicleMovementStdWheeled::UpdateSuspension(const float deltaTime)
 void CVehicleMovementStdWheeled::UpdateBrakes(const float deltaTime)
 {
   if (m_movementAction.brake || m_pVehicle->GetStatus().health <= 0.f)
-    m_action.bHandBrake = 1;
+	m_action.bHandBrake = 1;
   else
-    m_action.bHandBrake = 0;
+	m_action.bHandBrake = 0;
 
   if (m_isBreakingOnIdle && m_movementAction.power == 0.0f)
   {
-    m_action.bHandBrake = 1;
+	m_action.bHandBrake = 1;
   }
 
   if (IsPowered() && m_action.bHandBrake == 1 && m_actorId )
   {
-    if (m_brakeTimer == 0.f)
-    {
-      SVehicleEventParams params;
-      params.bParam = true;
-      m_pVehicle->BroadcastVehicleEvent(eVE_Brake, params);
-    }
+	if (m_brakeTimer == 0.f)
+	{
+	  SVehicleEventParams params;
+	  params.bParam = true;
+	  m_pVehicle->BroadcastVehicleEvent(eVE_Brake, params);
+	}
 
-    m_brakeTimer += deltaTime;  
+	m_brakeTimer += deltaTime;  
   }
   else
   {
-    if (m_brakeTimer > 0.f)
-    {
-      SVehicleEventParams params;
-      params.bParam = false;
-      m_pVehicle->BroadcastVehicleEvent(eVE_Brake, params);
+	if (m_brakeTimer > 0.f)
+	{
+	  SVehicleEventParams params;
+	  params.bParam = false;
+	  m_pVehicle->BroadcastVehicleEvent(eVE_Brake, params);
 
-      // airbrake sound
-      if (m_airbrakeTime > 0.f && IsPowered())
-      { 
-        if (m_brakeTimer > m_airbrakeTime)
-        {
-          char name[256];
-          _snprintf(name, sizeof(name), "sounds/vehicles:%s:airbrake", m_pVehicle->GetEntity()->GetClass()->GetName());
-          name[sizeof(name)-1] = '\0';
-          m_pEntitySoundsProxy->PlaySound(name, Vec3(0), FORWARD_DIRECTION, FLAG_SOUND_DEFAULT_3D, eSoundSemantic_Vehicle);                
-        }          
-      }  
-    }
+	  // airbrake sound
+	  if (m_airbrakeTime > 0.f && IsPowered())
+	  { 
+		if (m_brakeTimer > m_airbrakeTime)
+		{
+		  char name[256];
+		  _snprintf(name, sizeof(name), "sounds/vehicles:%s:airbrake", m_pVehicle->GetEntity()->GetClass()->GetName());
+		  name[sizeof(name)-1] = '\0';
+		  m_pEntitySoundsProxy->PlaySound(name, Vec3(0), FORWARD_DIRECTION, FLAG_SOUND_DEFAULT_3D, eSoundSemantic_Vehicle);                
+		}          
+	  }  
+	}
 
-    m_brakeTimer = 0.f;  
+	m_brakeTimer = 0.f;  
   }
 }
 
@@ -1123,7 +1123,7 @@ void CVehicleMovementStdWheeled::UpdateBrakes(const float deltaTime)
 void CVehicleMovementStdWheeled::UpdateSuspensionSound(const float deltaTime)
 {
   if (m_pVehicle->GetStatus().health <= 0.f)
-    return;
+	return;
 
   const bool visible = m_pVehicle->GetGameObject()->IsProbablyVisible();
   const bool distant = m_pVehicle->GetGameObject()->IsProbablyDistant();
@@ -1133,7 +1133,7 @@ void CVehicleMovementStdWheeled::UpdateSuspensionSound(const float deltaTime)
 
   IPhysicalEntity* pPhysics = GetPhysics();
   if (!pPhysics)
-    return;
+	return;
 
   const float speed = m_statusDyn.v.len();
   const int numWheels = m_pVehicle->GetWheelCount();
@@ -1144,62 +1144,62 @@ void CVehicleMovementStdWheeled::UpdateSuspensionSound(const float deltaTime)
   for (int i=0; i<numWheels; ++i)
   {
 	pe_status_wheel ws;
-    ws.iWheel = i;
-    if (!pPhysics->GetStatus(&ws))
-      continue;
+	ws.iWheel = i;
+	if (!pPhysics->GetStatus(&ws))
+	  continue;
 
-    if (ws.bContact)
-    { 
-      // sound-related                   
-      if (!distant && visible && !m_surfaceSoundStats.scratching && soundMatId==0 && speed > 0.001f)
-      {
-        if (gEnv->p3DEngine->GetWaterLevel(&ws.ptContact) > ws.ptContact.z+0.02f)
-        {        
-          soundMatId = gEnv->pPhysicalWorld->GetWaterMat();
-          m_lostContactTimer = 0;
-        }
-        else if (ws.contactSurfaceIdx > 0)
-        {   
-          if (m_wheelParts[i]->GetState() == IVehiclePart::eVGS_Damaged1)
-            m_surfaceSoundStats.scratching = 1;
-          
-          soundMatId = ws.contactSurfaceIdx;
-          m_lostContactTimer = 0;
-        }
-      }      
-    }
+	if (ws.bContact)
+	{ 
+	  // sound-related                   
+	  if (!distant && visible && !m_surfaceSoundStats.scratching && soundMatId==0 && speed > 0.001f)
+	  {
+		if (gEnv->p3DEngine->GetWaterLevel(&ws.ptContact) > ws.ptContact.z+0.02f)
+		{        
+		  soundMatId = gEnv->pPhysicalWorld->GetWaterMat();
+		  m_lostContactTimer = 0;
+		}
+		else if (ws.contactSurfaceIdx > 0)
+		{   
+		  if (m_wheelParts[i]->GetState() == IVehiclePart::eVGS_Damaged1)
+			m_surfaceSoundStats.scratching = 1;
+		  
+		  soundMatId = ws.contactSurfaceIdx;
+		  m_lostContactTimer = 0;
+		}
+	  }      
+	}
   }
 
   m_lastBump += deltaTime;
   if (visible && !distant && m_pVehicle->GetStatus().speed > m_bumpMinSpeed && m_lastBump > 1.f)
   { 
-    if (m_compressionMax > m_bumpMinSusp)
-    {
-      // do bump sound        
-      if (ISound* pSound = PlaySound(eSID_Bump))
-      {
-        pSound->SetParam("speed", ENGINESOUND_IDLE_RATIO + (1.f-ENGINESOUND_IDLE_RATIO)*m_speedRatio, false);
-        pSound->SetParam("intensity", min(1.f, m_bumpIntensityMult*m_compressionMax/m_bumpMinSusp), false);
-        m_lastBump = 0;
-      }      
-    }            
+	if (m_compressionMax > m_bumpMinSusp)
+	{
+	  // do bump sound        
+	  if (ISound* pSound = PlaySound(eSID_Bump))
+	  {
+		pSound->SetParam("speed", ENGINESOUND_IDLE_RATIO + (1.f-ENGINESOUND_IDLE_RATIO)*m_speedRatio, false);
+		pSound->SetParam("intensity", min(1.f, m_bumpIntensityMult*m_compressionMax/m_bumpMinSusp), false);
+		m_lastBump = 0;
+	  }      
+	}            
   }   
 
   // set surface sound type
   if (visible && !distant && soundMatId != m_surfaceSoundStats.matId)
   { 
-    if (m_lostContactTimer == 0.f || m_lostContactTimer > 3.f)
-    {
-      if (soundMatId > 0)
-      {
-        m_surfaceSoundStats.surfaceParam = GetSurfaceSoundParam(soundMatId);
-      }    
-      else
-      {
-        m_surfaceSoundStats.surfaceParam = 0.f;      
-      }   
-      m_surfaceSoundStats.matId = soundMatId;
-    }
+	if (m_lostContactTimer == 0.f || m_lostContactTimer > 3.f)
+	{
+	  if (soundMatId > 0)
+	  {
+		m_surfaceSoundStats.surfaceParam = GetSurfaceSoundParam(soundMatId);
+	  }    
+	  else
+	  {
+		m_surfaceSoundStats.surfaceParam = 0.f;      
+	  }   
+	  m_surfaceSoundStats.matId = soundMatId;
+	}
   } 
 
 }
@@ -1389,7 +1389,7 @@ void CVehicleMovementStdWheeled::ProcessMovement(const float deltaTime)
 	// speed ratio    
 	float speedRel = min(speed, m_vMaxSteerMax) / m_vMaxSteerMax;  
 	float steerMax = GetMaxSteer(speedRel);
-    
+	
 	// calc steer error  	
 	float steering = m_movementAction.rotateYaw;    
 	float steerError = steering * steerMax - m_action.steer;
@@ -1406,7 +1406,7 @@ void CVehicleMovementStdWheeled::ProcessMovement(const float deltaTime)
 	}
 	else
 	{
-    // relax to center
+	// relax to center
 		float d = -m_action.steer;
 		float a = min(DEG2RAD(deltaTime * m_steerRelaxation), 1.0f);
 		m_action.steer = m_action.steer + d * a;
@@ -1478,8 +1478,8 @@ void CVehicleMovementStdWheeled::Boost(bool enable)
 {  
   if (enable)
   {
-    if (m_action.bHandBrake)
-      return;
+	if (m_action.bHandBrake)
+	  return;
   }
 
   CVehicleMovementBase::Boost(enable);
@@ -1535,13 +1535,13 @@ void CVehicleMovementStdWheeled::GetMovementState(SMovementState& movementState)
 {
 	IPhysicalEntity* pPhysics = GetPhysics();
   if (!pPhysics)
-    return;
+	return;
 
   if (m_maxSpeed == 0.f)
   {
-    pe_status_vehicle_abilities ab;
-    if (pPhysics->GetStatus(&ab))
-      m_maxSpeed = ab.maxVelocity * 0.5f; // fixme
+	pe_status_vehicle_abilities ab;
+	if (pPhysics->GetStatus(&ab))
+	  m_maxSpeed = ab.maxVelocity * 0.5f; // fixme
   }  
 
 	movementState.minSpeed = 0.0f;
@@ -1573,7 +1573,7 @@ void CVehicleMovementStdWheeled::Serialize(TSerialize ser, unsigned aspects)
 
 		if (ser.IsReading() && blownTires != m_blownTires)
 		  SetEngineRPMMult(GetWheelCondition());
-	    
+		
 		ser.Value("m_prevAngle", m_prevAngle);
 	}
 };
@@ -1583,17 +1583,17 @@ void CVehicleMovementStdWheeled::UpdateSurfaceEffects(const float deltaTime)
 { 
   if (0 == g_pGameCVars->v_pa_surface)
   {
-    ResetParticles();
-    return;
+	ResetParticles();
+	return;
   }
 
   const SVehicleStatus& status = m_pVehicle->GetStatus();
   if (status.speed < 0.01f)
-    return;
+	return;
 
   float distSq = m_pVehicle->GetEntity()->GetWorldPos().GetSquaredDistance(gEnv->pRenderer->GetCamera().GetPosition());
   if (distSq > sqr(300.f) || (distSq > sqr(50.f) && !m_pVehicle->GetGameObject()->IsProbablyVisible()))
-    return;
+	return;
 
   IPhysicalEntity* pPhysics = GetPhysics();
   
@@ -1601,39 +1601,39 @@ void CVehicleMovementStdWheeled::UpdateSurfaceEffects(const float deltaTime)
   bool hideForFP = false;
   if (GetMovementType() == eVMT_Land && m_carParams.steerTrackNeutralTurn == 0.f)
   {
-    IActor* pActor = m_pVehicle->GetDriver();
-    if (pActor && pActor->IsClient() && !pActor->IsThirdPerson())
-      hideForFP = true;
+	IActor* pActor = m_pVehicle->GetDriver();
+	if (pActor && pActor->IsClient() && !pActor->IsThirdPerson())
+	  hideForFP = true;
   }
-    
+	
   float soundSlip = 0;
-    
+	
   SEnvironmentParticles* envParams = m_pPaParams->GetEnvironmentParticles();
   SEnvParticleStatus::TEnvEmitters::iterator emitterIt = m_paStats.envStats.emitters.begin();
   SEnvParticleStatus::TEnvEmitters::iterator emitterItEnd = m_paStats.envStats.emitters.end();
 
   for (; emitterIt != emitterItEnd; ++emitterIt)
   { 
-    if (emitterIt->layer < 0)
-    {
-      continue;
-    }
+	if (emitterIt->layer < 0)
+	{
+	  continue;
+	}
 
-    if (!emitterIt->active)
-      continue;
+	if (!emitterIt->active)
+	  continue;
 
-    const SEnvironmentLayer& layer = envParams->GetLayer(emitterIt->layer);
-    
-    // scaling for each wheelgroup is based on vehicle speed + avg. slipspeed
-    float slipAvg = 0; 
-    int cnt = 0;
-    bool bContact = false;
-    int matId = 0;
+	const SEnvironmentLayer& layer = envParams->GetLayer(emitterIt->layer);
+	
+	// scaling for each wheelgroup is based on vehicle speed + avg. slipspeed
+	float slipAvg = 0; 
+	int cnt = 0;
+	bool bContact = false;
+	int matId = 0;
 
 		// Calculate the average wheel position and find the water level there - not necessary to find the water
 		// level separately for each wheel.
 		float fWaterLevel = -FLT_MAX;
-    int wheelCount = layer.GetWheelCount(emitterIt->group);
+	int wheelCount = layer.GetWheelCount(emitterIt->group);
 		{
 			Vec3 averageWheelPosition(ZERO);
 			int foundWheels = 0;
@@ -1655,111 +1655,111 @@ void CVehicleMovementStdWheeled::UpdateSurfaceEffects(const float deltaTime)
 			}
 		}
 
-    for (int w=0; w<wheelCount; ++w)
-    {
-      // all wheels in group
-      ++cnt;
-      pe_status_wheel wheelStats;
-      wheelStats.iWheel = layer.GetWheelAt(emitterIt->group, w) - 1;
-      
-      if (!pPhysics->GetStatus(&wheelStats))
-        continue;
+	for (int w=0; w<wheelCount; ++w)
+	{
+	  // all wheels in group
+	  ++cnt;
+	  pe_status_wheel wheelStats;
+	  wheelStats.iWheel = layer.GetWheelAt(emitterIt->group, w) - 1;
+	  
+	  if (!pPhysics->GetStatus(&wheelStats))
+		continue;
 
-      if (wheelStats.bContact)
-      {
-        bContact = true;
-        
-        // take care of water
-        if (fWaterLevel > wheelStats.ptContact.z+0.02f)
-        {
+	  if (wheelStats.bContact)
+	  {
+		bContact = true;
+		
+		// take care of water
+		if (fWaterLevel > wheelStats.ptContact.z+0.02f)
+		{
 		  if ( fWaterLevel > wheelStats.ptContact.z+2.0f)
 		  {
 			slipAvg =0.0f;
 			bContact = false;
 		  }
-          matId = gEnv->pPhysicalWorld->GetWaterMat();
-        }
-        else if (wheelStats.contactSurfaceIdx > matId)
-          matId = wheelStats.contactSurfaceIdx;
+		  matId = gEnv->pPhysicalWorld->GetWaterMat();
+		}
+		else if (wheelStats.contactSurfaceIdx > matId)
+		  matId = wheelStats.contactSurfaceIdx;
 
-        if (wheelStats.bSlip)
-          slipAvg += wheelStats.velSlip.len();
-      }
-    }
+		if (wheelStats.bSlip)
+		  slipAvg += wheelStats.velSlip.len();
+	  }
+	}
 
-    if (!bContact && !emitterIt->bContact)
-      continue;
-    
-    emitterIt->bContact = bContact;    
-    slipAvg /= cnt;
+	if (!bContact && !emitterIt->bContact)
+	  continue;
+	
+	emitterIt->bContact = bContact;    
+	slipAvg /= cnt;
 
-    bool isSlip = !strcmp(layer.GetName(), "slip");    
-    float vel = isSlip ? 0.f : m_statusDyn.v.len(); 
-    vel += 1.f*slipAvg;
-     
-    soundSlip = max(soundSlip, slipAvg);       
-    
-    float countScale = 1;
-    float sizeScale = 1;
+	bool isSlip = !strcmp(layer.GetName(), "slip");    
+	float vel = isSlip ? 0.f : m_statusDyn.v.len(); 
+	vel += 1.f*slipAvg;
+	 
+	soundSlip = max(soundSlip, slipAvg);       
+	
+	float countScale = 1;
+	float sizeScale = 1;
 		float speedScale = 1;
 
-    if (hideForFP || !bContact || matId == 0)    
-      countScale = 0;          
-    else
-      GetParticleScale(layer, vel, 0.f, countScale, sizeScale, speedScale);
-    
-    IEntity* pEntity = m_pVehicle->GetEntity();
-    SEntitySlotInfo info;
-    info.pParticleEmitter = 0;
-    pEntity->GetSlotInfo(emitterIt->slot, info);
-        
-    if (matId != emitterIt->matId)
-    {
-      // change effect                        
-      const char* effect = GetEffectByIndex(matId, layer.GetName());
-      IParticleEffect* pEff = 0;   
-              
-      if (effect && (pEff = gEnv->p3DEngine->FindParticleEffect(effect)))
-      {           
-        if (info.pParticleEmitter)
-        {   
-          // free old emitter and load new one, for old effect to die gracefully           
-          info.pParticleEmitter->Activate(false);            
-          pEntity->FreeSlot(emitterIt->slot);
-        }         
-        
-        emitterIt->slot = pEntity->LoadParticleEmitter(emitterIt->slot, pEff);
-        
-        if (emitterIt->slot != -1)
-          pEntity->SetSlotLocalTM(emitterIt->slot, Matrix34(emitterIt->quatT));
+	if (hideForFP || !bContact || matId == 0)    
+	  countScale = 0;          
+	else
+	  GetParticleScale(layer, vel, 0.f, countScale, sizeScale, speedScale);
+	
+	IEntity* pEntity = m_pVehicle->GetEntity();
+	SEntitySlotInfo info;
+	info.pParticleEmitter = 0;
+	pEntity->GetSlotInfo(emitterIt->slot, info);
+		
+	if (matId != emitterIt->matId)
+	{
+	  // change effect                        
+	  const char* effect = GetEffectByIndex(matId, layer.GetName());
+	  IParticleEffect* pEff = 0;   
+			  
+	  if (effect && (pEff = gEnv->p3DEngine->FindParticleEffect(effect)))
+	  {           
+		if (info.pParticleEmitter)
+		{   
+		  // free old emitter and load new one, for old effect to die gracefully           
+		  info.pParticleEmitter->Activate(false);            
+		  pEntity->FreeSlot(emitterIt->slot);
+		}         
+		
+		emitterIt->slot = pEntity->LoadParticleEmitter(emitterIt->slot, pEff);
+		
+		if (emitterIt->slot != -1)
+		  pEntity->SetSlotLocalTM(emitterIt->slot, Matrix34(emitterIt->quatT));
 
-        info.pParticleEmitter = 0;
-        pEntity->GetSlotInfo(emitterIt->slot, info);
+		info.pParticleEmitter = 0;
+		pEntity->GetSlotInfo(emitterIt->slot, info);
 
-        emitterIt->matId = matId;
-      }
-      else 
-      {
-        countScale = 0.f;
-        emitterIt->matId = 0;
-      }        
-    }
+		emitterIt->matId = matId;
+	  }
+	  else 
+	  {
+		countScale = 0.f;
+		emitterIt->matId = 0;
+	  }        
+	}
 
-    if (emitterIt->matId == 0)      
-      countScale = 0.f;
+	if (emitterIt->matId == 0)      
+	  countScale = 0.f;
 
-    if (info.pParticleEmitter)
-    {
-      SpawnParams sp;
-      sp.fSizeScale = sizeScale;
-      sp.fCountScale = countScale;
+	if (info.pParticleEmitter)
+	{
+	  SpawnParams sp;
+	  sp.fSizeScale = sizeScale;
+	  sp.fCountScale = countScale;
 			sp.fSpeedScale = speedScale;
-      info.pParticleEmitter->SetSpawnParams(sp);
-    }
+	  info.pParticleEmitter->SetSpawnParams(sp);
+	}
   }
   
   if (m_maxSoundSlipSpeed > 0.f)
-    m_surfaceSoundStats.slipRatio = min(soundSlip/m_maxSoundSlipSpeed, 1.f);
+	m_surfaceSoundStats.slipRatio = min(soundSlip/m_maxSoundSlipSpeed, 1.f);
 }
 
 //------------------------------------------------------------------------
@@ -1767,11 +1767,11 @@ void CVehicleMovementStdWheeled::OnValuesTweaked()
 {	
 	if (IPhysicalEntity* pPhysicsEntity = GetPhysics())
   {
-    pe_params_car params(m_carParams);
+	pe_params_car params(m_carParams);
 		pPhysicsEntity->SetParams(&params);
 
-    if (m_blownTires)
-      SetEngineRPMMult(GetWheelCondition());
+	if (m_blownTires)
+	  SetEngineRPMMult(GetWheelCondition());
   }
 }
 
@@ -1826,7 +1826,7 @@ void CNetworkMovementStdWheeled::Serialize(TSerialize ser, unsigned aspects)
 			ser.Value("pedal", m_pedal, 'vPed');
 			ser.Value("steer", m_steer, 'vStr');      
 			ser.Value("brake", m_brake, 'bool');
-      ser.Value("boost", m_boost, 'bool');      
+	  ser.Value("boost", m_boost, 'bool');      
 		}		
 	}	
 }

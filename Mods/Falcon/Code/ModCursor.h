@@ -16,7 +16,7 @@ public:
 	CModCursor();
 	~CModCursor();
 private:
-        virtual void OnSystemEvent( ESystemEvent event,UINT_PTR wparam,UINT_PTR lparam );
+		virtual void OnSystemEvent( ESystemEvent event,UINT_PTR wparam,UINT_PTR lparam );
 	HCURSOR m_cursor;
 };
 

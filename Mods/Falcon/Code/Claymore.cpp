@@ -170,12 +170,12 @@ void CClaymore::Update(SEntityUpdateContext &ctx, int updateSlot)
 					IEntity* pEntity = gEnv->pEntitySystem->GetEntity(*it);
 					if(!pEntity) continue;
 						
- 					// if this is a team game, claymores aren't set off by their own team...
- 					if(pGR->GetTeamCount() > 0 && (m_teamId != 0 && pGR->GetTeam(pEntity->GetId()) == m_teamId))
- 						continue;
+					// if this is a team game, claymores aren't set off by their own team...
+					if(pGR->GetTeamCount() > 0 && (m_teamId != 0 && pGR->GetTeam(pEntity->GetId()) == m_teamId))
+						continue;
  
- 					// otherwise, not set off by the player who dropped them.
- 					if(pGR->GetTeamCount() == 0 && m_ownerId == pEntity->GetId())
+					// otherwise, not set off by the player who dropped them.
+					if(pGR->GetTeamCount() == 0 && m_ownerId == pEntity->GetId())
 						continue;
 					
 					IPhysicalEntity *pPhysics = pEntity->GetPhysics();

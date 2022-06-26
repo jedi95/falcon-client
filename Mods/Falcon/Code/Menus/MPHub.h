@@ -17,8 +17,8 @@ template<class T, class U, class V>
 T GetKeyByValue(V value, TKeyValuePair<T,U> list[], size_t list_size)
 {
   for(int i=0;i<list_size;++i)
-    if(value == list[i].value)
-      return list[i].key;
+	if(value == list[i].value)
+	  return list[i].key;
   return list[0].key;
 }
 
@@ -26,8 +26,8 @@ template<class T, class U, class V>
 U GetValueByKey(V key, TKeyValuePair<T,U> list[], size_t list_size)
 {
   for(int i=0;i<list_size;++i)
-    if(key == list[i].key)
-      return list[i].value;
+	if(key == list[i].key)
+	  return list[i].value;
   return list[0].value;
 }
 
@@ -185,35 +185,35 @@ class CMPHub : public IDownloadTaskListener
 private:
   struct SRegisterInfo
   {
-    string nick;
-    string email;
-    int    month;
-    int    day;
-    int    year;
+	string nick;
+	string email;
+	int    month;
+	int    day;
+	int    year;
 		string country;
   };
   struct SMPOptions
   {
-    SMPOptions():remeber(0),autologin(0){}
-    string  login;
-    string  password;
-    int    remeber;
-    int    autologin;
+	SMPOptions():remeber(0),autologin(0){}
+	string  login;
+	string  password;
+	int    remeber;
+	int    autologin;
   };
 public:
   class CDialog
   {
   public:
-    CDialog();
-    virtual ~CDialog();
-    void Show(CMPHub* hub);
-    void Close();
-    virtual bool OnCommand(EGsUiCommand cmd, const char* pArgs);
-    virtual void OnUIEvent(const SUIEvent& event);
-    virtual void OnClose();
-    virtual void OnShow();
+	CDialog();
+	virtual ~CDialog();
+	void Show(CMPHub* hub);
+	void Close();
+	virtual bool OnCommand(EGsUiCommand cmd, const char* pArgs);
+	virtual void OnUIEvent(const SUIEvent& event);
+	virtual void OnClose();
+	virtual void OnShow();
   protected:
-    CMPHub*     m_hub;
+	CMPHub*     m_hub;
   };
 public:
   CMPHub();

@@ -40,13 +40,13 @@ struct SExhaustStatus
   int runSlot;
   int boostSlot;
   int enabled;
-    
+	
   SExhaustStatus()
   {    
-    startStopSlot = -1;
-    runSlot = -1;
-    boostSlot = -1;
-    enabled = 1;
+	startStopSlot = -1;
+	runSlot = -1;
+	boostSlot = -1;
+	enabled = 1;
   }
 };
 
@@ -54,13 +54,13 @@ struct TEnvEmitter
 {
   TEnvEmitter()
   { 
-    layer = -1;      
-    slot = -1;
-    matId = -1;
-    group = -1;
-    bContact = false;
-    pGroundEffect = 0;    
-    active = true;
+	layer = -1;      
+	slot = -1;
+	matId = -1;
+	group = -1;
+	bContact = false;
+	pGroundEffect = 0;    
+	active = true;
   }
 
   QuatT quatT;  // local tm
@@ -85,31 +85,31 @@ struct SEnvParticleStatus
 
   void Serialize(TSerialize ser, unsigned aspects)
   {    
-    ser.BeginGroup("EnvParticleStatus");   
-    
-    int count = emitters.size();
-    ser.Value("NumEnvEmitters", count);
-    
-    if (ser.IsWriting())
-    { 
+	ser.BeginGroup("EnvParticleStatus");   
+	
+	int count = emitters.size();
+	ser.Value("NumEnvEmitters", count);
+	
+	if (ser.IsWriting())
+	{ 
 			for(SEnvParticleStatus::TEnvEmitters::iterator it = emitters.begin(); it != emitters.end(); ++it)
 			{
 				ser.BeginGroup("TEnvEmitterSlot");
-        ser.Value("slot", it->slot);
+		ser.Value("slot", it->slot);
 				ser.EndGroup();
 			}
-    }
-    else if (ser.IsReading())
-    {
-      for (int i=0; i<count&&i<emitters.size(); ++i)
+	}
+	else if (ser.IsReading())
+	{
+	  for (int i=0; i<count&&i<emitters.size(); ++i)
 			{
 				ser.BeginGroup("TEnvEmitterSlot");
-        ser.Value("slot", emitters[i].slot);
+		ser.Value("slot", emitters[i].slot);
 				ser.EndGroup();
 			}
-    }
+	}
 
-    ser.EndGroup();
+	ser.EndGroup();
   }
 };
 
@@ -127,32 +127,32 @@ struct SParticleStatus
 
   void Serialize(TSerialize ser, unsigned aspects)
   {
-    ser.BeginGroup("ExhaustStatus");
-    
-    int count = exhaustStats.size();
-    ser.Value("NumExhausts", count);
-    
-    if (ser.IsWriting())
-    {
-      for(std::vector<SExhaustStatus>::iterator it = exhaustStats.begin(); it != exhaustStats.end(); ++it)      
+	ser.BeginGroup("ExhaustStatus");
+	
+	int count = exhaustStats.size();
+	ser.Value("NumExhausts", count);
+	
+	if (ser.IsWriting())
+	{
+	  for(std::vector<SExhaustStatus>::iterator it = exhaustStats.begin(); it != exhaustStats.end(); ++it)      
 			{
 				ser.BeginGroup("ExhaustRunSlot");
-        ser.Value("slot", it->runSlot);
+		ser.Value("slot", it->runSlot);
 				ser.EndGroup();
 			}
-    }
-    else if (ser.IsReading())
-    {
-      for (int i=0; i<count&&i<exhaustStats.size(); ++i)
+	}
+	else if (ser.IsReading())
+	{
+	  for (int i=0; i<count&&i<exhaustStats.size(); ++i)
 			{
 				ser.BeginGroup("ExhaustRunSlot");
-        ser.Value("slot", exhaustStats[i].runSlot); 
+		ser.Value("slot", exhaustStats[i].runSlot); 
 				ser.EndGroup();
 			}
-    }
-    ser.EndGroup();
+	}
+	ser.EndGroup();
 
-    envStats.Serialize(ser, aspects);
+	envStats.Serialize(ser, aspects);
   }
 };
 
@@ -166,23 +166,23 @@ struct SSurfaceSoundStatus
 
   SSurfaceSoundStatus()
   {
-    Reset();
+	Reset();
   }
 
   void Reset()
   {
-    matId = 0;
-    surfaceParam = 0.f;
-    slipRatio = 0.f;
-    slipTimer = 0.f;
-    scratching = 0;
+	matId = 0;
+	surfaceParam = 0.f;
+	slipRatio = 0.f;
+	slipTimer = 0.f;
+	scratching = 0;
   }
 
   void Serialize(TSerialize ser, unsigned aspects)
   {
-    ser.BeginGroup("SurfaceSoundStats");
-    ser.Value("surfaceParam", surfaceParam);
-    ser.EndGroup();
+	ser.BeginGroup("SurfaceSoundStats");
+	ser.Value("surfaceParam", surfaceParam);
+	ser.EndGroup();
   }
 };
 
@@ -215,13 +215,13 @@ struct SMovementSoundStatus
 
   void Reset()
   {    
-    for (int i=0; i<eSID_Max; ++i)    
-    {      
-      sounds[i] = INVALID_SOUNDID;
-      lastPlayed[i].SetValue(0);
-    }
+	for (int i=0; i<eSID_Max; ++i)    
+	{      
+	  sounds[i] = INVALID_SOUNDID;
+	  lastPlayed[i].SetValue(0);
+	}
 
-    inout = 1.f;
+	inout = 1.f;
   }
   
   tSoundID sounds[eSID_Max];  
@@ -395,7 +395,7 @@ protected:
   float m_boostCounter;
 
   IVehicleAnimation* m_animations[eVMA_Max];
-      
+	  
   SParticleParams* m_pPaParams;
   SParticleStatus m_paStats;
   SSurfaceSoundStatus m_surfaceSoundStats;
@@ -426,12 +426,12 @@ protected:
   
   struct SSurfaceSoundInfo
   {
-    int paramIndex;
+	int paramIndex;
 
-    SSurfaceSoundInfo() : paramIndex(0)
-    {}
-    SSurfaceSoundInfo(int index) : paramIndex(index)
-    {}
+	SSurfaceSoundInfo() : paramIndex(0)
+	{}
+	SSurfaceSoundInfo(int index) : paramIndex(index)
+	{}
   };
   typedef std::map<string, SSurfaceSoundInfo> TSurfaceSoundInfo;
   static TSurfaceSoundInfo m_surfaceSoundInfo;

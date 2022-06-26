@@ -23,8 +23,8 @@ bool CItem::ReadItemParams(const IItemParamsNode *root)
 {
   if (!root)
   {
-    GameWarning("Warning: ItemParams for item <%s> NULL", GetEntity()->GetName());
-    return false;
+	GameWarning("Warning: ItemParams for item <%s> NULL", GetEntity()->GetName());
+	return false;
   }
 
 	const IItemParamsNode *params = root->GetChild("params");
@@ -321,36 +321,36 @@ bool CItem::ReadAction(const IItemParamsNode *actionparams, SAction *pAction)
 
 			pAction->animation[islot].push_back(animation);
 		}
-    else if (!stricmp(childName, "effect"))
-    {
-      const char *name = child->GetAttribute("name");
-      if (!name)
-      {
-        GameWarning("Missing name of effect for action '%s' in item '%s'! Skipping...", actionName, GetEntity()->GetName());
-        return false;
-      }
+	else if (!stricmp(childName, "effect"))
+	{
+	  const char *name = child->GetAttribute("name");
+	  if (!name)
+	  {
+		GameWarning("Missing name of effect for action '%s' in item '%s'! Skipping...", actionName, GetEntity()->GetName());
+		return false;
+	  }
 
-      const char *slot = child->GetAttribute("target");
-      int islot = TargetToSlot(slot);
+	  const char *slot = child->GetAttribute("target");
+	  int islot = TargetToSlot(slot);
 
-      if ((islot != eIGS_FirstPerson) && (islot != eIGS_ThirdPerson))
-      {
-        GameWarning("Invalid effect target '%s' for action '%s' in item '%s'! Skipping...", slot, actionName, GetEntity()->GetName());
-        return false;
-      }
+	  if ((islot != eIGS_FirstPerson) && (islot != eIGS_ThirdPerson))
+	  {
+		GameWarning("Invalid effect target '%s' for action '%s' in item '%s'! Skipping...", slot, actionName, GetEntity()->GetName());
+		return false;
+	  }
 
-      if (!pAction->effect[islot].name.empty())
-      {
-        GameWarning("Effect target '%s' for action '%s' in item '%s' already specified! Skipping...", slot, actionName, GetEntity()->GetName());
-        return false;
-      }
-      
-      pAction->effect[islot].name = name;
-      
-      const char *helper = child->GetAttribute("helper");
-      if (helper && helper[0])
-        pAction->effect[islot].helper = helper;      
-    }
+	  if (!pAction->effect[islot].name.empty())
+	  {
+		GameWarning("Effect target '%s' for action '%s' in item '%s' already specified! Skipping...", slot, actionName, GetEntity()->GetName());
+		return false;
+	  }
+	  
+	  pAction->effect[islot].name = name;
+	  
+	  const char *helper = child->GetAttribute("helper");
+	  if (helper && helper[0])
+		pAction->effect[islot].helper = helper;      
+	}
 		else
 		{
 			GameWarning("Unknown param '%s' for action '%s' in item '%s'! Skipping...", childName, actionName, GetEntity()->GetName());
@@ -683,8 +683,8 @@ int CItem::TargetToSlot(const char *slot)
 			islot = eIGS_OwnerLooped;
 		else if (!stricmp(slot, "offhand"))
 			islot = eIGS_OffHand;
-    else if (!stricmp(slot, "destroyed"))
-      islot = eIGS_Destroyed;
+	else if (!stricmp(slot, "destroyed"))
+	  islot = eIGS_Destroyed;
 		else if (!stricmp(slot, "thirdpersonAux"))
 			islot = eIGS_ThirdPersonAux;
 		else if (!stricmp(slot, "aux1"))

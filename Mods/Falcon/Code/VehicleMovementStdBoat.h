@@ -30,12 +30,12 @@ public:
 
   bool operator == (const CNetworkMovementStdBoat &rhs)
   { 
-    return false;
+	return false;
   };
 
   bool operator != (const CNetworkMovementStdBoat &rhs)
   {
-    return !this->operator==(rhs);
+	return !this->operator==(rhs);
   };
 
   void UpdateObject( CVehicleMovementStdBoat *pMovement );

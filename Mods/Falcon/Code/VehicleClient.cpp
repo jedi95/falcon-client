@@ -99,17 +99,17 @@ void CVehicleClient::Reset()
 //------------------------------------------------------------------------
 void CVehicleClient::OnAction(IVehicle* pVehicle, EntityId actorId, const ActionId& actionId, int activationMode, float value)
 {
- 	if (!pVehicle)
+	if (!pVehicle)
 		return;
 	
   TActionNameIdMap::const_iterator ite = m_actionNameIds.find(actionId);
 	if (ite == m_actionNameIds.end())
-    return;
+	return;
 
 	switch (ite->second)
   {
   case (eVAI_XIMoveX):	
-    {
+	{
 
 			IVehicleMovement *pMovement = pVehicle->GetMovement();
 			if (value < VEHICLE_GAMEPAD_DEADZONE && value > -VEHICLE_GAMEPAD_DEADZONE)
@@ -203,7 +203,7 @@ void CVehicleClient::OnAction(IVehicle* pVehicle, EntityId actorId, const Action
 				pVehicle->OnAction(eBack, eAAM_OnPress, -value, actorId);
 				m_bMovementFlagBack = true;
 			}
-      break;
+	  break;
 		}
   case (eVAI_XIRotateYaw):
 		{
@@ -216,7 +216,7 @@ void CVehicleClient::OnAction(IVehicle* pVehicle, EntityId actorId, const Action
 			{
 				m_xiRotation.x = (5.0f*value)*(5.0f*value)*value;
 			}
-      break;
+	  break;
 		}
   case (eVAI_XIRotatePitch):
 		{
@@ -231,62 +231,62 @@ void CVehicleClient::OnAction(IVehicle* pVehicle, EntityId actorId, const Action
 				if(g_pGameCVars->cl_invertController)
 					m_xiRotation.y*=-1;
 			}
-      break;
+	  break;
 		}
   case (eVAI_RotatePitch):
-    {
-      if (g_pGameCVars->cl_invertMouse)
-        value *= -1.f;
-      pVehicle->OnAction(ite->second, activationMode, value, actorId);
-      break;
-    }
+	{
+	  if (g_pGameCVars->cl_invertMouse)
+		value *= -1.f;
+	  pVehicle->OnAction(ite->second, activationMode, value, actorId);
+	  break;
+	}
   case (eVAI_TurnLeft):
-    {
-      if (activationMode == eAAM_OnPress || activationMode == eAAM_OnRelease)
-        m_fLeftRight -= value*2.f - 1.f;
+	{
+	  if (activationMode == eAAM_OnPress || activationMode == eAAM_OnRelease)
+		m_fLeftRight -= value*2.f - 1.f;
 			m_fLeftRight = CLAMP(m_fLeftRight, -1.0f, 1.0f);
-      pVehicle->OnAction(ite->second, activationMode, -m_fLeftRight, actorId);
-      break;
-    }
+	  pVehicle->OnAction(ite->second, activationMode, -m_fLeftRight, actorId);
+	  break;
+	}
   case (eVAI_TurnRight):
-    {
-      if (activationMode == eAAM_OnPress || activationMode == eAAM_OnRelease)
-        m_fLeftRight += value*2.f - 1.f;
+	{
+	  if (activationMode == eAAM_OnPress || activationMode == eAAM_OnRelease)
+		m_fLeftRight += value*2.f - 1.f;
 			m_fLeftRight = CLAMP(m_fLeftRight, -1.0f, 1.0f);
-      pVehicle->OnAction(ite->second, activationMode, m_fLeftRight, actorId);
-      break;
-    }  
+	  pVehicle->OnAction(ite->second, activationMode, m_fLeftRight, actorId);
+	  break;
+	}  
   case (eVAI_MoveForward):
-    {
-      if (activationMode == eAAM_OnPress || activationMode == eAAM_OnRelease)
-        m_fForwardBackward += value*2.f - 1.f;
+	{
+	  if (activationMode == eAAM_OnPress || activationMode == eAAM_OnRelease)
+		m_fForwardBackward += value*2.f - 1.f;
 
 			if(activationMode == eAAM_OnRelease)
 				m_fForwardBackward = CLAMP(m_fForwardBackward, 0.0f, 1.0f);
 			else
 				m_fForwardBackward = CLAMP(m_fForwardBackward, -1.0f, 1.0f);
-      pVehicle->OnAction(ite->second, activationMode, m_fForwardBackward, actorId);
-      break;
-    }
+	  pVehicle->OnAction(ite->second, activationMode, m_fForwardBackward, actorId);
+	  break;
+	}
   case (eVAI_MoveBack):
-    {
-      if (activationMode == eAAM_OnPress || activationMode == eAAM_OnRelease)
-        m_fForwardBackward -= value*2.f - 1.f;
+	{
+	  if (activationMode == eAAM_OnPress || activationMode == eAAM_OnRelease)
+		m_fForwardBackward -= value*2.f - 1.f;
 
 			if(activationMode == eAAM_OnRelease)
 				m_fForwardBackward = CLAMP(m_fForwardBackward, -1.0f, 0.0f);
 			else
 				m_fForwardBackward = CLAMP(m_fForwardBackward, -1.0f, 1.0f);
-      pVehicle->OnAction(ite->second, activationMode, -m_fForwardBackward, actorId);
-      break;
-    }  
+	  pVehicle->OnAction(ite->second, activationMode, -m_fForwardBackward, actorId);
+	  break;
+	}  
 	case (eVAI_ZoomIn):
 	case (eVAI_ZoomOut):
 		if(SAFE_HUD_FUNC_RET(GetModalHUD()))
 			break;
   default:
 		pVehicle->OnAction(ite->second, activationMode, value, actorId);
-    break;		
+	break;		
 	}
 }
 
@@ -360,10 +360,10 @@ void CVehicleClient::OnExitVehicleSeat(IVehicleSeat* pSeat)
 	
   if (viewId != InvalidVehicleViewId)  
   {
-    if (IVehicleView* pView = pSeat->GetView(viewId))    
-      m_tp = pView->IsThirdPerson();
-    
-    pSeat->SetView(InvalidVehicleViewId);
+	if (IVehicleView* pView = pSeat->GetView(viewId))    
+	  m_tp = pView->IsThirdPerson();
+	
+	pSeat->SetView(InvalidVehicleViewId);
   }
 }
 

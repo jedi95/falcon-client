@@ -215,34 +215,34 @@ void CHunter::Revive(bool fromInit)
 	{
 		pCharacter->SetFlags(pCharacter->GetFlags() | CS_FLAG_UPDATE_ALWAYS);
 
-    //TODO:this is temporary: remove it once the anim sys supports keyframe events
-    if (m_IKLimbIndex[0]<0)	m_IKLimbIndex[0] = GetIKLimbIndex("frontLeftTentacle");
-    if (m_IKLimbIndex[1]<0)	m_IKLimbIndex[1] = GetIKLimbIndex("frontRightTentacle");
-    if (m_IKLimbIndex[2]<0)	m_IKLimbIndex[2] = GetIKLimbIndex("backLeftTentacle");
-    if (m_IKLimbIndex[3]<0)	m_IKLimbIndex[3] = GetIKLimbIndex("backRightTentacle");
+	//TODO:this is temporary: remove it once the anim sys supports keyframe events
+	if (m_IKLimbIndex[0]<0)	m_IKLimbIndex[0] = GetIKLimbIndex("frontLeftTentacle");
+	if (m_IKLimbIndex[1]<0)	m_IKLimbIndex[1] = GetIKLimbIndex("frontRightTentacle");
+	if (m_IKLimbIndex[2]<0)	m_IKLimbIndex[2] = GetIKLimbIndex("backLeftTentacle");
+	if (m_IKLimbIndex[3]<0)	m_IKLimbIndex[3] = GetIKLimbIndex("backRightTentacle");
 
-    // create attachments for footstep fx
-    IAttachmentManager* pAttMan = pCharacter->GetIAttachmentManager();                        
-    for (int i=0; i<4; ++i)
-    {
-      if (m_IKLimbIndex[i] == -1) 
-        continue;
-      
-      SIKLimb *pLimb = &m_IKLimbs[m_IKLimbIndex[i]];
-      const char* boneName = pCharacter->GetISkeletonPose()->GetJointNameByID(pLimb->endBoneID);      
-      if (boneName && boneName[0])
-      {
-        char attName[128];
-        _snprintf(attName, sizeof(attName), "%s_effect_attach", boneName);
-        attName[sizeof(attName)-1] = 0;
+	// create attachments for footstep fx
+	IAttachmentManager* pAttMan = pCharacter->GetIAttachmentManager();                        
+	for (int i=0; i<4; ++i)
+	{
+	  if (m_IKLimbIndex[i] == -1) 
+		continue;
+	  
+	  SIKLimb *pLimb = &m_IKLimbs[m_IKLimbIndex[i]];
+	  const char* boneName = pCharacter->GetISkeletonPose()->GetJointNameByID(pLimb->endBoneID);      
+	  if (boneName && boneName[0])
+	  {
+		char attName[128];
+		_snprintf(attName, sizeof(attName), "%s_effect_attach", boneName);
+		attName[sizeof(attName)-1] = 0;
 
-        IAttachment* pAttachment = pAttMan->GetInterfaceByName(attName);
-        if (!pAttachment)              
-          pAttachment = pAttMan->CreateAttachment(attName, CA_BONE, boneName);
-        else
-          pAttachment->ClearBinding();
+		IAttachment* pAttachment = pAttMan->GetInterfaceByName(attName);
+		if (!pAttachment)              
+		  pAttachment = pAttMan->CreateAttachment(attName, CA_BONE, boneName);
+		else
+		  pAttachment->ClearBinding();
 
-        m_footAttachments[i] = pAttachment;
+		m_footAttachments[i] = pAttachment;
 
 				//before we use CCD-IK the first time, we have to initialize the limp-position to the current FK-position
 				pLimb->Update(GetEntity(),0.000001f);  
@@ -251,7 +251,7 @@ void CHunter::Revive(bool fromInit)
 
 			}
 
-    }
+	}
 	}
 }
 
@@ -414,7 +414,7 @@ void CHunter::ProcessAnimation(ICharacterInstance *pCharacter,float frameTime)
 				ray_hit hit;
 				int rayFlags = (COLLISION_RAY_PIERCABILITY & rwi_pierceability_mask);
 				if (GetISystem()->GetIPhysicalWorld()->RayWorldIntersection(m_footGroundPos[i] + Vec3(0,0,30.0f), Vec3(0,0,-60.0f), ent_terrain|ent_static|ent_water, rayFlags, &hit, 1))
-        {
+		{
 					//m_footGroundPos[i] = hit.pt;
 					//fix problem with hunter tantacles
 					if (i==0 ||i==1)
@@ -422,8 +422,8 @@ void CHunter::ProcessAnimation(ICharacterInstance *pCharacter,float frameTime)
 					else
 						m_footGroundPos[i] = Vec3(hit.pt.x,hit.pt.y,hit.pt.z+0.60f); //back tentacles
 
-          m_footGroundSurface[i] = hit.surface_idx;
-        }
+		  m_footGroundSurface[i] = hit.surface_idx;
+		}
 			}
 		}
 		if (TentacleGoingUp (i))
@@ -434,23 +434,23 @@ void CHunter::ProcessAnimation(ICharacterInstance *pCharacter,float frameTime)
 				CreateScriptEvent("footlift",i+1);
 				m_footSoundTime[i] = 0.35f;
 			}
-      
+	  
 			if ( ! Airborne ())
 			{
-        if (m_footAttachments[i])
-        {          
-          if (m_footGroundSurface[i] == 0)
-          {
-            // in case surface is queried the 1st time
-            ray_hit hit;
-            int rayFlags = (COLLISION_RAY_PIERCABILITY & rwi_pierceability_mask);
-            Vec3 pos = GetEntity()->GetSlotWorldTM(pLimb->characterSlot)*pLimb->lAnimPos;
-            if (gEnv->pPhysicalWorld->RayWorldIntersection(pos + Vec3(0,0,5.0f), Vec3(0,0,-15.0f), ent_terrain|ent_static|ent_water, rayFlags, &hit, 1))
-              m_footGroundSurface[i] = hit.surface_idx;
-          }
+		if (m_footAttachments[i])
+		{          
+		  if (m_footGroundSurface[i] == 0)
+		  {
+			// in case surface is queried the 1st time
+			ray_hit hit;
+			int rayFlags = (COLLISION_RAY_PIERCABILITY & rwi_pierceability_mask);
+			Vec3 pos = GetEntity()->GetSlotWorldTM(pLimb->characterSlot)*pLimb->lAnimPos;
+			if (gEnv->pPhysicalWorld->RayWorldIntersection(pos + Vec3(0,0,5.0f), Vec3(0,0,-15.0f), ent_terrain|ent_static|ent_water, rayFlags, &hit, 1))
+			  m_footGroundSurface[i] = hit.surface_idx;
+		  }
 
 					PlayFootliftEffects (i);					
-        }
+		}
 
 				m_footGroundPos[i].Set(0,0,0);	// the limb is lifting, reset its ground pos so that IK doesn't act on it	
 				m_footTouchesGround[i] = false;

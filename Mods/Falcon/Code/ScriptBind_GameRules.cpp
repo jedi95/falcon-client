@@ -60,14 +60,14 @@ void CScriptBind_GameRules::RegisterGlobals()
 	m_pSS->SetGlobalValue("TextMessageToClient", eRMI_ToClientChannel);
 	m_pSS->SetGlobalValue("TextMessageToOtherClients", eRMI_ToOtherClients);
 
- 	m_pSS->SetGlobalValue("eTE_TurretUnderAttack", eTE_TurretUnderAttack);
- 	m_pSS->SetGlobalValue("eTE_GameOverWin", eTE_GameOverWin);
- 	m_pSS->SetGlobalValue("eTE_GameOverLose", eTE_GameOverLose);
- 	m_pSS->SetGlobalValue("eTE_TACTankStarted", eTE_TACTankStarted);
- 	m_pSS->SetGlobalValue("eTE_SingularityStarted", eTE_SingularityStarted);
- 	m_pSS->SetGlobalValue("eTE_TACTankCompleted", eTE_TACTankCompleted);
+	m_pSS->SetGlobalValue("eTE_TurretUnderAttack", eTE_TurretUnderAttack);
+	m_pSS->SetGlobalValue("eTE_GameOverWin", eTE_GameOverWin);
+	m_pSS->SetGlobalValue("eTE_GameOverLose", eTE_GameOverLose);
+	m_pSS->SetGlobalValue("eTE_TACTankStarted", eTE_TACTankStarted);
+	m_pSS->SetGlobalValue("eTE_SingularityStarted", eTE_SingularityStarted);
+	m_pSS->SetGlobalValue("eTE_TACTankCompleted", eTE_TACTankCompleted);
 	m_pSS->SetGlobalValue("eTE_TACLauncherCompleted", eTE_TACLauncherCompleted);
- 	m_pSS->SetGlobalValue("eTE_SingularityCompleted", eTE_SingularityCompleted);
+	m_pSS->SetGlobalValue("eTE_SingularityCompleted", eTE_SingularityCompleted);
 	m_pSS->SetGlobalValue("eTE_EnemyNearBase", eTE_EnemyNearBase);
 	m_pSS->SetGlobalValue("eTE_Promotion", eTE_Promotion);
 	m_pSS->SetGlobalValue("eTE_Reactor50", eTE_Reactor50);

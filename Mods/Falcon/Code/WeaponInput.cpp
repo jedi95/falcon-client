@@ -112,6 +112,9 @@ bool CWeapon::PreActionAttack(bool startFire)
 	if(!pPlayer)
 		return false;
 
+	if (g_pGameCVars->fn_simpleGameMechanics)
+		return false;
+
 	if(startFire && pPlayer->IsSprinting())
 	{
 		//Stop sprinting, start firing
@@ -403,7 +406,7 @@ bool CWeapon::OnActionModify(EntityId actorId, const ActionId& actionId, int act
 		if(m_weaponRaised)
 			RaiseWeapon(false,true);
 
-		//Vader mod weapon menu animation speed
+		//Falcon fast weapon menu animation speed
 		float animSpeed = -1.0f;
 		if (g_pGameCVars->fn_fastWeaponMenu)
 			animSpeed = 50.0f;
@@ -563,11 +566,6 @@ bool CWeapon::OnActionZoomXI(EntityId actorId, const ActionId& actionId, int act
 							m_fm->Cancel();
 					}
 				}
-				else
-				{
-					// If the view does not zoom, we need to force aim assistance
-					AssistAiming(1, true);
-				}
 			}
 			else if (activationMode == eAAM_OnRelease)
 			{
@@ -585,14 +583,9 @@ bool CWeapon::OnActionZoomXI(EntityId actorId, const ActionId& actionId, int act
 				if (!isDualWield)
 				{
 					if (m_fm->AllowZoom())
-						StartZoom(actorId,1);		
+						StartZoom(actorId,1);
 					else
 						m_fm->Cancel();
-				}
-				else
-				{
-					// If the view does not zoom, we need to force aim assistance
-					AssistAiming(1, true);
 				}
 			}
 		}

@@ -65,12 +65,12 @@ class CWeapon;
 
 //-----------------------------------------------------------------------------------------------------
 
-class CHUD :	public CHUDCommon, 
-							public IGameFrameworkListener, 
-							public IInputEventListener, 
-							public IPlayerEventListener, 
-							public IItemSystemListener, 
-							public IWeaponEventListener, 
+class CHUD :	public CHUDCommon,
+							public IGameFrameworkListener,
+							public IInputEventListener,
+							public IPlayerEventListener,
+							public IItemSystemListener,
+							public IWeaponEventListener,
 							public CNanoSuit::INanoSuitListener,
 							public IViewSystemListener,
 							public ISubtitleHandler,
@@ -154,7 +154,7 @@ public:
 	typedef std::map<string, SHudObjective> THUDObjectiveList;
 
 	CHUD();
-	virtual	~	CHUD();
+	virtual ~CHUD();
 
 	//HUD initialisation
 	bool Init();
@@ -162,7 +162,7 @@ public:
 	void ResetPostSerElements();
 	void PlayerIdSet(EntityId playerId);
 	void PostSerialize();
-  void GameRulesSet(const char* name);
+	void GameRulesSet(const char* name);
 	//handle game events
 	void HandleEvent(const SGameObjectEvent &rGameObjectEvent);
 	void WeaponAccessoriesInterface(bool visible, bool force = false);
@@ -192,7 +192,7 @@ public:
 	virtual void OnSaveGame(ISaveGame* pSaveGame);
 	virtual void OnLoadGame(ILoadGame* pLoadGame) {};
 	virtual void OnLevelEnd(const char* nextLevel) {};
-  virtual void OnActionEvent(const SActionEvent& event);
+	virtual void OnActionEvent(const SActionEvent& event);
 	// ~IGameFrameworkListener
 
 	// IInputEventListener
@@ -305,8 +305,8 @@ public:
 	void UnloadVehicleHUD(bool bShow);
 	void UnloadSimpleHUDElements(bool unload);
 
-  //Game rules specific stuff - load/unload stuff
-  void LoadGameRulesHUD(bool load);
+	//Game rules specific stuff - load/unload stuff
+	void LoadGameRulesHUD(bool load);
 
 	struct SWeaponAccessoriesHelpersOffsets
 	{
@@ -321,7 +321,7 @@ public:
 	bool UpdateWeaponAccessoriesScreen();
 	void UpdateBuyMenuPages();
 
-  void SetInMenu(bool m);
+	void SetInMenu(bool m);
 
 	//sets the color to all hud elements
 	void SetHUDColor();
@@ -418,10 +418,10 @@ public:
 	//~mission objectives
 
 	//BattleStatus code : consult Marco C.
-	//	Increases the battle status
+	// Increases the battle status
 	void	TickBattleStatus(float fValue);
 	void	UpdateBattleStatus();
-	//	Queries the battle status, 0=no battle, 1=full battle
+	// Queries the battle status, 0=no battle, 1=full battle
 	float	QueryBattleStatus() { return (m_fBattleStatus); }
 	float GetBattleRange();
 
@@ -456,7 +456,7 @@ public:
 	//~HUDPDA.cpp
 
 	// Some special HUD fx
-	void BreakHUD(int state = 1);  //1 malfunction, 2 dead
+	void BreakHUD(int state = 1); //1 malfunction, 2 dead
 	int GetBreakHud(){return m_iBreakHUD; };
 	void RebootHUD();
 
@@ -528,9 +528,6 @@ public:
 	bool RegisterListener(IHUDListener* pListener);
 	bool UnRegisterListener(IHUDListener* pListener);
 
-	//assistance restriction
-	bool IsInputAssisted();
-
 	CWeapon *GetCurrentWeapon();
 
 	void RecordExplosivePlaced(EntityId eid);
@@ -540,15 +537,14 @@ public:
 	ILINE bool IsInCinematic() { return m_cineHideHUD; }
 	ILINE bool IsInitializing() { return m_animInitialize.IsLoaded(); }
 	ILINE bool InSpectatorMode() { return m_animSpectate.GetVisible(); }
-	void RefreshSpectatorHUDText() { m_prevSpectatorMode = -1; }	// mark it as changed, so values are fetched again from the target actor
+	void RefreshSpectatorHUDText() { m_prevSpectatorMode = -1; } // mark it as changed, so values are fetched again from the target actor
 
 	CGameFlashAnimation *GetWeaponMenu() { return &m_animWeaponAccessories; }
 
 	// marcok: I know it's bad to even have this in the HUD, but the way gamerulessystem is currently used I don't want to duplicate this elsewhere
-	EHUDGAMERULES GetCurrentGameRules()	{	return m_currentGameRules;	}
+	EHUDGAMERULES GetCurrentGameRules()	{ return m_currentGameRules; }
 
-	//Vader mod hud fix
-	CHUDInstantAction			*m_pHUDInstantAction;
+	CHUDInstantAction	*m_pHUDInstantAction;
 
 private:
 
@@ -867,9 +863,6 @@ private:
 	float m_fBackPressedTime;
 
 	SBuyMenuKeyLog m_buyMenuKeyLog;
-
-	float m_lastNonAssistedInput;
-	bool m_hitAssistanceAvailable;
 
 	bool m_quietMode;
 	string m_delayedMessage;

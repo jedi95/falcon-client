@@ -953,7 +953,7 @@ void CNanoSuit::SelectSuitMaterial()
 		return;
 
 	int mode=m_currentMode;
- 	if (m_invulnerable)
+	if (m_invulnerable)
 		mode=NANOMODE_INVULNERABILITY;
 
 	if(mode == NANOMODE_DEFENSE && m_defenseHitTimer > 0.0f)

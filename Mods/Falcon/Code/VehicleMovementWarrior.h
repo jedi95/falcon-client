@@ -25,18 +25,18 @@ public:
   
   struct SThrusterW : public SThruster
   {      
-    SThrusterW( const Vec3& vpos, const Vec3& vdir ) : SThruster(vpos, vdir)
-    { 
-    }    
+	SThrusterW( const Vec3& vpos, const Vec3& vdir ) : SThruster(vpos, vdir)
+	{ 
+	}    
   };
 
   enum EWarriorMovement
   {
-    eWM_None = 0,
-    eWM_Hovering,
-    eWM_Leveling,
-    eWM_Neutralizing,
-    eWM_Last
+	eWM_None = 0,
+	eWM_Hovering,
+	eWM_Leveling,
+	eWM_Neutralizing,
+	eWM_Last
   };
 
   CVehicleMovementWarrior();

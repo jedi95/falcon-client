@@ -315,23 +315,8 @@ bool CGame::Init(IGameFramework *pFramework)
 	if(!gEnv->pSystem->IsDedicated())
 		m_pDownloadTask = new CDownloadTask;
 
-	// ---------
-	if (!m_pRemoteControlSystem)
-	{
-		m_pRemoteControlSystem = new CRemoteControlSystem();
-	}
-
-	if (!m_pLauncher)
-	{
-		HMODULE hExe = GetModuleHandleA(NULL);
-		ILauncher::TGetFunc pGetILauncher = (ILauncher::TGetFunc) GetProcAddress(hExe, "GetILauncher");
-		if (pGetILauncher)
-		{
-			m_pLauncher = pGetILauncher();
-		}
-	}
-
-	FalconLogInfo("Loaded Falcon Client version %s", Falcon::GetBuildVersion());
+	// Falcon
+	FalconLogInfo("Loaded Falcon version %s", Falcon::GetBuildVersion());
 	if (gEnv->pRenderer->GetRenderType() == eRT_DX10)
 	{
 		if (ICVar *pVar=gEnv->pConsole->GetCVar("r_DisplayInfo"))
@@ -344,7 +329,21 @@ bool CGame::Init(IGameFramework *pFramework)
 		}
 	}
 
-	// ---------
+	if (!m_pLauncher)
+	{
+		HMODULE hExe = GetModuleHandleA(NULL);
+		ILauncher::TGetFunc pGetILauncher = (ILauncher::TGetFunc) GetProcAddress(hExe, "GetILauncher");
+		if (pGetILauncher)
+		{
+			m_pLauncher = pGetILauncher();
+		}
+	}
+
+	if (!m_pRemoteControlSystem)
+	{
+		m_pRemoteControlSystem = new CRemoteControlSystem();
+	}
+
 	return true;
 }
 

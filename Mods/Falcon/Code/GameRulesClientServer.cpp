@@ -266,12 +266,12 @@ void CGameRules::ProcessServerExplosion(const ExplosionInfo &explosionInfo)
 void CGameRules::ProcessQueuedExplosions()
 {
   const static uint8 nMaxExp = 3;
-    
+	
   for (uint8 exp=0; !m_queuedExplosions.empty() && exp<nMaxExp; ++exp)
   { 
-    ExplosionInfo info(m_queuedExplosions.front());
-    ProcessServerExplosion(info);	        
-    m_queuedExplosions.pop();
+	ExplosionInfo info(m_queuedExplosions.front());
+	ProcessServerExplosion(info);	        
+	m_queuedExplosions.pop();
   }
 }
 

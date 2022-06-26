@@ -14,7 +14,8 @@ History:
 #include "Item.h"
 #include "ItemSharedParams.h"
 #include "Actor.h"
-
+#include "Game.h"
+#include "GameCVars.h"
 
 //------------------------------------------------------------------------
 EntityId CItem::NetGetOwnerId() const
@@ -27,8 +28,6 @@ void CItem::NetSetOwnerId(EntityId id)
 {
 	if (id==m_ownerId)
 		return;
-
-	CryLogAlways("%s::NetSetOwnerId(%s)", GetEntity()->GetName(), GetActor(id)?GetActor(id)->GetEntity()->GetName():"null");
 
 	if (id)
 		PickUp(id, true);
@@ -60,10 +59,8 @@ void CItem::InitClient(int channelId)
 	{
 		if (!m_stats.mounted && !m_stats.used)
 		{
-			pOwner->GetGameObject()->InvokeRMIWithDependentObject(CActor::ClPickUp(), 
-				CActor::PickItemParams(GetEntityId(), m_stats.selected, false), eRMI_ToClientChannel, GetEntityId(), channelId);
-			//GetOwnerActor()->GetGameObject()->InvokeRMI(CActor::ClPickUp(), 
-			//	CActor::PickItemParams(GetEntityId(), m_stats.selected, false), eRMI_ToClientChannel, channelId);
+			pOwner->GetGameObject()->InvokeRMIWithDependentObject(CActor::ClPickUp(),
+			CActor::PickItemParams(GetEntityId(), m_stats.selected, false), eRMI_ToClientChannel, GetEntityId(), channelId);
 		}
 	}
 
@@ -92,7 +89,6 @@ IMPLEMENT_RMI(CItem, SvRequestAttachAccessory)
 			return true;
 		}
 	}
-	
 	return true; // set this to false later
 }
 
@@ -123,11 +119,10 @@ IMPLEMENT_RMI(CItem, SvRequestLeaveModify)
 //------------------------------------------------------------------------
 IMPLEMENT_RMI(CItem, ClEnterModify)
 {
-	//Vader mod weapon menu animation speed
+	//Falcon fast weapon menu animation speed
 	float animSpeed = -1.0f;
-	if (ICVar *pVar = gEnv->pConsole->GetCVar("fn_fastWeaponMenu"))
-		if (pVar->GetIVal() >= 1)
-			animSpeed = 50.0f;
+	if (g_pGameCVars->fn_fastWeaponMenu >= 1)
+		animSpeed = 50.0f;
 
 	PlayAction(g_pItemStrings->enter_modify, 0, false, eIPAF_Default | eIPAF_RepeatLastFrame, animSpeed);
 
@@ -137,11 +132,10 @@ IMPLEMENT_RMI(CItem, ClEnterModify)
 //------------------------------------------------------------------------
 IMPLEMENT_RMI(CItem, ClLeaveModify)
 {
-	//Vader mod weapon menu animation speed
+	//Falcon fast weapon menu animation speed
 	float animSpeed = -1.0f;
-	if (ICVar *pVar = gEnv->pConsole->GetCVar("fn_fastWeaponMenu"))
-		if (pVar->GetIVal() >= 1)
-			animSpeed = 50.0f;
+	if (g_pGameCVars->fn_fastWeaponMenu >= 1)
+		animSpeed = 50.0f;
 
 	PlayAction(g_pItemStrings->leave_modify, 0, false, eIPAF_Default, animSpeed);
 

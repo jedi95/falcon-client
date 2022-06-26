@@ -276,7 +276,7 @@ void CMultiPlayerMenu::SCreateGame::GetLevelRotation()
 
 	ILevelSystem *pLevelSystem = gEnv->pGame->GetIGameFramework()->GetILevelSystem();
 	if(!pLevelSystem)
-    return;
+	return;
 	ILevelRotation *rotation = pLevelSystem->GetLevelRotation();
 	if(!rotation)
 	  return;
@@ -310,7 +310,7 @@ void CMultiPlayerMenu::SCreateGame::GetLevelRotation()
 			CryLog("UI|CreateGame: Rotation Key/Value Arrays not matching!");
 			continue;
 		}
-    
+	
 		bool fraglimit = false;
 		bool scorelimit = false;
 		bool timelimit = true;

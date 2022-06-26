@@ -52,7 +52,7 @@ static void BroadcastChangeSafeMode( ICVar * )
 	}
 }
 
-// FOV
+// FOV calback
 void OnFOVUpdated(ICVar* cvar)
 {
 	float newValue = cvar->GetFVal();
@@ -81,7 +81,7 @@ void OnMaxFpsUpdated(ICVar* cvar)
 	}
 }
 
-// Custom character callbacks
+// Custom character FP body callback
 void OnFpBodyUpdated(ICVar* cvar)
 {
 	if (!gEnv->bClient || !gEnv->bMultiplayer)
@@ -102,7 +102,7 @@ void OnFpBodyUpdated(ICVar* cvar)
 	}
 }
 
-//Vader mod CVAR callbacks
+// Fix HUD callback
 static void fnHudFix(ICVar* cvar)
 {
 	if (gEnv->bMultiplayer)
@@ -125,43 +125,43 @@ static void fnHudFix(ICVar* cvar)
 // no other types of cvars are allowed to be defined here!
 void SCVars::InitCVars(IConsole *pConsole)
 {
-	// Falcon cvars
-	pConsole->Register("fn_fixHUD", &fn_fixHUD, 0, VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE, "Removes unnessesary items from the HUD.");
-	fn_version = pConsole->RegisterString("fn_version", Falcon::GetVersion(), VF_READONLY | VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE);
+	// Falcon system CVARs
 	fn_build = pConsole->RegisterString("fn_build", Falcon::GetBuildVersion(), VF_READONLY | VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE);
+	fn_version = pConsole->RegisterString("fn_version", Falcon::GetVersion(), VF_READONLY | VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE);
 	pConsole->Register("fn_svFalcon", &fn_svFalcon, 0, VF_READONLY);
 
-	// rcon
+	// RCON
 	fn_rconClientConsoleLineFormat = pConsole->RegisterString("fn_rconClientConsoleLineFormat", "  %0", VF_NOT_NET_SYNCED, "");
 
-	// misc
-	pConsole->Register("fn_wallJumpMultiplier", &fn_wallJumpMultiplier, 0.0f, VF_RESTRICTEDMODE, "Enables the Crysis 1 walljump bug");
-	pConsole->Register("fn_circleJump", &fn_circleJump, 0, VF_RESTRICTEDMODE, "Enables the Crysis 1 circle jump bug (WIP)");
-	pConsole->Register("fn_fastWeaponSwitch", &fn_fastWeaponSwitch, 0, VF_RESTRICTEDMODE, "Makes switching weapons faster");
-	pConsole->Register("fn_disableFreefall", &fn_disableFreefall, 0, VF_RESTRICTEDMODE, "Disables the freefall animation.");
+	// Falcon server controlled
 	pConsole->Register("fn_c4ThrowVelocityMultiplier", &fn_c4ThrowVelocityMultiplier, 1.0f, VF_RESTRICTEDMODE, "Set a multiplier for the launch velocity of thrown C4");
+	pConsole->Register("fn_circleJump", &fn_circleJump, 0, VF_RESTRICTEDMODE, "Enables the Crysis 1 circle jump bug");
+	pConsole->Register("fn_disableFreefall", &fn_disableFreefall, 0, VF_RESTRICTEDMODE, "Disables the freefall animation.");
 	pConsole->Register("fn_fastWeaponMenu", &fn_fastWeaponMenu, 0, VF_RESTRICTEDMODE, "Enables instant weapon customization menu.");
-    pConsole->Register("fn_weaponMassMultiplier", &fn_weaponMassMultiplier, 1.0f, VF_RESTRICTEDMODE, "Weapon mass multiplier.");
+	pConsole->Register("fn_fastWeaponSwitch", &fn_fastWeaponSwitch, 0, VF_RESTRICTEDMODE, "Makes switching weapons faster");
 	pConsole->Register("fn_playerLeaning", &fn_playerLeaning, 0, VF_RESTRICTEDMODE, "Enables Crysis 1 player leaning while prone, crouching or standing");
+	pConsole->Register("fn_radarClearOnDeath", &fn_radarClearOnDeath, 0, VF_RESTRICTEDMODE, "Prevent players from persisting on minimap between spawns");
+	pConsole->Register("fn_simpleGameMechanics", &fn_simpleGameMechanics, 0, VF_RESTRICTEDMODE, "Simplifies game mechanics for new players");
+	pConsole->Register("fn_wallJumpMultiplier", &fn_wallJumpMultiplier, 0.0f, VF_RESTRICTEDMODE, "Enables the Crysis 1 walljump bug");
+	pConsole->Register("fn_weaponMassMultiplier", &fn_weaponMassMultiplier, 1.0f, VF_RESTRICTEDMODE, "Weapon mass multiplier.");
 
-	// Crafty
-	pConsole->Register("fn_radarclearondeath", &fn_radarclearondeath, 0, VF_RESTRICTEDMODE, "Prevent players from persisting on minimap between spawns");
-
-	// Custom characters
-	pConsole->Register("fn_enableFPBody", &fn_enableFpBody, 0, VF_NOT_NET_SYNCED, "Enable first person body on custom characters");
-	pConsole->Register("fn_fpBody", &fn_fpBody, 0, VF_NOT_NET_SYNCED, "Enable first person body on custom characters");
-	gEnv->pConsole->GetCVar("fn_enableFPBody")->SetOnChangeCallback(OnFpBodyUpdated);
-
-	//client only
-	pConsole->Register("fn_fov", &fn_fov, 60.0f, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "Client-controlled field of view");
-	pConsole->Register("fn_disableShootZoom", &fn_disableShootZoom, 0, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "Disables the zoom in effect when shooting");
+	// Falcon client options
 	pConsole->Register("fn_constantMouseSensitivity", &fn_constantMouseSensitivity, 0, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "gets rid of mass effect of mouse sensitivity");
+	pConsole->Register("fn_disableShootZoom", &fn_disableShootZoom, 0, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "Disables the zoom in effect when shooting");
+	pConsole->Register("fn_enableFPBody", &fn_enableFpBody, 0, VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE, "Enable first person body on custom characters");
 	pConsole->Register("fn_fixExplosivePlant", &fn_fixExplosivePlant, 1, VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE, "Fix planting mines and claymores with high FPS");
+	pConsole->Register("fn_fixHUD", &fn_fixHUD, 0, VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE, "Removes unnessesary items from the HUD.");
+	pConsole->Register("fn_fov", &fn_fov, 60.0f, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "Client-controlled field of view");
 	pConsole->Register("sys_MaxFps", &sys_MaxFps, 0, VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE, "Sets the maximum FPS limit");
 
 	//Callback for updates
-	gEnv->pConsole->GetCVar("sys_MaxFps")->SetOnChangeCallback(OnMaxFpsUpdated);
+	gEnv->pConsole->GetCVar("fn_enableFPBody")->SetOnChangeCallback(OnFpBodyUpdated);
+	gEnv->pConsole->GetCVar("fn_fixHUD")->SetOnChangeCallback(fnHudFix);
 	gEnv->pConsole->GetCVar("fn_fov")->SetOnChangeCallback(OnFOVUpdated);
+	gEnv->pConsole->GetCVar("sys_MaxFps")->SetOnChangeCallback(OnMaxFpsUpdated);
+
+	// State only
+	pConsole->Register("fn_fpBody", &fn_fpBody, 0, VF_NOT_NET_SYNCED, "Enable first person body on custom characters");
 
 	//client cvars
 	pConsole->Register("cl_hud",&cl_hud,1,0,"Show/Hide the HUD", CHUDCommon::HUD);
@@ -179,7 +179,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("cl_invertController", &cl_invertController, 0, VF_DUMPTODISK, "Controller Look Up-Down invert");
 	pConsole->Register("cl_crouchToggle", &cl_crouchToggle, 0, VF_DUMPTODISK, "To make the crouch key work as a toggle");
 	pConsole->Register("cl_fpBody", &cl_fpBody, 2, 0, "first person body");
-	//FIXME:just for testing
 	pConsole->Register("cl_strengthscale", &cl_strengthscale, 1.0f, 0, "nanosuit strength scale");
 
 	// GOC
@@ -362,7 +361,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_teamlock", &g_teamlock, 2, 0, "Number of players one team needs to have over the other, for the game to deny joining it. 0 disables.");
 	pConsole->Register("g_useHitSoundFeedback", &g_useHitSoundFeedback, 1, 0, "Switches hit readability feedback sounds on/off.");
 
-	pConsole->Register("g_skipIntro", &g_skipIntro, 0, VF_CHEAT, "Skip all the intro videos.");
 	pConsole->Register("g_resetActionmapOnStart", &g_resetActionmapOnStart, 0, 0, "Resets Keyboard mapping on application start.");
 	pConsole->Register("g_useProfile", &g_useProfile, 1, 0, "Don't save anything to or load anything from profile.");
 	pConsole->Register("g_startFirstTime", &g_startFirstTime, 1, VF_DUMPTODISK, "1 before the game was started first time ever.");
@@ -427,7 +425,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("hud_radarBackground", &hud_radarBackground, 1, 0, "Switches the miniMap-background for the radar.");
 	pConsole->Register("hud_radarJammingEffectScale", &hud_radarJammingEffectScale, 0.75f, 0, "Scales the intensity of the radar jamming effect.");
 	pConsole->Register("hud_radarJammingThreshold", &hud_radarJammingThreshold, 0.99f, 0, "Threshold to disable the radar (independent from effect).");
-	pConsole->Register("hud_startPaused", &hud_startPaused, 1, 0, "The game starts paused, waiting for user input.");
 	pConsole->Register("hud_nightVisionConsumption", &hud_nightVisionConsumption, 0.5f, VF_CHEAT, "Scales the energy consumption of the night vision.");
 	pConsole->Register("hud_nightVisionRecharge", &hud_nightVisionRecharge, 2.0f, VF_CHEAT, "Scales the energy recharge of the night vision.");
 	pConsole->Register("hud_showBigVehicleReload", &hud_showBigVehicleReload, 0, 0, "Enables an additional reload bar around the crosshair in big vehicles.");
@@ -435,17 +432,10 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("hud_binocsScanningWidth", &hud_binocsScanningWidth, 0.3f, VF_CHEAT, "Defines the width/height in which the binocular raycasts are offset from the center to scan objects.");
 	pConsole->Register("hud_creategame_pb_server", &hud_creategame_pb_server, 0, 0, "Contains the value of the Punkbuster checkbox in the create game screen.");
 
-	// Controller aim helper cvars
-	pConsole->Register("aim_assistSearchBox", &aim_assistSearchBox, 100.0f, 0, "The area autoaim looks for enemies within");
+	// Aim helper cvars
 	pConsole->Register("aim_assistMaxDistance", &aim_assistMaxDistance, 150.0f, 0, "The maximum range at which autoaim operates");
-	pConsole->Register("aim_assistSnapDistance", &aim_assistSnapDistance, 3.0f, 0, "The maximum deviation autoaim is willing to compensate for");
 	pConsole->Register("aim_assistVerticalScale", &aim_assistVerticalScale, 0.75f, 0, "The amount of emphasis on vertical correction (the less the number is the more vertical component is compensated)");
-	pConsole->Register("aim_assistSingleCoeff", &aim_assistSingleCoeff, 1.0f, 0, "The scale of single-shot weapons' aim assistance");
-	pConsole->Register("aim_assistAutoCoeff", &aim_assistAutoCoeff, 0.5f, 0, "The scale of auto weapons' aim assistance at continuous fire");
-	pConsole->Register("aim_assistRestrictionTimeout", &aim_assistRestrictionTimeout, 20.0f, 0, "The restriction timeout on aim assistance after user uses a mouse");
 
-
-	
 	// Controller control
 	pConsole->Register("hud_aspectCorrection", &hud_aspectCorrection, 2, 0, "Aspect ratio corrections for controller rotation: 0-off, 1-direct, 2-inverse");
 	pConsole->Register("hud_ctrl_Curve_X", &hud_ctrl_Curve_X, 3.0f, 0, "Analog controller X rotation curve");
@@ -457,12 +447,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_combatFadeTime", &g_combatFadeTime, 17.0f, 0, "sets the battle fade time in seconds ");
 	pConsole->Register("g_combatFadeTimeDelay", &g_combatFadeTimeDelay, 7.0f, 0, "waiting time before the battle starts fading out, in seconds ");
 	pConsole->Register("g_battleRange", &g_battleRange, 50.0f, 0, "sets the battle range in meters ");
-
-	// Assistance switches
-	pConsole->Register("aim_assistAimEnabled", &aim_assistAimEnabled, 1, 0, "Enable/disable aim assitance on aim zooming");
-	pConsole->Register("aim_assistTriggerEnabled", &aim_assistTriggerEnabled, 1, 0, "Enable/disable aim assistance on firing the weapon");
-	pConsole->Register("hit_assistSingleplayerEnabled", &hit_assistSingleplayerEnabled, 1, 0, "Enable/disable minimum damage hit assistance");
-	pConsole->Register("hit_assistMultiplayerEnabled", &hit_assistMultiplayerEnabled, 1, 0, "Enable/disable minimum damage hit assistance in multiplayer games");
 
 	//movement cvars
   pConsole->Register("v_pa_surface", &v_pa_surface, 1, VF_CHEAT, "Enables/disables vehicle surface particles");
@@ -479,7 +463,7 @@ void SCVars::InitCVars(IConsole *pConsole)
 
 	pConsole->Register("v_stabilizeVTOL", &v_stabilizeVTOL, 0.35f, VF_DUMPTODISK, "Specifies if the air movements should automatically stabilize");
 
-  	
+	
 	pConsole->Register("pl_swimBaseSpeed", &pl_swimBaseSpeed, 4.0f, VF_CHEAT, "Swimming base speed.");
 	pConsole->Register("pl_swimBackSpeedMul", &pl_swimBackSpeedMul, 0.8f, VF_CHEAT, "Swimming backwards speed mul.");
 	pConsole->Register("pl_swimSideSpeedMul", &pl_swimSideSpeedMul, 0.9f, VF_CHEAT, "Swimming sideways speed mul.");
@@ -565,7 +549,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_c4_limit", &g_explosiveLimits[eET_C4], 1, 0, "Max C4 a player can place (recycled above this value)");
 	pConsole->Register("g_fgl_limit", &g_explosiveLimits[eET_LaunchedGrenade], 2, 0, "Max FGL remote grenades a player can launch (recycled above this value)");
 
-  pConsole->Register("aim_assistCrosshairSize", &aim_assistCrosshairSize, 25, VF_CHEAT, "screen size used for crosshair aim assistance");
 
 	pConsole->Register("g_MPDeathCam", &g_deathCam, 1, 0, "Enables / disables the MP death camera (shows the killer's location)");
 	pConsole->Register("g_MPDeathCamMaxZoomFOV", &g_deathCamMaxZoomFOV, 0.1f, 0, "FOV at maximum zoom of the death camera");
@@ -585,10 +568,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 
 	pConsole->Register("g_painSoundGap", &g_painSoundGap, 0.1f, 0, "Minimum time gap between local player pain sounds");
 	pConsole->Register("g_explosionScreenShakeMultiplier", &g_explosionScreenShakeMultiplier, 0.25f, 0, "Multiplier for explosion screenshake");
-
-	//Vader mod
-	gEnv->pConsole->GetCVar("fn_fixHUD")->SetOnChangeCallback(fnHudFix);
-
 }
 
 //------------------------------------------------------------------------
@@ -596,32 +575,37 @@ void SCVars::ReleaseCVars()
 {
 	IConsole* pConsole = gEnv->pConsole;
 
-	// Begin Falcon cvars
-	pConsole->UnregisterVariable("fn_fixHUD", true);
+	// Falcon system CVARs
+	pConsole->UnregisterVariable("fn_build", true);
 	pConsole->UnregisterVariable("fn_version", true);
 	pConsole->UnregisterVariable("fn_svFalcon", true);
 
+	// RCON
 	pConsole->UnregisterVariable("fn_rconClientConsoleLineFormat", true);
 
-	pConsole->UnregisterVariable("fn_fov", true);
-	pConsole->UnregisterVariable("fn_disableShootZoom", true);
-	pConsole->UnregisterVariable("fn_circleJump", true);
-	pConsole->UnregisterVariable("fn_wallJumpMultiplier", true);
-	pConsole->UnregisterVariable("fn_fastWeaponSwitch", true);
-	pConsole->UnregisterVariable("fn_disableFreefall", true);
+	// Falcon server controlled
 	pConsole->UnregisterVariable("fn_c4ThrowVelocityMultiplier", true);
-	pConsole->UnregisterVariable("fn_constantMouseSensitivity", true);
-	pConsole->UnregisterVariable("fn_fixExplosivePlant", true);
+	pConsole->UnregisterVariable("fn_circleJump", true);
+	pConsole->UnregisterVariable("fn_disableFreefall", true);
 	pConsole->UnregisterVariable("fn_fastWeaponMenu", true);
-	pConsole->UnregisterVariable("fn_weaponMassMultiplier", true);
+	pConsole->UnregisterVariable("fn_fastWeaponSwitch", true);
 	pConsole->UnregisterVariable("fn_playerLeaning", true);
 	pConsole->UnregisterVariable("fn_radarclearondeath", true);
+	pConsole->UnregisterVariable("fn_simpleGameMechanics", true);
+	pConsole->UnregisterVariable("fn_wallJumpMultiplier", true);
+	pConsole->UnregisterVariable("fn_weaponMassMultiplier", true);
+
+	// Falcon client options
+	pConsole->UnregisterVariable("fn_constantMouseSensitivity", true);
+	pConsole->UnregisterVariable("fn_disableShootZoom", true);
+	pConsole->UnregisterVariable("fn_enableFPBody", true);
+	pConsole->UnregisterVariable("fn_fixExplosivePlant", true);
+	pConsole->UnregisterVariable("fn_fixHUD", true);
+	pConsole->UnregisterVariable("fn_fov", true);
 	pConsole->UnregisterVariable("sys_MaxFps", true);
 
-	// Custom characters
-	pConsole->UnregisterVariable("fn_enableFPBody", true);
+	// State only
 	pConsole->UnregisterVariable("fn_fpBody", true);
-	// End Falcon cvars
 
 	pConsole->UnregisterVariable("cl_fov", true);
 	pConsole->UnregisterVariable("cl_bob", true);
@@ -743,7 +727,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("g_roundtime", true);
 	pConsole->UnregisterVariable("g_fraglimit", true);
 	pConsole->UnregisterVariable("g_fraglead", true);
-	pConsole->UnregisterVariable("g_skipIntro", true);
 	pConsole->UnregisterVariable("g_resetActionmapOnStart", true);
 	pConsole->UnregisterVariable("g_useProfile", true);
 	pConsole->UnregisterVariable("g_startFirstTime", true);
@@ -819,7 +802,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("hud_subtitles", true);
 	pConsole->UnregisterVariable("hud_subtitlesFontSize", true);
 	pConsole->UnregisterVariable("hud_subtitlesHeight", true);
-	pConsole->UnregisterVariable("hud_startPaused", true);
 	pConsole->UnregisterVariable("hud_nightVisionRecharge", true);
 	pConsole->UnregisterVariable("hud_nightVisionConsumption", true);
 	pConsole->UnregisterVariable("hud_showBigVehicleReload", true);
@@ -835,14 +817,8 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("hud_radarJammingThreshold", true);
 	pConsole->UnregisterVariable("hud_radarJammingEffectScale", true);
 
-	// Controller aim helper cvars
-	pConsole->UnregisterVariable("aim_assistSearchBox", true);
 	pConsole->UnregisterVariable("aim_assistMaxDistance", true);
-	pConsole->UnregisterVariable("aim_assistSnapDistance", true);
 	pConsole->UnregisterVariable("aim_assistVerticalScale", true);
-	pConsole->UnregisterVariable("aim_assistSingleCoeff", true);
-	pConsole->UnregisterVariable("aim_assistAutoCoeff", true);
-	pConsole->UnregisterVariable("aim_assistRestrictionTimeout", true);
 
 	pConsole->UnregisterVariable("hud_aspectCorrection", true);
 	pConsole->UnregisterVariable("hud_ctrl_Curve_X", true);
@@ -850,12 +826,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("hud_ctrl_Coeff_X", true);
 	pConsole->UnregisterVariable("hud_ctrl_Coeff_Z", true);
 	pConsole->UnregisterVariable("hud_ctrlZoomMode", true);
-
-	// Aim assitance switches
-	pConsole->UnregisterVariable("aim_assistAimEnabled", true);
-	pConsole->UnregisterVariable("aim_assistTriggerEnabled", true);
-	pConsole->UnregisterVariable("hit_assistSingleplayerEnabled", true);
-	pConsole->UnregisterVariable("hit_assistMultiplayerEnabled", true);
 		
 	// weapon system
 	pConsole->UnregisterVariable("tracer_min_distance", true);
@@ -896,8 +866,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("g_spectate_TeamOnly", true);
 	pConsole->UnregisterVariable("g_claymore_limit", true);
 	pConsole->UnregisterVariable("g_avmine_limit", true);
-
- pConsole->UnregisterVariable("aim_assistCrosshairSize", true);
 
 	pConsole->UnregisterVariable("i_restrictItems", true);
 	pConsole->UnregisterVariable("g_spawnProtectionTime", true);
@@ -941,13 +909,11 @@ void CGame::RegisterConsoleCommands()
 	m_pConsole->AddCommand("register", CmdRegisterNick, VF_CHEAT, "Register nickname with email, nickname and password");
 	m_pConsole->AddCommand("connect_crynet",CmdCryNetConnect,0,"Connect to online game server");
 
-	//Falcon
-	m_pConsole->AddCommand("sc", CmdRconSc, VF_RESTRICTEDMODE, "execute rcon command");
-	m_pConsole->AddCommand("scl", CmdRconScl, VF_RESTRICTEDMODE, "request server console lines");
+	// Falcon
 	m_pConsole->AddCommand("chat", CmdChat, VF_RESTRICTEDMODE, "send chat message");
 	m_pConsole->AddCommand("chatt", CmdChatTeam, VF_RESTRICTEDMODE, "send chat message to team");
-
-	//Vader mod
+	m_pConsole->AddCommand("sc", CmdRconSc, VF_RESTRICTEDMODE, "execute rcon command");
+	m_pConsole->AddCommand("scl", CmdRconScl, VF_RESTRICTEDMODE, "request server console lines");
 	m_pConsole->AddCommand("fn_thirdPerson", CmdFnThirdPerson, VF_RESTRICTEDMODE, "Toggles 3rd person view on/off. Warning: This has some bugs!");
 }
 
@@ -981,10 +947,11 @@ void CGame::UnregisterConsoleCommands()
 	// variables from CHUDCommon
 	m_pConsole->RemoveCommand("ShowGODMode");
 
-	m_pConsole->RemoveCommand("sc");
-	m_pConsole->RemoveCommand("scl");
+	// Falcon
 	m_pConsole->RemoveCommand("chat");
 	m_pConsole->RemoveCommand("chatt");
+	m_pConsole->RemoveCommand("sc");
+	m_pConsole->RemoveCommand("scl");
 	m_pConsole->RemoveCommand("fn_thirdPerson");
 }
 
@@ -1297,7 +1264,7 @@ void CGame::CmdNextLevel(IConsoleCmdArgs* pArgs)
 {
   ILevelRotation *pLevelRotation = g_pGame->GetIGameFramework()->GetILevelSystem()->GetLevelRotation();
   if (pLevelRotation->GetLength())
-    pLevelRotation->ChangeLevel(pArgs);
+	pLevelRotation->ChangeLevel(pArgs);
 }
 
 void CGame::CmdQuickGame(IConsoleCmdArgs* pArgs)
@@ -1322,7 +1289,7 @@ static bool GSCheckComplete()
 {
   INetworkService* serv = gEnv->pNetwork->GetService("GameSpy");
   if(!serv)
-    return true;
+	return true;
   return serv->GetState() != eNSS_Initializing;
 }
 
@@ -1335,10 +1302,10 @@ void CGame::CmdLogin(IConsoleCmdArgs* pArgs)
 {
   if(pArgs->GetArgCount()>2)
   {
-    g_pGame->BlockingProcess(&GSCheckComplete);
-    INetworkService* serv = gEnv->pNetwork->GetService("GameSpy");
-    if(!serv || serv->GetState() != eNSS_Ok)
-      return;
+	g_pGame->BlockingProcess(&GSCheckComplete);
+	INetworkService* serv = gEnv->pNetwork->GetService("GameSpy");
+	if(!serv || serv->GetState() != eNSS_Ok)
+	  return;
 		if(gEnv->pSystem->IsDedicated())
 		{
 			if(INetworkProfile* profile = serv->GetNetworkProfile())
@@ -1356,7 +1323,7 @@ void CGame::CmdLogin(IConsoleCmdArgs* pArgs)
 		}
   }
   else
-    GameWarning("Invalid parameters.");
+	GameWarning("Invalid parameters.");
 }
 
 static bool GSRegisterNick()
@@ -1429,54 +1396,54 @@ struct SCryNetConnectListener : public IServerListener
   
   virtual void OnError(const EServerBrowserError)
   {
-    End(false);
+	End(false);
   }
   
   virtual void NewServer(const int id,const SBasicServerInfo* info)
   {
-    UpdateServer(id, info);
+	UpdateServer(id, info);
   }
 
   virtual void UpdateServer(const int id,const SBasicServerInfo* info)
   {
-    m_port = info->m_hostPort;
+	m_port = info->m_hostPort;
   }
 
   virtual void ServerUpdateFailed(const int id)
   {
-    End(false);
+	End(false);
   }
   virtual void ServerUpdateComplete(const int id)
   { 
-    m_browser->CheckDirectConnect(id,m_port);
+	m_browser->CheckDirectConnect(id,m_port);
   }
 
   virtual void ServerDirectConnect(bool neednat, uint ip, ushort port)
   {
-    string connect;
-    if(neednat)
-    {
-      int cookie = rand() + (rand()<<16);
-      connect.Format("connect <nat>%d|%d.%d.%d.%d:%d",cookie,ip&0xFF,(ip>>8)&0xFF,(ip>>16)&0xFF,(ip>>24)&0xFF,port);
-      m_browser->SendNatCookie(ip,port,cookie);
-    }
-    else
-    {
-      connect.Format("connect %d.%d.%d.%d:%d",ip&0xFF,(ip>>8)&0xFF,(ip>>16)&0xFF,(ip>>24)&0xFF,port);
-    }
-    m_browser->Stop();
-    End(true);
-    g_pGame->GetIGameFramework()->ExecuteCommandNextFrame(connect.c_str());
+	string connect;
+	if(neednat)
+	{
+	  int cookie = rand() + (rand()<<16);
+	  connect.Format("connect <nat>%d|%d.%d.%d.%d:%d",cookie,ip&0xFF,(ip>>8)&0xFF,(ip>>16)&0xFF,(ip>>24)&0xFF,port);
+	  m_browser->SendNatCookie(ip,port,cookie);
+	}
+	else
+	{
+	  connect.Format("connect %d.%d.%d.%d:%d",ip&0xFF,(ip>>8)&0xFF,(ip>>16)&0xFF,(ip>>24)&0xFF,port);
+	}
+	m_browser->Stop();
+	End(true);
+	g_pGame->GetIGameFramework()->ExecuteCommandNextFrame(connect.c_str());
   }
 
   void End(bool success)
   {
-    if(!success)
-      CryLog("Server is not responding.");
-    gGSConnecting = false;
-    m_browser->Stop();
-    m_browser->SetListener(0);
-    delete this;
+	if(!success)
+	  CryLog("Server is not responding.");
+	gGSConnecting = false;
+	m_browser->Stop();
+	m_browser->SetListener(0);
+	delete this;
   }
 
   IServerBrowser* m_browser;
@@ -1494,31 +1461,31 @@ void CGame::CmdCryNetConnect(IConsoleCmdArgs* pArgs)
   ushort port = SERVER_DEFAULT_PORT;
 
   if(pArgs->GetArgCount()>2)
-    port = atoi(pArgs->GetArg(2));
+	port = atoi(pArgs->GetArg(2));
   else
   {
-    ICVar* pv = GetISystem()->GetIConsole()->GetCVar("cl_serverport");
-    if(pv)
-      port = pv->GetIVal();
+	ICVar* pv = GetISystem()->GetIConsole()->GetCVar("cl_serverport");
+	if(pv)
+	  port = pv->GetIVal();
   }
   if(pArgs->GetArgCount()>1)
   {
-    g_pGame->BlockingProcess(&GSCheckComplete);
-    INetworkService* serv = gEnv->pNetwork->GetService("GameSpy");
-    if(!serv || serv->GetState() != eNSS_Ok)
-      return;
-    IServerBrowser* sb = serv->GetServerBrowser();
+	g_pGame->BlockingProcess(&GSCheckComplete);
+	INetworkService* serv = gEnv->pNetwork->GetService("GameSpy");
+	if(!serv || serv->GetState() != eNSS_Ok)
+	  return;
+	IServerBrowser* sb = serv->GetServerBrowser();
 
-    SCryNetConnectListener* lst = new SCryNetConnectListener();
-    lst->m_browser = sb;
-    sb->SetListener(lst);
-    sb->Start(false);
-    sb->BrowseForServer(pArgs->GetArg(1),port);
-    gGSConnecting = true;
-    g_pGame->BlockingProcess(&GSConnect);
+	SCryNetConnectListener* lst = new SCryNetConnectListener();
+	lst->m_browser = sb;
+	sb->SetListener(lst);
+	sb->Start(false);
+	sb->BrowseForServer(pArgs->GetArg(1),port);
+	gGSConnecting = true;
+	g_pGame->BlockingProcess(&GSConnect);
   }
   else
-    GameWarning("Invalid parameters.");
+	GameWarning("Invalid parameters.");
 }
 
 void SCVars::RestrictedItemsChanged(ICVar* var)

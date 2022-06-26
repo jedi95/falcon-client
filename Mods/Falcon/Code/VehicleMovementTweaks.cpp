@@ -164,11 +164,11 @@ bool CVehicleMovementTweaks::RevertValues()
 	{
 		SGroup& groupInfo = *groupIte;
 		
-    if (groupInfo.isEnabled)
-    {
-      groupInfo.isEnabled = false;
-      reverted = true;
-    }    
+	if (groupInfo.isEnabled)
+	{
+	  groupInfo.isEnabled = false;
+	  reverted = true;
+	}    
 	}
 
 	return reverted;
@@ -210,8 +210,8 @@ void CVehicleMovementTweaks::ComputeGroup(const SGroup& group)
 
 		SValue& valueInfo = m_values[v.valueId];
 
-    if (valueInfo.blocked)
-      continue;
+	if (valueInfo.blocked)
+	  continue;
 
 		if (v.op == eTVO_Replace)
 			(*valueInfo.pValue) = v.value;

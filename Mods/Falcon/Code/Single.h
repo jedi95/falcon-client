@@ -139,23 +139,23 @@ protected:
 
   struct SDustParams
   {
-    SDustParams() { Reset(); }
-    void Reset(const IItemParamsNode* params=0, bool defaultInit=true)
-    {
-      CItemParamReader reader(params);
-      ResetValue(mfxtag, "");
-      ResetValue(maxheight, 2.5f);
-      ResetValue(maxheightscale, 1.f);
-    }
+	SDustParams() { Reset(); }
+	void Reset(const IItemParamsNode* params=0, bool defaultInit=true)
+	{
+	  CItemParamReader reader(params);
+	  ResetValue(mfxtag, "");
+	  ResetValue(maxheight, 2.5f);
+	  ResetValue(maxheightscale, 1.f);
+	}
 
 		void GetMemoryStatistics(ICrySizer * s)
 		{
 			s->Add(mfxtag);
 		}
 
-    ItemString mfxtag;
-    float maxheight;
-    float maxheightscale;
+	ItemString mfxtag;
+	float maxheight;
+	float maxheightscale;
   };
 
 	struct SRecoilParams
@@ -387,7 +387,7 @@ protected:
 			ResetValue(ooatracer_treshold, 0);
 			ResetValueEx("helper_fp", helper[0],	"");
 			ResetValueEx("helper_tp",	helper[1],	"");
-      ResetValue(barrel_count,  1);
+	  ResetValue(barrel_count,  1);
 
 			ResetValue(spin_up_time,	0.0f);
 			ResetValue(spin_down_time,0.0f);
@@ -411,7 +411,7 @@ protected:
 			ResetValue(auto_fire, false);
 			ResetValue(advanced_AAim,false);
 			ResetValue(advanced_AAim_Range,1.0f);
-      ResetValue(crosshair_assist_range, 0.0f);
+	  ResetValue(crosshair_assist_range, 0.0f);
 
 			pierceability[0] = 0.0f;
 			pierceability[1] = 0.05f;
@@ -445,7 +445,7 @@ protected:
 		float		reload_time;
 		float		offset;
 		ItemString	helper[2];
-    short   barrel_count;
+	short   barrel_count;
 
 		bool		unzoomed_cock;
 		int			ooatracer_treshold;
@@ -491,7 +491,7 @@ protected:
 		bool  advanced_AAim;
 		float advanced_AAim_Range;
 
-    float  crosshair_assist_range;
+	float  crosshair_assist_range;
 	};
 
 	struct SSingleActions
@@ -726,8 +726,6 @@ protected:
 
 	void SetAutoAimHelperTimer(float time) { m_autoAimHelperTimer = time;}
 
-  bool CrosshairAssistAiming(const Vec3& firingPos, Vec3& firingDir, ray_hit* pRayhit=NULL);
-
 	void EmitTracer(const Vec3& pos,const Vec3& destination,bool ooa);
 
 	std::vector<IStatObj *> m_tracerCache;
@@ -749,14 +747,14 @@ protected:
 
   struct SMuzzleEffectInfo
   {
-    uint mfId[2];
+	uint mfId[2];
 
-    SMuzzleEffectInfo()
-    {
-      mfId[0] = mfId[1] = 0;
-    }
+	SMuzzleEffectInfo()
+	{
+	  mfId[0] = mfId[1] = 0;
+	}
   };
-    
+	
   std::vector<SMuzzleEffectInfo> m_mfIds;
 	uint			m_mflightId[2];	
 	float			m_mflTimer;

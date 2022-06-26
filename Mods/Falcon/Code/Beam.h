@@ -76,7 +76,7 @@ class CBeam :
 			}
 		}
 
-		float	scale[2];
+		float scale[2];
 		string effect[2];
 		string helper[2];
 
@@ -93,11 +93,11 @@ class CBeam :
 			ResetValue(hit_effect_scale, 1.0f);
 			ResetValue(hit_decal, "");
 			ResetValue(hit_decal_size, 0.45f);
-      ResetValue(hit_decal_size_min, 0.f);
+			ResetValue(hit_decal_size_min, 0.f);
 			ResetValue(hit_decal_lifetime, 60.0f);
-			ResetValue(range,			75.0f);
-			ResetValue(tick,			0.25f);
-			ResetValue(ammo_tick,	0.15f);
+			ResetValue(range, 75.0f);
+			ResetValue(tick, 0.25f);
+			ResetValue(ammo_tick, 0.15f);
 			ResetValue(ammo_drain,2);
 
 			PreLoadAssets();
@@ -114,16 +114,16 @@ class CBeam :
 		}
 
 		string	hit_effect;
-		float		hit_effect_scale;
+		float	hit_effect_scale;
 		string	hit_decal;
-		float		hit_decal_size;
-    float		hit_decal_size_min;
-		float		hit_decal_lifetime;
+		float	hit_decal_size;
+		float	hit_decal_size_min;
+		float	hit_decal_lifetime;
 
-		float		range;
-		float		tick;
-		float		ammo_tick;
-		int			ammo_drain;
+		float	range;
+		float	tick;
+		float	ammo_tick;
+		int		ammo_drain;
 
 	};
 	struct SBeamActions
@@ -133,12 +133,12 @@ class CBeam :
 		{
 			CItemParamReader reader(params);
 
-			ResetValue(blast,			"blast");
-			ResetValue(hit,				"hit");
+			ResetValue(blast, "blast");
+			ResetValue(hit, "hit");
 		};
 
-		string	blast;
-		string	hit;
+		string blast;
+		string hit;
 
 		void GetMemoryStatistics(ICrySizer * s)
 		{
@@ -159,9 +159,6 @@ public:
 
 	virtual void Activate(bool activate);
 
-	//virtual bool OutOfAmmo() const;
-	//virtual bool CanReload() const;
-
 	virtual bool CanFire(bool considerAmmo = true) const;
 	virtual void StartFire();
 	virtual void StopFire();
@@ -177,7 +174,7 @@ public:
 
 	virtual void DecalLine(const Vec3 &org0, const Vec3 &org1, const Vec3 &hit0, const Vec3 &hit1, float step);
 	virtual void Decal(const ray_hit &rayhit, const Vec3 &dir);
-  virtual void Hit(ray_hit &hit, const Vec3 &dir);
+	virtual void Hit(ray_hit &hit, const Vec3 &dir);
 	virtual void Tick(ray_hit &hit, const Vec3 &dir);
 	virtual void TickDamage(ray_hit &hit, const Vec3 &dir, uint16 seq);
 
@@ -186,26 +183,25 @@ public:
 	virtual void NetShootEx(const Vec3 &pos, const Vec3 &dir, const Vec3 &vel, const Vec3 &hit, float extra, int predictionHandle){};
 
 protected:
-	SBeamParams				m_beamparams;
-	SBeamActions			m_beamactions;
+	SBeamParams			m_beamparams;
+	SBeamActions		m_beamactions;
 	SBeamEffectParams	m_effectparams;
 	SBeamEffectParams	m_hitbeameffectparams;
 
-	uint							m_effectId;
-	uint							m_hitbeameffectId;
-	tSoundID					m_fireLoopId;
-	tSoundID					m_hitSoundId;
-	bool							m_lastHitValid;
-	bool							m_remote;
-	float							m_tickTimer;
-	float							m_ammoTimer;
-	float							m_spinUpTimer;
+	uint				m_effectId;
+	uint				m_hitbeameffectId;
+	tSoundID			m_fireLoopId;
+	tSoundID			m_hitSoundId;
+	bool				m_lastHitValid;
+	bool				m_remote;
+	float				m_tickTimer;
+	float				m_ammoTimer;
+	float				m_spinUpTimer;
 
-	Vec3							m_lastHit;
-	Vec3							m_lastOrg;
+	Vec3				m_lastHit;
+	Vec3				m_lastOrg;
 
-	bool              m_viewFP;
-
+	bool				m_viewFP;
 };
 
 

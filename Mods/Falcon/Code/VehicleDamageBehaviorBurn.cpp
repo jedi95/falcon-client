@@ -41,7 +41,7 @@ bool CVehicleDamageBehaviorBurn::Init(IVehicle* pVehicle, const SmartScriptTable
 	if (table->GetValue("Burn", burnParams))
 	{
 		burnParams->GetValue("damage", m_damage);
-    burnParams->GetValue("selfDamage", m_selfDamage);
+	burnParams->GetValue("selfDamage", m_selfDamage);
 		burnParams->GetValue("interval", m_interval);
 		burnParams->GetValue("radius", m_radius);
 
@@ -73,23 +73,23 @@ void CVehicleDamageBehaviorBurn::Activate(bool activate)
 {
   if (activate && !m_isActive)
   {
-    m_timeCounter = m_interval;
-    m_pVehicle->SetObjectUpdate(this, IVehicle::eVOU_AlwaysUpdate);
-    m_timerId = m_pVehicle->SetTimer(-1, 20000, this); // total burn of 60 secs
+	m_timeCounter = m_interval;
+	m_pVehicle->SetObjectUpdate(this, IVehicle::eVOU_AlwaysUpdate);
+	m_timerId = m_pVehicle->SetTimer(-1, 20000, this); // total burn of 60 secs
 
-    if (!m_pVehicle->IsDestroyed() && !m_pVehicle->IsFlipped() && gEnv->pAISystem )
-      gEnv->pAISystem->SetSmartObjectState(m_pVehicle->GetEntity(), "Exploding");        
+	if (!m_pVehicle->IsDestroyed() && !m_pVehicle->IsFlipped() && gEnv->pAISystem )
+	  gEnv->pAISystem->SetSmartObjectState(m_pVehicle->GetEntity(), "Exploding");        
 
 	m_pVehicle->NeedsUpdate(IVehicle::eVUF_AwakePhysics);
   }
   else if (!activate && m_isActive)
   {
-    m_pVehicle->SetObjectUpdate(this, IVehicle::eVOU_NoUpdate);
-    m_pVehicle->KillTimer(m_timerId);
-    m_timerId = -1;
+	m_pVehicle->SetObjectUpdate(this, IVehicle::eVOU_NoUpdate);
+	m_pVehicle->KillTimer(m_timerId);
+	m_timerId = -1;
 
 		if (gEnv->pAISystem)
-	    gEnv->pAISystem->RegisterDamageRegion(this, Sphere(ZERO, -1.0f)); // disable
+		gEnv->pAISystem->RegisterDamageRegion(this, Sphere(ZERO, -1.0f)); // disable
   }
 
   m_isActive = activate;
@@ -100,15 +100,15 @@ void CVehicleDamageBehaviorBurn::OnDamageEvent(EVehicleDamageBehaviorEvent event
 {
   if (event == eVDBE_Repair)
   {
-    if (behaviorParams.componentDamageRatio < m_damageRatioMin)
-      Activate(false);
+	if (behaviorParams.componentDamageRatio < m_damageRatioMin)
+	  Activate(false);
 
 		m_shooterId = 0;
   }
 	else 
 	{
-    if (behaviorParams.componentDamageRatio >= m_damageRatioMin)
-	    Activate(true);
+	if (behaviorParams.componentDamageRatio >= m_damageRatioMin)
+		Activate(true);
 
 		m_shooterId = behaviorParams.shooterId;
 	}
@@ -120,9 +120,9 @@ void CVehicleDamageBehaviorBurn::OnVehicleEvent(EVehicleEvent event, const SVehi
   switch (event)
   {
   case eVE_Timer:
-    if (params.iParam == m_timerId)
-      Activate(false);
-    break;
+	if (params.iParam == m_timerId)
+	  Activate(false);
+	break;
   }
 }
 
@@ -142,17 +142,17 @@ void CVehicleDamageBehaviorBurn::Update(const float deltaTime)
 			else
 				worldPos = m_pVehicle->GetEntity()->GetWorldTM().GetTranslation();
 
-      SEntityProximityQuery query;
-      query.box = AABB(worldPos-Vec3(m_radius), worldPos+Vec3(m_radius));
-      gEnv->pEntitySystem->QueryProximity(query);
+	  SEntityProximityQuery query;
+	  query.box = AABB(worldPos-Vec3(m_radius), worldPos+Vec3(m_radius));
+	  gEnv->pEntitySystem->QueryProximity(query);
 
-      IEntity* pEntity = 0;
-      
+	  IEntity* pEntity = 0;
+	  
 			for (int i = 0; i < query.nCount; ++i)
 			{				
 				if ((pEntity = query.pEntities[i]) && pEntity->GetPhysics())
 				{
-          float damage = (pEntity->GetId() == m_pVehicle->GetEntityId()) ? m_selfDamage : m_damage;
+		  float damage = (pEntity->GetId() == m_pVehicle->GetEntityId()) ? m_selfDamage : m_damage;
 
 					// SNH: need to check vertical distance here as the QueryProximity() call seems to work in 2d only
 					Vec3 pos = pEntity->GetWorldPos();
@@ -172,7 +172,7 @@ void CVehicleDamageBehaviorBurn::Update(const float deltaTime)
 			}
 			
 			if (gEnv->pAISystem)
-	      gEnv->pAISystem->RegisterDamageRegion(this, Sphere(worldPos, m_radius));
+		  gEnv->pAISystem->RegisterDamageRegion(this, Sphere(worldPos, m_radius));
 		}
 
 		m_timeCounter = m_interval;
@@ -191,11 +191,11 @@ void CVehicleDamageBehaviorBurn::Serialize(TSerialize ser, unsigned aspects)
 		ser.Value("time", m_timeCounter);
 		ser.Value("shooterId", m_shooterId);
 
-    if (ser.IsReading())
-    {
+	if (ser.IsReading())
+	{
 			if(active != m_isActive)
 				Activate(active);
-    }
+	}
 	}
 }
 

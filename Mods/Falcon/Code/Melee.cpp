@@ -292,7 +292,8 @@ const char *CMelee::GetType() const
 //------------------------------------------------------------------------
 int CMelee::GetDamage(float distance) const
 {
-	if(distance > m_meleeparams.range * 2.0f)	// added a bit to compensate for network differences... (changed 1.5f to 2.0f to fix 0 dmg melee) - vader mod
+	// Falon: changed 1.5f to 2.0f to fix 0 dmg melee
+	if(distance > m_meleeparams.range * 2.0f) // added a bit to compensate for network differences...
 		return 0;
 
 	// NOTE: in multiplayer m_meleeScale == 1.0,

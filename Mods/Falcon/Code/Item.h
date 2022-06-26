@@ -32,12 +32,12 @@
 #include "ItemScheduler.h"
 #include "ItemString.h"
 
-#define ITEM_ARMS_ATTACHMENT_NAME		"arms_fp"
+#define ITEM_ARMS_ATTACHMENT_NAME "arms_fp"
 
-#define ITEM_DESELECT_POSE					"nw"
+#define ITEM_DESELECT_POSE "nw"
 
-#define ITEM_FIRST_PERSON_TOKEN			"fp"
-#define ITEM_THIRD_PERSON_TOKEN			"tp"
+#define ITEM_FIRST_PERSON_TOKEN "fp"
+#define ITEM_THIRD_PERSON_TOKEN "tp"
 
 struct ICharacterInstance;
 struct AnimEventInstance;
@@ -45,10 +45,10 @@ struct IAttachmentObject;
 
 enum EItemUpdateSlots
 {
-  eIUS_General = 0,
+	eIUS_General = 0,
 	eIUS_Zooming = 1,
-	eIUS_FireMode = 2,  
-	eIUS_Scheduler = 3,  
+	eIUS_FireMode = 2,
+	eIUS_Scheduler = 3,
 };
 
 struct SItemStrings
@@ -57,56 +57,56 @@ struct SItemStrings
 	~SItemStrings();
 
 	// here they are
-	ItemString activate;						// "activate";
-	ItemString begin_reload;				// "begin_reload";
-	ItemString cannon;							// "cannon";
-	ItemString change_firemode;		// "change_firemode";
-	ItemString change_firemode_zoomed; // "change_firemode_zoomed";
-	ItemString crawl;							// "crawl";
-	ItemString deactivate;					// "deactivate";
-	ItemString deselect;						// "deselect";
-	ItemString destroy;						// "destroy";
-	ItemString enter_modify;				// "enter_modify";
-	ItemString exit_reload_nopump; // "exit_reload_nopump";
+	ItemString activate;				// "activate";
+	ItemString begin_reload;			// "begin_reload";
+	ItemString cannon;					// "cannon";
+	ItemString change_firemode;			// "change_firemode";
+	ItemString change_firemode_zoomed;	// "change_firemode_zoomed";
+	ItemString crawl;					// "crawl";
+	ItemString deactivate;				// "deactivate";
+	ItemString deselect;				// "deselect";
+	ItemString destroy;					// "destroy";
+	ItemString enter_modify;			// "enter_modify";
+	ItemString exit_reload_nopump;		// "exit_reload_nopump";
 	ItemString exit_reload_pump;		// "exit_reload_pump";
-	ItemString fire;								// "fire";
-	ItemString idle;								// "idle";
-	ItemString idle_relaxed;				// "idle_relaxed";
+	ItemString fire;					// "fire";
+	ItemString idle;					// "idle";
+	ItemString idle_relaxed;			// "idle_relaxed";
 	ItemString idle_raised;				// "idle_raised";
-	ItemString jump_end;						// "jump_end";
-	ItemString jump_idle;					// "jump_idle";
-	ItemString jump_start;					// "jump_start";
-	ItemString leave_modify;				// "leave_modify";
-	ItemString left_item_attachment; // "left_item_attachment";
-	ItemString lock;								// "lock";
-	ItemString lower;							// "lower";
-	ItemString modify_layer;       // "modify_layer";
-	ItemString nw;									// "nw";
-	ItemString offhand_on;					// "offhand_on";
+	ItemString jump_end;				// "jump_end";
+	ItemString jump_idle;				// "jump_idle";
+	ItemString jump_start;				// "jump_start";
+	ItemString leave_modify;			// "leave_modify";
+	ItemString left_item_attachment;	// "left_item_attachment";
+	ItemString lock;					// "lock";
+	ItemString lower;					// "lower";
+	ItemString modify_layer;			// "modify_layer";
+	ItemString nw;						// "nw";
+	ItemString offhand_on;				// "offhand_on";
 	ItemString offhand_off;				// "offhand_off";
 	ItemString offhand_on_akimbo;
 	ItemString offhand_off_akimbo;
-	ItemString pickedup;						// "pickedup";
-	ItemString pickup_weapon_left; // "pickup_weapon_left";
-	ItemString raise;							// "raise";
-	ItemString reload_shell;				// "reload_shell";
-	ItemString right_item_attachment;// "right_item_attachment";
+	ItemString pickedup;				// "pickedup";
+	ItemString pickup_weapon_left;		// "pickup_weapon_left";
+	ItemString raise;					// "raise";
+	ItemString reload_shell;			// "reload_shell";
+	ItemString right_item_attachment;	// "right_item_attachment";
 	ItemString run_forward;				// "run_forward";
 	ItemString SCARSleepAmmo;			// "SCARSleepAmmo";
 	ItemString SCARTagAmmo;				// "SCARTagAmmo";
-	ItemString select;							// "select";
-	ItemString first_select;				// "first_select"; (For the LAW)
+	ItemString select;					// "select";
+	ItemString first_select;			// "first_select"; (For the LAW)
 	ItemString select_grenade;			// "select_grenade";
-	ItemString swim_idle;					// "swim_idle";
+	ItemString swim_idle;				// "swim_idle";
 	ItemString swim_idle_2;				// "swim_idle_underwater";
-	ItemString swim_forward;				// "swim_forward";
+	ItemString swim_forward;			// "swim_forward";
 	ItemString swim_forward_2;			// "swim_forward_underwater";
 	ItemString swim_backward;			// "swim_backward";
-	ItemString speed_swim;					// "speed_swim";
-	ItemString turret;							// "turret";
-  ItemString enable_light;        
-  ItemString disable_light;
-  ItemString use_light;
+	ItemString speed_swim;				// "speed_swim";
+	ItemString turret;					// "turret";
+	ItemString enable_light;
+	ItemString disable_light;
+	ItemString use_light;
 	ItemString LAM;
 	ItemString LAMRifle;
 	ItemString LAMFlashLight;
@@ -144,8 +144,8 @@ public:
 		eIGS_Owner,
 		eIGS_OwnerLooped,
 		eIGS_OffHand,
-    eIGS_Destroyed,
-    eIGS_Aux1,
+		eIGS_Destroyed,
+		eIGS_Aux1,
 		eIGS_ThirdPersonAux,
 		eIGS_Last,
 	};
@@ -154,7 +154,6 @@ public:
 	{
 		eIPhys_PhysicalizedRigid,
 		eIPhys_PhysicalizedStatic,
-		//eIPhys_DemoRecording,
 		eIPhys_NotPhysicalized,
 	};
 
@@ -166,25 +165,25 @@ public:
 
 	enum ePlayActionFlags
 	{
-		eIPAF_FirstPerson				= 1 << eIGS_FirstPerson,
-		eIPAF_ThirdPerson				= 1 << eIGS_ThirdPerson,
-		eIPAF_Arms							= 1 << eIGS_Arms,
-		eIPAF_Aux0							= 1 << eIGS_Aux0,
-		eIPAF_Owner							= 1 << eIGS_Owner,
-		eIPAF_OwnerLooped					= 1 << eIGS_OwnerLooped,
-    eIPAF_Destroyed         = 1 << eIGS_Destroyed,
-		eIPAF_ForceFirstPerson	= 1 << 15,
-		eIPAF_ForceThirdPerson	= 1 << 16,
-		eIPAF_NoBlend						= 1 << 17,
-		eIPAF_CleanBlending			= 1 << 18,
-		eIPAF_Animation					= 1 << 19,
-		eIPAF_Sound							= 1 << 20,
-	  eIPAF_SoundLooped				= 1 << 21,
-		eIPAF_SoundStartPaused	= 1 << 22,
-		eIPAF_RestartAnimation	= 1 << 23,
-		eIPAF_RepeatLastFrame	  = 1 << 24,
-    eIPAF_Effect            = 1 << 25,
-		eIPAF_Default						= eIPAF_FirstPerson|eIPAF_ThirdPerson|eIPAF_Owner|eIPAF_OwnerLooped|eIPAF_Sound|eIPAF_Animation|eIPAF_Effect,
+		eIPAF_FirstPerson = 1 << eIGS_FirstPerson,
+		eIPAF_ThirdPerson = 1 << eIGS_ThirdPerson,
+		eIPAF_Arms = 1 << eIGS_Arms,
+		eIPAF_Aux0 = 1 << eIGS_Aux0,
+		eIPAF_Owner = 1 << eIGS_Owner,
+		eIPAF_OwnerLooped = 1 << eIGS_OwnerLooped,
+		eIPAF_Destroyed = 1 << eIGS_Destroyed,
+		eIPAF_ForceFirstPerson = 1 << 15,
+		eIPAF_ForceThirdPerson = 1 << 16,
+		eIPAF_NoBlend = 1 << 17,
+		eIPAF_CleanBlending = 1 << 18,
+		eIPAF_Animation = 1 << 19,
+		eIPAF_Sound = 1 << 20,
+		eIPAF_SoundLooped = 1 << 21,
+		eIPAF_SoundStartPaused = 1 << 22,
+		eIPAF_RestartAnimation = 1 << 23,
+		eIPAF_RepeatLastFrame = 1 << 24,
+		eIPAF_Effect = 1 << 25,
+		eIPAF_Default = eIPAF_FirstPerson|eIPAF_ThirdPerson|eIPAF_Owner|eIPAF_OwnerLooped|eIPAF_Sound|eIPAF_Animation|eIPAF_Effect,
 	};
 
 	enum eViewMode
@@ -195,11 +194,11 @@ public:
 
 	enum eScriptEventTable
 	{
-		eISET_Server				= 1<<1,
-		eISET_Client				= 1<<2,
-		eISET_Root					= 1<<3,
-		eISET_All						= eISET_Client|eISET_Server|eISET_Root,
-		eISET_ClientServer	= eISET_Client|eISET_Server
+		eISET_Server = 1<<1,
+		eISET_Client = 1<<2,
+		eISET_Root = 1<<3,
+		eISET_All = eISET_Client|eISET_Server|eISET_Root,
+		eISET_ClientServer = eISET_Client|eISET_Server
 	};
 
 	enum eItemBackAttachment
@@ -215,28 +214,25 @@ public:
 		:	fp(false),
 			mounted(false),
 			mount_last_aimdir(Vec3(0.0f,0.0f,0.0f)),
-			mount_dir(Vec3(0.0f,0.0f,0.0f)),      
+			mount_dir(Vec3(0.0f,0.0f,0.0f)),
 			pickable(true),
 			selectable(true),
 			selected(false),
 			dropped(false),
-			brandnew(true),      
-			flying(false),      
+			brandnew(true),
+			flying(false),
 			viewmode(0),
-      used(false),
+			used(false),
 			sound_enabled(true),
 			hand(eIH_Right),
-      health(0.f),
+			health(0.f),
 			first_selection(true),
 			backAttachment(eIBA_Unknown)
-		{
-		};
+		{};
 
 		void Serialize(TSerialize &ser)
 		{
 			ser.BeginGroup("ItemStats");
-			//int vmode = viewmode;
-			//ser.Value("viewmode", vmode);
 			bool fly = flying;
 			ser.Value("flying", fly);
 			bool sel = selected;
@@ -249,12 +245,10 @@ public:
 			ser.Value("hand", han);
 			bool drop = dropped;
 			ser.Value("dropped", drop);
-			//bool firstPerson = fp;
-			//ser.Value("firstPerson", firstPerson);
 			bool bnew = brandnew;
-			ser.Value("brandnew", bnew);      
-      float fHealth = health;
-      ser.Value("health", fHealth);   
+			ser.Value("brandnew", bnew);
+			float fHealth = health;
+			ser.Value("health", fHealth);
 			bool bfirstSelection = first_selection;
 			ser.Value("first_selection", bfirstSelection);
 			int aback = (int)backAttachment;
@@ -265,39 +259,37 @@ public:
 
 			if(ser.IsReading())
 			{
-				//viewmode = vmode;
 				flying = fly;
 				selected = sel;
 				mounted = mount;
 				used = use;
 				hand = han;
 				dropped = drop;
-				brandnew = bnew;        
-				//fp = firstPerson;
-        health = fHealth;
+				brandnew = bnew;
+				health = fHealth;
 				first_selection = bfirstSelection;
 				backAttachment = (eItemBackAttachment)aback;
 				pickable = pick;
 			}
 		}
 
-		Vec3	mount_dir;
-		Vec3	mount_last_aimdir;
-		int		hand:3;
-		int		viewmode:3;
+		Vec3 mount_dir;
+		Vec3 mount_last_aimdir;
+		int hand:3;
+		int viewmode:3;
 		float health;
-		bool	fp:1;
-		bool	mounted:1;
-		bool	pickable:1;
-		bool	selectable:1;
-		bool	selected:1;
-		bool	dropped:1;
-		bool	brandnew:1;    
-		bool	flying:1;
-		bool	used:1;
-		bool	sound_enabled:1;
-		bool  first_selection:1;
-		eItemBackAttachment   backAttachment;
+		bool fp:1;
+		bool mounted:1;
+		bool pickable:1;
+		bool selectable:1;
+		bool selected:1;
+		bool dropped:1;
+		bool brandnew:1;
+		bool flying:1;
+		bool used:1;
+		bool sound_enabled:1;
+		bool first_selection:1;
+		eItemBackAttachment backAttachment;
 	};
 
 	struct SEditorStats
@@ -311,7 +303,6 @@ public:
 		:	ownerId(_ownerId),
 			current(_current)
 		{};
-
 
 		EntityId	ownerId;
 		bool			current;
@@ -328,7 +319,7 @@ public:
 			giveable(true),
 			unique(true),
 			arms(true),
-			two_hand(0),      
+			two_hand(0),
 			mass(3.5f),
 			fly_timer(750),
 			drop_impulse(12.5f),
@@ -363,43 +354,43 @@ public:
 			s->Add(display_name);
 		}
 
-		bool    prone_not_usable ;
-		bool		raiseable        ;
-		bool		selectable       ;
-		bool		droppable        ;
-		bool		pickable         ;
-		bool		mountable        ;
-		bool		usable           ;
-		bool		giveable         ;
-		bool		unique           ;
-		bool		arms             ;
-		short		two_hand; // 0 = one-hand, 1 = two-hand no grenades, 2 = two-hand w/ grenades
+		bool prone_not_usable;
+		bool raiseable;
+		bool selectable;
+		bool droppable;
+		bool pickable;
+		bool mountable;
+		bool usable;
+		bool giveable;
+		bool unique;
+		bool arms;
+		short two_hand; // 0 = one-hand, 1 = two-hand no grenades, 2 = two-hand w/ grenades
 
-		int			fly_timer;
-		float		mass;
-		float		drop_impulse;
-		float		select_override;
-		float		raise_distance;
-		Vec3		drop_impulse_pos;
-		Vec3		drop_angles;
-		bool    update_hud;
-		bool		auto_droppable;
-		int     scopeAttachment;
-		bool    attachment_gives_ammo;
+		int fly_timer;
+		float mass;
+		float drop_impulse;
+		float select_override;
+		float raise_distance;
+		Vec3 drop_impulse_pos;
+		Vec3 drop_angles;
+		bool update_hud;
+		bool auto_droppable;
+		int scopeAttachment;
+		bool attachment_gives_ammo;
 
-		ItemString	pose;
-		ItemString	attachment[eIH_Last];
-		ItemString	dual_wield_suffix;
-		ItemString	dual_wield_pose;
-		ItemString	display_name;
+		ItemString pose;
+		ItemString attachment[eIH_Last];
+		ItemString dual_wield_suffix;
+		ItemString dual_wield_pose;
+		ItemString display_name;
 
-		bool				has_first_select;
-		bool				attach_to_back;
+		bool has_first_select;
+		bool attach_to_back;
 
-		ItemString  bone_attachment_01;
-		ItemString  bone_attachment_02;
+		ItemString bone_attachment_01;
+		ItemString bone_attachment_02;
 
-		bool				select_on_pickup;
+		bool select_on_pickup;
 	};
 
 
@@ -421,20 +412,20 @@ public:
 			s->Add(right_hand_helper);
 		}
 
-		float		min_pitch;
-		float		max_pitch;
-		float		yaw_range;
-		float		eye_distance;
-		float		eye_height;
-		float		body_distance;
-		ItemString	pivot;
-		ItemString	left_hand_helper;
-		ItemString	right_hand_helper;
+		float min_pitch;
+		float max_pitch;
+		float yaw_range;
+		float eye_distance;
+		float eye_height;
+		float body_distance;
+		ItemString pivot;
+		ItemString left_hand_helper;
+		ItemString right_hand_helper;
 	};
 
 	struct SDamageLevel
 	{
-		SDamageLevel(): max_health(100), min_health(0), effectId(-1) {};
+		SDamageLevel(): max_health(100), min_health(0), effectId(-1){};
 
 		int max_health;
 		int min_health;
@@ -471,8 +462,8 @@ public:
 	{
 		SRespawnProperties(): timer(0.0f), unique(false), respawn(false) {};
 		float timer;
-		bool	unique;
-		bool	respawn;
+		bool unique;
+		bool respawn;
 	};
 
 	struct SCameraAnimationStats
@@ -493,14 +484,14 @@ public:
 			s->Add(helper);
 		}
 
-		ItemString	helper;
-		Vec3		pos;
-		Quat		rot;
-		bool		animating ;
-		bool		position  ;
-		bool		rotation  ;
-		bool		follow    ;
-		bool		reorient  ;
+		ItemString helper;
+		Vec3 pos;
+		Quat rot;
+		bool animating;
+		bool position;
+		bool rotation;
+		bool follow;
+		bool reorient;
 	};
 
 	struct SAccessoryParams
@@ -518,40 +509,40 @@ public:
 			s->Add(zoommode);
 		}
 
-		ItemString		attach_helper;
-		ItemString		attach_action;
-		ItemString		attach_layer;
-		ItemString		detach_action;
-		ItemString		switchToFireMode;
-		ItemString		zoommode;
-		std::vector< ItemString >   firemodes;
+		ItemString attach_helper;
+		ItemString attach_action;
+		ItemString attach_layer;
+		ItemString detach_action;
+		ItemString switchToFireMode;
+		ItemString zoommode;
+		std::vector< ItemString > firemodes;
 		const IItemParamsNode *params;
-		bool      exclusive;
-		bool			client_only;
+		bool exclusive;
+		bool client_only;
 	};
 
 	struct SAudio
 	{
-		SAudio():	isstatic(false), sphere(0.0f), airadius(0.0f),issynched(false) {};
+		SAudio(): isstatic(false), sphere(0.0f), airadius(0.0f),issynched(false) {};
 
 		void GetMemoryStatistics(ICrySizer * s)
 		{
 			s->Add(name);
 		}
 
-		ItemString		name;
-		float			    airadius;
-		float			    sphere;
-		bool			    isstatic;
-		bool          issynched;
+		ItemString name;
+		float airadius;
+		float sphere;
+		bool isstatic;
+		bool issynched;
 	};
 
 	struct SInstanceAudio
 	{
-		SInstanceAudio(): id(INVALID_SOUNDID),synch(false) {};
-		ItemString		static_name;
-		tSoundID	    id;
-		bool          synch;
+		SInstanceAudio(): id(INVALID_SOUNDID),synch(false){};
+		ItemString static_name;
+		tSoundID id;
+		bool synch;
 
 		void GetMemoryStatistics(ICrySizer * s)
 		{
@@ -571,9 +562,9 @@ public:
 		}
 
 		std::vector<ItemString>	bones;
-		ItemString	name[eIGS_Last];
-		int			id[eIGS_Last];
-		bool		isstatic;
+		ItemString name[eIGS_Last];
+		int id[eIGS_Last];
+		bool isstatic;
 	};
 
 	struct SAnimation
@@ -586,29 +577,29 @@ public:
 			s->Add(camera_helper);
 		}
 
-		ItemString	name;
-		ItemString	camera_helper;
-		float				speed;
-		float				blend;
-		bool				camera_pos;
-		bool				camera_rot;
-		bool				camera_follow;
-		bool				camera_reorient;
+		ItemString name;
+		ItemString camera_helper;
+		float speed;
+		float blend;
+		bool camera_pos;
+		bool camera_rot;
+		bool camera_follow;
+		bool camera_reorient;
 	};
 
-  struct SEffect
-  {
-    SEffect() {};
+	struct SEffect
+	{
+		SEffect() {};
 
-    void GetMemoryStatistics(ICrySizer *s)
-    {
-      s->Add(name);
-      s->Add(helper);
-    }
+		void GetMemoryStatistics(ICrySizer *s)
+		{
+			s->Add(name);
+			s->Add(helper);
+		}
 
-    ItemString name;
-    ItemString helper;
-  };
+		ItemString name;
+		ItemString helper;
+	};
 
 	struct SAction
 	{
@@ -623,9 +614,9 @@ public:
 		}
 
 		std::vector<SAnimation>	animation[eIGS_Last];
-		SAudio			sound[2];
-    SEffect     effect[2];
-		bool				children;
+		SAudio sound[2];
+		SEffect effect[2];
+		bool children;
 	};
 
 	struct SInstanceAction
@@ -641,9 +632,9 @@ public:
 
 	struct SAttachmentHelper
 	{
-		ItemString	name;
-		ItemString	bone;
-		int			slot;
+		ItemString name;
+		ItemString bone;
+		int slot;
 		void GetMemoryStatistics(ICrySizer * s) const
 		{
 			s->Add(*this);
@@ -654,11 +645,11 @@ public:
 
 	struct SEffectInfo
 	{
-		int			characterSlot;
-		int			slot;
-		ItemString	helper;
+		int characterSlot;
+		int slot;
+		ItemString helper;
 
-    SEffectInfo() : characterSlot(-1), slot(-1) {}
+		SEffectInfo() : characterSlot(-1), slot(-1) {}
 		void GetMemoryStatistics(ICrySizer * s)
 		{
 			s->Add(helper);
@@ -680,20 +671,20 @@ public:
 	};
 
 
-	typedef std::map<ItemString, SAction>					TActionMap;
-	typedef std::map<ItemString, SInstanceAction>	TInstanceActionMap;
-	typedef std::map<ItemString, SLayer>					TLayerMap;
-	typedef std::map<ItemString, int>							TActiveLayerMap;
-	typedef std::vector<SAttachmentHelper>				THelperVector;
-	typedef std::map<ItemString, bool>						TDualWieldSupportMap;
-	typedef	std::map<uint, SEffectInfo>						TEffectInfoMap;
-	typedef std::map<ItemString, EntityId>				TAccessoryMap;
+	typedef std::map<ItemString, SAction> TActionMap;
+	typedef std::map<ItemString, SInstanceAction> TInstanceActionMap;
+	typedef std::map<ItemString, SLayer> TLayerMap;
+	typedef std::map<ItemString, int> TActiveLayerMap;
+	typedef std::vector<SAttachmentHelper> THelperVector;
+	typedef std::map<ItemString, bool> TDualWieldSupportMap;
+	typedef	std::map<uint, SEffectInfo> TEffectInfoMap;
+	typedef std::map<ItemString, EntityId> TAccessoryMap;
 	typedef std::map<ItemString, SAccessoryParams>TAccessoryParamsMap;
-	typedef std::vector<ItemString>								TInitialSetup;
-	typedef std::vector<SDamageLevel>							TDamageLevelVector;
-	typedef std::map<IEntityClass*, int>					TAccessoryAmmoMap;
+	typedef std::vector<ItemString> TInitialSetup;
+	typedef std::vector<SDamageLevel> TDamageLevelVector;
+	typedef std::map<IEntityClass*, int> TAccessoryAmmoMap;
 
-	static const int ASPECT_OWNER_ID	= eEA_GameServerStatic;
+	static const int ASPECT_OWNER_ID = eEA_GameServerStatic;
 
 public:
 	CItem();
@@ -740,7 +731,7 @@ public:
 	virtual EntityId GetOwnerId() const;
 
 	virtual void Reset();
-  virtual void ResetOwner();
+	virtual void ResetOwner();
 
 	virtual void RemoveEntity(bool force = false);
 
@@ -781,7 +772,6 @@ public:
 	void WetSync(bool fade);
 	void ApplyMaterialLayerSettings(uint8 mask, uint32 blend);
 
-
 	virtual bool IsTwoHand() const;
 	virtual int TwoHandMode() const;
 	virtual bool SupportsDualWield(const char *itemName) const;
@@ -814,7 +804,7 @@ public:
 	virtual void EnableSound(bool enable);
 	virtual bool IsSoundEnabled() const;
 	virtual bool IsModifying() { return m_modifying || m_transitioning; }
-  virtual bool IsDestroyed() { return m_properties.hitpoints > 0 && m_stats.health <= 0.f; }
+	virtual bool IsDestroyed() { return m_properties.hitpoints > 0 && m_stats.health <= 0.f; }
 
 	virtual void EnterWater(bool enter) {};
 	// ~IItem
@@ -823,7 +813,7 @@ public:
 	virtual bool SetAspectProfile( EEntityAspects aspect, uint8 profile );
 	virtual uint8 GetDefaultProfile( EEntityAspects aspect );
 	// ~IGameObjectProfileManager
-  
+
 	// Events
 	virtual void OnStartUsing();
 	virtual void OnStopUsing();
@@ -831,10 +821,10 @@ public:
 	virtual void OnSelected(bool selected);
 	virtual void OnEnterFirstPerson();
 	virtual void OnEnterThirdPerson();
-  virtual void OnReset();
+	virtual void OnReset();
 	virtual void OnPickedUp(EntityId actorId, bool destroyed);
 	virtual void OnDropped(EntityId actorId);
-  
+
 	virtual const SStats &GetStats() const { return m_stats; };
 	virtual const SParams &GetParams() const { return m_params; };
 	virtual const SEntityProperties &GetProperties() const { return m_properties; };
@@ -892,21 +882,21 @@ public:
 
 	// effects
 	uint AttachEffect(int slot, uint id, bool attach, const char *effectName=0, const char *helper=0,
-		const Vec3 &offset=Vec3Constants<float>::fVec3_Zero, const Vec3 &dir=Vec3Constants<float>::fVec3_OneY, float scale=1.0f, bool prime=true);
-  uint AttachLight(int slot, uint id, bool attach, float radius=5.0f, const Vec3 &color=Vec3Constants<float>::fVec3_One,
-		const float fSpecularMult=1.0f, const char *projectTexture=0, float projectFov=0, const char *helper=0,
-		const Vec3 &offset=Vec3Constants<float>::fVec3_Zero, const Vec3 &dir=Vec3Constants<float>::fVec3_OneY, 
-    const char* material=0, float fHDRDynamic=0.f );
+	const Vec3 &offset=Vec3Constants<float>::fVec3_Zero, const Vec3 &dir=Vec3Constants<float>::fVec3_OneY, float scale=1.0f, bool prime=true);
+	uint AttachLight(int slot, uint id, bool attach, float radius=5.0f, const Vec3 &color=Vec3Constants<float>::fVec3_One,
+	const float fSpecularMult=1.0f, const char *projectTexture=0, float projectFov=0, const char *helper=0,
+	const Vec3 &offset=Vec3Constants<float>::fVec3_Zero, const Vec3 &dir=Vec3Constants<float>::fVec3_OneY,
+	const char* material=0, float fHDRDynamic=0.f );
 	uint AttachLightEx(int slot, uint id, bool attach, bool fakeLight = false , bool castShadows = false, IRenderNode* pCasterException = NULL, float radius=5.0f, const Vec3 &color=Vec3Constants<float>::fVec3_One,
-		const float fSpecularMult=1.0f, const char *projectTexture=0, float projectFov=0, const char *helper=0,
-		const Vec3 &offset=Vec3Constants<float>::fVec3_Zero, const Vec3 &dir=Vec3Constants<float>::fVec3_OneY, 
-		const char* material=0, float fHDRDynamic=0.f );
+	const float fSpecularMult=1.0f, const char *projectTexture=0, float projectFov=0, const char *helper=0,
+	const Vec3 &offset=Vec3Constants<float>::fVec3_Zero, const Vec3 &dir=Vec3Constants<float>::fVec3_OneY,
+	const char* material=0, float fHDRDynamic=0.f );
 	void SpawnEffect(int slot, const char *effectName, const char *helper, const Vec3 &offset=Vec3Constants<float>::fVec3_Zero,
-		const Vec3 &dir=Vec3Constants<float>::fVec3_OneY, float scale=1.0f);
+	const Vec3 &dir=Vec3Constants<float>::fVec3_OneY, float scale=1.0f);
 	IParticleEmitter *GetEffectEmitter(uint id) const;
 	void SetEffectWorldTM(uint id, const Matrix34 &tm);
 	Matrix34 GetEffectWorldTM(uint it);
-  void EnableLight(bool enable, uint id);
+	void EnableLight(bool enable, uint id);
 	void SetLightRadius(float radius, uint id);
 
 	// misc
@@ -926,10 +916,10 @@ public:
 	IEntity *GetOwner() const;
 	CActor *GetOwnerActor() const;
 	CActor *GetActor(EntityId actorId) const;
-  IInventory *GetActorInventory(IActor *pActor) const;
+	IInventory *GetActorInventory(IActor *pActor) const;
 	CItem *GetActorItem(IActor *pActor) const;
 	EntityId GetActorItemId(IActor *pActor) const;
-  EntityId GetHostId() const { return m_hostId; }
+	EntityId GetHostId() const { return m_hostId; }
 	CActor *GetActorByNetChannel(INetChannel *pNetChannel) const;
 
 	const char *GetDisplayName() const;
@@ -947,9 +937,9 @@ public:
 	void SetViewMode(int mode);
 	void CopyRenderFlags(IEntity *pOwner);
 	void ResetRenderFlags();
-  virtual void UseManualBlending(bool enable);
-  virtual bool GetAimBlending(OldBlendSpace& params);
-  virtual void UpdateIKMounted(IActor* pActor, const Vec3& vGunXAxis);
+	virtual void UseManualBlending(bool enable);
+	virtual bool GetAimBlending(OldBlendSpace& params);
+	virtual void UpdateIKMounted(IActor* pActor, const Vec3& vGunXAxis);
 
 	// character attachments
 	bool CreateCharacterAttachment(int slot, const char *name, int type, const char *bone);
@@ -977,10 +967,10 @@ public:
 	// freeze
 	virtual void Freeze(bool freeze);
 
-  // damage
-  virtual void OnHit(float damage, const char* damageType);
-  virtual void OnDestroyed();
-  virtual void OnRepaired();
+	// damage
+	virtual void OnHit(float damage, const char* damageType);
+	virtual void OnDestroyed();
+	virtual void OnRepaired();
 	virtual void DestroyedGeometry(bool use);
 	virtual void UpdateDamageLevel();
 
@@ -1058,45 +1048,45 @@ public:
 		return GetEntityProperty(GetEntity(), name, value);
 	}
 
-  template<typename T>bool GetEntityProperty(IEntity* pEntity, const char *name, T &value) const
-  {
-    SmartScriptTable props;
-    IScriptTable* pScriptTable = pEntity->GetScriptTable();
-    if (pScriptTable && pScriptTable->GetValue("Properties", props))
-      return props->GetValue(name, value);
-    return false;
-  }
-  
-	template<typename T>bool GetEntityProperty(const char *table, const char *name, T &value) const
+	template<typename T>bool GetEntityProperty(IEntity* pEntity, const char *name, T &value) const
 	{
-    return GetEntityProperty(GetEntity(), table, name, value);
+		SmartScriptTable props;
+		IScriptTable* pScriptTable = pEntity->GetScriptTable();
+		if (pScriptTable && pScriptTable->GetValue("Properties", props))
+			return props->GetValue(name, value);
+		return false;
 	}
 
-  template<typename T>bool GetEntityProperty(IEntity* pEntity, const char *table, const char *name, T &value) const
-  {
-    SmartScriptTable props;
-    IScriptTable* pScriptTable = pEntity->GetScriptTable();
-    if (pScriptTable && pScriptTable->GetValue("Properties", props))
-    {
-      SmartScriptTable subprop;
-      if (props->GetValue(table, subprop))
-        return subprop->GetValue(name, value);
-    }
-    return false;
-  }
+	template<typename T>bool GetEntityProperty(const char *table, const char *name, T &value) const
+	{
+		return GetEntityProperty(GetEntity(), table, name, value);
+	}
 
-  template<typename T>void SetEntityProperty(const char *name, const T &value)
-  {
-    return SetEntityProperty(GetEntity(), name, value);
-  }
+	template<typename T>bool GetEntityProperty(IEntity* pEntity, const char *table, const char *name, T &value) const
+	{
+		SmartScriptTable props;
+		IScriptTable* pScriptTable = pEntity->GetScriptTable();
+		if (pScriptTable && pScriptTable->GetValue("Properties", props))
+		{
+			SmartScriptTable subprop;
+			if (props->GetValue(table, subprop))
+				return subprop->GetValue(name, value);
+		}
+		return false;
+	}
 
-  template<typename T>void SetEntityProperty(IEntity* pEntity, const char *name, const T &value)
-  {
-    SmartScriptTable props;
-    IScriptTable* pScriptTable = pEntity->GetScriptTable();
-    if (pScriptTable && pScriptTable->GetValue("Properties", props))
-      props->SetValue(name, value);    
-  }
+	template<typename T>void SetEntityProperty(const char *name, const T &value)
+	{
+		return SetEntityProperty(GetEntity(), name, value);
+	}
+
+	template<typename T>void SetEntityProperty(IEntity* pEntity, const char *name, const T &value)
+	{
+		SmartScriptTable props;
+		IScriptTable* pScriptTable = pEntity->GetScriptTable();
+		if (pScriptTable && pScriptTable->GetValue("Properties", props))
+			props->SetValue(name, value);
+	}
 
 	// script
 	bool CallScriptEvent(IScriptTable *pScriptTable, const char *name)
@@ -1259,79 +1249,78 @@ protected:
 	// data
 	_smart_ptr<class CItemSharedParams> m_sharedparams;
 
-	SParams								m_params;
-	SMountParams					m_mountparams;
-	SStats								m_stats;
-	SEditorStats					m_editorstats;
+	SParams 				m_params;
+	SMountParams			m_mountparams;
+	SStats 					m_stats;
+	SEditorStats			m_editorstats;
 	SCameraAnimationStats	m_camerastats;
-	TEffectInfoMap				m_effects;
-	TActiveLayerMap				m_activelayers;
-	TAccessoryMap					m_accessories;
+	TEffectInfoMap			m_effects;
+	TActiveLayerMap			m_activelayers;
+	TAccessoryMap			m_accessories;
 	TInstanceActionMap		m_instanceActions;
 
-	TAccessoryAmmoMap			m_bonusAccessoryAmmo;
+	TAccessoryAmmoMap 		m_bonusAccessoryAmmo;
 
 	TDamageLevelVector		m_damageLevels;
 
-	TInitialSetup					m_initialSetup;
-		
-	uint									m_effectGenId;
+	TInitialSetup			m_initialSetup;
 
-	EntityId							m_dualWieldMasterId;
-	EntityId							m_dualWieldSlaveId;
+	uint					m_effectGenId;
 
-	CItemScheduler				m_scheduler;
+	EntityId				m_dualWieldMasterId;
+	EntityId				m_dualWieldSlaveId;
 
-	EntityId							m_ownerId;
-	EntityId							m_parentId;
+	CItemScheduler			m_scheduler;
 
-	SmartScriptTable			m_stateTable[3];		// root, server, client
+	EntityId				m_ownerId;
+	EntityId				m_parentId;
 
-	ItemString						m_idleAnimation[eIGS_Last];
-	uint									m_animationTime[eIGS_Last];
-	uint									m_animationEnd[eIGS_Last];
-	float									m_animationSpeed[eIGS_Last];
+	SmartScriptTable		m_stateTable[3]; // root, server, client
 
-	string								m_actionSuffix;
-	string								m_actionSuffixSerializationHelper;
+	ItemString				m_idleAnimation[eIGS_Last];
+	uint					m_animationTime[eIGS_Last];
+	uint					m_animationEnd[eIGS_Last];
+	float					m_animationSpeed[eIGS_Last];
+
+	string					m_actionSuffix;
+	string					m_actionSuffixSerializationHelper;
 
 	ICharacterInstance		*m_pForcedArms;
 
-	SGeometry							m_fpgeometry[3];		// have to save the first person geometry
-																						// to support dynamic change of hand
+	SGeometry				m_fpgeometry[3]; // have to save the first person geometry to support dynamic change of hand
 	SRespawnProperties		m_respawnprops;
-	SEntityProperties			m_properties;
-	EntityId							m_hostId;
-	EntityId							m_postSerializeMountedOwner;
+	SEntityProperties		m_properties;
+	EntityId				m_hostId;
+	EntityId				m_postSerializeMountedOwner;
 
-	IScriptTable					*m_pEntityScript;
+	IScriptTable			*m_pEntityScript;
 
-	static IEntitySystem		*m_pEntitySystem;
-	static IItemSystem			*m_pItemSystem;
-	static IGameFramework		*m_pGameFramework;
+	static IEntitySystem	*m_pEntitySystem;
+	static IItemSystem		*m_pItemSystem;
+	static IGameFramework	*m_pGameFramework;
 
-	bool									m_bPostPostSerialize;
+	bool					m_bPostPostSerialize;
 
 protected:
-	ItemString						m_geometry[eIGS_Last];
-	bool									m_modifying;
-	bool									m_transitioning;
-	bool									m_cloaked;
-	bool									m_serializeCloaked; //used for cloaked serialization
-	bool									m_frozen;
-	bool									m_enableAnimations;
+	ItemString				m_geometry[eIGS_Last];
+	bool					m_modifying;
+	bool					m_transitioning;
+	bool					m_cloaked;
+	bool					m_serializeCloaked; //used for cloaked serialization
+	bool					m_frozen;
+	bool					m_enableAnimations;
 
-	int										m_constraintId;
+	int						m_constraintId;
 
-	bool                  m_useFPCamSpacePP; //Enables special processing of FP weapons in camera space (prevent jittering)
+	bool					m_useFPCamSpacePP; //Enables special processing of FP weapons in camera space (prevent jittering)
 
-	Vec3									m_serializeActivePhysics;
-	bool									m_serializeDestroyed;
-	bool                  m_serializeRigidPhysics;
+	Vec3					m_serializeActivePhysics;
+	bool					m_serializeDestroyed;
+	bool					m_serializeRigidPhysics;
 
 public:
 
-	bool									m_noDrop;				//Fix reseting problem in editor
+	bool					m_noDrop; //Fix reseting problem in editor
 	static IEntityClass*	sOffHandClass;
 	static IEntityClass*	sFistsClass;
 	static IEntityClass*	sAlienCloak;
@@ -1357,9 +1346,9 @@ public:
 	static IEntityClass*	sEMPGrenade;
 	static IEntityClass*	sSmokeGrenade;
 
-	static IEntityClass*  sIncendiaryAmmo;
+	static IEntityClass*	sIncendiaryAmmo;
 
-	static IEntityClass*  sScarGrenadeClass;
+	static IEntityClass*	sScarGrenadeClass;
 
 	// Expansion items
 	static IEntityClass*	sGrenadeLauncherClass;

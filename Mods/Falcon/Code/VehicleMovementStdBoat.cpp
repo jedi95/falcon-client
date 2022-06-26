@@ -63,7 +63,7 @@ CVehicleMovementStdBoat::~CVehicleMovementStdBoat()
 bool CVehicleMovementStdBoat::Init(IVehicle* pVehicle, const SmartScriptTable &table)
 {
   if (!CVehicleMovementBase::Init(pVehicle, table))
-    return false;
+	return false;
   
   MOVEMENT_VALUE("velMax", m_velMax);      
   MOVEMENT_VALUE("velMaxReverse", m_velMaxReverse);
@@ -80,7 +80,7 @@ bool CVehicleMovementStdBoat::Init(IVehicle* pVehicle, const SmartScriptTable &t
   MOVEMENT_VALUE_OPT("pedalLimitReverse", m_pedalLimitReverse, table);
   MOVEMENT_VALUE_OPT("turnVelocityMult", m_turnVelocityMult, table);
   MOVEMENT_VALUE_OPT("velLift", m_velLift, table);
-    
+	
   table->GetValue("waveIdleStrength", m_waveIdleStrength);
   table->GetValue("waveSpeedMult", m_waveSpeedMult);
   
@@ -105,7 +105,7 @@ bool CVehicleMovementStdBoat::Init(IVehicle* pVehicle, const SmartScriptTable &t
   
   IVehiclePart* pMassPart = pVehicle->GetPart("mass");
   if (!pMassPart)
-    pMassPart = pVehicle->GetPart("massBox");
+	pMassPart = pVehicle->GetPart("massBox");
 	
   if (pMassPart)
 	{
@@ -184,9 +184,9 @@ void CVehicleMovementStdBoat::PostPhysicalize()
 
   if (GetMovementType() == eVMT_Sea)
   {
-    pe_params_foreign_data pfd; 
-    pfd.iForeignFlagsOR = PFF_UNIMPORTANT;    
-    GetPhysics()->SetParams(&pfd);
+	pe_params_foreign_data pfd; 
+	pfd.iForeignFlagsOR = PFF_UNIMPORTANT;    
+	GetPhysics()->SetParams(&pfd);
   }  
 }
 
@@ -198,8 +198,8 @@ void CVehicleMovementStdBoat::OnEvent(EVehicleMovementEvent event, const SVehicl
 
   if (eVME_BecomeVisible == event)
   {     
-    if (g_pGameCVars->v_rockBoats || m_actorId) 
-      m_pVehicle->NeedsUpdate(IVehicle::eVUF_AwakePhysics);
+	if (g_pGameCVars->v_rockBoats || m_actorId) 
+	  m_pVehicle->NeedsUpdate(IVehicle::eVUF_AwakePhysics);
   }
 }
 //------------------------------------------------------------------------
@@ -255,56 +255,56 @@ void CVehicleMovementStdBoat::UpdateRunSound(const float deltaTime)
   float acceleration = min(1.f, abs(localAccel.y) / m_accel*max(1.f, m_accelCoeff));
   if (acceleration > 0.5f) 
   {     
-    if (ISound* pSound = GetOrPlaySound(eSID_Acceleration, 2.f))
-      SetSoundParam(pSound, "acceleration", acceleration);
+	if (ISound* pSound = GetOrPlaySound(eSID_Acceleration, 2.f))
+	  SetSoundParam(pSound, "acceleration", acceleration);
   }
 
   float damage = GetSoundDamage();
   if (damage > 0.1f)
   { 
-    if (ISound* pSound = GetOrPlaySound(eSID_Damage, 5.f, m_enginePos))
-      SetSoundParam(pSound, "damage", damage);        
+	if (ISound* pSound = GetOrPlaySound(eSID_Damage, 5.f, m_enginePos))
+	  SetSoundParam(pSound, "damage", damage);        
   }
 
   // rpm dropdown for waves
   if (m_rpmPitchDir != 0)    
   { 
-    float speed = (m_rpmPitchDir > 0) ? 0.1f : -0.8f; // quick down, slow up
-    m_waveSoundPitch += deltaTime * speed;
+	float speed = (m_rpmPitchDir > 0) ? 0.1f : -0.8f; // quick down, slow up
+	m_waveSoundPitch += deltaTime * speed;
 
-    if (m_waveSoundPitch < -m_waveSoundAmount) // dropdown amount
-    {
-      m_waveSoundPitch = -m_waveSoundAmount;
-      m_rpmPitchDir = 1;
-    }      
-    else if (m_waveSoundPitch > 0.f)
-    {
-      m_waveSoundPitch = 0.f;
-      m_rpmPitchDir = 0;
-    }
+	if (m_waveSoundPitch < -m_waveSoundAmount) // dropdown amount
+	{
+	  m_waveSoundPitch = -m_waveSoundAmount;
+	  m_rpmPitchDir = 1;
+	}      
+	else if (m_waveSoundPitch > 0.f)
+	{
+	  m_waveSoundPitch = 0.f;
+	  m_rpmPitchDir = 0;
+	}
   }
 
   if (m_rpmPitchSpeed>0.f)
   {    
-    const float maxPedal = (!m_inWater) ? 1.f : Boosting() ? 0.8f : 0.7f;
+	const float maxPedal = (!m_inWater) ? 1.f : Boosting() ? 0.8f : 0.7f;
 
-    // pitch rpm with pedal          
-    float pedal = GetEnginePedal();
-    pedal = sgnnz(pedal)*max(ENGINESOUND_IDLE_RATIO, min(maxPedal, abs(pedal))); // clamp "pedal" to [0.2..0.7] range
+	// pitch rpm with pedal          
+	float pedal = GetEnginePedal();
+	pedal = sgnnz(pedal)*max(ENGINESOUND_IDLE_RATIO, min(maxPedal, abs(pedal))); // clamp "pedal" to [0.2..0.7] range
 
-    float delta = pedal - m_rpmScaleSgn;
-    m_rpmScaleSgn = max(-1.f, min(1.f, m_rpmScaleSgn + sgn(delta)*min(abs(delta), m_rpmPitchSpeed*deltaTime)));
+	float delta = pedal - m_rpmScaleSgn;
+	m_rpmScaleSgn = max(-1.f, min(1.f, m_rpmScaleSgn + sgn(delta)*min(abs(delta), m_rpmPitchSpeed*deltaTime)));
 
-    // skip transition around 0 when on pedal (sounds more realistic)
-    if (abs(GetEnginePedal()) > 0.001f && abs(delta) > 0.001f && sgn(m_rpmScaleSgn) != sgn(delta) && abs(m_rpmScaleSgn) <= 0.3f)
-      m_rpmScaleSgn = sgn(delta)*0.3f;
+	// skip transition around 0 when on pedal (sounds more realistic)
+	if (abs(GetEnginePedal()) > 0.001f && abs(delta) > 0.001f && sgn(m_rpmScaleSgn) != sgn(delta) && abs(m_rpmScaleSgn) <= 0.3f)
+	  m_rpmScaleSgn = sgn(delta)*0.3f;
 
-    // for normal driving, rpm is clamped at max defined by sound dept
-    m_rpmScale = abs(m_rpmScaleSgn);
-    m_rpmScale = min(1.f, max(ENGINESOUND_IDLE_RATIO, m_rpmScale + m_waveSoundPitch));
-    
-    SetSoundParam(eSID_Run, "rpm_scale", m_rpmScale);
-    SetSoundParam(eSID_Ambience, "rpm_scale", m_rpmScale);
+	// for normal driving, rpm is clamped at max defined by sound dept
+	m_rpmScale = abs(m_rpmScaleSgn);
+	m_rpmScale = min(1.f, max(ENGINESOUND_IDLE_RATIO, m_rpmScale + m_waveSoundPitch));
+	
+	SetSoundParam(eSID_Run, "rpm_scale", m_rpmScale);
+	SetSoundParam(eSID_Ambience, "rpm_scale", m_rpmScale);
   }
 }
 
@@ -314,8 +314,8 @@ void CVehicleMovementStdBoat::UpdateSurfaceEffects(const float deltaTime)
 {
   if (0 == g_pGameCVars->v_pa_surface)
   {
-    ResetParticles();
-    return;
+	ResetParticles();
+	return;
   }
   
   IEntity* pEntity = m_pVehicle->GetEntity();
@@ -323,7 +323,7 @@ void CVehicleMovementStdBoat::UpdateSurfaceEffects(const float deltaTime)
   
   float distSq = worldTM.GetTranslation().GetSquaredDistance(gEnv->pRenderer->GetCamera().GetPosition());
   if (distSq > sqr(300.f) || (distSq > sqr(50.f) && !m_pVehicle->GetGameObject()->IsProbablyVisible()))
-    return;
+	return;
 
   Matrix34 worldTMInv = worldTM.GetInverted();
   const SVehicleStatus& status = m_pVehicle->GetStatus();    
@@ -335,94 +335,94 @@ void CVehicleMovementStdBoat::UpdateSurfaceEffects(const float deltaTime)
   SEnvParticleStatus::TEnvEmitters::iterator end = m_paStats.envStats.emitters.end();
   for (SEnvParticleStatus::TEnvEmitters::iterator emitterIt = m_paStats.envStats.emitters.begin(); emitterIt!=end; ++emitterIt)  
   { 
-    if (emitterIt->layer < 0)
-    {
-      continue;
-    }
+	if (emitterIt->layer < 0)
+	{
+	  continue;
+	}
 
-    const SEnvironmentLayer& layer = envParams->GetLayer(emitterIt->layer);
-    
-    SEntitySlotInfo info;        
-    info.pParticleEmitter = 0;
-    pEntity->GetSlotInfo(emitterIt->slot, info);        
+	const SEnvironmentLayer& layer = envParams->GetLayer(emitterIt->layer);
+	
+	SEntitySlotInfo info;        
+	info.pParticleEmitter = 0;
+	pEntity->GetSlotInfo(emitterIt->slot, info);        
 
-    float countScale = 1.f;
-    float sizeScale = 1.f;
+	float countScale = 1.f;
+	float sizeScale = 1.f;
 		float speedScale = 1.f;
-    float speed = 0.f;
+	float speed = 0.f;
 
-    // check if helper position is beneath water level      
-                
-    Vec3 emitterWorldPos = worldTM * emitterIt->quatT.t;
-    float waterLevel = gEnv->p3DEngine->GetWaterLevel(&emitterWorldPos);
-    int matId = 0;
-    
-    if (emitterWorldPos.z <= waterLevel+0.1f && m_statusDyn.submergedFraction<0.999f)
-    {
-      matId = gEnv->pPhysicalWorld->GetWaterMat();
-      speed = status.speed;
+	// check if helper position is beneath water level      
+				
+	Vec3 emitterWorldPos = worldTM * emitterIt->quatT.t;
+	float waterLevel = gEnv->p3DEngine->GetWaterLevel(&emitterWorldPos);
+	int matId = 0;
+	
+	if (emitterWorldPos.z <= waterLevel+0.1f && m_statusDyn.submergedFraction<0.999f)
+	{
+	  matId = gEnv->pPhysicalWorld->GetWaterMat();
+	  speed = status.speed;
 
-      bool spray = !strcmp(layer.GetName(), "spray");        
-      
-      if (spray)
-      {
-        // slip based          
-        speed -= abs(velDot);
-      }
+	  bool spray = !strcmp(layer.GetName(), "spray");        
+	  
+	  if (spray)
+	  {
+		// slip based          
+		speed -= abs(velDot);
+	  }
 
-      GetParticleScale(layer, speed, powerNorm, countScale, sizeScale, speedScale);
-    }
-    else
-    {
-      countScale = 0.f;
-    }
-    
-    if (matId && matId != emitterIt->matId)
-    {
-      // change effect       
-      IParticleEffect* pEff = 0;                
-      const char* effect = GetEffectByIndex( matId, layer.GetName() );
+	  GetParticleScale(layer, speed, powerNorm, countScale, sizeScale, speedScale);
+	}
+	else
+	{
+	  countScale = 0.f;
+	}
+	
+	if (matId && matId != emitterIt->matId)
+	{
+	  // change effect       
+	  IParticleEffect* pEff = 0;                
+	  const char* effect = GetEffectByIndex( matId, layer.GetName() );
 
-      if (effect && (pEff = gEnv->p3DEngine->FindParticleEffect(effect)))
-      {           
-        if (info.pParticleEmitter)
-        {
-          info.pParticleEmitter->Activate(false);
-          pEntity->FreeSlot(emitterIt->slot);                  
-        }
+	  if (effect && (pEff = gEnv->p3DEngine->FindParticleEffect(effect)))
+	  {           
+		if (info.pParticleEmitter)
+		{
+		  info.pParticleEmitter->Activate(false);
+		  pEntity->FreeSlot(emitterIt->slot);                  
+		}
 
-        emitterIt->slot = pEntity->LoadParticleEmitter(emitterIt->slot, pEff);
+		emitterIt->slot = pEntity->LoadParticleEmitter(emitterIt->slot, pEff);
 
-        if (emitterIt->slot != -1)
-          pEntity->SetSlotLocalTM(emitterIt->slot, Matrix34(emitterIt->quatT));
+		if (emitterIt->slot != -1)
+		  pEntity->SetSlotLocalTM(emitterIt->slot, Matrix34(emitterIt->quatT));
 
-        info.pParticleEmitter = 0;
-        pEntity->GetSlotInfo(emitterIt->slot, info);
-      }
-      else
-        countScale = 0.f;
-    }
+		info.pParticleEmitter = 0;
+		pEntity->GetSlotInfo(emitterIt->slot, info);
+	  }
+	  else
+		countScale = 0.f;
+	}
 
-    if (matId)
-      emitterIt->matId = matId;
+	if (matId)
+	  emitterIt->matId = matId;
 
-    if (info.pParticleEmitter)
-    {
-      SpawnParams sp;
-      sp.fSizeScale = sizeScale;
-      sp.fCountScale = countScale;    
+	if (info.pParticleEmitter)
+	{
+	  SpawnParams sp;
+	  sp.fSizeScale = sizeScale;
+	  sp.fCountScale = countScale;    
 			sp.fSpeedScale = speedScale;
-      info.pParticleEmitter->SetSpawnParams(sp);
+	  info.pParticleEmitter->SetSpawnParams(sp);
 
-      if (layer.alignToWater && countScale > 0.f)
-      {          
-        Vec3 worldPos(emitterWorldPos.x, emitterWorldPos.y, waterLevel+0.05f);
+	  if (layer.alignToWater && countScale > 0.f)
+	  {          
+		Vec3 worldPos(emitterWorldPos.x, emitterWorldPos.y, waterLevel+0.05f);
 
-        Matrix34 localTM(emitterIt->quatT);
-        localTM.SetTranslation(worldTMInv * worldPos);
-        pEntity->SetSlotLocalTM(emitterIt->slot, localTM);           
-      }
-    }
+		Matrix34 localTM(emitterIt->quatT);
+		localTM.SetTranslation(worldTMInv * worldPos);
+		pEntity->SetSlotLocalTM(emitterIt->slot, localTM);           
+	  }
+	}
   }
 
   // generate water splashes
@@ -431,51 +431,51 @@ void CVehicleMovementStdBoat::UpdateSurfaceEffects(const float deltaTime)
 
   Vec3 localW = worldTMInv.TransformVector(m_statusDyn.w);   
   if (localW.x >= 0.f)
-    m_diving = false;
-      
+	m_diving = false;
+	  
   if (!m_diving && localW.x < -0.03f && status.speed > 10.f && wakePos.z < m_lastWakePos.z && wakeWaterLevel+0.1f >= wakePos.z)
   {
-    float speedRatio = min(1.f, status.speed/m_maxSpeed); 
-    m_diving = true;              
-    
-    if (m_pWaveEffect)
-    {
-      if (IParticleEmitter* pEmitter = pEntity->GetParticleEmitter(m_wakeSlot))
-      {
-        pEmitter->Activate(false);
-        pEntity->FreeSlot(m_wakeSlot);
-        m_wakeSlot = -1;
-      }
+	float speedRatio = min(1.f, status.speed/m_maxSpeed); 
+	m_diving = true;              
+	
+	if (m_pWaveEffect)
+	{
+	  if (IParticleEmitter* pEmitter = pEntity->GetParticleEmitter(m_wakeSlot))
+	  {
+		pEmitter->Activate(false);
+		pEntity->FreeSlot(m_wakeSlot);
+		m_wakeSlot = -1;
+	  }
 
-      SpawnParams spawnParams;
-      spawnParams.fSizeScale = spawnParams.fCountScale = 0.5f + 0.25f*speedRatio;
-      spawnParams.fSizeScale  += 0.4f*m_waveRandomMult;
-      spawnParams.fCountScale += 0.4f*Random();
+	  SpawnParams spawnParams;
+	  spawnParams.fSizeScale = spawnParams.fCountScale = 0.5f + 0.25f*speedRatio;
+	  spawnParams.fSizeScale  += 0.4f*m_waveRandomMult;
+	  spawnParams.fCountScale += 0.4f*Random();
 
-      m_wakeSlot = pEntity->LoadParticleEmitter(m_wakeSlot, m_pWaveEffect, &spawnParams);        
-    }
+	  m_wakeSlot = pEntity->LoadParticleEmitter(m_wakeSlot, m_pWaveEffect, &spawnParams);        
+	}
 
-    // handle splash sound
-    PlaySound(eSID_Splash, 0.f, Vec3(0,5,1));      
-    SetSoundParam(eSID_Splash, "intensity", 0.2f*speedRatio + 0.5f*m_waveRandomMult);     
+	// handle splash sound
+	PlaySound(eSID_Splash, 0.f, Vec3(0,5,1));      
+	SetSoundParam(eSID_Splash, "intensity", 0.2f*speedRatio + 0.5f*m_waveRandomMult);     
 
-    if (m_rpmPitchDir == 0)
-    {
-      m_rpmPitchDir = -1;
-      m_waveSoundPitch = 0.f;
-      m_waveSoundAmount = 0.02f + m_waveRandomMult*0.08f;
-    }      
+	if (m_rpmPitchDir == 0)
+	{
+	  m_rpmPitchDir = -1;
+	  m_waveSoundPitch = 0.f;
+	  m_waveSoundAmount = 0.02f + m_waveRandomMult*0.08f;
+	}      
   }  
 
   if (m_wakeSlot != -1)
   { 
-    // update emitter local pos to short above waterlevel
-    Matrix34 tm(m_pSplashPos ? m_pSplashPos->GetVehicleTM() : IDENTITY);
+	// update emitter local pos to short above waterlevel
+	Matrix34 tm(m_pSplashPos ? m_pSplashPos->GetVehicleTM() : IDENTITY);
 
-    Vec3 pos = tm.GetTranslation();
-    pos.z = worldTMInv.TransformPoint(Vec3(wakePos.x,wakePos.y,wakeWaterLevel)).z + 0.2f;
-    tm.SetTranslation(pos);
-    pEntity->SetSlotLocalTM(m_wakeSlot, tm);        
+	Vec3 pos = tm.GetTranslation();
+	pos.z = worldTMInv.TransformPoint(Vec3(wakePos.x,wakePos.y,wakeWaterLevel)).z + 0.2f;
+	tm.SetTranslation(pos);
+	pEntity->SetSlotLocalTM(m_wakeSlot, tm);        
   } 
 
   m_lastWakePos = wakePos;
@@ -486,7 +486,7 @@ void CVehicleMovementStdBoat::UpdateSurfaceEffects(const float deltaTime)
 void CVehicleMovementStdBoat::Lift(bool lift)
 { 
   if (lift == m_lifted || m_velLift == 0.f)
-    return;
+	return;
 
   m_lifted = lift;
 }
@@ -612,7 +612,7 @@ void CVehicleMovementStdBoat::ProcessMovement(const float deltaTime)
   static const float fMinSpeedForTurn = 0.5f; // min speed so that turning becomes possible
   
   if (m_bNetSync)
-    m_netActionSync.UpdateObject(this);
+	m_netActionSync.UpdateObject(this);
 
   CryAutoLock<CryFastLock> lk(m_lock);
 
@@ -624,15 +624,15 @@ void CVehicleMovementStdBoat::ProcessMovement(const float deltaTime)
   float frameTime = min(deltaTime, 0.1f); 
 
   if (abs(m_movementAction.power) < 0.001f)
-    m_movementAction.power = 0.f;
+	m_movementAction.power = 0.f;
   if (abs(m_movementAction.rotateYaw) < 0.001f)
-    m_movementAction.rotateYaw = 0.f;
+	m_movementAction.rotateYaw = 0.f;
 
   Matrix34 wTM( m_PhysPos.q );
   wTM.AddTranslation( m_PhysPos.pos );
 
   Matrix34 wTMInv = wTM.GetInvertedFast();
-    
+	
   Vec3 localVel = wTMInv.TransformVector( m_PhysDyn.v );
   Vec3 localW = wTMInv.TransformVector( m_PhysDyn.w );   
   
@@ -643,7 +643,7 @@ void CVehicleMovementStdBoat::ProcessMovement(const float deltaTime)
   
   bool submerged = m_PhysDyn.submergedFraction > fSubmergedMin;
   m_inWater = submerged && fWaterLevelDiff < fWaterLevelMaxDiff;
-    
+	
   float speed = m_PhysDyn.v.len2() > 0.001f ? m_PhysDyn.v.len() : 0.f;    
   float speedRatio = min(1.f, speed/m_maxSpeed);  
   float absPedal = abs(m_movementAction.power);
@@ -659,10 +659,10 @@ void CVehicleMovementStdBoat::ProcessMovement(const float deltaTime)
 
   // new randomized amount for this oscillation
   if (m_waveTimer >= gf_PI && waveTimerPrev < gf_PI) 
-    m_waveRandomMult = Random();  
+	m_waveRandomMult = Random();  
   
   if (m_waveTimer >= 2*gf_PI)  
-    m_waveTimer -= 2*gf_PI;    
+	m_waveTimer -= 2*gf_PI;    
 
   float kx = m_waveIdleStrength.x*(m_waveRandomMult+0.3f) + m_waveSpeedMult*speedRatio;
   float ky = m_waveIdleStrength.y * (1.f - 0.5f*absPedal - 0.5f*absSteer);
@@ -673,27 +673,27 @@ void CVehicleMovementStdBoat::ProcessMovement(const float deltaTime)
 
   bool visible = m_pVehicle->GetGameObject()->IsProbablyVisible();
   bool doWave = visible && submerged && m_PhysDyn.submergedFraction < 0.99f;
-    
+	
   if (doWave && !m_isEnginePowered)
-    m_pVehicle->NeedsUpdate(IVehicle::eVUF_AwakePhysics, true);
+	m_pVehicle->NeedsUpdate(IVehicle::eVUF_AwakePhysics, true);
   
   if (m_isEnginePowered || (visible && !m_pVehicle->GetGameObject()->IsProbablyDistant()))
   {
-    if (doWave && (m_isEnginePowered || g_pGameCVars->v_rockBoats))
-    { 
-      pe_action_impulse waveImp;
-      waveImp.angImpulse.x = Boosting() ? 0.f : sin(m_waveTimer) * frameTime * m_Inertia.x * kx;
-      
-      if (isneg(waveImp.angImpulse.x))
-        waveImp.angImpulse.x *= (1.f - min(1.f, 2.f*speedRatio)); // less amplitude for negative impulse      
+	if (doWave && (m_isEnginePowered || g_pGameCVars->v_rockBoats))
+	{ 
+	  pe_action_impulse waveImp;
+	  waveImp.angImpulse.x = Boosting() ? 0.f : sin(m_waveTimer) * frameTime * m_Inertia.x * kx;
+	  
+	  if (isneg(waveImp.angImpulse.x))
+		waveImp.angImpulse.x *= (1.f - min(1.f, 2.f*speedRatio)); // less amplitude for negative impulse      
 
-      waveImp.angImpulse.y = sin(m_waveTimer-0.5f*gf_PI) * frameTime * m_Inertia.y * ky;  
-      waveImp.angImpulse.z = 0.f;
-      waveImp.angImpulse = wTM.TransformVector(waveImp.angImpulse);
-      waveImp.point = waveLoc;
-      if (!m_movementAction.isAI)
-	      pPhysics->Action(&waveImp, 1);      
-    }
+	  waveImp.angImpulse.y = sin(m_waveTimer-0.5f*gf_PI) * frameTime * m_Inertia.y * ky;  
+	  waveImp.angImpulse.z = 0.f;
+	  waveImp.angImpulse = wTM.TransformVector(waveImp.angImpulse);
+	  waveImp.point = waveLoc;
+	  if (!m_movementAction.isAI)
+		  pPhysics->Action(&waveImp, 1);      
+	}
   }
   // ~wave stuff 
 
@@ -705,127 +705,127 @@ void CVehicleMovementStdBoat::ProcessMovement(const float deltaTime)
 
   if (m_inWater)
   {     
-    // optional lifting (catamarans)
-    if (m_velLift > 0.f)
-    {
-      if (localVel.y > m_velLift && !IsLifted())
-        Lift(true);
-      else if (localVel.y < m_velLift && IsLifted())
-        Lift(false);
-    }
+	// optional lifting (catamarans)
+	if (m_velLift > 0.f)
+	{
+	  if (localVel.y > m_velLift && !IsLifted())
+		Lift(true);
+	  else if (localVel.y < m_velLift && IsLifted())
+		Lift(false);
+	}
 
-    if (Boosting() && IsLifted())
-    {
-      // additional lift force      
-      liftImp.impulse = Vec3(0,0,m_PhysDyn.mass*frameTime*(localVel.y/m_velMax)*3.f);
-      liftImp.point = wTM * m_massOffset;
-      pPhysics->Action(&liftImp, 1);
-    }
-    
-    // apply driving force         
-    float a = m_movementAction.power;
+	if (Boosting() && IsLifted())
+	{
+	  // additional lift force      
+	  liftImp.impulse = Vec3(0,0,m_PhysDyn.mass*frameTime*(localVel.y/m_velMax)*3.f);
+	  liftImp.point = wTM * m_massOffset;
+	  pPhysics->Action(&liftImp, 1);
+	}
+	
+	// apply driving force         
+	float a = m_movementAction.power;
 
-    if (sgn(a)*sgn(localVel.y) > 0)
-    {
-      // reduce acceleration with increasing speed
-      float ratio = (localVel.y > 0.f) ? localVel.y/m_velMax : -localVel.y/m_velMaxReverse;      
-      a = (ratio>1.f) ? 0.f : sgn(a)*min(abs(a), 1.f-((1.f-m_accelVelMax)*sqr(ratio))); 
-    }
-    
-    if (a != 0)
-    {
-      if (sgn(a) * sgn(localVel.y) < 0) // "braking"
-        a *= m_accelCoeff;    
-      else
-        a = max(a, -m_pedalLimitReverse);
+	if (sgn(a)*sgn(localVel.y) > 0)
+	{
+	  // reduce acceleration with increasing speed
+	  float ratio = (localVel.y > 0.f) ? localVel.y/m_velMax : -localVel.y/m_velMaxReverse;      
+	  a = (ratio>1.f) ? 0.f : sgn(a)*min(abs(a), 1.f-((1.f-m_accelVelMax)*sqr(ratio))); 
+	}
+	
+	if (a != 0)
+	{
+	  if (sgn(a) * sgn(localVel.y) < 0) // "braking"
+		a *= m_accelCoeff;    
+	  else
+		a = max(a, -m_pedalLimitReverse);
 
-      Vec3 pushDir(FORWARD_DIRECTION);                
-      
-      // apply force downwards a bit for more realistic response  
-      if (a > 0)
-        pushDir = Quat_tpl<float>::CreateRotationAA( DEG2RAD(m_pushTilt), Vec3(-1,0,0) ) * pushDir;
+	  Vec3 pushDir(FORWARD_DIRECTION);                
+	  
+	  // apply force downwards a bit for more realistic response  
+	  if (a > 0)
+		pushDir = Quat_tpl<float>::CreateRotationAA( DEG2RAD(m_pushTilt), Vec3(-1,0,0) ) * pushDir;
 
-      pushDir = wTM.TransformVector( pushDir );  
-      linearImp.impulse = pushDir * m_PhysDyn.mass * a * m_accel * frameTime;
+	  pushDir = wTM.TransformVector( pushDir );  
+	  linearImp.impulse = pushDir * m_PhysDyn.mass * a * m_accel * frameTime;
 
-      linearImp.point = m_pushOffset;
-      linearImp.point.x = m_massOffset.x;
-      linearImp.point = wTM * linearImp.point;
+	  linearImp.point = m_pushOffset;
+	  linearImp.point.x = m_massOffset.x;
+	  linearImp.point = wTM * linearImp.point;
 	  pPhysics->Action(&linearImp, 1);
-    } 
-    
-    float roll = 0.f;
-    
-    // apply steering           
-    if (m_movementAction.rotateYaw != 0)
-    { 
-      if (abs(localVel.y) < fMinSpeedForTurn){ // if forward speed too small, no turning possible
-        turnAccel = 0; 
-      }
-      else 
-      {
-        int iDir = m_movementAction.power != 0.f ? sgn(m_movementAction.power) : sgn(localVel.y);
-        turnAccelNorm = m_movementAction.rotateYaw * iDir * max(1.f, m_turnVelocityMult * speedRatio);    
+	} 
+	
+	float roll = 0.f;
+	
+	// apply steering           
+	if (m_movementAction.rotateYaw != 0)
+	{ 
+	  if (abs(localVel.y) < fMinSpeedForTurn){ // if forward speed too small, no turning possible
+		turnAccel = 0; 
+	  }
+	  else 
+	  {
+		int iDir = m_movementAction.power != 0.f ? sgn(m_movementAction.power) : sgn(localVel.y);
+		turnAccelNorm = m_movementAction.rotateYaw * iDir * max(1.f, m_turnVelocityMult * speedRatio);    
 
-        // steering and current w in same direction?
-        int sgnSteerW = sgn(m_movementAction.rotateYaw) * iDir * sgn(-localW.z);
+		// steering and current w in same direction?
+		int sgnSteerW = sgn(m_movementAction.rotateYaw) * iDir * sgn(-localW.z);
 
-        if (sgnSteerW < 0)
-        { 
-          // "braking"
-          turnAccelNorm *= m_turnAccelCoeff; 
-        }
-        else 
-        {    
-          // reduce turn vel towards max
-          float maxRatio = 1.f - 0.15f*min(1.f, abs(localW.z)/m_turnRateMax);
-          turnAccelNorm = sgn(turnAccelNorm) * min(abs(turnAccelNorm), maxRatio);
-        }
+		if (sgnSteerW < 0)
+		{ 
+		  // "braking"
+		  turnAccelNorm *= m_turnAccelCoeff; 
+		}
+		else 
+		{    
+		  // reduce turn vel towards max
+		  float maxRatio = 1.f - 0.15f*min(1.f, abs(localW.z)/m_turnRateMax);
+		  turnAccelNorm = sgn(turnAccelNorm) * min(abs(turnAccelNorm), maxRatio);
+		}
 
-        turnAccel = turnAccelNorm * m_turnAccel;     
-      }        
-    }    
-    else 
-    { 
-      // if no steering, damp rotation                
-      turnAccel = localW.z * m_turnDamping;
-    }
-    
-    if (turnAccel != 0)
-    {
-      Vec3& angImp = angularImp.angImpulse; 
-      
-      angImp.x = 0.f;
-      angImp.y = roll * frameTime * m_Inertia.y;
-      angImp.z = -turnAccel * frameTime * m_Inertia.z;      
-      
-      angImp = wTM.TransformVector( angImp );
-      pPhysics->Action(&angularImp, 1);
-    }   
-    
-    if (abs(localVel.x) > 0.01f)  
-    { 
-      // lateral force         
-      Vec3& cornerForce = dampImp.impulse;
-      
-      cornerForce.x = -localVel.x * m_cornerForceCoeff * m_PhysDyn.mass * frameTime;
-      cornerForce.y = 0.f;
-      cornerForce.z = 0.f;
-      
-      if (m_cornerTilt != 0)
-        cornerForce = Quat_tpl<float>::CreateRotationAA( sgn(localVel.x)*DEG2RAD(m_cornerTilt), Vec3(0,1,0) ) * cornerForce;
+		turnAccel = turnAccelNorm * m_turnAccel;     
+	  }        
+	}    
+	else 
+	{ 
+	  // if no steering, damp rotation                
+	  turnAccel = localW.z * m_turnDamping;
+	}
+	
+	if (turnAccel != 0)
+	{
+	  Vec3& angImp = angularImp.angImpulse; 
+	  
+	  angImp.x = 0.f;
+	  angImp.y = roll * frameTime * m_Inertia.y;
+	  angImp.z = -turnAccel * frameTime * m_Inertia.z;      
+	  
+	  angImp = wTM.TransformVector( angImp );
+	  pPhysics->Action(&angularImp, 1);
+	}   
+	
+	if (abs(localVel.x) > 0.01f)  
+	{ 
+	  // lateral force         
+	  Vec3& cornerForce = dampImp.impulse;
+	  
+	  cornerForce.x = -localVel.x * m_cornerForceCoeff * m_PhysDyn.mass * frameTime;
+	  cornerForce.y = 0.f;
+	  cornerForce.z = 0.f;
+	  
+	  if (m_cornerTilt != 0)
+		cornerForce = Quat_tpl<float>::CreateRotationAA( sgn(localVel.x)*DEG2RAD(m_cornerTilt), Vec3(0,1,0) ) * cornerForce;
 
-      dampImp.impulse = wTM.TransformVector(cornerForce);
+	  dampImp.impulse = wTM.TransformVector(cornerForce);
 
-      dampImp.point = m_cornerOffset;
-      dampImp.point.x = m_massOffset.x;
-      dampImp.point = wTM.TransformPoint( dampImp.point );
-      pPhysics->Action(&dampImp, 1);         
-    }  
+	  dampImp.point = m_cornerOffset;
+	  dampImp.point.x = m_massOffset.x;
+	  dampImp.point = wTM.TransformPoint( dampImp.point );
+	  pPhysics->Action(&dampImp, 1);         
+	}  
   }
   
   if (m_bNetSync && m_netActionSync.PublishActions( CNetworkMovementStdBoat(this) ))
-    m_pVehicle->GetGameObject()->ChangedNetworkState( eEA_GameClientDynamic );
+	m_pVehicle->GetGameObject()->ChangedNetworkState( eEA_GameClientDynamic );
 }
 
 //------------------------------------------------------------------------
@@ -880,13 +880,13 @@ void CVehicleMovementStdBoat::Serialize(TSerialize ser, unsigned aspects)
 
   if (ser.GetSerializationTarget() == eST_Network) 
   {
-    if (m_bNetSync && aspects & CNetworkMovementStdBoat::CONTROLLED_ASPECT)
-      m_netActionSync.Serialize(ser, aspects);
+	if (m_bNetSync && aspects & CNetworkMovementStdBoat::CONTROLLED_ASPECT)
+	  m_netActionSync.Serialize(ser, aspects);
   }
   else
   {
-    ser.Value("m_prevAngle", m_prevAngle);
-    ser.Value("lifted", m_lifted);
+	ser.Value("m_prevAngle", m_prevAngle);
+	ser.Value("lifted", m_lifted);
   }
 };
 
@@ -925,9 +925,9 @@ void CNetworkMovementStdBoat::Serialize(TSerialize ser, unsigned aspects)
 {
   if (ser.GetSerializationTarget()==eST_Network && aspects&CONTROLLED_ASPECT)
   {
-    ser.Value("pedal", m_pedal, 'vPed');
-    ser.Value("steer", m_steer, 'vStr');   
-    ser.Value("boost", m_boost, 'bool');
+	ser.Value("pedal", m_pedal, 'vPed');
+	ser.Value("steer", m_steer, 'vStr');   
+	ser.Value("boost", m_boost, 'bool');
   }
 }
 

@@ -205,36 +205,36 @@ void CPlayerView::ViewProcess(SViewParams &viewParams)
 			ViewFirstThirdSharedPost(viewParams);
 	}
 	// Externally controlled first person view e.g. by animation
- 	else if ((m_in.stats_isRagDoll || m_in.stats_isFrozen || m_in.stats_isStandingUp) && !m_in.bIsThirdPerson && !m_in.stats_onLadder && m_in.pCharacter && (m_in.stats_firstPersonBody==1 || m_in.stats_followCharacterHead))
- 	{
- 		ViewFollowCharacterFirstPerson(viewParams);
- 	}
- 	else if (m_in.pVehicle)
- 	{
- 		ViewVehicle(viewParams);
- 	}
- 	else if(m_in.stats_onLadder)
- 	{
- 		ViewFirstThirdSharedPre(viewParams);
- 		ViewFirstPersonOnLadder(viewParams);
- 	}
-  else if(m_in.stats_spectatorMode == CActor::eASM_Follow)
- 	{
+	else if ((m_in.stats_isRagDoll || m_in.stats_isFrozen || m_in.stats_isStandingUp) && !m_in.bIsThirdPerson && !m_in.stats_onLadder && m_in.pCharacter && (m_in.stats_firstPersonBody==1 || m_in.stats_followCharacterHead))
+	{
+		ViewFollowCharacterFirstPerson(viewParams);
+	}
+	else if (m_in.pVehicle)
+	{
+		ViewVehicle(viewParams);
+	}
+	else if(m_in.stats_onLadder)
+	{
 		ViewFirstThirdSharedPre(viewParams);
- 		ViewSpectatorTarget(viewParams);
+		ViewFirstPersonOnLadder(viewParams);
+	}
+  else if(m_in.stats_spectatorMode == CActor::eASM_Follow)
+	{
+		ViewFirstThirdSharedPre(viewParams);
+		ViewSpectatorTarget(viewParams);
 		ViewFirstThirdSharedPost(viewParams);
- 	}
- 	else
- 	{
- 		ViewFirstThirdSharedPre(viewParams);
+	}
+	else
+	{
+		ViewFirstThirdSharedPre(viewParams);
  
 		if (m_in.bIsThirdPerson || m_in.stats_isShattered || m_io.bUsePivot)
- 			ViewThirdPerson(viewParams);
- 		else
- 			ViewFirstPerson(viewParams);
+			ViewThirdPerson(viewParams);
+		else
+			ViewFirstPerson(viewParams);
  
- 		ViewFirstThirdSharedPost(viewParams);
- 	}
+		ViewFirstThirdSharedPost(viewParams);
+	}
 }
 
 //--------------------------------------------------------------------------
@@ -347,8 +347,8 @@ void CPlayerView::ViewFirstThirdSharedPost(SViewParams &viewParams)
 
   if(g_pGameCVars->g_detachCamera!=0)
   {
-      viewParams.position = m_in.lastPos;
-      viewParams.rotation = m_in.lastQuat;
+	  viewParams.position = m_in.lastPos;
+	  viewParams.rotation = m_in.lastQuat;
   }
 
 	//--- Weapon orientation

@@ -60,7 +60,7 @@ protected:
 		float defaultValue;
 		float* pValue;
 		bool isRestrictedToMult;
-    bool blocked;
+	bool blocked;
 	};
 
 	typedef std::vector <SValue> TValueVector;

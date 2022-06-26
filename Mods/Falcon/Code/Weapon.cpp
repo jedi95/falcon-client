@@ -645,7 +645,7 @@ void CWeapon::FullSerialize( TSerialize ser )
 		}
 		for(int i = 0; i < numFiremodes; ++i)
 			m_firemodes[i]->Serialize(ser);
-    
+	
 		bool hasZoom = (m_zm)?true:false;
 		ser.Value("hasZoom", hasZoom);
 		if(hasZoom)
@@ -667,8 +667,8 @@ void CWeapon::FullSerialize( TSerialize ser )
 				m_restartZoom = isZoomed;
 				m_restartZoomStep = (zoomStep<=1)?zoomStep:1; //Only enter first zoom step, not succesive
 
-        if (!isZoomed)
-          m_zm->ExitZoom();
+		if (!isZoomed)
+		  m_zm->ExitZoom();
 			}
 		}
 
@@ -902,7 +902,7 @@ void CWeapon::Reset()
 	// clean up firemodes
 	for (TFireModeVector::iterator it = m_firemodes.begin(); it != m_firemodes.end(); it++)
 		(*it)->Release();
-  	
+	
   // clean up zoommodes
 	for (TZoomModeVector::iterator it = m_zoommodes.begin(); it != m_zoommodes.end(); it++)
 		(*it)->Release();
@@ -1231,8 +1231,8 @@ Vec3 CWeapon::GetFiringDir(const Vec3 &probableHit, const Vec3& firingPos) const
 void CWeapon::StartFire()
 {
 	CActor *pOwner = GetOwnerActor();
-  if (IsDestroyed())
-    return;
+	if (IsDestroyed())
+		return;
 
 	if(pOwner)
 	{
@@ -1291,11 +1291,6 @@ void CWeapon::StartZoom(EntityId actorId, int zoomed)
 		bool stayZoomed = (m_zm->IsZoomed() && m_zm->IsZooming() && !m_zm->IsToggle());
 		m_zm->StartZoom(stayZoomed, true, zoomed);
 	}
-	else
-	{
-		// If the view does not zoom, we need to force aim assistance
-		AssistAiming(1, true);
-	}
 }
 
 //------------------------------------------------------------------------
@@ -1334,166 +1329,6 @@ bool CWeapon::IsZooming() const
 bool CWeapon::IsReloading() const
 {
 	return m_fm && m_fm->IsReloading();
-}
-
-void CWeapon::AssistAiming(float magnification, bool accurate)
-{
-	// Check for assistance switches
-	if (!accurate && !g_pGameCVars->aim_assistTriggerEnabled)
-		return;
-
-	if (accurate && !g_pGameCVars->aim_assistAimEnabled)
-		return;
-		
-	// Check for assistance restriction
-	if (!SAFE_HUD_FUNC_RET(IsInputAssisted()))
-		return;
-
-	IEntity *res=NULL;
-
-	IActor *pSelfActor=g_pGame->GetIGameFramework()->GetClientActor();
-	if (!pSelfActor)
-		return;
-
-	IEntity *pSelf=pSelfActor->GetEntity();
-	if (GetOwner() != pSelf)
-		return;
-
-	// Do not use in case of vehicle mounted weaponry
-	if (pSelfActor->GetLinkedVehicle())
-		return;
-
-	IPhysicalEntity *pSelfPhysics=pSelf->GetPhysics();
-	IMovementController * pMC = pSelfActor->GetMovementController();
-	if(!pMC || !pSelfPhysics)
-		return;
-
-	SMovementState info;
-	pMC->GetMovementState(info);
-
-	// If already having a valid target, don't do anything
-	ray_hit hit;
-	if (gEnv->pPhysicalWorld->RayWorldIntersection(info.eyePosition, info.eyeDirection*500.0f, ent_all, (13&rwi_pierceability_mask), &hit, 1, &pSelfPhysics, 1))
-	{
-		if (!hit.bTerrain && hit.pCollider != pSelfPhysics)
-		{
-			if (IsValidAssistTarget(gEnv->pEntitySystem->GetEntityFromPhysics(hit.pCollider), pSelf))
-				return;
-		}
-	}
-
-	const CCamera &camera=GetISystem()->GetViewCamera();
-	Vec3 origo=camera.GetPosition();
-	// PARAMETER: Autotarget search radius
-	const float radius=g_pGameCVars->aim_assistSearchBox;
-	
-	// Some other ray may be used too, like weapon aiming or firing ray 
-	Line aim=Line(info.eyePosition, info.eyeDirection);
-
-	int betsTarget=-1;
-	// PARAMETER: The largest deviance between aiming and target compensated by autoaim
-	//	Magnification is used for scopes, but greatly downscaled to avoid random snaps in viewfield
-	float maxSnapSqr=g_pGameCVars->aim_assistSnapDistance*sqrt(magnification);
-	maxSnapSqr*=maxSnapSqr;
-	float bestSnapSqr=maxSnapSqr;
-	// PARAMETER: maximum range at which autotargetting works
-	float maxDistanceSqr=g_pGameCVars->aim_assistMaxDistance;
-	maxDistanceSqr*=maxDistanceSqr;
-	Vec3 bestTarget;
-
-	const std::vector<EntityId> *entitiesInProximity = SAFE_HUD_FUNC_RET(GetRadar()->GetNearbyEntities());
-	IEntitySystem *pEntitySystem = gEnv->pEntitySystem;
-
-	for(int iEntity=0; iEntity<entitiesInProximity->size(); ++iEntity)
-	{
-		IEntity *pEntity = pEntitySystem->GetEntity((*entitiesInProximity)[iEntity]);
-		if(!pEntity)
-			continue;
-
-		// Check for target validity
-		if (!IsValidAssistTarget(pEntity, pSelf))
-			continue;
-
-		IPhysicalEntity *pPhysics=pEntity->GetPhysics();
-
-		if (!pPhysics)
-			continue;
-
-		Vec3 target=pEntity->GetWorldPos();
-		pe_status_dynamics dyn;
-		if (pPhysics->GetStatus(&dyn))
-			target=dyn.centerOfMass;
-				
-		if (target.GetSquaredDistance(origo) < maxDistanceSqr &&
-			camera.IsPointVisible(target))
-		{
-			float dst=LinePointDistanceSqr(aim, target, g_pGameCVars->aim_assistVerticalScale);
-			
-			if (dst<bestSnapSqr)
-			{
-				// Check if can be hit directly after auto aim
-				ray_hit chkhit;
-				if (gEnv->pPhysicalWorld->RayWorldIntersection(info.eyePosition, (target-info.eyePosition)*500.0f, ent_all, (13&rwi_pierceability_mask), &chkhit, 1, &pSelfPhysics, 1))
-				{
-					IEntity *pFound=gEnv->pEntitySystem->GetEntityFromPhysics(chkhit.pCollider);
-					if (pFound != pEntity)
-						continue;
-				}
-				else
-				{
-					continue;
-				}
-
-				res=pEntity;
-				bestSnapSqr=dst;
-				bestTarget=target;
-			}
-		}
-	}
-
-	if (res)
-	{
-		CMovementRequest req;
-		Vec3 v0=info.eyeDirection;
-		Vec3 v1=bestTarget-info.eyePosition;
-		v0.Normalize();
-		v1.Normalize();
-
-		Matrix34 mInvWorld = pSelf->GetWorldTM();
-		mInvWorld.Invert();
-
-		v0 = mInvWorld.TransformVector( v0 );
-		v1 = mInvWorld.TransformVector( v1 );
-
-		Ang3 deltaR=Ang3(Quat::CreateRotationV0V1(v0, v1));
-		float scale=1.0f;
-		
-		if (!accurate)
-		{
-			IFireMode *pFireMode = GetFireMode(GetCurrentFireMode());
-			if (!pFireMode)
-				return;
-
-			string modetype (pFireMode->GetType());
-			if (modetype.empty())
-				return;
-
-			float assistMod=1.0f;
-
-			if (!modetype.compareNoCase("Automatic")||
-				!modetype.compareNoCase("Beam") ||
-				!modetype.compareNoCase("Burst") ||
-				!modetype.compareNoCase("Rapid"))
-				assistMod=g_pGameCVars->aim_assistAutoCoeff;
-			else
-				assistMod=g_pGameCVars->aim_assistSingleCoeff;
-				
-			scale=sqr(1.0f-bestSnapSqr/maxSnapSqr)*assistMod;
-		}
-
-		req.AddDeltaRotation(deltaR*scale);
-		pMC->RequestMovement(req);
-	}
 }
 
 bool CWeapon::IsValidAssistTarget(IEntity *pEntity, IEntity *pSelf,bool includeVehicles)
@@ -2414,10 +2249,10 @@ void CWeapon::SetDestinationEntity(EntityId targetId)
 
   if (pEntity)
   {
-    AABB box;
-    pEntity->GetWorldBounds(box);
-    
-    SetDestination(box.GetCenter());
+	AABB box;
+	pEntity->GetWorldBounds(box);
+	
+	SetDestination(box.GetCenter());
   }
 }
 
@@ -2528,8 +2363,8 @@ void CWeapon::OnDestroyed()
 
   if (m_fm)
   {
-    if (m_fm->IsFiring())
-      m_fm->StopFire();
+	if (m_fm->IsFiring())
+	  m_fm->StopFire();
   }
 }
 

@@ -217,7 +217,7 @@ void CVehicleMovementVTOL::PreProcessMovement(const float deltaTime)
 	Matrix33 tm( m_PhysPos.q);
 	Ang3 angles = Ang3::GetAnglesXYZ(tm);
 
- 	m_workingUpDir = m_engineUpDir;
+	m_workingUpDir = m_engineUpDir;
 	
 	m_workingUpDir += (vertical * m_rotorDiskTiltScale * Vec3(angles.y, -angles.x, 0.0f));
 	m_workingUpDir += (m_horizontal * m_rotorDiskTiltScale * Vec3(0.0f, 0.0f, angles.z));
@@ -245,7 +245,7 @@ void CVehicleMovementVTOL::PreProcessMovement(const float deltaTime)
 		fakeLeftDir.z = 0.0f;
 		forwardImpulse += fakeLeftDir * -strafe * m_enginePower * m_horizLeftForce * turbulenceMult;
 
- 		float horizDamp = 0.25f;
+		float horizDamp = 0.25f;
 		static float vertDamp = 0.0f;
 
 		if ( m_movementAction.isAI )
@@ -253,7 +253,7 @@ void CVehicleMovementVTOL::PreProcessMovement(const float deltaTime)
 		else
 			horizDamp = m_velDamp;
 
- 		m_control.impulse += forwardImpulse;
+		m_control.impulse += forwardImpulse;
 		m_control.impulse.x -= m_PhysDyn.v.x * horizDamp * turbulenceMult;
 		m_control.impulse.y -= m_PhysDyn.v.y * horizDamp * turbulenceMult;
 		m_control.impulse.z -= m_PhysDyn.v.z * vertDamp * turbulenceMult;

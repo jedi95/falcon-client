@@ -67,14 +67,14 @@ struct SWheelStats
 
   SWheelStats()
   {
-    pullMod = 0.f;
-    lateralSlip = 0.f;
-    friction = 0.f;
-    suspLen = 0.f;
-    compression = 0.f;
-    torqueScale = 0.f;
-    handBraking = false;
-    bContact = false;
+	pullMod = 0.f;
+	lateralSlip = 0.f;
+	friction = 0.f;
+	suspLen = 0.f;
+	compression = 0.f;
+	torqueScale = 0.f;
+	handBraking = false;
+	bContact = false;
   }
 };
 
@@ -96,7 +96,7 @@ public:
   virtual void PostPhysicalize();
 
   virtual EVehicleMovementType GetMovementType() { return eVMT_Land; } 
-    
+	
   virtual bool StartEngine(EntityId driverId);  
 	virtual void StopEngine();
 	virtual void OnEvent(EVehicleMovementEvent event, const SVehicleMovementEventParams& params);
@@ -162,7 +162,7 @@ protected:
 	pe_action_drive m_action;
 
 	float m_engineMaxRPM, m_engineIdleRPM, m_engineShiftDownRPM;
-  		 
+		 
 	float m_steerMax;             // max steering angle in deg
 	float m_steerSpeedMin;        // steer speed at v=0
   float m_steerSpeed;           // steer speed at vMaxSteerMax	
@@ -194,7 +194,7 @@ protected:
   float m_suspDampingMin, m_suspDampingMax, m_suspDamping, m_suspDampingMaxSpeed;  
   float m_stabiMin, m_stabiMax, m_stabi;
   float m_speedSuspUpdated;    
-	    
+		
 	// Network related
 	CNetActionSync<CNetworkMovementStdWheeled> m_netActionSync;
   

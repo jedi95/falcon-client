@@ -384,33 +384,33 @@ CProjectile *CWeaponSystem::GetProjectile(EntityId entityId)
 //------------------------------------------------------------------------
 int  CWeaponSystem::QueryProjectiles(SProjectileQuery& q)
 {
-    IEntityClass* pClass = q.ammoName?gEnv->pEntitySystem->GetClassRegistry()->FindClass(q.ammoName):0;
-    m_queryResults.resize(0);
-    if(q.box.IsEmpty())
-    {
-        for(TProjectileMap::iterator it = m_projectiles.begin();it!=m_projectiles.end();++it)
-        {
-            IEntity *pEntity = it->second->GetEntity();
-            if(pClass == 0 || pEntity->GetClass() == pClass)
-            m_queryResults.push_back(pEntity);
-        }
-    }
-    else
-    {
-        for(TProjectileMap::iterator it = m_projectiles.begin();it!=m_projectiles.end();++it)
-        {
-            IEntity *pEntity = it->second->GetEntity();
-            if(q.box.IsContainPoint(pEntity->GetWorldPos()))
-            {
-                m_queryResults.push_back(pEntity);
-            }
-        }
-    }
-    
-    q.nCount = int(m_queryResults.size());
-    if(q.nCount)
-        q.pResults = &m_queryResults[0];
-    return q.nCount;
+	IEntityClass* pClass = q.ammoName?gEnv->pEntitySystem->GetClassRegistry()->FindClass(q.ammoName):0;
+	m_queryResults.resize(0);
+	if(q.box.IsEmpty())
+	{
+		for(TProjectileMap::iterator it = m_projectiles.begin();it!=m_projectiles.end();++it)
+		{
+			IEntity *pEntity = it->second->GetEntity();
+			if(pClass == 0 || pEntity->GetClass() == pClass)
+			m_queryResults.push_back(pEntity);
+		}
+	}
+	else
+	{
+		for(TProjectileMap::iterator it = m_projectiles.begin();it!=m_projectiles.end();++it)
+		{
+			IEntity *pEntity = it->second->GetEntity();
+			if(q.box.IsContainPoint(pEntity->GetWorldPos()))
+			{
+				m_queryResults.push_back(pEntity);
+			}
+		}
+	}
+	
+	q.nCount = int(m_queryResults.size());
+	if(q.nCount)
+		q.pResults = &m_queryResults[0];
+	return q.nCount;
 }
 
 //------------------------------------------------------------------------
@@ -559,19 +559,19 @@ void CWeaponSystem::DebugGun(IConsoleCmdArgs *args)
  
   IActor* pActor = pGF->GetClientActor();
   if (!pActor || !pActor->IsPlayer())
-    return;
+	return;
 
   IInventory *pInventory = pActor->GetInventory();
   if (!pInventory)
-    return;  
+	return;  
   
   // give & select the debuggun 
 	EntityId itemId = pInventory->GetItemByClass(CItem::sDebugGunClass);
   if (0 == itemId)        
   {
-    // if actor doesn't have it, only give it in editor
-    if (!GetISystem()->IsEditor())
-      return;
+	// if actor doesn't have it, only give it in editor
+	if (!GetISystem()->IsEditor())
+	  return;
 
 		itemId = pItemSystem->GiveItem(pActor, CItem::sDebugGunClass->GetName(), false, true, true);
   }

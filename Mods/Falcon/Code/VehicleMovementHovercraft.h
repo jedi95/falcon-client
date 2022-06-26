@@ -30,12 +30,12 @@ public:
 
   bool operator == (const CNetworkMovementHovercraft &rhs)
   { 
-    return false;
+	return false;
   };
 
   bool operator != (const CNetworkMovementHovercraft &rhs)
   {
-    return !this->operator==(rhs);
+	return !this->operator==(rhs);
   };
 
   void UpdateObject( CVehicleMovementHovercraft *pMovement );
@@ -57,49 +57,49 @@ public:
   // thruster for hovering
   struct SThruster 
   {      
-    SThruster( const Vec3& vpos, const Vec3& vdir )
-    {
-      pos = vpos;
-      dir = vdir;    
-      prevHit.zero();
-      maxForce = 0;      
-      tiltAngle = 0; 
-      hoverHeight = -1.f; // if -1, inherit from Hovercraft table
-      hoverVariance = -1.f; 
-      heightAdaption = -1.f; 
-      pPart = 0;
-      pParentPart = 0;
-      heightInitial = 0;      
-      prevDist = 0.f;
-      levelOffsetInitial = 0.f;
-      levelOffset = 0.f;
-      cylinderRadius = 0.f;
-      pushing = true;
-      groundContact = false;
-      hit = false;
-      enabled = true;
-    }
+	SThruster( const Vec3& vpos, const Vec3& vdir )
+	{
+	  pos = vpos;
+	  dir = vdir;    
+	  prevHit.zero();
+	  maxForce = 0;      
+	  tiltAngle = 0; 
+	  hoverHeight = -1.f; // if -1, inherit from Hovercraft table
+	  hoverVariance = -1.f; 
+	  heightAdaption = -1.f; 
+	  pPart = 0;
+	  pParentPart = 0;
+	  heightInitial = 0;      
+	  prevDist = 0.f;
+	  levelOffsetInitial = 0.f;
+	  levelOffset = 0.f;
+	  cylinderRadius = 0.f;
+	  pushing = true;
+	  groundContact = false;
+	  hit = false;
+	  enabled = true;
+	}
 
-    Vec3 pos;   // in vehicle frame
-    Vec3 dir;  
-    Vec3 prevHit;
-    float tiltAngle;
-    float maxForce;                
-    float hoverHeight;
-    float hoverVariance;
-    float heightAdaption;
-    float levelOffsetInitial; // intial offset in vehicle frame for leveling out
-    float levelOffset; // additional desired offset (for tilting)
-    IVehicleHelper* pHelper; // optionally
-    IVehiclePart* pPart; // helper part
-    IVehiclePart* pParentPart; // optionally
-    float heightInitial; // local initial height, used for height adaption
-    float prevDist; // previous hit dist
-    float cylinderRadius; // if > 0, use cylinder instead of ray geom
-    bool hit;
-    bool pushing;
-    bool groundContact;    
-    bool enabled;
+	Vec3 pos;   // in vehicle frame
+	Vec3 dir;  
+	Vec3 prevHit;
+	float tiltAngle;
+	float maxForce;                
+	float hoverHeight;
+	float hoverVariance;
+	float heightAdaption;
+	float levelOffsetInitial; // intial offset in vehicle frame for leveling out
+	float levelOffset; // additional desired offset (for tilting)
+	IVehicleHelper* pHelper; // optionally
+	IVehiclePart* pPart; // helper part
+	IVehiclePart* pParentPart; // optionally
+	float heightInitial; // local initial height, used for height adaption
+	float prevDist; // previous hit dist
+	float cylinderRadius; // if > 0, use cylinder instead of ray geom
+	bool hit;
+	bool pushing;
+	bool groundContact;    
+	bool enabled;
   };
 
   CVehicleMovementHovercraft();
@@ -159,7 +159,7 @@ protected:
   float m_thrusterUpdate;
   float m_thrusterTimer;
   int   m_contacts;
-      
+	  
   // driving
   float m_velMax;
   float m_velMaxReverse;

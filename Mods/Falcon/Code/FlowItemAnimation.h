@@ -169,7 +169,7 @@ public:
 		};
 
 		void execute(CItem *pOffHand)
- 		{
+		{
 			if (pOffHand->GetEntity()->GetClass()==CItem::sOffHandClass)
 			{
 				if (COffHand *pCOffHand=static_cast<COffHand *>(pOffHand))

@@ -58,7 +58,7 @@ CVehicleMovementTank::~CVehicleMovementTank()
 bool CVehicleMovementTank::Init(IVehicle* pVehicle, const SmartScriptTable &table)
 {
   if (!CVehicleMovementStdWheeled::Init(pVehicle, table))
-    return false;
+	return false;
   
   MOVEMENT_VALUE("pedalSpeed", m_pedalSpeed);
   MOVEMENT_VALUE_OPT("pedalThreshold", m_pedalThreshold, table);
@@ -89,8 +89,8 @@ void CVehicleMovementTank::PostInit()
   
   for (int i=0; i<m_wheelParts.size(); ++i)
   { 
-    if (m_wheelParts[i]->GetIWheel()->GetCarGeomParams()->bDriving)
-      m_drivingWheels[m_wheelParts[i]->GetLocalTM(false).GetTranslation().x > 0.f] = m_wheelParts[i];
+	if (m_wheelParts[i]->GetIWheel()->GetCarGeomParams()->bDriving)
+	  m_drivingWheels[m_wheelParts[i]->GetLocalTM(false).GetTranslation().x > 0.f] = m_wheelParts[i];
   }
 
 	m_treadParts.clear();
@@ -123,8 +123,8 @@ void CVehicleMovementTank::SetLatFriction(float latFric)
   
   for (int i=0; i<numWheels; ++i)
   {    
-    params.iWheel = i;    
-    pPhysics->SetParams(&params, THREAD_SAFE);
+	params.iWheel = i;    
+	pPhysics->SetParams(&params, THREAD_SAFE);
   }
 
   m_latFriction = latFric;
@@ -179,40 +179,40 @@ void CVehicleMovementTank::ProcessMovement(const float deltaTime)
   
   if (steerSpeed == 0.f)
   {
-    m_currSteer =	sgn(actionSteer);
+	m_currSteer =	sgn(actionSteer);
   }
   else
   { 
-    if (m_movementAction.isAI)
-    {
-      m_currSteer = actionSteer;
-    }
-    else
-    {
-      m_currSteer += min(abs(actionSteer-m_currSteer), deltaTime*steerSpeed) * sgn(actionSteer-m_currSteer);        
-    }
+	if (m_movementAction.isAI)
+	{
+	  m_currSteer = actionSteer;
+	}
+	else
+	{
+	  m_currSteer += min(abs(actionSteer-m_currSteer), deltaTime*steerSpeed) * sgn(actionSteer-m_currSteer);        
+	}
   }
   Limit(m_currSteer, -m_steerLimit, m_steerLimit);  
   
   if (abs(m_currSteer) > 0.0001f) 
   {
-    // if steering, apply full throttle to have enough turn power    
-    actionPedal = sgn(actionPedal);
-    
-    if (actionPedal == 0.f) 
-    {
-      // allow steering-on-teh-spot only above maxReverseSpeed (to avoid sudden reverse of controls)
-      const float maxReverseSpeed = -1.5f;
-      actionPedal = max(0.f, min(1.f, 1.f-(localVel.y/maxReverseSpeed)));
-      
-      // todo
-      float steerLim = 0.8f;
-      Limit(m_currSteer, -steerLim*m_steerLimit, steerLim*m_steerLimit);
-    }
+	// if steering, apply full throttle to have enough turn power    
+	actionPedal = sgn(actionPedal);
+	
+	if (actionPedal == 0.f) 
+	{
+	  // allow steering-on-teh-spot only above maxReverseSpeed (to avoid sudden reverse of controls)
+	  const float maxReverseSpeed = -1.5f;
+	  actionPedal = max(0.f, min(1.f, 1.f-(localVel.y/maxReverseSpeed)));
+	  
+	  // todo
+	  float steerLim = 0.8f;
+	  Limit(m_currSteer, -steerLim*m_steerLimit, steerLim*m_steerLimit);
+	}
   }
 
   if (!pPhysics->GetStatus(&m_vehicleStatus))
-    return;
+	return;
   
   int currGear = m_vehicleStatus.iCurGear - 1; // indexing for convenience: -1,0,1,2,..
 
@@ -223,18 +223,18 @@ void CVehicleMovementTank::ProcessMovement(const float deltaTime)
   
   // pedal ramping   
   if (m_pedalSpeed == 0.f)
-    m_currPedal = actionPedal;
+	m_currPedal = actionPedal;
   else
   {
-    m_currPedal += deltaTime * m_pedalSpeed * sgn(actionPedal - m_currPedal);  
-    m_currPedal = clamp_tpl(m_currPedal, -absPedal, absPedal);
+	m_currPedal += deltaTime * m_pedalSpeed * sgn(actionPedal - m_currPedal);  
+	m_currPedal = clamp_tpl(m_currPedal, -absPedal, absPedal);
   }
 
   // only apply pedal after threshold is exceeded
   if (currGear == 0 && fabs_tpl(m_currPedal) < m_pedalThreshold) 
-    m_action.pedal = 0;
+	m_action.pedal = 0;
   else
-    m_action.pedal = m_currPedal;
+	m_action.pedal = m_currPedal;
 
   // change pedal amount based on damages
   float damageMul = 0.0f;
@@ -266,32 +266,32 @@ void CVehicleMovementTank::ProcessMovement(const float deltaTime)
   
   if (abs(effSteer) > 0.01f && !m_movementAction.brake)
   {
-    latSlipMinGoal = m_latSlipMin;
-    
-    // use steering friction, but not when countersteering
-    if (sgn(effSteer) != sgn(localW.z))
-      latFricMinGoal = m_latFricMinSteer;
+	latSlipMinGoal = m_latSlipMin;
+	
+	// use steering friction, but not when countersteering
+	if (sgn(effSteer) != sgn(localW.z))
+	  latFricMinGoal = m_latFricMinSteer;
   }
 
   Interpolate(m_currentSlipMin, latSlipMinGoal, 3.f, deltaTime);   
   
   if (latFricMinGoal < m_currentFricMin)
-    m_currentFricMin = latFricMinGoal;
+	m_currentFricMin = latFricMinGoal;
   else
-    Interpolate(m_currentFricMin, latFricMinGoal, 3.f, deltaTime);
+	Interpolate(m_currentFricMin, latFricMinGoal, 3.f, deltaTime);
 
   float fractionSpeed = min(1.f, max(0.f, m_avgLateralSlip-m_currentSlipMin) / (m_latSlipMax-m_currentSlipMin));
   float latFric = fractionSpeed * (m_latFricMax-m_currentFricMin) + m_currentFricMin;
 
   if ( m_movementAction.brake && m_movementAction.isAI )
   {
-    // it is natural for ai, apply differnt friction value while handbreaking
+	// it is natural for ai, apply differnt friction value while handbreaking
 	 latFric = m_latFricMax;
   }
 
   if (latFric != m_latFriction)
   { 
-    SetLatFriction(latFric);    
+	SetLatFriction(latFric);    
   }      
  
   const static float maxSteer = gf_PI/4.f; // fix maxsteer, shouldn't change  
@@ -299,47 +299,47 @@ void CVehicleMovementTank::ProcessMovement(const float deltaTime)
    
   if (m_steeringImpulseMin > 0.f && m_wheelContactsLeft != 0 && m_wheelContactsRight != 0)
   {  
-    const float maxW = 0.3f*gf_PI;
-    float steer = abs(m_currSteer)>0.001f ? m_currSteer : 0.f;    
-    float desired = steer * maxW; 
-    float curr = -localW.z;
-    float err = desired - curr; // err>0 means correction to right 
-    Limit(err, -maxW, maxW);
+	const float maxW = 0.3f*gf_PI;
+	float steer = abs(m_currSteer)>0.001f ? m_currSteer : 0.f;    
+	float desired = steer * maxW; 
+	float curr = -localW.z;
+	float err = desired - curr; // err>0 means correction to right 
+	Limit(err, -maxW, maxW);
 
-    if (abs(err) > 0.01f)
-    { 
-      float amount = m_steeringImpulseMin + speedRatio*(m_steeringImpulseMax-m_steeringImpulseMin);
-      
-      // bigger correction for relaxing
-      if (desired == 0.f || (desired*curr>0 && abs(desired)<abs(curr))) 
-        amount = m_steeringImpulseRelaxMin + speedRatio*(m_steeringImpulseRelaxMax-m_steeringImpulseRelaxMin);
+	if (abs(err) > 0.01f)
+	{ 
+	  float amount = m_steeringImpulseMin + speedRatio*(m_steeringImpulseMax-m_steeringImpulseMin);
+	  
+	  // bigger correction for relaxing
+	  if (desired == 0.f || (desired*curr>0 && abs(desired)<abs(curr))) 
+		amount = m_steeringImpulseRelaxMin + speedRatio*(m_steeringImpulseRelaxMax-m_steeringImpulseRelaxMin);
 
-      float corr = -err * amount * m_PhysDyn.mass * deltaTime;
+	  float corr = -err * amount * m_PhysDyn.mass * deltaTime;
 
-      pe_action_impulse imp;
-      imp.iApplyTime = 0;      
-      imp.angImpulse = worldTM.GetColumn2() * corr;
-      pPhysics->Action(&imp, THREAD_SAFE);
-    }    
+	  pe_action_impulse imp;
+	  imp.iApplyTime = 0;      
+	  imp.angImpulse = worldTM.GetColumn2() * corr;
+	  pPhysics->Action(&imp, THREAD_SAFE);
+	}    
   }
   
 	m_action.bHandBrake = (m_movementAction.brake) ? 1 : 0;	
 
   if (currGear > 0 && m_vehicleStatus.iCurGear < m_currentGear) 
   {
-    // when shifted down, disengage clutch immediately to avoid power/speed dropdown
-    m_action.clutch = 1.f;
+	// when shifted down, disengage clutch immediately to avoid power/speed dropdown
+	m_action.clutch = 1.f;
   }
   
   pPhysics->Action(&m_action, 1);
 
   if (Boosting())  
-    ApplyBoost(speed, 1.2f*m_maxSpeed*GetWheelCondition()*damageMul, m_boostStrength, deltaTime);  
+	ApplyBoost(speed, 1.2f*m_maxSpeed*GetWheelCondition()*damageMul, m_boostStrength, deltaTime);  
 
   if (m_wheelContacts <= 1 && speed > 5.f)
   {
-    ApplyAirDamp(DEG2RAD(20.f), DEG2RAD(10.f), deltaTime, THREAD_SAFE);
-    UpdateGravity(-9.81f * 1.4f);
+	ApplyAirDamp(DEG2RAD(20.f), DEG2RAD(10.f), deltaTime, THREAD_SAFE);
+	UpdateGravity(-9.81f * 1.4f);
   }
 
 	if (m_netActionSync.PublishActions( CNetworkMovementStdWheeled(this) ))
@@ -353,16 +353,16 @@ void CVehicleMovementTank::OnEvent(EVehicleMovementEvent event, const SVehicleMo
 
   if (event == eVME_TireBlown || event == eVME_TireRestored)
   { 
-    // tracked vehicles don't have blowable tires, these events are sent on track destruction
-    int numTreads = m_treadParts.size();
-    int treadsPrev = m_blownTires;
-    m_blownTires = max(0, min(numTreads, event==eVME_TireBlown ? m_blownTires+1 : m_blownTires-1));
-    
-    // reduce speed based on number of destroyed treads
-    if (m_blownTires != treadsPrev)
-    {	
-      SetEngineRPMMult(GetWheelCondition());
-    }
+	// tracked vehicles don't have blowable tires, these events are sent on track destruction
+	int numTreads = m_treadParts.size();
+	int treadsPrev = m_blownTires;
+	m_blownTires = max(0, min(numTreads, event==eVME_TireBlown ? m_blownTires+1 : m_blownTires-1));
+	
+	// reduce speed based on number of destroyed treads
+	if (m_blownTires != treadsPrev)
+	{	
+	  SetEngineRPMMult(GetWheelCondition());
+	}
   }
 }
 
@@ -380,7 +380,7 @@ void CVehicleMovementTank::OnAction(const TVehicleActionId actionId, int activat
 float CVehicleMovementTank::GetWheelCondition() const
 {
   if (0 == m_blownTires)
-    return 1.0f;
+	return 1.0f;
 
   int numTreads = m_treadParts.size();
   float treadCondition = (numTreads > 0) ? 1.0f - ((float)m_blownTires / numTreads) : 1.0f;

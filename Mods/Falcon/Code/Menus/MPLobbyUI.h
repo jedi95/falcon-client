@@ -76,99 +76,99 @@ class CMPLobbyUI
 public:
   struct SServerInfo 
   {
-    SServerInfo():
-    m_publicIP(0),
-    m_publicPort(0),
-    m_hostPort(0),
-    m_privateIP(0),
-    m_numPlayers(0),
-    m_maxPlayers(0),
-    m_ping(-1),
-    m_serverId(-1),
-    m_favorite(false),
-    m_recent(false),
-    m_private(false),
-    m_official(false),
-    m_anticheat(false),
+	SServerInfo():
+	m_publicIP(0),
+	m_publicPort(0),
+	m_hostPort(0),
+	m_privateIP(0),
+	m_numPlayers(0),
+	m_maxPlayers(0),
+	m_ping(-1),
+	m_serverId(-1),
+	m_favorite(false),
+	m_recent(false),
+	m_private(false),
+	m_official(false),
+	m_anticheat(false),
 		m_gamepadsonly(false),
 		m_canjoin(true)
-    {
-    }
-    string    m_hostName;
-    string    m_mapName;
-    string    m_gameType;
-    wstring   m_gameTypeName;
-    string    m_gameVersion;
+	{
+	}
+	string    m_hostName;
+	string    m_mapName;
+	string    m_gameType;
+	wstring   m_gameTypeName;
+	string    m_gameVersion;
 
 		string    m_modName;
 		string    m_modVersion;
 
-    uint32    m_publicIP;
-    ushort    m_publicPort;
-    ushort		m_hostPort;
-    uint32		m_privateIP;
-    int				m_numPlayers;
-    int				m_maxPlayers;
-    int       m_ping;
+	uint32    m_publicIP;
+	ushort    m_publicPort;
+	ushort		m_hostPort;
+	uint32		m_privateIP;
+	int				m_numPlayers;
+	int				m_maxPlayers;
+	int       m_ping;
 
-    int       m_serverId;
+	int       m_serverId;
 
-    bool      m_favorite;
-    bool      m_recent;
-    bool			m_private;
-    bool      m_official;
-    bool      m_anticheat;
-    bool      m_voicecomm;
-    bool      m_friendlyfire;
-    bool      m_dx10;
-    bool      m_dedicated;
-    bool      m_gamepadsonly;
+	bool      m_favorite;
+	bool      m_recent;
+	bool			m_private;
+	bool      m_official;
+	bool      m_anticheat;
+	bool      m_voicecomm;
+	bool      m_friendlyfire;
+	bool      m_dx10;
+	bool      m_dedicated;
+	bool      m_gamepadsonly;
 
 		bool			m_canjoin;//determined on client side
   };
 
   struct SServerDetails
   {
-    SServerDetails():
+	SServerDetails():
 		m_noResponce(false),
-    m_friendlyfire(false),
-    m_dedicated(false),
-    m_timelimit(0),
+	m_friendlyfire(false),
+	m_dedicated(false),
+	m_timelimit(0),
 		m_timeleft(0),
-    m_voicecomm(false),
-    m_anticheat(false),
-    m_gamepadsonly(false),
+	m_voicecomm(false),
+	m_anticheat(false),
+	m_gamepadsonly(false),
 		m_dx10(false)
-    {
-    }
+	{
+	}
 
 		bool		m_noResponce;
-    bool    m_friendlyfire;
-    bool    m_dedicated;
-    int     m_timelimit;
+	bool    m_friendlyfire;
+	bool    m_dedicated;
+	int     m_timelimit;
 		int     m_timeleft;
-    bool    m_voicecomm;
-    bool    m_anticheat;
-    bool    m_gamepadsonly;
+	bool    m_voicecomm;
+	bool    m_anticheat;
+	bool    m_gamepadsonly;
 		bool		m_dx10;
-    
-    string  m_gamever;
-    string  m_gamemode;
-    
+	
+	string  m_gamever;
+	string  m_gamemode;
+	
 		string  m_modname;
 		string  m_modversion;
 
 		struct  SPlayerDetails
-    {
-      SPlayerDetails():m_team(0),m_kills(0),m_deaths(0),m_iRank(0){}
-      string m_name;
-      string m_rank;
-      int    m_team;
-      int    m_kills;
+	{
+	  SPlayerDetails():m_team(0),m_kills(0),m_deaths(0),m_iRank(0){}
+	  string m_name;
+	  string m_rank;
+	  int    m_team;
+	  int    m_kills;
 			int		 m_iRank;
-      int    m_deaths;
-    };
-    std::vector<SPlayerDetails> m_players;
+	  int    m_deaths;
+	};
+	std::vector<SPlayerDetails> m_players;
   };
 
   struct SServerFilter;
@@ -280,9 +280,9 @@ private:
 inline bool IsTrue(const char* str)
 {
   if(*str == 'T' || *str == 't')//true
-    return true;
+	return true;
   if(*str == 'O' || *str == 'o')//on
-    return true;
+	return true;
   return atoi(str)!=0;
 }
 

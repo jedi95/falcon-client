@@ -261,19 +261,11 @@ public:
 	// ~IWeapon
 
 	int  GetMaxZoomSteps();
-	void AssistAiming(float magnification=1.0f, bool accurate=false);
-	bool IsValidAssistTarget(IEntity *pEntity, IEntity *pSelf, bool includeVehicles=false);
 
+	bool IsValidAssistTarget(IEntity *pEntity, IEntity *pSelf, bool includeVehicles=false);
 	void AdvancedAssistAiming(float range, const Vec3& pos, Vec3 &dir);
 
-
 	bool		IsSilencerAttached() { return m_silencerAttached; }
-//	bool		IsLAMAttached() { return m_lamAttached; }
-
-	//Activate/Deactivate Laser and Light for the AI (also player if neccessary)
-//	void    ActivateLamLaser(bool activate, bool aiRequest = true);
-//	void		ActivateLamLight(bool activate, bool aiRequest = true);
-
 	void		StartChangeFireMode();
 	void		EndChangeFireMode();
 	ILINE		bool    IsSwitchingFireMode() { return m_switchingFireMode; };

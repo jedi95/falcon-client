@@ -280,9 +280,6 @@ bool CShotgun::Shoot(bool resetAnimation, bool autoreload, bool noSound)
 		return false;
 	}
 
-	// Aim assistance
-	m_pWeapon->AssistAiming();
-
 	const char *action = m_actions.fire_cock.c_str();
 	bool zoomedCock = m_fireparams.unzoomed_cock && m_pWeapon->IsZoomed() && (ammoCount != 1);
 	if (ammoCount == 1 || zoomedCock)
@@ -311,8 +308,8 @@ bool CShotgun::Shoot(bool resetAnimation, bool autoreload, bool noSound)
 		if (pAmmo)
 		{
 			dir = ApplySpread(fdir, m_shotgunparams.spread);      
-      int hitTypeId = g_pGame->GetGameRules()->GetHitTypeId(m_fireparams.hit_type.c_str());			
-      
+	  int hitTypeId = g_pGame->GetGameRules()->GetHitTypeId(m_fireparams.hit_type.c_str());			
+	  
 			pAmmo->SetParams(m_pWeapon->GetOwnerId(), m_pWeapon->GetHostId(), m_pWeapon->GetEntityId(), m_pWeapon->GetFireModeIdx(GetName()),
 				m_shotgunparams.pelletdamage, hitTypeId);
 			pAmmo->SetSequence(m_pWeapon->GetShootSeqN());
@@ -423,7 +420,7 @@ void CShotgun::NetShootEx(const Vec3 &pos, const Vec3 &dir, const Vec3 &vel, con
 		if (pAmmo)
 		{
 			pdir = ApplySpread(dir, m_shotgunparams.spread);
-      int hitTypeId = g_pGame->GetGameRules()->GetHitTypeId(m_fireparams.hit_type.c_str());			
+	  int hitTypeId = g_pGame->GetGameRules()->GetHitTypeId(m_fireparams.hit_type.c_str());			
 
 			pAmmo->SetParams(m_pWeapon->GetOwnerId(), m_pWeapon->GetHostId(), m_pWeapon->GetEntityId(), m_pWeapon->GetFireModeIdx(GetName()),
 				m_shotgunparams.pelletdamage, hitTypeId);
