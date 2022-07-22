@@ -399,7 +399,8 @@ bool CMPHub::HandleFSCommand(const char* pCmd, const char* pArgs)
 			m_profile.reset(new CGameNetworkProfile(this));
 			SFlashVarValue val("");
 			m_currentScreen->GetVariable("_root.Root.MainMenu.ForgotPassword_POPUP_M.ForgotPassword_POPUP.Texts.Colorset.CA_EMAILADDY.text",&val);
-			m_profile->RetrievePassword(val.GetConstStrPtr());
+			string email = val.GetConstStrPtr();
+			g_pGame->GetIGameFramework()->ShowPageInBrowser("https://crysiswarsmp.com/forgotpassword.html?email=" + email.replace("@", "%40").replace("+", "%2B"));
 		}
 		break;
   case eGUC_dialogClosed:

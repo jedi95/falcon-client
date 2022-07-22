@@ -545,17 +545,25 @@ void CPlayerInput::PreUpdate()
 	mouseSensitivity *= gf_PI / 180.0f;//doesnt make much sense, but after all helps to keep reasonable values for the sensitivity cvars
 	//these 2 could be moved to CPlayerRotation
 	mouseSensitivity *= m_pPlayer->m_params.viewSensitivity;
-	if (!g_pGameCVars->fn_constantMouseSensitivity)
+	if (g_pGameCVars->fn_constantMouseSensitivity == 0)
 	{
-		mouseSensitivity *= m_pPlayer->GetMassFactor();
+		mouseSensitivity *= m_pPlayer->GetMassFactor(true);
+	}
+	else if (g_pGameCVars->fn_constantMouseSensitivity == 2)
+	{
+		mouseSensitivity *= m_pPlayer->GetMassFactor(false);
 	}
 
 	controllerSensitivity *= gf_PI / 180.0f;//doesnt make much sense, but after all helps to keep reasonable values for the sensitivity cvars
 	//these 2 could be moved to CPlayerRotation
 	controllerSensitivity *= m_pPlayer->m_params.viewSensitivity;
-	if (!g_pGameCVars->fn_constantMouseSensitivity)
+	if (g_pGameCVars->fn_constantMouseSensitivity == 0)
 	{
-		controllerSensitivity *= m_pPlayer->GetMassFactor();
+		controllerSensitivity *= m_pPlayer->GetMassFactor(true);
+	}
+	else if (g_pGameCVars->fn_constantMouseSensitivity == 2)
+	{
+		controllerSensitivity *= m_pPlayer->GetMassFactor(false);
 	}
 
 	if(m_binocularsTime>0.0f)

@@ -54,7 +54,6 @@ History:
 #include "PlayerRotation.h"
 #include "PlayerInput.h"
 #include "NetPlayerInput.h"
-#include "AIDemoInput.h"
 
 #include "CryCharAnimationParams.h"
 
@@ -855,13 +854,8 @@ void CPlayer::Update(SEntityUpdateContext& ctx, int updateSlot)
 		// init input systems if required
 		if (GetGameObject()->GetChannelId())
 		{
-			if (client) //|| ((demoMode == 2) && this == gEnv->pGame->GetIGameFramework()->GetIActorSystem()->GetOriginalDemoSpectator()))
-			{
-				if ( GetISystem()->IsDedicated() )
-					m_pPlayerInput.reset( new CDedicatedInput(this) );
-				else
-					m_pPlayerInput.reset( new CPlayerInput(this) );
-			}
+			if (client)
+				m_pPlayerInput.reset( new CPlayerInput(this) );
 			else
 				m_pPlayerInput.reset( new CNetPlayerInput(this) );
 		} else if (IsDemoPlayback())
@@ -3468,7 +3462,7 @@ void CPlayer::Freeze(bool freeze)
 	m_stats.followCharacterHead = (freeze?2:0);
 }
 
-float CPlayer::GetMassFactor() const
+float CPlayer::GetMassFactor(bool useMultiplier) const
 {
 	//code regarding currentItem only
 	EntityId itemId = GetInventory()->GetCurrentItem();
@@ -3476,6 +3470,10 @@ float CPlayer::GetMassFactor() const
 	{
 		//Falcon weapon mass multiplier
 		float massMulti = g_pGameCVars->fn_weaponMassMultiplier;
+
+		if (!useMultiplier) {
+			massMulti = 1.0f;
+		}
 
 		float mass = 0;
 		if(CWeapon* weap = GetWeapon(itemId))

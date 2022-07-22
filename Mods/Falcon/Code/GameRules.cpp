@@ -559,14 +559,19 @@ bool CGameRules::OnClientConnect(int channelId, bool isReset)
 		if (INetChannel *pNetChannel=m_pGameFramework->GetNetChannel(channelId))
 		{
 			playerName=pNetChannel->GetNickname();
-			if (!playerName.empty())
-				playerName=VerifyName(playerName);
+			if (!playerName.empty()) {
+				playerName = VerifyName(playerName);
+			}
 		}
 
-    if(!playerName.empty())
+		if (!playerName.empty())
+		{
 			CallScript(m_serverStateScript, "OnClientConnect", channelId, isReset, playerName.c_str());
-    else
+		}
+		else
+		{
 			CallScript(m_serverStateScript, "OnClientConnect", channelId, isReset);
+		}
 	}
 	else
 	{

@@ -615,12 +615,12 @@ public:
 	const Quat& GetViewQuat() { return m_viewQuat; }
 	const Quat& GetViewQuatFinal() { return m_viewQuatFinal; }
 	virtual void ResetAnimations();
-	float GetMassFactor() const;
-	bool	IsFiringProne() const;
-	bool	IsFiring() const;
-  virtual float GetFrozenAmount(bool stages=false) const; 
+	float GetMassFactor( bool useMultiplier ) const;
+	bool IsFiringProne() const;
+	bool IsFiring() const;
+	virtual float GetFrozenAmount(bool stages=false) const;
 	IPlayerInput* GetPlayerInput() const {return m_pPlayerInput.get();}
-		
+
 	virtual void SwitchDemoModeSpectator(bool activate);
 	bool IsTimeDemo() const { return m_timedemo; }
 	void ForceFreeFall();
@@ -632,7 +632,7 @@ public:
 
 	ILINE bool GravityBootsOn() const
 	{
-		return false; //(m_actions & ACTION_GRAVITYBOOTS && InZeroG() )?true:false;
+		return false;
 	}
 
 	void Stabilize(bool stabilize);

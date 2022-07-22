@@ -181,7 +181,7 @@ void CC4Projectile::Stick(EventPhysCollision *pCollision)
 
 				pe_params_part pPart;
 				pPart.partid = pCollision->partid[trgId];
-				if(pTarget->GetParams(&pPart) && pPart.pPhysGeom && pPart.pPhysGeom->V<c4Box.GetVolume())
+				if(pTarget->GetParams(&pPart) && pPart.pPhysGeom && pPart.pPhysGeom->V < c4Box.GetVolume())
 				{
 					m_notStick = true;
 					return;
@@ -189,7 +189,7 @@ void CC4Projectile::Stick(EventPhysCollision *pCollision)
 			}
 
 		}
-		else if(pTarget->GetType()==PE_LIVING)
+		else if (pTarget->GetType() == PE_LIVING)
 		{
 			m_notStick = true;
 			return;
@@ -199,7 +199,9 @@ void CC4Projectile::Stick(EventPhysCollision *pCollision)
 		RefineCollision(pCollision);
 
 		if(!pTargetEntity)
+		{
 			StickToStaticObject(pCollision,pTarget);
+		}
 		else
 		{
 			//Do not attach to items

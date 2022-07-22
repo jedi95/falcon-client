@@ -255,7 +255,6 @@ void CItem::SetCharacterAttachmentWorldTM(int slot, const char *name, const Matr
 		return;
 	}
 
-//	Matrix34 boneWorldMatrix = GetEntity()->GetSlotWorldTM(slot) *	pCharacter->GetISkeleton()->GetAbsJMatrixByID(pAttachment->GetBoneID());
 	Matrix34 boneWorldMatrix = GetEntity()->GetSlotWorldTM(slot) *	Matrix34(pCharacter->GetISkeletonPose()->GetAbsJointByID(pAttachment->GetBoneID()) );
 
 	Matrix34 localAttachmentMatrix = (boneWorldMatrix.GetInverted()*tm);
@@ -488,7 +487,6 @@ void CItem::SetDefaultIdleAnimation(int slot, const ItemString& actionName)
 	TActionMap::iterator it = m_sharedparams->actions.find(CONST_TEMPITEM_STRING(actionName));
 	if (it == m_sharedparams->actions.end())
 	{
-//		GameWarning("Action '%s' not found on item '%s'!", actionName, GetEntity()->GetName());
 		return;
 	}
 
@@ -502,8 +500,6 @@ void CItem::SetDefaultIdleAnimation(int slot, const ItemString& actionName)
 			TempResourceName name;
 			FixResourceName(action.animation[slot][0].name, name, 0);
 		}
-		//changed by ivo!
-		//pCharacter->SetDefaultIdleAnimation(0, name.c_str());
 	}
 	m_idleAnimation[slot] = actionName;
 }
@@ -531,28 +527,12 @@ void CItem::ForceSkinning(bool always)
 }
 
 //------------------------------------------------------------------------
-void CItem::EnableHiddenSkinning(bool enable)
-{
-	/*
-	for (int slot=0; slot<eIGS_Last; slot++)
-	{
-		ICharacterInstance *pCharacter = GetEntity()->GetCharacter(slot);
-		if (pCharacter)
-		{
-			if (enable)
-				pCharacter->SetFlags(pCharacter->GetFlags()|CS_FLAG_UPDATE_ALWAYS);
-			else
-				pCharacter->SetFlags(pCharacter->GetFlags()&(~CS_FLAG_UPDATE_ALWAYS));
-		}
-	}
-	*/
-}
+void CItem::EnableHiddenSkinning(bool enable) {}
 
 //------------------------------------------------------------------------
 void CItem::FixResourceName(const ItemString& inName, TempResourceName& name, int flags, const char *hand, const char *suffix, const char *pose, const char *pov, const char *env)
 {
 	// the whole thing of fixing is not nice, but at least we don't allocate too often
-	// StringHelper<TempResourceName::SIZE> name (inName.c_str(), inName.length());
 	name.assign(inName.c_str(), inName.length());
 
 	if (!hand)
@@ -640,8 +620,6 @@ tSoundID CItem::PlayAction(const ItemString& actionName, int layer, bool loop, u
 	TActionMap::iterator it = m_sharedparams->actions.find(CONST_TEMPITEM_STRING(actionName));
 	if (it == m_sharedparams->actions.end())
 	{
-//		GameWarning("Action '%s' not found on item '%s'!", actionName, GetEntity()->GetName());
-
 		for (int i=0;i<eIGS_Last;i++)
 		{
 			m_animationTime[i]=0;
@@ -687,9 +665,6 @@ tSoundID CItem::PlayAction(const ItemString& actionName, int layer, bool loop, u
 
 		EntityId pSkipEnts[3];
 		int nSkipEnts = 0;
-
-		// TODO for Marcio :)
-		// check code changes
 
 		// Skip the Item
 		pSkipEnts[nSkipEnts] = GetEntity()->GetId();

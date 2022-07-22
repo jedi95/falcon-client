@@ -331,6 +331,7 @@
 				RuntimeLibrary="2"
 				BufferSecurityCheck="true"
 				EnableEnhancedInstructionSet="2"
+				FloatingPointModel="2"
 				ForceConformanceInForLoopScope="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="StdAfx.h"
@@ -400,10 +401,6 @@
 			</File>
 			<File
 				RelativePath=".\Actor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\AIDemoInput.h"
 				>
 			</File>
 			<File
@@ -1428,18 +1425,6 @@
 					>
 				</File>
 			</Filter>
-		</Filter>
-		<Filter
-			Name="Utility"
-			>
-			<File
-				RelativePath=".\ScriptUtils.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ScriptUtils.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="HUD"

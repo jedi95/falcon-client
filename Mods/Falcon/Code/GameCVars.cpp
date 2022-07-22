@@ -146,7 +146,7 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("fn_weaponMassMultiplier", &fn_weaponMassMultiplier, 1.0f, VF_RESTRICTEDMODE, "Weapon mass multiplier.");
 
 	// Falcon client options
-	pConsole->Register("fn_constantMouseSensitivity", &fn_constantMouseSensitivity, 0, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "gets rid of mass effect of mouse sensitivity");
+	pConsole->Register("fn_constantMouseSensitivity", &fn_constantMouseSensitivity, 0, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "0 = Sensitivity depends on set mass multiplier. 1 = Sensitivity ignores mass. 2 = Sensitivity follows default mass");
 	pConsole->Register("fn_disableShootZoom", &fn_disableShootZoom, 0, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "Disables the zoom in effect when shooting");
 	pConsole->Register("fn_enableFPBody", &fn_enableFpBody, 0, VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE, "Enable first person body on custom characters");
 	pConsole->Register("fn_fixExplosivePlant", &fn_fixExplosivePlant, 1, VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE, "Fix planting mines and claymores with high FPS");

@@ -108,10 +108,10 @@ CGame::CGame()
 
 CGame::~CGame()
 {
-  m_pFramework->EndGameContext();
-  m_pFramework->UnregisterListener(this);
+	m_pFramework->EndGameContext();
+	m_pFramework->UnregisterListener(this);
 
-  ReleaseScriptBinds();
+	ReleaseScriptBinds();
 	ReleaseActionMaps();
 	SAFE_DELETE(m_pFlashMenuObject);
 	SAFE_DELETE(m_pOptionsManager);
@@ -126,15 +126,14 @@ CGame::~CGame()
 	g_pGameActions = 0;
 	SAFE_DELETE(m_pDownloadTask);
 	SAFE_DELETE(m_pCursor);
+
 	SAFE_DELETE(m_pLauncher);
 	SAFE_DELETE(m_pRemoteControlSystem);
 }
 
-
-
 bool CGame::Init(IGameFramework *pFramework)
 {
-  LOADING_TIME_PROFILE_SECTION(GetISystem());
+	LOADING_TIME_PROFILE_SECTION(GetISystem());
 
 	m_pFramework = pFramework;
 	m_pConsole = gEnv->pConsole;
@@ -272,10 +271,6 @@ bool CGame::Init(IGameFramework *pFramework)
 		}
 		else
 		{
-			#ifdef LINUX  // workaround for Linux server.
-				if(gEnv->pSystem->IsDedicated())
-					m_pFramework->GetILevelSystem()->LoadRotation();
-			#endif				
 			GameWarning("[GameProfiles]: Cannot login user '%s'", userName);
 		}
 	}
@@ -570,21 +565,14 @@ void CGame::OnLoadGame(ILoadGame* pLoadGame)
 	if(difficulty != g_pGameCVars->g_difficultyLevel)
 	{
 		m_pFlashMenuObject->SetDifficulty(difficulty);
-		//ICVar *diff = gEnv->pConsole->GetCVar("g_difficultyLevel");
-		//if(diff)
-		//{
-			//string diffVal = "Option.";
-			//diffVal.append(diff->GetName());
-			//GetOptions()->SaveCVarToProfile(diffVal.c_str(), diff->GetString());
-			IPlayerProfile *pProfile = m_pPlayerProfileManager->GetCurrentProfile(m_pPlayerProfileManager->GetCurrentUser());
-			if(pProfile)
-			{
-				pProfile->SetAttribute("Singleplayer.LastSelectedDifficulty", difficulty);
-				pProfile->SetAttribute("Option.g_difficultyLevel", difficulty);
-				IPlayerProfileManager::EProfileOperationResult result;
-				m_pPlayerProfileManager->SaveProfile(m_pPlayerProfileManager->GetCurrentUser(), result);
-			}
-		//}
+		IPlayerProfile *pProfile = m_pPlayerProfileManager->GetCurrentProfile(m_pPlayerProfileManager->GetCurrentUser());
+		if(pProfile)
+		{
+			pProfile->SetAttribute("Singleplayer.LastSelectedDifficulty", difficulty);
+			pProfile->SetAttribute("Option.g_difficultyLevel", difficulty);
+			IPlayerProfileManager::EProfileOperationResult result;
+			m_pPlayerProfileManager->SaveProfile(m_pPlayerProfileManager->GetCurrentUser(), result);
+		}
 	}
 
 	// altitude limit
@@ -601,41 +589,37 @@ void CGame::OnLoadGame(ILoadGame* pLoadGame)
 
 void CGame::OnActionEvent(const SActionEvent& event)
 {
-  //SAFE_MENU_FUNC(OnActionEvent(event)); - FlashMenuObject is already a registered CryAction listener - Lin
 	switch(event.m_event)
-  {
-  case  eAE_channelDestroyed:
-	GameChannelDestroyed(event.m_value == 1);
-	break;
-	case eAE_serverIp:
-		if(gEnv->bServer && GetServerSynchedStorage())
-		{
-			GetServerSynchedStorage()->SetGlobalValue(GLOBAL_SERVER_IP_KEY,CONST_TEMP_STRING(event.m_description));
-			GetServerSynchedStorage()->SetGlobalValue(GLOBAL_SERVER_PUBLIC_PORT_KEY,event.m_value);
-		}
-		break;
-	case eAE_serverName:
-		if(gEnv->bServer && GetServerSynchedStorage())
-		{
-			GetServerSynchedStorage()->SetGlobalValue(GLOBAL_SERVER_NAME_KEY,CONST_TEMP_STRING(event.m_description));
-		}
-
-		break;
-	case eAE_channelCreated:
-		
-
-		break;
-  }
+	{
+		case eAE_channelDestroyed:
+			GameChannelDestroyed(event.m_value == 1);
+			break;
+		case eAE_serverIp:
+			if(gEnv->bServer && GetServerSynchedStorage())
+			{
+				GetServerSynchedStorage()->SetGlobalValue(GLOBAL_SERVER_IP_KEY,CONST_TEMP_STRING(event.m_description));
+				GetServerSynchedStorage()->SetGlobalValue(GLOBAL_SERVER_PUBLIC_PORT_KEY,event.m_value);
+			}
+			break;
+		case eAE_serverName:
+			if(gEnv->bServer && GetServerSynchedStorage())
+			{
+				GetServerSynchedStorage()->SetGlobalValue(GLOBAL_SERVER_NAME_KEY,CONST_TEMP_STRING(event.m_description));
+			}
+			break;
+		case eAE_channelCreated:
+			break;
+	}
 }
 
 void CGame::GameChannelDestroyed(bool isServer)
 {
-  if (!isServer)
-  {
-	delete m_pClientSynchedStorage;
-	m_pClientSynchedStorage=0;
-	if(m_pHUD)
-	  m_pHUD->PlayerIdSet(0);
+	if (!isServer)
+	{
+		delete m_pClientSynchedStorage;
+		m_pClientSynchedStorage=0;
+		if(m_pHUD)
+			m_pHUD->PlayerIdSet(0);
 
 		if (!gEnv->pSystem->IsSerializingFile())
 		{
@@ -643,35 +627,30 @@ void CGame::GameChannelDestroyed(bool isServer)
 			buf.FormatFast("%g", g_pGameCVars->v_altitudeLimitDefault());
 			g_pGameCVars->pAltitudeLimitCVar->ForceSet(buf.c_str());
 		}
-	//the hud continues existing when the player got diconnected - it's part of the game
-	/*if(!gEnv->pSystem->IsEditor())
-	{
-	SAFE_DELETE(m_pHUD);
-	}*/
-  }
+	}
 }
 
 void CGame::DestroyHUD()
 {
-  SAFE_DELETE(m_pHUD);
+	SAFE_DELETE(m_pHUD);
 }
 
 void CGame::BlockingProcess(BlockingConditionFunction f)
 {
-  INetwork* pNetwork = gEnv->pNetwork;
+	INetwork* pNetwork = gEnv->pNetwork;
 
-  bool ok = false;
+	bool ok = false;
 
-  ITimer * pTimer = gEnv->pTimer;
-  CTimeValue startTime = pTimer->GetAsyncTime();
+	ITimer * pTimer = gEnv->pTimer;
+	CTimeValue startTime = pTimer->GetAsyncTime();
 
-  while (!ok)
-  {
-	pNetwork->SyncWithGame(eNGS_FrameStart);
-	pNetwork->SyncWithGame(eNGS_FrameEnd);
-	gEnv->pTimer->UpdateOnFrameStart();
-	ok |= (*f)();
-  }
+	while (!ok)
+	{
+		pNetwork->SyncWithGame(eNGS_FrameStart);
+		pNetwork->SyncWithGame(eNGS_FrameEnd);
+		gEnv->pTimer->UpdateOnFrameStart();
+		ok |= (*f)();
+	}
 }
 
 CGameRules *CGame::GetGameRules() const
@@ -855,7 +834,7 @@ void CGame::GetMemoryStatistics(ICrySizer * s)
 	m_pItemSharedParamsList->GetMemoryStatistics(s);
 
 	if (m_pPlayerProfileManager)
-	  m_pPlayerProfileManager->GetMemoryStatistics(s);
+		m_pPlayerProfileManager->GetMemoryStatistics(s);
 
 	if (m_pHUD)
 		m_pHUD->GetMemoryStatistics(s);
@@ -911,7 +890,7 @@ const string& CGame::GetLastSaveGame(string &levelName)
 
 ILINE void expandSeconds(int secs, int& days, int& hours, int& minutes, int& seconds)
 {
-	days  = secs / 86400;
+	days = secs / 86400;
 	secs -= days * 86400;
 	hours = secs / 3600;
 	secs -= hours * 3600;

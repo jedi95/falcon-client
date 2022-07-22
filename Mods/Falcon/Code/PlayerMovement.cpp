@@ -1031,7 +1031,7 @@ void CPlayerMovement::AdjustMovementForEnvironment( Vec3& move, bool sprinting )
 	}
 
 	//player is slowed down by carrying heavy objects (max. 33%)
-	float massFactor = m_player.GetMassFactor();
+	float massFactor = m_player.GetMassFactor(true);
 	move *= massFactor;
 
 	//Stop movement while firing in prone
