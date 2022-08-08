@@ -71,7 +71,7 @@ bool CC4::OnActionSelectDetonator(EntityId actorId, const ActionId& actionId, in
 	return true;
 }
 //------------------------------------------------------------------------
-void CC4::PickUp(EntityId pickerId, bool sound, bool select/* =true */, bool keepHistory/* =true */)
+void CC4::PickUp(EntityId pickerId, bool sound, bool select, bool keepHistory)
 {
 	CActor *pActor=GetActor(pickerId);
 	if (pActor)

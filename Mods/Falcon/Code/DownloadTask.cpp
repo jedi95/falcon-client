@@ -40,7 +40,7 @@ CDownloadTask::~CDownloadTask()
 	StopDownloadTask();
 }
 
-bool CDownloadTask::StartMapDownload(SFileDownloadParameters& dl, int attempts, IDownloadTaskListener* pListener/*=NULL*/)
+bool CDownloadTask::StartMapDownload(SFileDownloadParameters& dl, int attempts, IDownloadTaskListener* pListener)
 {
 	if(IsDownloadTaskInProgress())
 		return false;

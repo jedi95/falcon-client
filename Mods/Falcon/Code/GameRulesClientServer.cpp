@@ -884,8 +884,8 @@ IMPLEMENT_RMI(CGameRules, ClTextMessage)
 //------------------------------------------------------------------------
 IMPLEMENT_RMI(CGameRules, SvRequestSimpleHit)
 {
- 	int channelId=m_pGameFramework->GetGameChannelId(pNetChannel);
- 	IActor *pActor=m_pGameFramework->GetIActorSystem()->GetActorByChannelId(channelId);
+	int channelId=m_pGameFramework->GetGameChannelId(pNetChannel);
+	IActor *pActor=m_pGameFramework->GetIActorSystem()->GetActorByChannelId(channelId);
 	if(!pActor)
 		return true;
 
@@ -904,8 +904,8 @@ IMPLEMENT_RMI(CGameRules, SvRequestHit)
 	HitInfo info(params);
 	info.remote=true;
 
- 	int channelId=m_pGameFramework->GetGameChannelId(pNetChannel);
- 	IActor *pActor=m_pGameFramework->GetIActorSystem()->GetActorByChannelId(channelId);
+	int channelId=m_pGameFramework->GetGameChannelId(pNetChannel);
+	IActor *pActor=m_pGameFramework->GetIActorSystem()->GetActorByChannelId(channelId);
 	if(!pActor)
 		return true;
 

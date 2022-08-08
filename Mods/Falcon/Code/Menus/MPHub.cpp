@@ -265,49 +265,7 @@ bool CMPHub::HandleFSCommand(const char* pCmd, const char* pArgs)
 			m_currentScreen->Invoke("showAccountInfo",infoArgs,2);
 			if(m_profile.get() && m_profile->IsLoggedIn())
 			{
-				SUserStats stats = m_profile->GetMyStats();
-				static string country;
-				if(strlen(m_profile->GetCountry()))
-				{
-					country = "@ui_country_";
-					country += m_profile->GetCountry();
-				}
-				else
-					country = "";
-
-				static string played, accuracy, kills, kpm;
-
-				if(stats.m_played)
-					played.Format("%d",stats.m_played/60);
-				else
-					played.resize(0);
-
-				if(stats.m_accuracy)
-					accuracy.Format("%.2f%%",stats.m_accuracy);
-				else
-					accuracy.resize(0);
-
-				if(stats.m_kills)
-					kills.Format("%d",stats.m_kills);
-				else
-					kills.resize(0);
-
-				if(stats.m_killsPerMinute)
-					kpm.Format("%.2f",stats.m_killsPerMinute);
-				else
-					kpm.resize(0);
-
-				SFlashVarValue args[] = {	m_profile->GetLogin(),
-																	country.c_str(),
-																	played.c_str(),
-																	stats.m_gameMode.c_str(),
-																	stats.m_map.c_str(),
-																	stats.m_weapon.c_str(),
-																	stats.m_vehicle.c_str(),
-																	stats.m_suitMode.c_str(),
-																	accuracy.c_str(),
-																	kpm.c_str(),
-																	kills.c_str()};
+				SFlashVarValue args[] = { m_profile->GetLogin() };
 				m_currentScreen->Invoke("setAccountInfo",args,sizeof(args)/sizeof(args[0]));
 			}
 		}

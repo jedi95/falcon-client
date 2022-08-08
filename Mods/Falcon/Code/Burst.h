@@ -55,7 +55,7 @@ public:
 	virtual void PatchParams(const struct IItemParamsNode *patch);
 
 	virtual void Activate(bool activate);
-	virtual bool CanFire(bool considerAmmo /* = true */) const;
+	virtual bool CanFire(bool considerAmmo) const;
 
 	virtual void StartFire();
 	virtual void StopFire();

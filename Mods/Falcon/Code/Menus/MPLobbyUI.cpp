@@ -120,10 +120,6 @@ struct CMPLobbyUI::SServerFilter
 	  return false;
 	if( m_notprivate && i.m_private )
 	  return false;
-	//if( m_notcustomized && i.m_custom )
-	//  return false;
-	//if( m_autoteambalance && i.m_autoteambalance )
-	//  return false;
 	if( m_anticheat && !i.m_anticheat )
 	  return false;
 	if( m_friendlyfire && !i.m_friendlyfire )
@@ -231,59 +227,11 @@ struct SMPServerList
 	stl::find_and_erase(m_all,idx);
   }
 
-  void AddToFavorites(int idx)
-  {
-	m_favorites.push_back(idx);
-	if(m_displayMode==1)
-	{
-	  AddToVisible(idx);
-	}
-  }
-
-  void AddToRecent(int idx)
-  {
-	m_recent.push_back(idx);
-	if(m_displayMode==2)
-	{
-	  AddToVisible(idx);
-	}
-  }
-
-  void RemoveFromFavorites(int idx)
-  {
-	stl::find_and_erase(m_favorites,idx);
-	if(m_displayMode==1)
-	{
-	  RemoveFromVisible(idx);
-	  if(m_selectedServer == idx)
-		ClearSelection();
-	}
-  }
-
-  void RemoveFromRecent(int idx)
-  {
-	stl::find_and_erase(m_recent,idx);
-	if(m_displayMode==2)
-	{
-	  RemoveFromVisible(idx);
-	  if(m_selectedServer == idx)
-		ClearSelection();
-	}
-  }
-
   void AddServer(const CMPLobbyUI::SServerInfo& srv)
   {
 	int idx = m_allServers.size();
 	m_allServers.push_back(srv);
 
-	if(srv.m_favorite)
-	{
-	  AddToFavorites(idx);
-	}
-	if(srv.m_recent)
-	{
-	  AddToRecent(idx);
-	}
 	if(m_displayMode == 0)
 	  AddToVisible(idx);
 	m_dirty = true;
@@ -295,27 +243,8 @@ struct SMPServerList
 	if(idx!=-1)
 	{
 	  int ping = m_allServers[idx].m_ping;
-	  //if(srv.m_ping != 9999)
 	  ping = srv.m_ping;
-	  
-	  if(srv.m_favorite != m_allServers[idx].m_favorite)
-	  {
-		if(!srv.m_favorite)
-		  RemoveFromFavorites(idx);
-		else
-		  AddToFavorites(idx);
-	  }
-
-	  if(srv.m_recent != m_allServers[idx].m_recent)
-	  {
-		if(!srv.m_recent)
-		  RemoveFromRecent(idx);
-		else
-		  AddToRecent(idx);
-	  }
-	
 	  m_allServers[idx] = srv;
-	  
 	  m_allServers[idx].m_ping = ping;
 	}
   }
@@ -336,8 +265,6 @@ struct SMPServerList
 	{
 	  m_allServers.erase(m_allServers.begin()+idx);
 	  RemoveFromVisible(idx);
-	  stl::find_and_erase(m_favorites,idx);
-	  stl::find_and_erase(m_recent,idx);
 	}
   }
 
@@ -382,9 +309,8 @@ struct SMPServerList
 
   void Clear()
   {
-	m_recent.resize(0);
-	m_favorites.resize(0);
 	m_all.resize(0);
+	m_empty.resize(0);
 	m_allServers.resize(0);
 	m_startIndex = 0;
 	m_selectedServer = -1;
@@ -402,11 +328,11 @@ struct SMPServerList
 	  m_dirty = true;
 	  break;
 	case 1:
-	  m_all = m_favorites;
+	  m_all = m_empty;
 	  m_dirty = true;
 	 break;
 	case 2:
-	  m_all = m_recent;
+	  m_all = m_empty;
 	  m_dirty = true;
 	  break;
 	}
@@ -472,7 +398,7 @@ struct SMPServerList
 		less = (m_sl.m_allServers[i].m_private && !m_sl.m_allServers[j].m_private)?1:0;
 		break;
 	  case eSC_favorite:
-		less = (m_sl.m_allServers[i].m_favorite && !m_sl.m_allServers[j].m_favorite)?1:0;
+		less = 0;
 		break;
 	  case eSC_official:
 		less = (m_sl.m_allServers[i].m_official && !m_sl.m_allServers[j].m_official)?1:0;
@@ -502,18 +428,8 @@ struct SMPServerList
 	  }
 	  break;
 	case 1:
-	  {
-		for(int i=0;i<m_favorites.size();++i)
-		  if(filter->Filter(m_allServers[m_favorites[i]]))
-			m_all.push_back(m_favorites[i]);
-	  }
 	  break;
 	case 2:
-	  {
-		for(int i=0;i<m_recent.size();++i)
-		  if(filter->Filter(m_allServers[m_recent[i]]))
-			m_all.push_back(m_recent[i]);
-	  }
 	  break;
 	}
 	if(m_selectedServer != -1)
@@ -572,50 +488,8 @@ struct SMPServerList
 	return m_allServers[m_selectedServer];
   }
 
-  void SetSelectedFavorite(bool fav)
-  {
-	if(m_selectedServer == -1)
-	  return;
-	const CMPLobbyUI::SServerInfo &sel = GetSelectedServer(); 
-	for(int i=0;i<m_allServers.size();++i)
-	{
-	  if(m_allServers[i].m_publicIP == sel.m_publicIP &&
-		 m_allServers[i].m_hostPort == sel.m_hostPort &&
-		 m_allServers[i].m_favorite != fav)
-	  {
-		 m_allServers[i].m_favorite = fav;
-		 if(!fav)
-		   RemoveFromFavorites(i);
-		 else
-		 {
-		   AddToFavorites(i);
-		 }
-	  }
-	}
-  }
-
-	void SetIpFavorite(uint ip, ushort port, bool fav)
-	{
-		for(int i=0;i<m_allServers.size();++i)
-		{
-			if(m_allServers[i].m_publicIP == ip &&
-				m_allServers[i].m_hostPort == port &&
-				m_allServers[i].m_favorite != fav)
-			{
-				m_allServers[i].m_favorite = fav;
-				if(!fav)
-					RemoveFromFavorites(i);
-				else
-				{
-					AddToFavorites(i);
-				}
-			}
-		}
-	}
-
 	DisplayedServersVector m_all;
-  DisplayedServersVector m_favorites;
-  DisplayedServersVector m_recent;
+	DisplayedServersVector m_empty;
   bool                m_updateCompleted;
 
   ServerInfoVector    m_allServers;
@@ -634,455 +508,14 @@ struct SMPServerList
 ESortColumn         gSortColumn = eSC_none;
 ESortType           gSortType = eST_ascending;
 
-
-struct SUserStatus
-{
-	SUserStatus():port(0),ping(-1){}
-	string			server;
-	int					port;
-	string			gamemode;
-	int					ping;
-	EUserStatus status;
-};
-
-struct SUserListItem
-{
-  int					id;
-  string			name;
-  int					arrow;
-  bool				header;
-  bool				bubble;
-  bool				playing;
-  bool				offline;
-	bool				foreign;
-	SUserStatus status;
-	bool operator<(const SUserListItem& u) const
-	{
-		return name.compareNoCase(u.name)<0;
-	}
-	bool operator==(const SUserListItem& u) const
-	{
-		return name.compareNoCase(u.name)==0;
-	}
-};
-
-bool ParseUserStatus(SUserStatus& status, const char* str)
-{
-	const char* after_game = strstr(str,"://");
-	if (after_game)
-	{
-		string game(str, after_game);
-		after_game += 2;
-		if(!strncmp("chatting",after_game,strlen("chatting")))
-		{
-			status.status = eUS_chatting;
-		}
-		else if(!strncmp("playing",after_game,strlen("playing")))
-		{
-			status.status = eUS_playing;
-		}
-		else if(!strncmp("away",after_game,strlen("playing")))
-		{
-			status.status = eUS_away;
-		}
-		status.status = eUS_online;
-	}
-	else
-		return false;
-	return true;
-}
-
-struct CMPLobbyUI::SMPUserList
-{
-  struct SVisibleEntry
-  {
-	int idx;
-	EVisibleUserType type;
-  };
-
-	SMPUserList(CMPLobbyUI*	parent):
-	m_visibleCount(22),
-	m_firstVisible(0),
-	m_selected(-1),
-		m_parent(parent)
-  {
-	InitHeaders();
-  }
-
-  void InitHeaders()
-  {
-	SUserListItem i;
-	m_headers.resize(0);
-	i.arrow = 2;
-	i.header = true;
-	i.bubble = false;
-	i.playing = false;
-	i.offline = false;
-		i.foreign = false;
-	i.id = 0;
-	i.name = "@ui_menu_BUDDIES";
-	m_headers.push_back(i);
-	i.id = 1;
-	i.name = "@ui_menu_GLOBAL_CHAT";
-	m_headers.push_back(i);
-	i.id = 2;
-		i.name = "@ui_menu_IGNORE_LIST";
-	m_headers.push_back(i);
-  }
-
-  int GetDisplayCount()
-  {
-	return min(m_visibleCount,int(m_visibleList.size()));
-  }
-
-  SUserListItem& GetListItem(int i)
-  {
-	SVisibleEntry& v = m_visibleList[i];
-	switch(v.type)
-	{
-	case eVUT_header:
-	  return m_headers[v.idx];
-	case eVUT_buddy:
-	  return m_buddies[v.idx];
-	case eVUT_global:
-	  return m_chat[v.idx];
-	  break;
-	case eVUT_ignore:
-	  return m_ignore[v.idx];
-	}
-	static SUserListItem dummy;
-	return dummy;
-  }
-
-  bool    SetScrollPos(double fr)
-  {
-	int pos = (int)(fr*(m_visibleList.size()-m_visibleCount));
-	return SetStartIndex(pos);
-  }
-
-  bool SetStartIndex(int i)
-  {
-	int set_idx = i;
-	if(set_idx+m_visibleCount>m_visibleList.size())
-	  set_idx = m_visibleList.size()-m_visibleCount;
-
-	if(set_idx<0)
-	  set_idx = 0;
-
-	if(set_idx!= m_firstVisible)
-	{
-	  m_firstVisible = set_idx;
-	  return true;
-	}
-	return false;
-  }
-
-	void UpdateVisibleList()
-	{
-		SSelectionSave save(*this);
-		m_visibleList.resize(0);
-
-	SVisibleEntry e;
-	e.type = eVUT_header;
-	e.idx = 0;
-	m_visibleList.push_back(e);
-	if(m_headers[0].arrow == 2)
-		{
-			e.type = eVUT_buddy;
-			for(int i=0;i<m_buddies.size();++i)
-			{
-				e.idx = i;
-				m_visibleList.push_back(e);
-			}
-		}
-
-		e.type = eVUT_header;
-		e.idx = 1;
-		m_visibleList.push_back(e);
-
-	if(m_headers[1].arrow == 2)
-		{
-			e.type = eVUT_global;
-			for(int i=0;i<m_chat.size();++i)
-			{
-				e.idx = i;
-				m_visibleList.push_back(e);
-			}
-		}
-
-	if(g_pGameCVars->g_displayIgnoreList)
-	{
-	  e.type = eVUT_header;
-	  e.idx = 2;
-	  m_visibleList.push_back(e);
-	
-	  e.type = eVUT_ignore;
-			if(m_headers[2].arrow == 2)
-			{
-				for(int i=0;i<m_ignore.size();++i)
-				{
-					e.idx = i;
-					m_visibleList.push_back(e);
-				}
-			}
-		}
-		SetStartIndex(m_firstVisible);
-	}
-
-  void AddUser(EChatCategory cat, int id, const char *name, bool foreign)
-  {
-		SSelectionSave save(*this);
-	SUserListItem i;
-	i.id = id;
-	i.name = name;
-	i.header = false;
-	i.bubble = false;
-	i.arrow = 0;
-	i.offline = false;
-	i.playing = false;
-		i.foreign = foreign;
-	switch(cat)
-	{
-	case eCC_buddy:
-	  stl::binary_insert_unique(m_buddies,i);
-	  break;
-	case eCC_global:
-			stl::binary_insert_unique(m_chat,i);
-			break;
-	case eCC_ignored:
-			stl::binary_insert_unique(m_ignore,i);
-	  break;
-	}
-		UpdateHeaders();
-  }
-
-  void RemoveUser(EChatCategory cat, int id)
-  {
-		SSelectionSave save(*this);
-	std::vector<SUserListItem> *p = 0;
-	switch(cat)
-	{
-	case eCC_buddy:
-	  p = &m_buddies;
-	  break;
-	case eCC_global:
-	  p = &m_chat;
-	  break;
-	case eCC_ignored:
-	  p = &m_ignore;
-	  break;
-	default:
-	  return;
-	}
-	std::vector<SUserListItem> &list = *p;    
-	for(int i=0;i<list.size();++i)
-	{
-	  if(list[i].id == id)
-	  {
-		list.erase(list.begin()+i);
-		break;
-	  }
-	}
-		UpdateHeaders();
-  }
-
-	void UpdateHeaders()
-	{
-		/*m_headers[0].name.Format("@ui_menu_BUDDIES (%d)",m_buddies.size());
-		m_headers[1].name.Format("@ui_menu_GLOBAL_CHAT (%d)",m_chat.size());
-		m_headers[2].name.Format("@ui_menu_IGNORE_LIST (%d)",m_ignore.size());*/
-	}
-
-  void SetUserStatus(EChatCategory cat, int id, EUserStatus status, const char* descr)
-  {
-	std::vector<SUserListItem> *p = 0;
-	switch(cat)
-	{
-	case eCC_buddy:
-	  p = &m_buddies;
-	  break;
-	case eCC_global:
-	  p = &m_chat;
-	  break;
-	case eCC_ignored:
-	  p = &m_ignore;
-	  break;
-	default:
-	  return;
-	}
-	std::vector<SUserListItem> &list = *p;    
-	for(int i=0;i<list.size();++i)
-	{
-	  if(list[i].id == id)
-	  {
-		SUserListItem &u = list[i];
-		if(!ParseUserStatus(u.status,descr))
-				{
-					u.status.status = status;
-				}
-		switch(u.status.status)
-		{
-		case eUS_offline:
-		  u.offline = true;
-		  u.playing = false;
-		  u.bubble = false;
-		  break;
-		case eUS_online:
-		  u.offline = false;
-		  u.playing = false;
-		  u.bubble = false;
-		  break;
-		case eUS_playing:
-		  u.offline = false;
-		  u.playing = true;
-		  u.bubble = false;
-		  break;
-		}
-		break;
-	  }
-	}
-  }
-
-  void SelectUser(int id)
-  {
-	m_selected = id;
-  }
-
-  
-	void OpenGroup(int id)
-	{
-		if( id >= 0 && id < m_visibleList.size() && m_visibleList[id].type == eVUT_header )
-		{
-			SUserListItem& item = m_headers[m_visibleList[id].idx];
-			if(item.arrow == 1)
-				item.arrow = 2;
-			else
-				item.arrow = 1;
-		}			
-	}
-
-  struct SSelectionSave
-  {
-	SSelectionSave(SMPUserList& p):m_parent(p),m_visibleDelta(0)
-	{
-	  if(m_parent.m_selected == -1)
-		return;
-	  if(!m_parent.m_visibleList.empty())
-			{
-		m_type = m_parent.m_visibleList[m_parent.m_selected].type;
-				const SUserListItem& item = m_parent.GetListItem(m_parent.m_selected);
-				m_id = item.id;
-				m_visibleDelta = m_parent.m_selected-m_parent.m_firstVisible;
-			}
-	  else //invalid
-	  {
-		m_id = -1;
-		m_type = eVUT_header;
-	  }
-	}
-	~SSelectionSave()
-	{
-	  if(m_parent.m_selected == -1 || m_parent.m_visibleList.empty())
-		return;
-	  for(int i=0;i<m_parent.m_visibleList.size();++i)
-		if(m_parent.m_visibleList[i].type == m_type && m_parent.GetListItem(i).id == m_id)
-		{
-		  m_parent.m_selected = i;
-					if(m_visibleDelta>=0 && m_visibleDelta<m_parent.m_visibleCount)//item was visible
-					{
-						m_parent.SetStartIndex(i - m_visibleDelta);
-					}
-		  return;
-		}
-	  m_parent.m_selected = -1;
-			if(m_parent.m_parent)
-				m_parent.m_parent->SetChatButtonsMode(false,0);
-	}
-
-		int 							m_visibleDelta;
-
-	SMPUserList&			m_parent;
-	EVisibleUserType	m_type;
-		int								m_id;
-  };
-
-  std::vector<SVisibleEntry> m_visibleList;
-  int                        m_firstVisible;
-  int                        m_visibleCount;
-  int                        m_selected;
-
-  SVisibleEntry              m_tempSelection;
-
-  std::vector<SUserListItem> m_headers;
-  std::vector<SUserListItem> m_chat;
-  std::vector<SUserListItem> m_ignore;
-  std::vector<SUserListItem> m_buddies;
-	CMPLobbyUI*								 m_parent;
-};
-
-
-struct SMPChatText
-{
-  SMPChatText():
-  m_firstVisible(0),
-  m_visibleCount(22)
-  {}
-
-  bool    SetScrollPos(double fr)
-  {
-	int pos = (int)(fr*(m_text.size()-m_visibleCount));
-	return SetStartIndex(pos);
-  }
-
-  bool SetStartIndex(int i)
-  {
-	int set_idx = i;
-	if(set_idx+m_visibleCount>m_text.size())
-	  set_idx = m_text.size()-m_visibleCount;
-
-	if(set_idx<0)
-	  set_idx = 0;
-
-	if(set_idx!= m_firstVisible)
-	{
-	  m_firstVisible = set_idx;
-	  return true;
-	}
-	return false;
-  }
-
-  void AddText(const char* text)
-  {
-	m_text.push_back(text);
-	if(m_text.size()>m_visibleCount)
-	  m_firstVisible++;
-  }
-
-  void Clear()
-  {
-	m_firstVisible = 0;
-	m_text.resize(0);
-  }
-  
-  int                 m_firstVisible;
-  int                 m_visibleCount;
-  std::vector<string> m_text;
-};
-
 CMPLobbyUI::CMPLobbyUI(IFlashPlayer* plr):
 m_player(plr),
 m_serverlist(new SMPServerList()),
-m_currentTab(-1),
-m_chatBlink(false)
+m_currentTab(-1)
 {
   m_cmd.reserve(256);
   SetSortParams(gSortColumn, gSortType);
-  m_userlist.reset(new SMPUserList(this));
-  m_chatlist.reset(new SMPChatText());
   m_filter.reset(new SServerFilter(this));
-
-	DisplayChatText();
-	SetChatHeader("@ui_menu_GLOBALCHAT",0);
 }
 
 CMPLobbyUI::~CMPLobbyUI()
@@ -1091,267 +524,122 @@ CMPLobbyUI::~CMPLobbyUI()
   gSortType = m_serverlist->m_sorttype;
 }
 
-
 bool CMPLobbyUI::HandleFSCommand(EGsUiCommand cmd, const char* pArgs)
 {
-  bool handled = true;
-  switch(cmd)
-  {
-  case eGUC_setVisibleServers:
+	bool handled = true;
+	switch(cmd)
 	{
-	  int i=atoi(pArgs);
-	  m_serverlist->SetVisibleCount(i);
-	  DisplayServerList();
-	}
-	break;
-  case eGUC_displayServerList:
-	{
-	  DisplayServerList();
-	}
-	break;
-  case eGUC_serverScrollBarPos:
-	{
-	  double pos = atof(pArgs);
-	  SetServerListPos(pos);
-	}
-	break;
-  case eGUC_serverScroll:
-	{
-	  int d = atoi(pArgs);
-	  ChangeServerListPos(d);
-	}
-	break;
-  case eGUC_userScrollBarPos:
-	{
-	  double pos = atof(pArgs);
-	  SetUserListPos(pos);
-	}
-	break;
-  case eGUC_userScroll:
-	{
-	  int d = atoi(pArgs);
-	  ChangeUserListPos(d);
-	}
-	break;
-  case eGUC_chatScrollBarPos:
-	{
-	  double pos = atof(pArgs);
-	  SetChatTextPos(pos);
-	}
-	break;
-  case eGUC_chatScroll:
-	{
-	  int d = atoi(pArgs);
-	  ChangeChatTextPos(d);
-	}
-	break;
-  case eGUC_selectServer:
-	{
-	  int id = atoi(pArgs);
-	  SelectServer(id);
-	}
-	break;
-  case eGUC_tab:
-	{
-	  int id = atoi(pArgs);
-	  ChangeTab(id);
-	}
-	break;
-  case eGUC_find:
-	{
-	  ClearSearchResults();
-	}
-	break;
-  case eGUC_addBuddy:
-	{
-	  int id = atoi(pArgs);
-	  const SUserListItem& u = m_userlist->GetListItem(id);
-	  ShowRequestDialog(u.name);
-	}
-	break;
-	case eGUC_addBuddyFromFind:
+		case eGUC_setVisibleServers:
 		{
-			if(pArgs && pArgs[0])
-			{
-				ShowRequestDialog(pArgs);
-			}
+			int i=atoi(pArgs);
+			m_serverlist->SetVisibleCount(i);
+			DisplayServerList();
+			break;
 		}
-		break;
-	case eGUC_addBuddyFromInfo:
+		case eGUC_displayServerList:
 		{
-			ShowRequestDialog(m_infoNick);
-		}
-		break;
-  case eGUC_addIgnoreFromInfo:
-	{
-	  OnAddIgnore(m_infoNick);
-	}
-	break;
-  case eGUC_addIgnore:
-	{
-	  int id = atoi(pArgs);
-	  const SUserListItem& u = m_userlist->GetListItem(id);
-	  OnAddIgnore(u.name);
-	}
-	break;
-  case eGUC_stopIgnore:
-	{
-	  int id = atoi(pArgs);
-			if(id != -1)
-			{
-				const SUserListItem& u = m_userlist->GetListItem(id);
-				OnStopIgnore(u.name);
-			}
-	}
-	break;
-  case eGUC_inviteBuddy:
-	{
-	  OnAddBuddy(m_inviteNick,pArgs);
-	}
-	break;
-  case eGUC_removeBuddy:
-	{
-	  int id = atoi(pArgs);
-			if(id != -1)
-			{
-				OnRemoveBuddy(m_userlist->GetListItem(id).name);
-			}
-	}
-	break;
-  case eGUC_chatClick:
-	{
-	  int id = atoi(pArgs);
-			if(id != -1)
-			{
-				SelectUser(id);
-			}
-	}
-	break;
-  case eGUC_sortColumn:
-	{
-	  ESortColumn old_mode = m_serverlist->m_sortcolumn;
-	  ESortType   old_type = m_serverlist->m_sorttype;
-	  string header = pArgs;
-	  const char* comma = strchr(pArgs,',');
-	  if(comma!=0)
-	  {
-		header = header.substr(0,comma-pArgs);
-		m_serverlist->m_sorttype = comma[1]=='1'?eST_ascending:eST_descending;
-	  }
-
-	  ESortColumn c = KEY_BY_VALUE(header,gSortColumnNames);
-	  m_serverlist->m_sortcolumn = c;
-
-	  if(old_mode!=m_serverlist->m_sortcolumn || old_type!=m_serverlist->m_sorttype)
-	  {
-		m_serverlist->m_dirty = true;
-		DisplayServerList();
-	  }    
-	}
-	break;
-  case eGUC_displayInfo:
-	OnShowUserInfo(atoi(pArgs),0);
-	break;
-  case eGUC_displayInfoInList:
-	{
-	  int id = atoi(pArgs);
-			if(id>=0 && id<m_userlist->m_visibleList.size())
-			{
-				EVisibleUserType t = m_userlist->m_visibleList[id].type;
-				switch(t)
-				{
-				case eVUT_global:
-					OnShowUserInfo(0, m_userlist->GetListItem(id).name);
-					break;
-				case eVUT_buddy:
-				case eVUT_ignore:
-					OnShowUserInfo(m_userlist->GetListItem(id).id, m_userlist->GetListItem(id).name);
-					break;
-				}
-			}
-	}
-	break;
-	case eGUC_addFavorite:
-		OnAddFavorite();
-		m_serverlist->SetSelectedFavorite(true);
-		DisplayServerList();
-		break;
-  case eGUC_addFavoriteByIP:
-		{
-			string ip = pArgs;
-			string ip1 = "";
-			string ip2 = "";
-			string ip3 = "";
-			string ip4 = "";
-			string port = pArgs;
-			const char* sep = strchr(pArgs,':');
-			if(sep!=0)
-			{
-				ip = ip.substr(0,sep-pArgs);
-				port = port.substr((sep-pArgs)+1);
-			}
-
-			sep = strchr(ip,'.');
-			if(sep!=0)
-			{
-				ip1 = ip.substr(0,sep-ip.c_str());
-				ip = ip.substr((sep-ip.c_str())+1);
-			}
-
-			sep = strchr(ip,'.');
-			if(sep!=0)
-			{
-				ip2 = ip.substr(0,sep-ip.c_str());
-				ip = ip.substr((sep-ip.c_str())+1);
-			}
-
-			sep = strchr(ip,'.');
-			if(sep!=0)
-			{
-				ip3 = ip.substr(0,sep-ip.c_str());
-				ip4 = ip.substr((sep-ip.c_str())+1);
-			}
-			
-			int _ip1 = max(0,min(255,atoi(ip1)));
-			int _ip2 = max(0,min(255,atoi(ip2)));
-			int _ip3 = max(0,min(255,atoi(ip3)));
-			int _ip4 = max(0,min(255,atoi(ip4)));
-
-			uint _ip = (unsigned int)(_ip1 + (_ip2*256) +  (_ip3*65536) + (_ip4*16777216));
-			ushort _port = (unsigned short)(max(0,min(65535,atoi(port))));
-
-			OnAddFavoriteByIP(_ip,_port);
-			m_serverlist->SetIpFavorite(_ip, _port, true);
 			DisplayServerList();
 		}
-	break;
-  case eGUC_removeFavorite:
-	{
-			OnRemoveFavorite();
-	  int sel = m_serverlist->m_selectedServer;
-	  m_serverlist->SetSelectedFavorite(false);
-	  if(sel!=-1 && m_serverlist->m_selectedServer ==-1)
-		ClearSelection();        
-	  DisplayServerList();
-	}
-	break;
-  case eGUC_joinPassword:
-	{
-	  OnJoinWithPassword(atoi(pArgs));
-	}
-	break;
-	case eGUC_chatOpen:
-		m_userlist->OpenGroup(atoi(pArgs));
-		DisplayUserList();
 		break;
-  default:
-	handled = false;
-  }
+		case eGUC_serverScrollBarPos:
+		{
+			double pos = atof(pArgs);
+			SetServerListPos(pos);
+			break;
+		}
+		case eGUC_serverScroll:
+		{
+			int d = atoi(pArgs);
+			ChangeServerListPos(d);
+			break;
+		}
+		case eGUC_userScrollBarPos:
+			break;
+		case eGUC_userScroll:
+			break;
+		case eGUC_chatScrollBarPos:
+			break;
+		case eGUC_chatScroll:
+			break;
+		case eGUC_selectServer:
+		{
+			int id = atoi(pArgs);
+			SelectServer(id);
+			break;
+		}
+		case eGUC_tab:
+		{
+			int id = atoi(pArgs);
+			ChangeTab(id);
+		}
+		break;
+		case eGUC_find:
+			break;
+		case eGUC_addBuddy:
+			break;
+		case eGUC_addBuddyFromFind:
+			break;
+		case eGUC_addBuddyFromInfo:
+			break;
+		case eGUC_addIgnoreFromInfo:
+			break;
+		case eGUC_addIgnore:
+			break;
+		case eGUC_stopIgnore:
+			break;
+		case eGUC_inviteBuddy:
+			break;
+		case eGUC_removeBuddy:
+			break;
+		case eGUC_chatClick:
+			break;
+		case eGUC_sortColumn:
+		{
+			ESortColumn old_mode = m_serverlist->m_sortcolumn;
+			ESortType   old_type = m_serverlist->m_sorttype;
+			string header = pArgs;
+			const char* comma = strchr(pArgs,',');
+			if(comma!=0)
+			{
+				header = header.substr(0,comma-pArgs);
+				m_serverlist->m_sorttype = comma[1]=='1'?eST_ascending:eST_descending;
+			}
 
-  handled = OnHandleCommand(cmd,pArgs) || handled;
-  handled = m_filter->HandleFSCommand(cmd,pArgs) || handled;  
+			ESortColumn c = KEY_BY_VALUE(header,gSortColumnNames);
+			m_serverlist->m_sortcolumn = c;
 
-  return handled;
+			if(old_mode!=m_serverlist->m_sortcolumn || old_type!=m_serverlist->m_sorttype)
+			{
+				m_serverlist->m_dirty = true;
+				DisplayServerList();
+			}
+			break;
+		}
+		case eGUC_displayInfo:
+			break;
+		case eGUC_displayInfoInList:
+			break;
+		case eGUC_addFavorite:
+			break;
+		case eGUC_addFavoriteByIP:
+			break;
+		case eGUC_removeFavorite:
+			break;
+		case eGUC_joinPassword:
+		{
+			OnJoinWithPassword(atoi(pArgs));
+			break;
+		}
+		case eGUC_chatOpen:
+			break;
+		default:
+			handled = false;
+	}
+
+	handled = OnHandleCommand(cmd,pArgs) || handled;
+	handled = m_filter->HandleFSCommand(cmd,pArgs) || handled;  
+
+	return handled;
 }
 
 void  CMPLobbyUI::ClearServerList()
@@ -1436,30 +724,18 @@ void  CMPLobbyUI::SetUpdateProgress(int done, int total)
   m_serverlist->m_total = total;
 }
 
-void  CMPLobbyUI::ChangeTab(int tab)
+void CMPLobbyUI::ChangeTab(int tab)
 {
-  if(m_currentTab == tab)
-	return;
-  if(m_currentTab != -1)
-	OnDeactivateTab(m_currentTab);
-  m_currentTab = tab;
-  m_serverlist->SetDisplayMode(m_currentTab);
-  ClearSelection();
-  DisplayServerList();
-  if(tab != -1)
-	OnActivateTab(tab);
-  if(tab == 3)
-	{
-		m_chatBlink = false;
-	SetBlinkChat(false);
-		SelectUser(m_userlist->m_selected);
-	}
-  else
-	{
-		if(m_chatBlink)
-			SetBlinkChat(true);  
-		SetStatusString("");
-		}
+	if(m_currentTab == tab)
+		return;
+	if(m_currentTab != -1)
+		OnDeactivateTab(m_currentTab);
+	m_currentTab = tab;
+	m_serverlist->SetDisplayMode(m_currentTab);
+	ClearSelection();
+	DisplayServerList();
+	if(tab != -1)
+		OnActivateTab(tab);
 }
 
 void  CMPLobbyUI::DisplayServerList()
@@ -1545,7 +821,7 @@ void  CMPLobbyUI::DisplayServerList()
 	m_cmd = MPPath;
 	m_cmd += "AddServer\0";
 
-		SFlashVarValue args[] = {server.m_serverId, server.m_hostName.c_str(), server.m_ping, uiNumPlayers, server.m_mapName.c_str(), server.m_gameTypeName.c_str(), uiIP, server.m_hostPort, server.m_private, server.m_official, server.m_favorite, server.m_anticheat, server.m_canjoin, server.m_gameVersion.c_str()};
+		SFlashVarValue args[] = {server.m_serverId, server.m_hostName.c_str(), server.m_ping, uiNumPlayers, server.m_mapName.c_str(), server.m_gameTypeName.c_str(), uiIP, server.m_hostPort, server.m_private, server.m_official, false, server.m_anticheat, server.m_canjoin, server.m_gameVersion.c_str()};
 	m_player->Invoke(m_cmd.c_str(), args, sizeof(args)/sizeof(args[0]));
 
   }
@@ -1555,49 +831,16 @@ void  CMPLobbyUI::DisplayServerList()
   m_player->Invoke0(m_cmd.c_str());
 }
 
-void    CMPLobbyUI::SetServerListPos(double sb_pos)
+void CMPLobbyUI::SetServerListPos(double sb_pos)
 {
-  if(m_serverlist->SetScrollPos(sb_pos))
-	DisplayServerList();
+	if(m_serverlist->SetScrollPos(sb_pos))
+		DisplayServerList();
 }
 
-void    CMPLobbyUI::ChangeServerListPos(int delta)//either +1 or -1
+void CMPLobbyUI::ChangeServerListPos(int delta)
 {
-  if(m_serverlist->SetStartIndex(m_serverlist->m_startIndex+delta))
-	DisplayServerList();    
-}
-
-void  CMPLobbyUI::SetUserListPos(double sb_pos)
-{
-  if(m_userlist->SetScrollPos(sb_pos))  
-	DisplayUserList();
-}
-
-void  CMPLobbyUI::ChangeUserListPos(int delta)
-{
-  if(m_userlist->SetStartIndex(m_userlist->m_firstVisible + delta))
-	DisplayUserList();
-}
-
-void  CMPLobbyUI::SetChatTextPos(double sb_pos)
-{
-  if(m_chatlist->SetScrollPos(sb_pos))  
-	DisplayChatText();
-}
-
-void  CMPLobbyUI::ChangeChatTextPos(int delta)
-{
-  if(m_chatlist->SetStartIndex(m_chatlist->m_firstVisible + delta))
-	DisplayChatText();
-}
-
-void CMPLobbyUI::SetChatMode(const char* buddy)
-{
-  BlinkChat(true);
-  if(buddy)
-	SetChatHeader("@ui_menu_CHAT_WITH",buddy);
-  else
-	SetChatHeader("@ui_menu_GLOBALCHAT",0);
+	if(m_serverlist->SetStartIndex(m_serverlist->m_startIndex+delta))
+		DisplayServerList();
 }
 
 void CMPLobbyUI::SelectServer(int id)
@@ -1605,110 +848,6 @@ void CMPLobbyUI::SelectServer(int id)
   if(m_serverlist->SelectServer(id))
   {
 	ResetServerDetails();
-  }
-}
-
-void  CMPLobbyUI::SelectUser(int id)
-{
-  if(id>=0 && id<m_userlist->m_visibleList.size())
-  {
-	EVisibleUserType user_type = m_userlist->m_visibleList[id].type;
-	const SUserListItem& item = m_userlist->GetListItem(id);
-
-	switch(user_type)
-	{
-	case eVUT_buddy:
-	  SetChatButtonsMode(!item.foreign,1);
-	  OnChatModeChange(false,item.id);
-	  OnUserSelected(eCC_buddy,item.id);
-			switch(item.status.status)
-			{
-			case eUS_online:
-				SetStatusString("@ui_menu_Buddy_is_online",item.name.c_str());
-				break;
-			case eUS_chatting:
-				SetStatusString("@ui_menu_Buddy_is_chatting",item.name.c_str());
-				break;
-			case eUS_playing:
-				SetStatusString("@ui_menu_Buddy_is_playing",item.name.c_str());
-				break;
-			case eUS_away:
-				SetStatusString("@ui_menu_Buddy_is_away",item.name.c_str());
-				break;
-			case eUS_offline:
-				SetStatusString("@ui_menu_Buddy_is_offline",item.name.c_str());
-				break;
-			default:
-				SetStatusString("");
-			}
-	  SetChatMode(item.name.c_str());
-	  break;
-	case eVUT_global:
-	  SetChatButtonsMode(true,CanAdd(eCC_global,item.id,item.name)?2:0);
-	  OnChatModeChange(true,0);
-	  OnUserSelected(eCC_global,item.id);
-	  SetChatMode(0);
-	  SetStatusString("");
-	  break;
-	case eVUT_ignore:
-	  SetChatButtonsMode(true,3);
-	  OnChatModeChange(true,0);
-	  OnUserSelected(eCC_ignored,item.id);
-	  SetChatMode(0);
-	  SetStatusString("");
-	  break;
-	case eVUT_header:
-	  SetChatButtonsMode(false,0);
-	  OnChatModeChange(true,0);
-	  SetChatMode(0);
-	  SetStatusString("");
-	  break;
-	}
-  }
-	else
-	{
-		SetChatButtonsMode(false,0);
-	}
-  m_userlist->SelectUser(id);
-}
-
-void  CMPLobbyUI::SetChatButtonsMode(bool info, int action)
-{
-  m_cmd = MPPath;
-  m_cmd += "setBuddyListMenuEnabled";
-  SFlashVarValue args[]={true,info,action};
-  m_player->Invoke(m_cmd,args,sizeof(args)/sizeof(args[0]));
-}
-
-void  CMPLobbyUI::BreakChatText(const char* text)
-{
-  m_cmd = MPPath;
-  m_cmd += "TestChat";
-  m_player->Invoke1(m_cmd,text);
-  m_cmd = MPPath;
-  m_cmd += "back_TextSize";
-  SFlashVarValue v(int(1));
-  m_player->GetVariable(m_cmd,&v);
-  m_cmd = MPPath;
-  m_cmd += "back_Text";
-  SFlashVarValue sv("");
-  m_player->GetVariable(m_cmd,&sv);
-  const char* str = sv.GetConstStrPtr();
-  if(v.GetDouble()>1)
-  {
-	const char* next = strchr(str,'\n');
-	while(next)
-	{
-	  string a(str,next);
-	  m_chatlist->AddText(a);
-	  str = next+1;
-	  next = strchr(str,'\n');
-	}
-	m_chatlist->AddText(str);
-  }
-  else
-  {
-	m_chatlist->AddText(str);
   }
 }
 
@@ -1799,227 +938,34 @@ void  CMPLobbyUI::SetSortParams(ESortColumn sc, ESortType st)
   m_player->SetVariable(m_cmd,col);
 }
 
-void  CMPLobbyUI::ClearUserList()
-{
-  m_cmd = MPPath;
-  m_cmd += "ClearBuddyList";
-  m_player->Invoke0(m_cmd);
-}
-
-void  CMPLobbyUI::AddChatUser(EChatCategory cat, int id,const char *name, bool foreign)
-{
-  m_userlist->AddUser(cat,id,name,foreign);
-  DisplayUserList();
-}
-
-void  CMPLobbyUI::ChatUserStatus(EChatCategory cat, int id, EUserStatus status, const char* descr )
-{
-  m_userlist->SetUserStatus(cat,id,status,descr);
-  DisplayUserList();
-}
-
-void  CMPLobbyUI::RemoveCharUser(EChatCategory cat, int id)
-{
-  m_userlist->RemoveUser(cat,id);
-  DisplayUserList();
-}
-
-void  CMPLobbyUI::AddFindPerson(int id, const char *name)
-{
-  m_cmd = "addFoundPerson";
-  SFlashVarValue args[]={name};
-  m_player->Invoke(m_cmd,args,sizeof(args)/sizeof(args[0]));  
-}
-
-void  CMPLobbyUI::UpdateUsers()
-{
-  m_cmd = MPPath;
-  m_cmd += "SelectedBuddy";
-  m_player->SetVariable(m_cmd,m_userlist->m_selected);
-  m_cmd = MPPath;
-  m_cmd += "SetBuddyListInfo";
-  m_player->Invoke0(m_cmd);
-}
-
-void  CMPLobbyUI::AddChatText(const char *text)
-{
-  BlinkChat(true);
-//  m_chatlist->AddText(text);
-  BreakChatText(text);
-  DisplayChatText();
-}
-
-void  CMPLobbyUI::DisplayChatText()
-{
-  m_cmd = MPPath;
-  m_cmd += "ClearChatList";
-  m_player->Invoke0(m_cmd);
-  
-  m_cmd = MPPath;
-  m_cmd += "NumChats";
-  m_player->SetVariable(m_cmd,int(m_chatlist->m_text.size()));
-
-  m_cmd = MPPath;
-  m_cmd += "DisplayChatIndex";
-  m_player->SetVariable(m_cmd,m_chatlist->m_firstVisible);
-
-  m_cmd = MPPath;
-  m_cmd += "ManageChatScrollbar";
-  m_player->Invoke0(m_cmd);
-
-  m_cmd = MPPath;
-  m_cmd += "AddChatText";
-
-  for(int i=0;i<m_chatlist->m_visibleCount;++i)
-  {
-	int idx = m_chatlist->m_firstVisible+i;
-	if(idx>=m_chatlist->m_text.size())
-	  break;
-	SFlashVarValue args[]={0,m_chatlist->m_text[idx].c_str()};
-	m_player->Invoke(m_cmd,args,sizeof(args)/sizeof(args[0]));
-  }
-}
-
-void  CMPLobbyUI::BlinkChat(bool blink)
-{
-  m_chatBlink = blink;
-  SetBlinkChat(blink);
-}
-
-void  CMPLobbyUI::EnableTabs(bool fav, bool recent, bool chat)
+void CMPLobbyUI::EnableTabs(bool fav, bool recent, bool chat)
 {
 	m_cmd = MPPath;
 	m_cmd += "setMPTabs";
-  SFlashVarValue args[]={1,fav?1:0,recent?1:0,chat?1:0};
-  m_player->Invoke(m_cmd,args,sizeof(args)/sizeof(args[0]));
+	SFlashVarValue args[]={1,fav?1:0,recent?1:0,chat?1:0};
+	m_player->Invoke(m_cmd,args,sizeof(args)/sizeof(args[0]));
 }
-
-void  CMPLobbyUI::SetChatHeader(const char* text, const char* name)
-{
-	if(name && strlen(name))
-	{
-		static wstring tmp, tmp2;
-		gEnv->pSystem->GetLocalizationManager()->LocalizeLabel(text, tmp);
-
-		StrToWstr(name,tmp2);
-		
-		static wstring header;
-		header.resize(0);
-
-		gEnv->pSystem->GetLocalizationManager()->FormatStringMessage(header,tmp,tmp2.c_str());
-		m_cmd = "setChatHeaderText";
-		m_player->Invoke1(m_cmd,header.c_str());
-	}
-	else
-	{
-		m_cmd = "setChatHeaderText";
-		m_player->Invoke1(m_cmd,text);
-	}
-}
-
-void  CMPLobbyUI::AddSearchResult(int id, const char* nick)
-{
-  m_cmd = "addFoundPerson";
-  SFlashVarValue args[]={nick,id};
-  m_player->Invoke(m_cmd,args,sizeof(args)/sizeof(args[0]));
-}
-
-void CMPLobbyUI::ClearSearchResults()
-{
-  m_cmd = "clearFindPerson";
-  m_player->Invoke0(m_cmd);
-}
-
-void CMPLobbyUI::EnableSearchButton(bool f)
-{
-  m_cmd = "setFindPersonDisabled";
-  m_player->Invoke1(m_cmd,!f);
-}
-
-void  CMPLobbyUI::SetInfoScreenId(int id)
-{
-  m_player->Invoke1("setPlayerInfoID",id);
-}
-
-void  CMPLobbyUI::EnableInfoScreenContorls(bool add, bool ignore)
-{
-  m_player->Invoke1("setPlayerInfoAddBuddyDisabled",!add);
-  m_player->Invoke1("setPlayerInfoIgnoreDisabled",!ignore);
-}
-
-void CMPLobbyUI::SetUserDetails(const char* nick, const char* country)
-{
-  m_cmd = "setPlayerInfo";
-  // (Nick, Country, HoursPlayed, BattleWon, BattleLost, Kills, Death, FavMap, FavWeapon, TotalScorefor)
-  SFlashVarValue args[]={nick,country};
-  m_player->Invoke(m_cmd,args,sizeof(args)/sizeof(args[0]));
-}
-
-void CMPLobbyUI::ShowInvitation(int id, const char* nick, const char* message)
-{
-  m_cmd = "showInvitationReceived";
-	//showInvitationReceived(Playername, Text)
-  SFlashVarValue args[]={id, nick, message};
-  m_player->Invoke(m_cmd,args,sizeof(args)/sizeof(args[0]));
-}
-
 
 void CMPLobbyUI::SetJoinPassword()
 {
-  SFlashVarValue p("");
-  m_player->GetVariable("_root.MPServer_Password",&p);
-  ICVar* pV = gEnv->pConsole->GetCVar("sv_password");
-  if(pV)
-	pV->Set(p.GetConstStrPtr());
+	SFlashVarValue p("");
+	m_player->GetVariable("_root.MPServer_Password",&p);
+	ICVar* pV = gEnv->pConsole->GetCVar("sv_password");
+	if(pV)
+		pV->Set(p.GetConstStrPtr());
 }
 
-void	CMPLobbyUI::EnableResume(bool enable)
+void CMPLobbyUI::EnableResume(bool enable)
 {
 	m_player->Invoke1("setResumeEnabled",enable);
 }
 
-void  CMPLobbyUI::SetBlinkChat(bool blink)
-{
-  if(m_currentTab == 3 && blink)
-	return;
-  m_cmd = "setBlinkChat";
-  m_player->Invoke1(m_cmd,blink?1:0);
-}
-
-void  CMPLobbyUI::DisplayUserList()
-{
-  m_userlist->UpdateVisibleList();
-  ClearUserList();
-  
-  m_cmd = MPPath;
-  m_cmd += "NumBuddies";
-  m_player->SetVariable(m_cmd,int(m_userlist->m_visibleList.size()));
-
-  m_cmd = MPPath;
-  m_cmd += "DisplayBuddyIndex";
-  m_player->SetVariable(m_cmd,int(m_userlist->m_firstVisible));
-
-  m_cmd = MPPath;
-  m_cmd += "ManageBuddyScrollbar";
-  m_player->Invoke0(m_cmd);
-
-  m_cmd = MPPath;
-  m_cmd += "AddBuddy";
-  for(int i=0, num=m_userlist->GetDisplayCount(); i<num; ++i)
-  {
-	const SUserListItem &item = m_userlist->GetListItem(i+m_userlist->m_firstVisible);
-	SFlashVarValue args[]={i+m_userlist->m_firstVisible,item.name.c_str(),item.arrow,item.bubble,item.playing,item.playing,item.offline,!item.foreign};
-	m_player->Invoke(m_cmd,args,sizeof(args)/sizeof(args[0]));
-  }
-  UpdateUsers();
-}
-
 void  CMPLobbyUI::SetStatusString(const char* str)
 {
-  m_player->Invoke1("setToolTipText",str);
+	m_player->Invoke1("setToolTipText",str);
 }
 
-void  CMPLobbyUI::SetStatusString(const char* fmt, const char* param)
+void CMPLobbyUI::SetStatusString(const char* fmt, const char* param)
 {
 	static wstring tmp, tmp2;
 	gEnv->pSystem->GetLocalizationManager()->LocalizeLabel(fmt, tmp);
@@ -2034,89 +980,17 @@ void  CMPLobbyUI::SetStatusString(const char* fmt, const char* param)
 	m_player->Invoke1(m_cmd,text.c_str());
 }
 
-void  CMPLobbyUI::SetProfileInfo(const SUserInfo& ui)
-{
-  m_infoNick = ui.m_nick;
-  m_cmd = "setPlayerInfo";
-	static string country_code;
-	if(!ui.m_country.empty())
-	{
-		country_code = "@ui_country_";
-		country_code += ui.m_country;
-	}
-	else
-		country_code = "";
-
-	static string played, accuracy, kills, deaths;
-	
-	if(ui.m_stats.m_played)
-		played.Format("%d",ui.m_stats.m_played/60);
-	else
-		played.resize(0);
-	
-	if(ui.m_stats.m_accuracy)
-		accuracy.Format("%.2f%%",ui.m_stats.m_accuracy);
-	else
-		accuracy.resize(0);
-
-	if(ui.m_stats.m_kills)
-		kills.Format("%d",ui.m_stats.m_kills);
-	else
-		kills.resize(0);
-
-	if(ui.m_stats.m_deaths)
-		deaths.Format("%d",ui.m_stats.m_deaths);
-	else
-		deaths.resize(0);
-
-  SFlashVarValue args[]={ui.m_nick.c_str(),
-												 country_code.c_str(),
-												 played.c_str(),
-												 accuracy.c_str(),
-												 ui.m_stats.m_suitMode.c_str(),
-												 kills.c_str(),
-												 deaths.c_str(),
-												 ui.m_stats.m_map.c_str(),
-												 ui.m_stats.m_weapon.c_str()};
-  m_player->Invoke(m_cmd, args, sizeof(args)/sizeof(args[0]));
-}
-
-void  CMPLobbyUI::SetProfileInfoNick(const char* nick)
-{
-	m_cmd = "setPlayerInfo";
-
-	SFlashVarValue args[]={nick, "", "", "", "", "", "", "", ""};
-
-	m_player->Invoke(m_cmd, args, sizeof(args)/sizeof(args[0]));
-	m_infoNick = nick;
-}
-
 void  CMPLobbyUI::SetJoinButtonMode(EJoinButtonMode m)
 {
-  if(m == eJBM_default)
-	m_player->Invoke1("_root.Root.MainMenu.MultiPlayer.setJoinServerButtonState", -1);
-  else
-	m_player->Invoke1("_root.Root.MainMenu.MultiPlayer.setJoinServerButtonState", int(m));
-}
-
-void CMPLobbyUI::ShowRequestDialog(const char* nick)
-{
-  m_inviteNick = nick;
-  m_player->Invoke1("showSendInvitation",nick);
+	if(m == eJBM_default)
+		m_player->Invoke1("_root.Root.MainMenu.MultiPlayer.setJoinServerButtonState", -1);
+	else
+		m_player->Invoke1("_root.Root.MainMenu.MultiPlayer.setJoinServerButtonState", int(m));
 }
 
 void  CMPLobbyUI::OpenPasswordDialog(int id)
 {
-  m_player->Invoke1("showEnterPassword",id);
-}
-
-void CMPLobbyUI::TestChatUI()
-{
-  BlinkChat(true);
-  EnableTabs(false, false, true);
-  m_player->Invoke1("setToolTipText","Bla bla bla");
-  for(int i=0;i<10;++i)
-	m_player->Invoke1("addFoundPerson",string().Format("Testgyu%d",i).c_str());
+	m_player->Invoke1("showEnterPassword",id);
 }
 
 bool CMPLobbyUI::SServerFilter::HandleFSCommand(EGsUiCommand cmd, const char* pArgs)

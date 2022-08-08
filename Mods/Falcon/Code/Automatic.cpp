@@ -51,13 +51,7 @@ void CAutomatic::StopFire()
 		if (pActor && pActor->IsClient() && pActor->GetScreenEffects() != 0)
 		{
 			pActor->GetScreenEffects()->ClearBlendGroup(pActor->m_autoZoomInID);
-
-			// this is so we will zoom out always at the right speed
-			//float speed = (1.0f/.1f) * (1.0f - pActor->GetScreenEffects()->GetCurrentFOV())/(1.0f - .75f);
-			//speed = fabs(speed);
 			float speed = 1.0f/.1f;
-			//if (pActor->GetScreenEffects()->HasJobs(pActor->m_autoZoomOutID))
-			//	speed = pActor->GetScreenEffects()->GetAdjustedSpeed(pActor->m_autoZoomOutID);
 
 			pActor->GetScreenEffects()->ClearBlendGroup(pActor->m_autoZoomOutID);
 			CFOVEffect *fov = new CFOVEffect(pActor->GetEntityId(), 1.0f);

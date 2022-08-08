@@ -36,7 +36,7 @@ public:
 	virtual bool CanSelect() const;
 	virtual void Select(bool select);
 	virtual void GetMemoryStatistics(ICrySizer * s) { s->Add(*this); CWeapon::GetMemoryStatistics(s); }
-	virtual void Drop(float impulseScale, bool selectNext/* =true */, bool byDeath/* =false */);
+	virtual void Drop(float impulseScale, bool selectNext, bool byDeath);
 
 
 	struct SetProjectileIdParams

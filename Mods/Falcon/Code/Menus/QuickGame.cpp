@@ -90,15 +90,6 @@ public:
 		return "";
 	}
 
-	bool GetFavorites(std::vector<SStoredServer>& lst)
-	{
-		if(m_hub->GetProfile() && m_hub->GetProfile()->IsLoggedIn())
-		{
-			return m_hub->GetProfile()->GetFavoriteServers(lst);
-		}
-		return false;
-	}
-
 	bool CheckLogin()
 	{
 		CMPHub* hub = m_hub;
@@ -192,17 +183,6 @@ struct CQuickGame::SQGServerList : public IServerListener
 	srv.name = info->m_hostName;
 		srv.country = info->m_country;
 		srv.fav = false;
-		if(m_preferFav)
-		{
-			for(int i = 0; i<m_favorites.size(); ++i)
-			{
-				if(info->m_publicIP == m_favorites[i].ip && info->m_hostPort == m_favorites[i].port)
-				{
-					srv.fav = true;
-					break;
-				}
-			}
-		}
 
 	if(!m_mapName.empty())
 	{
@@ -234,14 +214,15 @@ struct CQuickGame::SQGServerList : public IServerListener
 	return -1;
   }
 
-  void ComputeScore(SRatedServer& svr)
-  {
-	svr.score = ((128-min(127u,svr.players))<<10) + min(1023u, svr.ping);
-	if(svr.ping > m_ping1)
-	  svr.score += 1<<20;
+	void ComputeScore(SRatedServer& svr)
+	{
+		svr.score = ((128-min(127u,svr.players))<<10) + min(1023u, svr.ping);
+		if(svr.ping > m_ping1)
+			svr.score += 1<<20;
 
-	if(svr.players < (svr.maxplayers/2))
-	  svr.score += 1<<21;
+		if(svr.players < (svr.maxplayers/2))
+			svr.score += 1<<21;
+
 		if(m_preferCountry)
 		{
 			if(svr.country == m_country)
@@ -249,14 +230,9 @@ struct CQuickGame::SQGServerList : public IServerListener
 		}
 		if(svr.ping > m_ping2)
 			svr.score += 1<<23;
-		if(m_preferFav)
-		{
-			if(!svr.fav)
-				svr.score += 1<<24;
-		}
-	if(!svr.mapmatch)
-	  svr.score += 1<<25;
-  }
+		if(!svr.mapmatch)
+			svr.score += 1<<25;
+	}
 
   virtual void RemoveServer(const int id)
   {
@@ -355,12 +331,10 @@ struct CQuickGame::SQGServerList : public IServerListener
 	string										m_ver;
   int                       m_minPlayers;
   bool                      m_preferLan;
-  bool                      m_preferFav;
   bool                      m_preferCountry;
 	string										m_country;
   uint											m_ping1;
   uint											m_ping2;
-	std::vector<SStoredServer>m_favorites;
   CQuickGame*               m_qg;
 };
 
@@ -401,7 +375,6 @@ void CQuickGame::StartSearch(CMPHub* hub)
 	}
   m_list->m_minPlayers = g_pGameCVars->g_quickGame_min_players;
   m_list->m_preferLan = g_pGameCVars->g_quickGame_prefer_lan!=0;
-  m_list->m_preferFav = g_pGameCVars->g_quickGame_prefer_favorites!=0;
   m_list->m_preferCountry = g_pGameCVars->g_quickGame_prefer_my_country!=0;
   m_list->m_ping1 = g_pGameCVars->g_quickGame_ping1_level;
   m_list->m_ping2 = g_pGameCVars->g_quickGame_ping2_level;
@@ -411,14 +384,8 @@ void CQuickGame::StartSearch(CMPHub* hub)
 		m_stage = 1;
 	}
 
-	if(m_list->m_preferFav)
-	{
-		if(!m_ui->GetFavorites(m_list->m_favorites))
-			m_list->m_preferFav = false;
-	}
-
-  m_searching = true;
-  NextStage();
+	m_searching = true;
+	NextStage();
 }
 
 void CQuickGame::Cancel()
