@@ -156,6 +156,21 @@ public:
 				CNanoSuit* pSuit = pPlayer->GetNanoSuit();
 				if(!pSuit)
 					return;
+
+				if (IsPortActive(pActInfo, EIP_Cloak))
+					pSuit->SetMode(NANOMODE_CLOAK);
+				else if (IsPortActive(pActInfo, EIP_Speed))
+					pSuit->SetMode(NANOMODE_SPEED);
+				else if (IsPortActive(pActInfo, EIP_Strength))
+					pSuit->SetMode(NANOMODE_STRENGTH);
+				else if (IsPortActive(pActInfo, EIP_Defense))
+					pSuit->SetMode(NANOMODE_DEFENSE);
+
+				if (IsPortActive(pActInfo, EIP_Energy))
+					pSuit->SetSuitEnergy(GetPortFloat(pActInfo, EIP_Energy));
+				if (IsPortActive(pActInfo, EIP_CloakLevel))
+					pSuit->SetCloakLevel( (ENanoCloakMode) GetPortInt(pActInfo, EIP_CloakLevel));
+
 			}
 			break;
 		}
@@ -366,9 +381,9 @@ public:
 					if (bAdd)
 						pSuit->ActivateMode((ENanoMode)PortInt2ModeMapping[mode], true);
 					else if (bRemove)
-						pSuit->ActivateMode((ENanoMode)PortInt2ModeMapping[mode], true);
+						pSuit->ActivateMode((ENanoMode)PortInt2ModeMapping[mode], false);
 					if (bDefect)
-						pSuit->SetModeDefect((ENanoMode)PortInt2ModeMapping[mode], false);
+						pSuit->SetModeDefect((ENanoMode)PortInt2ModeMapping[mode], true);
 					else if (bRepair)
 						pSuit->SetModeDefect((ENanoMode)PortInt2ModeMapping[mode], false);
 				}

@@ -70,7 +70,7 @@ public:
 
 	void ClReset();
 	void ClUpdate(float frameTime);
-	
+
 	void ClOnQuery(const char * szQuery);
 	void ClSendCommand(RemoteCommandArgs &args);
 	void ClSendCommand(const char * szCommand);
