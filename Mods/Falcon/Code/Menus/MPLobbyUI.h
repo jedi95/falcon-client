@@ -184,7 +184,6 @@ private:
 	void DisplayServerList();
 	void SetServerListPos(double sb_pos);
 	void ChangeServerListPos(int delta);
-	void StopServerListUpdate();
 	void SelectServer(int id);
 	void SetSortParams(ESortColumn, ESortType);
 

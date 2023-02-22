@@ -1306,7 +1306,7 @@ void CAlien::ProcessMovement2(float frameTime)
 	vecRefRoll = tempVel;
 
 	//rollage
-	if (!m_input.upTarget.len2()>0.0f)
+	if (!(m_input.upTarget.len2()>0.0f))
 	{
 		float	rollAmt = 0.0f;
 		float dotRoll(vecRefRoll * m_baseMtx.GetColumn(0));

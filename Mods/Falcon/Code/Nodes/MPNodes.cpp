@@ -222,12 +222,6 @@ protected:
 		}
 		virtual void EnteredGame()
 		{
-// 			CPlayer* pPlayer = static_cast<CPlayer*>(g_pGame->GetIGameFramework()->GetClientActor());
-// 			if(pPlayer && pPlayer->GetSpectatorMode() == 0)
-// 			{
-// 				ActivateOutput(&m_actInfo, EOP_EnteredGame,true);
-// 				m_timeRemainingTriggered = false;
-// 			}
 		}
 		virtual void EndGameNear(EntityId id)
 		{
@@ -258,7 +252,6 @@ class CFlowNode_MPGameType : public CFlowBaseNode
 	enum OUTPUTS
 	{
 		EOP_InstantAction = 0,
-	//	EOP_TeamInstantAction,
 		EOP_TeamAction,
 		EOP_PowerStruggle,
 
@@ -294,7 +287,6 @@ public:
 		static const SOutputPortConfig out_ports[] = 
 		{
 			OutputPortConfig_Void( "InstantAction", _HELP("Triggered on level load if IA or TIA game")),
-	//		OutputPortConfig_Void( "TeamInstantAction", _HELP("Triggered on level load if TeamInstantAction game")),
 			OutputPortConfig_Void( "TeamAction", _HELP("Triggered on level load if TeamAction game")),
 			OutputPortConfig_Void( "PowerStruggle", _HELP("Triggered on level load if PowerStruggle game")),
 			OutputPortConfig<string>("GameRulesName", _HELP("Outputs the current game rules name")),

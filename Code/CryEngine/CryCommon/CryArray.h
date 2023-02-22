@@ -414,7 +414,11 @@ struct FModuleAlloc16
     if (newsize)
     {
       unsigned char *pData = (unsigned char *)ModuleAlloc( NULL, newsize+16+sizeof(char *)+sizeof(DynArray<char>::Header) );
-      unsigned char *bPtrRes = (unsigned char *)((int)(pData+16+sizeof(char *)) & ~0xf);
+#if _WIN64
+	  unsigned char* bPtrRes = (unsigned char*)((unsigned long long)(pData + 16 + sizeof(char*)) & ~0xf);
+#else
+	  unsigned char* bPtrRes = (unsigned char*)((unsigned int)(pData + 16 + sizeof(char*)) & ~0xf);
+#endif
       ((unsigned char**)bPtrRes)[-1] = pData;
       if (oldptr)
       {

@@ -83,7 +83,7 @@ BEGIN
         BLOCK "000904b0"
         BEGIN
             VALUE "FileDescription", _Falcon_Build_version
-            VALUE "LegalCopyright", "(C) 2022 jedi95"
+            VALUE "LegalCopyright", "(C) 2023 jedi95"
             VALUE "ProductName", "Falcon Client"
             VALUE "ProductVersion", _Falcon_Version_rc
         END

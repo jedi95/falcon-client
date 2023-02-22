@@ -144,16 +144,8 @@ void CMPTutorial::InitEvents()
 	// now fill out the removal conditions for special events:
 	m_events[eTE_TutorialDisabled].m_removal = eMRC_Time;
 	m_events[eTE_Barracks].m_removal = eMRC_OpenBuyMenu;
-	//m_events[eTE_BarracksTwo].m_removal = eMRC_CloseBuyMenu;
 	m_events[eTE_CloseBarracksBuyMenu].m_removal = eMRC_OpenMap;
 	m_events[eTE_CaptureFactory].m_removal = eMRC_OpenBuyMenu;
-//	m_events[eTE_VehicleBuyMenu].m_removal = eMRC_CloseBuyMenu;
-//	m_events[eTE_WarBuyMenu].m_removal = eMRC_CloseBuyMenu;
-//	m_events[eTE_PrototypeBuyMenu].m_removal = eMRC_CloseBuyMenu;
-//	m_events[eTE_PrototypeTab].m_removal = eMRC_CloseBuyMenu;
-//	m_events[eTE_NavalBuyMenu].m_removal = eMRC_CloseBuyMenu;
-//	m_events[eTE_AirBuyMenu].m_removal = eMRC_CloseBuyMenu;
-//	m_events[eTE_BuyAmmo].m_removal = eMRC_CloseBuyMenu;
 }
 
 void CMPTutorial::InitEntityClasses()
@@ -227,13 +219,6 @@ void CMPTutorial::OnBuyMenuOpen(bool open, FlashRadarType buyZoneType)
 				// other types don't show help
 				break;
 		}
-
-		/*if(!showPrompt)
-		{
-			if(ammoPage)
-				TriggerEvent(eTE_BuyAmmo);
-		}
-		*/
 	}
 	else
 	{
@@ -411,22 +396,18 @@ void CMPTutorial::Update()
 				if(pEnt->GetClass() == m_pHQClass)
 				{
 					m_baseList.push_back(pEnt->GetId());
-					//CryLog("Adding HQ %d to list: %d", pEnt->GetId(), m_baseList.size());
 				}
 				else if(pEnt->GetClass() == m_pAlienEnergyPointClass)
 				{
 					m_alienEnergyPointList.push_back(pEnt->GetId());
-					//CryLog("Adding AEP %d to list: %d", pEnt->GetId(), m_alienEnergyPointList.size());
 				}
 				else if(pEnt->GetClass() == m_pSpawnGroupClass)
 				{
 					m_spawnGroupList.push_back(pEnt->GetId());
-					//CryLog("Adding spawngroup %d to list: %d", pEnt->GetId(), m_spawnGroupList.size());
 				}
 				else if(pEnt->GetClass() == m_pFactoryClass)
 				{
 					m_factoryList.push_back(pEnt->GetId());
-					//CryLog("Adding Factory %d to list: %d", pEnt->GetId(), m_factoryList.size());
 				}
 			}
 		}
