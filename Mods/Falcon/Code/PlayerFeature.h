@@ -31,7 +31,7 @@ public:
 	virtual bool ReadItemParams(const IItemParamsNode *root);
 
 	virtual void OnReset();
-	virtual void PickUp(EntityId pickerId, bool sound, bool select/* =true */, bool keepHistory/* =true */);
+	virtual void PickUp(EntityId pickerId, bool sound, bool select, bool keepHistory);
 	virtual void OnPickedUp(EntityId pickerId, bool destroyed);
 
 	virtual void ActivateFeature(CActor *pActor, const char *feature);

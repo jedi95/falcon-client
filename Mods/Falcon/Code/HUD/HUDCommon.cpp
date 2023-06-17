@@ -38,30 +38,6 @@ void CHUDCommon::HUD(ICVar *pVar)
 }
 
 //-----------------------------------------------------------------------------------------------------
-
-void CHUDCommon::ShowGODMode(IConsoleCmdArgs *pConsoleCmdArgs)
-{
-	CHUD* pHUD = g_pGame->GetHUD();
-
-	if(pHUD && 2 == pConsoleCmdArgs->GetArgCount())
-	{
-		if(gEnv->pSystem->IsDevMode())
-			pHUD->m_bShowGODMode = false;
-		else
-		{
-			if(0 == strcmp(pConsoleCmdArgs->GetArg(1),"0"))
-			{
-				pHUD->m_bShowGODMode = false;
-			}
-			else
-			{
-				pHUD->m_bShowGODMode = true;
-			}
-		}
-	}
-}
-
-//-----------------------------------------------------------------------------------------------------
 //-- ~ IConsoleArgs
 //-----------------------------------------------------------------------------------------------------
 
@@ -82,12 +58,6 @@ void CHUDCommon::UpdateRatio()
 
 CHUDCommon::CHUDCommon() 
 {
-	m_bShowGODMode = true;
-	m_godMode = 0;
-	m_iDeaths = 0;
-
-	strcpy(m_strGODMode,"");
-	
 	m_width					= 0;
 	m_height				= 0;
 
@@ -106,8 +76,6 @@ CHUDCommon::CHUDCommon()
 	m_iCursorVisibilityCounter = 0;
 
 	m_bShow = true;
-
-	gEnv->pConsole->AddCommand("ShowGODMode",ShowGODMode);
 
 	if(gEnv->pHardwareMouse)
 	{
@@ -142,38 +110,6 @@ CHUDCommon::~CHUDCommon()
 void CHUDCommon::Show(bool bShow)
 {
 	m_bShow = bShow;
-}
-
-//-----------------------------------------------------------------------------------------------------
-
-void CHUDCommon::SetGODMode(uint8 ucGodMode, bool forceUpdate)
-{
-	if (forceUpdate || m_godMode != ucGodMode)
-	{
-		m_godMode = ucGodMode;
-		m_fLastGodModeUpdate = gEnv->pTimer->GetAsyncTime().GetSeconds();
-
-		if(gEnv->pSystem->IsDevMode())
-		{
-			if(0 == ucGodMode)
-			{
-				strcpy(m_strGODMode,"GOD MODE OFF");
-				m_iDeaths = 0;
-			}
-			else if(1 == ucGodMode)
-			{
-				strcpy(m_strGODMode,"GOD");
-			}
-			else if(2 == ucGodMode)
-			{
-				strcpy(m_strGODMode,"Team GOD");
-			}
-			else if(3 == ucGodMode)
-			{
-				strcpy(m_strGODMode,"DEMI GOD");
-			}
-		}
-	}
 }
 
 //-----------------------------------------------------------------------------------------------------

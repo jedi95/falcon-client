@@ -1164,9 +1164,6 @@ void CHUD::ShowKillAreaWarning(bool active, int timer)
 
 void CHUD::ShowDeathFX(int type)
 {
-	if(m_godMode || !g_pGame->GetIGameFramework()->IsGameStarted())
-		return;
-
 	IMaterialEffects* pMaterialEffects = gEnv->pGame->GetIGameFramework()->GetIMaterialEffects();
 	if (m_deathFxId != InvalidEffectId)
 	{

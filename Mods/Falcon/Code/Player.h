@@ -265,7 +265,7 @@ struct IPlayerEventListener
 	virtual void OnItemUsed(IActor* pActor, EntityId itemId) {};
 	virtual void OnStanceChanged(IActor* pActor, EStance stance) {};
 	virtual void OnSpecialMove(IActor* pActor, ESpecialMove move) {};
-	virtual void OnDeath(IActor* pActor, bool bIsGod) {};
+	virtual void OnDeath(IActor* pActor) {};
 	virtual void OnObjectGrabbed(IActor* pActor, bool bIsGrab, EntityId objectId, bool bIsNPC, bool bIsTwoHanded) {};
 };
 
@@ -520,8 +520,6 @@ public:
 
 	virtual void ToggleThirdPerson();
 
-	virtual int  IsGod();
-	
 	virtual void Revive( bool fromInit );
 	virtual void Kill();
 
@@ -529,7 +527,6 @@ public:
 	virtual Vec3	GetStanceViewOffset(EStance stance,float *pLeanAmt=NULL,bool withY = false) const;
 	virtual bool IsThirdPerson() const;
 	virtual void StanceChanged(EStance last);
-  //virtual bool TrySetStance(EStance stance); // Moved to Actor, to be shared with Aliens.
 
 	virtual void ResetAnimGraph();
 
@@ -740,7 +737,6 @@ protected:
 	Ang3 		m_viewAnglesOffset;//used for recoil
 	Ang3		m_headAngles;//head angles in local space, for bones rotation
 
-	// bool IsMaterialBootable(int matId) const;
 	ILINE bool IsMaterialBootable(int matId) const { return true; }
 
   void InitInterference();

@@ -104,8 +104,6 @@ private:
 
 	// Cheats
 	bool OnActionThirdPerson(EntityId entityId, const ActionId& actionId, int activationMode, float value);
-	bool OnActionFlyMode(EntityId entityId, const ActionId& actionId, int activationMode, float value);
-	bool OnActionGodMode(EntityId entityId, const ActionId& actionId, int activationMode, float value);
 
 	bool OnActionXIRotateYaw(EntityId entityId, const ActionId& actionId, int activationMode, float value);
 	bool OnActionXIRotatePitch(EntityId entityId, const ActionId& actionId, int activationMode, float value);

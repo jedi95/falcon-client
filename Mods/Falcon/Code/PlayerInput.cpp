@@ -76,8 +76,6 @@ CPlayerInput::CPlayerInput( CPlayer * pPlayer ) :
 		ADD_HANDLER(suitcloak, OnActionSuitCloak);
 
 		ADD_HANDLER(thirdperson, OnActionThirdPerson);
-		ADD_HANDLER(flymode, OnActionFlyMode);
-		ADD_HANDLER(godmode, OnActionGodMode);
 
 		ADD_HANDLER(v_rotateyaw, OnActionVRotateYaw); // needed so player can shake unfreeze while in a vehicle
 		ADD_HANDLER(v_rotatepitch, OnActionVRotatePitch);
@@ -158,11 +156,7 @@ void CPlayerInput::OnAction( const ActionId& actionId, int activationMode, float
 		filterOut = true;
 		if (!m_pPlayer->m_stats.spectatorMode)
 		{
-			if (actions.ulammo==actionId && m_pPlayer->m_pGameFramework->CanCheat() && gEnv->pSystem->IsDevMode())
-			{
-				g_pGameCVars->i_unlimitedammo = 1;
-			}
-			else if (actions.debug_ag_step == actionId)
+			if (actions.debug_ag_step == actionId)
 			{
 				gEnv->pConsole->ExecuteString("ag_step");
 			}
@@ -1345,53 +1339,6 @@ bool CPlayerInput::OnActionThirdPerson(EntityId entityId, const ActionId& action
 	}
 	return false;
 }
-
-bool CPlayerInput::OnActionFlyMode(EntityId entityId, const ActionId& actionId, int activationMode, float value)
-{
-	if (!gEnv->pSystem->IsDevMode())
-		return false;
-
-	if (!m_pPlayer->m_stats.spectatorMode && m_pPlayer->m_pGameFramework->CanCheat())
-	{
-		uint8 flyMode=m_pPlayer->GetFlyMode()+1;
-		if (flyMode>2)
-			flyMode=0;
-		m_pPlayer->SetFlyMode(flyMode);
-
-		switch(m_pPlayer->m_stats.flyMode)
-		{
-		case 0:m_pPlayer->CreateScriptEvent("printhud",0,"FlyMode/NoClip OFF");break;
-		case 1:m_pPlayer->CreateScriptEvent("printhud",0,"FlyMode ON");break;
-		case 2:m_pPlayer->CreateScriptEvent("printhud",0,"NoClip ON");break;
-		}
-	}
-	return false;
-}
-
-bool CPlayerInput::OnActionGodMode(EntityId entityId, const ActionId& actionId, int activationMode, float value)
-{
-	if (!gEnv->pSystem->IsDevMode())
-		return false;
-
-	if (!m_pPlayer->m_stats.spectatorMode && m_pPlayer->m_pGameFramework->CanCheat())
-	{
-		int godMode(g_pGameCVars->g_godMode);
-
-		godMode = (godMode+1)%4;
-
-		if(godMode && m_pPlayer->GetHealth() <= 0)
-		{
-			m_pPlayer->StandUp();
-			m_pPlayer->Revive(false);
-			m_pPlayer->SetHealth(100);
-		}
-
-		g_pGameCVars->g_godMode = godMode;
-	}
-	return false;
-}
-
-
 
 bool CPlayerInput::OnActionXIRotateYaw(EntityId entityId, const ActionId& actionId, int activationMode, float value)
 {

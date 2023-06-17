@@ -49,7 +49,6 @@ public:
 
 	// IConsole callback
 	static void HUD					(ICVar *pVar);
-	static void ShowGODMode	(IConsoleCmdArgs *pConsoleCmdArgs);
 	// ~IConsole callback
 
 						CHUDCommon();
@@ -58,9 +57,6 @@ public:
 
 	virtual void UpdateRatio();
 	virtual void Serialize(TSerialize ser);
-
-	// Set the GOD mode
-	void SetGODMode(uint8 ucGodMode, bool forceUpdate = false);
 
 	// Show or hide the Flash HUD
 	void Show(bool bShow);
@@ -86,15 +82,7 @@ public:
 	void Remove(CGameFlashAnimation* pAnim);
 
 protected:
-	//DEBUG : used for balancing (player deaths in god mode)
-	int						m_iDeaths;
-
-	// Current GOD mode
-	bool					m_bShowGODMode;
-	uint8					m_godMode;
 	TMFXEffectId	m_deathFxId;
-	float					m_fLastGodModeUpdate;
-	char					m_strGODMode[32];
 
 	// Cursor state
 	int m_iCursorVisibilityCounter;

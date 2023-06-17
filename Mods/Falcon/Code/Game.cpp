@@ -316,11 +316,8 @@ bool CGame::Init(IGameFramework *pFramework)
 	{
 		if (ICVar *pVar=gEnv->pConsole->GetCVar("r_DisplayInfo"))
 		{
-			if (pVar->GetIVal() == 0)
-			{
-				pVar->Set(1);
-				m_dx10Fix = 2;
-			}
+			pVar->Set(1);
+			m_dx10Fix = 5;
 		}
 	}
 

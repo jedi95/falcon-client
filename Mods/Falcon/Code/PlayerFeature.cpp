@@ -169,7 +169,6 @@ void CPlayerFeature::DualSOCOM(CActor *pActor)
 			if (IsServer())
 			{
 					m_pItemSystem->GiveItem(pActor, "SOCOM", false, false,false);
-					//m_pItemSystem->SetActorItem(pActor,"SOCOM",true);
 			}
 		}
 	}

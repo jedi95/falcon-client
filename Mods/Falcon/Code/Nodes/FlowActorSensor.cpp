@@ -109,7 +109,7 @@ public:
 			OutputPortConfig<EntityId> ( "ObjectThrown", _HELP("Triggered when an object is thrown")),
 			OutputPortConfig<int>      ( "StanceChanged", _HELP("Triggered when Stance changed. 0=Stand,1=Crouch,2=Prone,3=Relaxed,4=Stealth,5=Swim,6=ZeroG")),
 			OutputPortConfig<int>      ( "SpecialMove", _HELP("Triggered On SpecialMove. 0=Jump,1=SpeedSprint,2=StrengthJump")),
-			OutputPortConfig<int>      ( "OnDeath", _HELP("Triggered when Actor dies. Outputs 0 if not god. 1 if god.")),
+			OutputPortConfig<int>      ( "OnDeath", _HELP("Triggered when Actor dies. Outputs 0.")),
 			{0}
 		};
 		config.nFlags |= EFLN_TARGET_ENTITY;
@@ -236,9 +236,9 @@ public:
 	{
 		ActivateOutput(&m_actInfo, EOP_SPECIALMOVE, static_cast<int> (move));
 	}
-	virtual void OnDeath(IActor* pActor, bool bIsGod)
+	virtual void OnDeath(IActor* pActor)
 	{
-		ActivateOutput(&m_actInfo, EOP_ONDEATH, bIsGod ? 1 : 0);
+		ActivateOutput(&m_actInfo, EOP_ONDEATH, 0);
 	}
 	virtual void OnObjectGrabbed(IActor* pActor, bool bIsGrab, EntityId objectId, bool bIsNPC, bool bIsTwoHanded)
 	{

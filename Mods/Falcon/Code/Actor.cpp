@@ -1507,8 +1507,7 @@ void CActor::UpdateScriptStats(SmartScriptTable &rTable)
 
 		stats.SetValue("flatSpeed",pStats->speedFlat);
 
-		stats.SetValue("godMode",IsGod());
-		stats.SetValue("inFiring",pStats->inFiring);		
+		stats.SetValue("inFiring",pStats->inFiring);
 		pStats->inFreefall.SetDirtyValue(stats, "inFreeFall");
 		pStats->isHidden.SetDirtyValue(stats, "isHidden");
 	}
@@ -1777,9 +1776,6 @@ void CActor::SetHealth( int health )
 {
 	if (health <= 0)
 	{
-		if (IsGod() > 0) // handled in CPlayer
-			return;
-
 		SActorStats *pStats = GetActorStats();
 
 		if (pStats && pStats->isRagDoll)

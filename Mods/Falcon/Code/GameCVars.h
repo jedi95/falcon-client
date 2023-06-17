@@ -122,7 +122,6 @@ struct SCVars
 	float pl_inputAccel;
 
 	float g_tentacle_joint_limit;
-	int		g_godMode;
 	int		g_detachCamera;
 	int		g_suicideDelay;
 	int		g_enableSpeedLean;
@@ -320,7 +319,6 @@ struct SCVars
 	int		hud_voicemode;
 	int		hud_enableAlienInterference;
 	float	hud_alienInterferenceStrength;
-	int		hud_godFadeTime;
 	int		hud_crosshair_enable;
 	int		hud_crosshair;
 	int		hud_chDamageIndicator;

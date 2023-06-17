@@ -32,7 +32,7 @@ public:
 	// CSingle
 	virtual void GetMemoryStatistics(ICrySizer * s) { s->Add(*this); CSingle::GetMemoryStatistics(s); }
 
-	virtual bool CanFire(bool considerAmmo /* = true */) const;
+	virtual bool CanFire(bool considerAmmo) const;
 	virtual void UpdateFPView(float frameTime);
 
 	virtual void StartFire();

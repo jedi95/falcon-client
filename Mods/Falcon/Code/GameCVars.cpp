@@ -367,7 +367,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_cutsceneSkipDelay", &g_cutsceneSkipDelay, 0.0f, 0, "Skip Delay for Cutscenes.");
 	pConsole->Register("g_enableAutoSave", &g_enableAutoSave, 1, 0, "Switches all savegames created by Flowgraph (checkpoints). Does not affect user generated saves or levelstart savegames.");
 
-	pConsole->Register("g_godMode", &g_godMode, 0, VF_CHEAT, "God Mode");
 	pConsole->Register("g_detachCamera", &g_detachCamera, 0, VF_CHEAT, "Detach camera");
 	pConsole->Register("g_suicideDelay", &g_suicideDelay, 2, VF_CHEAT, "delay in sec before executing kill command");
 
@@ -397,7 +396,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("hud_voicemode", &hud_voicemode, 1, 0, "Usage of the voice when switching of Nanosuit mode.");
 	pConsole->Register("hud_enableAlienInterference", &hud_enableAlienInterference, 1, VF_SAVEGAME, "Switched the alien interference effect.");
 	pConsole->Register("hud_alienInterferenceStrength", &hud_alienInterferenceStrength, 0.8f, VF_SAVEGAME, "Scales alien interference effect strength.");
-	pConsole->Register("hud_godFadeTime", &hud_godFadeTime, 3, VF_CHEAT, "sets the fade time of the god mode message");
 	pConsole->Register("hud_crosshair_enable", &hud_crosshair_enable, 1,0, "Toggles singleplayer crosshair visibility.", CHUD::OnCrosshairCVarChanged);
 	pConsole->Register("hud_crosshair", &hud_crosshair, 1,0, "Select the crosshair (1-8)", CHUD::OnCrosshairCVarChanged);
 	pConsole->Register("hud_alternateCrosshairSpread",&hud_iAlternateCrosshairSpread,0, 0, "Switch new crosshair spread code on/off.");
@@ -734,7 +732,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("g_tk_punish", true);
 	pConsole->UnregisterVariable("g_tk_punish_limit", true);
 
-	pConsole->UnregisterVariable("g_godMode", true);
 	pConsole->UnregisterVariable("g_detachCamera", true);
 	pConsole->UnregisterVariable("g_suicideDelay", true);
 
@@ -784,7 +781,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("hud_showRoundMessages", true);
 	pConsole->UnregisterVariable("hud_showTeamMessages", true);
 	pConsole->UnregisterVariable("hud_showKillMessages", true);
-	pConsole->UnregisterVariable("hud_godfadetime", true);
 	pConsole->UnregisterVariable("g_combatfadetime", true);
 	pConsole->UnregisterVariable("g_combatfadetimedelay", true);
 	pConsole->UnregisterVariable("g_battlerange", true);
@@ -943,9 +939,6 @@ void CGame::UnregisterConsoleCommands()
 	m_pConsole->RemoveCommand("g_battleDust_reload");
 	m_pConsole->RemoveCommand("bulletTimeMode");
 	m_pConsole->RemoveCommand("GOCMode");
-
-	// variables from CHUDCommon
-	m_pConsole->RemoveCommand("ShowGODMode");
 
 	// Falcon
 	m_pConsole->RemoveCommand("chat");

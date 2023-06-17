@@ -2955,18 +2955,14 @@ void CFlashMenuObject::OnPostUpdate(float fDeltaTime)
 
 	if (g_pGame->GetDX10Fix() > 0)
 	{
-		if (g_pGame->GetDX10Fix() > 1) {
-			int newValue = g_pGame->GetDX10Fix() - 1;
-			g_pGame->SetDX10Fix(newValue);
-		}
-		else
-		{
+		int dx10Fix = g_pGame->GetDX10Fix();
+		if (dx10Fix <= 1) {
 			if (ICVar* pVar = gEnv->pConsole->GetCVar("r_DisplayInfo"))
 			{
 				pVar->Set(0);
 			}
-			g_pGame->SetDX10Fix(0);
 		}
+		g_pGame->SetDX10Fix(dx10Fix - 1);
 	}
 
 	if(!IsOnScreen(MENUSCREEN_FRONTENDINGAME) && !IsOnScreen(MENUSCREEN_FRONTENDSTART))

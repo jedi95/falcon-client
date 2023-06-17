@@ -864,7 +864,6 @@ void CHUD::Serialize(TSerialize ser)
 	ser.Value("hudBroken", m_iBreakHUD);
 	ser.EnumValue("hudCineState", m_cineState, eHCS_None, eHCS_Fading);
 	ser.Value("thirdPerson", m_bThirdPerson);
-	ser.Value("hudGodMode", m_godMode);
 	ser.Value("hudBattleStatus",m_fBattleStatus);
 	ser.Value("hudBattleStatusDelay",m_fBattleStatusDelay);
 	ser.Value("hudExclusiveInputListener",m_bExclusiveListener);
@@ -875,7 +874,6 @@ void CHUD::Serialize(TSerialize ser)
 	ser.Value("hudShowAllOnScreenObjectives",m_bShowAllOnScreenObjectives);
 	int iSize = m_possibleAirStrikeTargets.size();
 	ser.Value("hudPossibleTargetsLength",iSize);
-	ser.Value("hudGodDeaths",m_iDeaths);
 
 	ser.Value("playerRespawnTimer", m_fPlayerRespawnTimer);
 	ser.Value("playerFakeDeath", m_bRespawningFromFakeDeath);
@@ -954,8 +952,6 @@ void CHUD::Serialize(TSerialize ser)
 		m_pHUDCrosshair->SetUsability(false); //sometimes the scripts don't update the usability after loading from mounted gun for example
 		
 		m_bMiniMapZooming = false; 
-
-		SetGODMode(m_godMode, true);	//reset god mode - only necessary when reading
 
 		// QuickMenu is a push holder thing, when we load, we don't hold
 		// the middle click so we have to disable this menu !
@@ -3667,34 +3663,6 @@ void CHUD::OnPostUpdate(float frameTime)
 			(*iter)->Update(frameTime);
 		}
 
-		if(m_bShowGODMode && strcmp(m_strGODMode,""))
-		{
-			int fading = g_pGameCVars->hud_godFadeTime;
-			float time = gEnv->pTimer->GetAsyncTime().GetSeconds();
-			if(fading == -1 || (time - m_fLastGodModeUpdate < fading))
-			{
-				float alpha = 0.75f;
-				if(fading >= 2)
-				{
-					if(time - m_fLastGodModeUpdate < 0.75f)		//fade in
-						alpha = (time - m_fLastGodModeUpdate);
-					else if(time - m_fLastGodModeUpdate > (float(fading)-0.75f))		//fade out
-						alpha -= ((time - m_fLastGodModeUpdate) - (float(fading)-0.75f));
-				}
-				m_pUIDraw->DrawText(m_pDefaultFont,10,60,0,0,m_strGODMode,alpha,1,1,1,UIDRAWHORIZONTAL_LEFT,UIDRAWVERTICAL_TOP,UIDRAWHORIZONTAL_LEFT,UIDRAWVERTICAL_TOP);
-				//debugging : render number of deaths in God mode ...
-				if(!strcmp(m_strGODMode,"GOD") || !strcmp(m_strGODMode,"Team GOD"))
-				{
-					string died("You died ");
-					char aNumber[5];
-					itoa(m_iDeaths, aNumber, 10);
-					died.append(aNumber);
-					died.append(" times.");
-					m_pUIDraw->DrawText(m_pDefaultFont,10,80,0,0,died.c_str(),alpha,1,1,1,UIDRAWHORIZONTAL_LEFT,UIDRAWVERTICAL_TOP,UIDRAWHORIZONTAL_LEFT,UIDRAWVERTICAL_TOP);
-				}
-			}
-		}
-
 		m_pUIDraw->PostRender();
 	}
 	else if(!m_bInMenu && pPlayer)
@@ -4445,9 +4413,6 @@ void CHUD::ActorDeath(IActor* pActor)
 	if (!pActor)
 		return;
 
-	if(pActor->IsGod())
-		return;
-
 	m_pHUDRadar->RemoveFromRadar(pActor->GetEntityId());
 
 	// for MP and for SP local player
@@ -4498,9 +4463,6 @@ void CHUD::ActorRevive(IActor* pActor)
 	if (!pActor)
 		return;
 
-	if(pActor->IsGod())
-		return;
-
 	if(pActor == g_pGame->GetIGameFramework()->GetClientActor())
 	{
 		if (m_bNightVisionActive)
@@ -4529,16 +4491,6 @@ void CHUD::TextMessage(const char* message)
 {
 	if (!message)
 		return;
-
-	//DEBUG : used for balancing
-	if(!strcmp(message, "GodMode:died!"))
-	{
-		m_fLastGodModeUpdate = gEnv->pTimer->GetAsyncTime().GetSeconds();
-
-		m_iDeaths++;
-		m_pNanoSuit->ResetEnergy();
-		return;
-	}
 
 	//find a vocal/sound to a text string ...
 	const char* textMessage = 0;

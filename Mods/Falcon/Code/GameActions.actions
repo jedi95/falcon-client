@@ -15,15 +15,12 @@ DECL_ACTION(rotateyaw)
 DECL_ACTION(rotatepitch)
 
 DECL_ACTION(nextspawnpoint)
-DECL_ACTION(flymode)
-DECL_ACTION(godmode)
 DECL_ACTION(toggle_airstrike)
 
 DECL_ACTION(cycle_spectator_mode)
 DECL_ACTION(prev_spectator_target)
 DECL_ACTION(next_spectator_target)
 
-DECL_ACTION(ulammo)
 DECL_ACTION(giveitems)
 
 DECL_ACTION(attack1)

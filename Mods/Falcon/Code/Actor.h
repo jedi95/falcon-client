@@ -850,13 +850,12 @@ public:
 	virtual void NetReviveInPlaceInVehicle();
 
 	virtual void Revive( bool fromInit = false );
-  virtual void Reset(bool toGame) {};
+	virtual void Reset(bool toGame) {};
 	//physicalization
 	virtual void Physicalize(EStance stance=STANCE_NULL);
 	virtual void PostPhysicalize();
 	virtual void RagDollize( bool fallAndPlay );
-	//
-  virtual int IsGod(){ return 0; }
+	virtual int IsGod() { return 0; }
 
 	virtual void SetSpectatorMode(uint8 mode, EntityId targetId) {};
 	virtual uint8 GetSpectatorMode() const { return 0; };
@@ -891,7 +890,7 @@ public:
 	virtual IEntity *LinkToVehicleRemotely(EntityId vehicleId);
 	virtual void LinkToMountedWeapon(EntityId weaponId) {};
 	virtual IEntity *LinkToEntity(EntityId entityId, bool bKeepTransformOnDetach=true);
-	
+
 	ILINE virtual IEntity *GetLinkedEntity() const
 	{
 		return m_linkStats.GetLinked();

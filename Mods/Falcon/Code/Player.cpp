@@ -757,7 +757,7 @@ void CPlayer::Update(SEntityUpdateContext& ctx, int updateSlot)
 					healthThrHigh = g_pGameCVars->g_playerLowHealthThreshold2Multiplayer;
 				}
 				static float lastHealth = 0;
-				if(m_health < healthThrHigh && !g_pGameCVars->g_godMode)
+				if(m_health < healthThrHigh)
 				{
 					if(m_health < healthThrLow)
 					{
@@ -2138,11 +2138,8 @@ void CPlayer::UpdateStats(float frameTime)
 		return;
 
 	bool isClient(IsClient());
-	//update god mode status
 	if (isClient)
 	{
-		SAFE_HUD_FUNC(SetGODMode(g_pGameCVars->g_godMode));
-
 		// Crafty: Custom character change
 		m_stats.firstPersonBody = (uint8)g_pGameCVars->fn_fpBody;
 	}
@@ -2698,32 +2695,6 @@ void CPlayer::ToggleThirdPerson()
 	CALL_PLAYER_EVENT_LISTENERS(OnToggleThirdPerson(this,m_stats.isThirdPerson));
 }
 
-int CPlayer::IsGod()
-{
-	if (!m_pGameFramework->CanCheat())
-		return 0;
-
-	int godMode(g_pGameCVars->g_godMode);
-
-	// Demi-Gods are not Gods
-	if (godMode == 3)
-		return 0;
-
-	//check if is the player
-	if (IsClient())
-		return godMode;
-
-	//check if is a squadmate
-	IAIActor* pAIActor = CastToIAIActorSafe(GetEntity()->GetAI());
-	if (pAIActor)
-	{
-		int group=pAIActor->GetParameters().m_nGroup;
-		if(group>= 0 && group<10)
-			return (godMode==2?1:0);
-	}
-	return 0;
-}
-
 void CPlayer::ForceFreeFall()
 {
 	if (!g_pGameCVars->fn_disableFreefall)
@@ -3187,18 +3158,10 @@ void CPlayer::SetHealth(int health )
 
 	if (health <= 0)
 	{
-		const bool bIsGod = IsGod() > 0;
 		if (IsClient())
 		{
 			SAFE_HUD_FUNC(ActorDeath(this));
-	
-				if (bIsGod)
-				{
-				SAFE_HUD_FUNC(TextMessage("GodMode:died!"));
-			}
 		}
-		if (bIsGod)		// report GOD death
-			CALL_PLAYER_EVENT_LISTENERS(OnDeath(this, true));
 	}
 
 	if (GetHealth() <= 0)	//client deathFX are triggered in the lua gamerules
@@ -3229,7 +3192,7 @@ void CPlayer::SetHealth(int health )
 				pItem->Select(false);
 		}
 		// report normal death
-		CALL_PLAYER_EVENT_LISTENERS(OnDeath(this, false));
+		CALL_PLAYER_EVENT_LISTENERS(OnDeath(this));
 
 		SendMusicLogicEvent(eMUSICLOGICEVENT_PLAYER_KILLED);
 	}
@@ -3248,7 +3211,7 @@ void CPlayer::SetHealth(int health )
 			const float healthThrHi = g_pGameCVars->g_playerLowHealthThreshold*1.25f;
 			const float healthThrLow = g_pGameCVars->g_playerLowHealthThreshold;
 
-			if(!g_pGameCVars->g_godMode && m_health < healthThrHi)
+			if(m_health < healthThrHi)
 			{
 				SMFXRunTimeEffectParams params;
 				params.pos = GetEntity()->GetWorldPos();
