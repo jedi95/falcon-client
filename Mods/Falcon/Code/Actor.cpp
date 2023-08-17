@@ -232,9 +232,6 @@ CActor::CActor()
 , m_reviveNoReactionTime(0.f)
 {
 	m_currentPhysProfile=GetDefaultProfile(eEA_Physics);
-	//memset(&m_stances,0,sizeof(m_stances));
-	//SetupStance(STANCE_NULL,&SStanceInfo());
-
 	m_timeImpulseRecover = 0.0f;
 	m_airResistance = 0.0f;
 	m_airControl = 1.0f;
@@ -891,7 +888,6 @@ void CActor::RagDollize( bool fallAndPlay )
 			IAnimationGraphState *animGraph = GetAnimationGraphState();
 			if (animGraph)
 				animGraph->PushForcedState( "FallAndPlay" );
-				//animGraph->SetInput("Signal", "fall");
 		}
 
 		// [Mikko] 12.10.2007 Skipping the timer reset here or else QL tranquilized characters does not work.
@@ -1459,10 +1455,8 @@ void CActor::Update(SEntityUpdateContext& ctx, int slot)
 	// NOTE Sep 13, 2007: <pvl> UpdateGrab() moved into an animation system callback -
 	// due to complexities in update ordering previous frame's bone positions
 	// were still used by the GrabHandler when updated from here.
-	//UpdateGrab(ctx.fFrameTime);
 	UpdateAnimGraph( m_pAnimatedCharacter?m_pAnimatedCharacter->GetAnimationGraphState():NULL );
 
-	//
 	// get stats table
 	if (!m_actorStats)
 	{

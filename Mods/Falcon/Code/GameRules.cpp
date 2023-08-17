@@ -1079,16 +1079,16 @@ string CGameRules::VerifyName(const char *name, IEntity *pEntity)
 {
 	string nameFormatter(name);
 
-	// size limit is 26
-	if (nameFormatter.size()>26)
-		nameFormatter.resize(26);
-
 	// no spaces at start/end
 	nameFormatter.TrimLeft(' ');
 	nameFormatter.TrimRight(' ');
 
+	// size limit is 26
+	if (nameFormatter.size()>26)
+		nameFormatter.resize(26);
+
 	// no $ at the beginning (Patch3: colors are forbidden)
-	nameFormatter.TrimLeft('$');
+	nameFormatter.replace("$", "_");
 
 	// no empty names
 	if (nameFormatter.empty())
@@ -1103,16 +1103,15 @@ string CGameRules::VerifyName(const char *name, IEntity *pEntity)
 	// search for duplicates
 	if (IsNameTaken(nameFormatter.c_str(), pEntity))
 	{
-		int n=1;
+		int n = 1;
 		string appendix;
-		do 
+		do
 		{
 			appendix.Format("(%d)", n++);
-		} while(IsNameTaken(nameFormatter+appendix));
+		} while (IsNameTaken(nameFormatter + appendix));
 
 		nameFormatter.append(appendix);
 	}
-
 	return nameFormatter;
 }
 

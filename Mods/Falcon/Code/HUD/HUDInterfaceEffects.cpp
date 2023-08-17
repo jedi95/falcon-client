@@ -152,7 +152,6 @@ void CHUD::UpdateMissionObjectiveIcon(EntityId objective, int friendly, FlashOnS
 					id = info.pCharacter->GetISkeletonPose()->GetJointIDByName("Bip01 Head");
 				if (id >= 0)
 				{
-					//vPos = pCharacter->GetISkeleton()->GetHelperPos(helper);
 					vWorldPos = info.pCharacter->GetISkeletonPose()->GetAbsJointByID(id).t;
 					if (!vWorldPos.IsZero())
 					{
@@ -366,8 +365,6 @@ void CHUD::UpdateMissionObjectiveIcon(EntityId objective, int friendly, FlashOnS
 		{
 			localizedText = LocalizeWithParams(GetPlayerRank(objective, true), true);
 			icon.text.append(localizedText);
-
-			//localizedText = LocalizeWithParams(" ", true);
 			icon.text.append(L" ");
 		}
 	}

@@ -49,7 +49,6 @@ public:
 	virtual void SetActorMovement(SMovementRequestParams &control);
 
 	virtual void FullSerialize( TSerialize ser );
-	//virtual bool NetSerialize( TSerialize ser, EEntityAspects aspect, uint8 profile, int flags );
 
 	void GetMemoryStatistics(ICrySizer * s);
 

@@ -32,7 +32,7 @@ CHUDVehicleInterface::CHUDVehicleInterface(CHUD *pHUD, CGameFlashAnimation *pAmm
 	m_lastSetFriendly = m_friendlyFire = false;
 	m_seatId = InvalidVehicleSeatId;
 
-	m_iSecondaryAmmoCount = m_iPrimaryAmmoCount = m_iSecondaryClipSize = m_iPrimaryClipSize = 0;// m_iHeat = 0;
+	m_iSecondaryAmmoCount = m_iPrimaryAmmoCount = m_iSecondaryClipSize = m_iPrimaryClipSize = 0;
 	m_iLastReloadBarValue = -1;
 
 	m_animMainWindow.Init("Libs/UI/HUD_VehicleHUD.gfx", eFD_Center, eFAF_ManualRender|eFAF_Visible|eFAF_ThisHandler);
@@ -841,19 +841,6 @@ void CHUDVehicleInterface::ShowVehicleInterface(EVehicleHud type, bool forceFlas
 						iPrimaryAmmoCount=pWeapon->GetAmmoCount(pAmmoType);
 					}
 
-					/*if(pFireMode->CanOverheat())
-					{
-						int heat = int(pFireMode->GetHeat()*100);
-						if(m_iHeat != heat)
-						{
-							SFlashVarValue args[2] = {true, pFireMode->GetHeat()*100};
-							g_pAmmo->Invoke("setOverheatBar", args, 2);
-							m_iHeat = heat;
-						}
-					}
-					else
-						m_iHeat = 0;*/
-					
 					int fmIdx = g_pHUD->GetSelectedFiremode();
 					if(fmIdx == 8 || fmIdx == 15 || fmIdx == 22 || fmIdx == 24) //infite ammo firemodes
 						iSecondaryClipSize = -1;
@@ -894,8 +881,6 @@ void CHUDVehicleInterface::ShowVehicleInterface(EVehicleHud type, bool forceFlas
 			{
 				SFlashVarValue args[7] = {iSecondaryAmmoCount, iPrimaryAmmoCount, iSecondaryClipSize, iPrimaryClipSize, 0, "", false};
 				g_pAmmo->Invoke("setAmmo", args, 7);
-				//if(iSecondaryClipSize == -1)
-				//	g_pAmmo->Invoke("setFireMode", 8);
 				m_iSecondaryAmmoCount	= iSecondaryAmmoCount;
 				m_iPrimaryAmmoCount		= iPrimaryAmmoCount;
 				m_iSecondaryClipSize	= iSecondaryClipSize;
@@ -984,8 +969,6 @@ void CHUDVehicleInterface::ShowVehicleInterface(EVehicleHud type, bool forceFlas
 		}
 
 		sprintf(szAltitude,"%.2f",fAltitude);
-
-		//g_pHUD->GetGPSPosition(szN,szW);
 		m_animMainWindow.Invoke("setHorizon", fHorizon);
 	}
 	if(type == EHUD_VTOL || type == EHUD_HELI)

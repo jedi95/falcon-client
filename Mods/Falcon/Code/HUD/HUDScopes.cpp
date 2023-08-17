@@ -255,9 +255,6 @@ void CHUDScopes::DisplayBinoculars(CPlayer* pPlayerActor)
 				{
 					if(g_pGame->GetGameRules()->GetTeam(pPlayerActor->GetEntityId()) == g_pGame->GetGameRules()->GetTeam(pEntity->GetId()))
 						continue;
-
-					// Do not display any silouhette in MP (Eric's request)
-//					SetSilhouette(pActor,NULL);
 				}
 			}
 		}
@@ -317,7 +314,7 @@ void CHUDScopes::ShowBinoculars(bool bVisible, bool bShowIfNoHUD, bool bNoFadeOu
 		m_bDestroyBinocularsAtNextFrame = false;
 		g_pHUD->SetAirStrikeBinoculars(true);
 	}
-	else /* if(!bVisible) */
+	else
 	{
 		if(m_bShowBinoculars)
 		{
@@ -352,7 +349,6 @@ void CHUDScopes::SetBinocularsDistance(float fDistance)
 
 void CHUDScopes::SetBinocularsZoomMode(int iZoomMode)
 {
-//	m_animBinoculars.Invoke("setZoomMode", iZoomMode);
 	m_iZoomLevel = iZoomMode;
 }
 

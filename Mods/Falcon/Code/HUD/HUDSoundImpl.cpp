@@ -175,7 +175,6 @@ void CHUD::PlayStatusSound(const char* name, bool forceSuitSound)
 	if(!gEnv->pSoundSystem)
 		return;
 
-	//string strSound("languages/dialog/suit/");
 	string strSound;
 
 	//we don't want to play the suit sounds at once (because of quick mode change key)

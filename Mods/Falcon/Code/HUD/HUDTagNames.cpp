@@ -400,50 +400,6 @@ void CHUDTagNames::DrawTagName(IVehicle *pVehicle)
 		}
 
 		SAFE_HUD_FUNC(UpdateMissionObjectiveIcon(pActor->GetEntityId(), (pActor->GetHealth() <= 0)?0:friendly, iTeam==1?eOS_NKPlayer:eOS_USPlayer, false, Vec3(0,0,0), true));
-
-		/*
-		const char *szRank = GetPlayerRank(uiEntityId);
-
-		IEntity *pEntity = pActor->GetEntity();
-		if(!pEntity)
-			continue;
-
-		char szText[HUD_MAX_STRING_SIZE];
-		if(szRank)
-		{
-			sprintf(szText,"%s %s",szRank,pEntity->GetName());
-		}
-		else
-		{
-			sprintf(szText,"%s",pEntity->GetName());
-		}
-
-		if(0 == iClientTeam)
-		{
-			if(uiEntityId && IsFriendlyToClient(uiEntityId))
-			{
-				rgbTagName = COLOR_FRIEND;
-			}
-		}
-		else if(uiEntityId && pGameRules->GetTeam(uiEntityId) == iClientTeam)
-		{
-			rgbTagName = COLOR_FRIEND;
-		}
-		
-		if(pActor->GetHealth() <= 0)
-		{
-			rgbTagName = COLOR_DEAD;
-		}
-
-		m_tagNamesVector.resize(m_tagNamesVector.size()+1);
-
-		STagName *pTagName = &m_tagNamesVector[m_tagNamesVector.size()-1];
-
-		pTagName->strName			= szText;
-		pTagName->vWorld			= vWorldPos;
-		pTagName->bDrawOnTop	= bDrawOnTop;
-		pTagName->rgb					= rgbTagName;
-		*/
 	}
 
 	DrawTagNames();
@@ -496,7 +452,6 @@ void CHUDTagNames::Update()
 			if(pClientActor->GetSpectatorMode() == CActor::eASM_Follow && pClientActor->GetSpectatorTarget() == pActor->GetEntityId())
 				continue;
 
-			//DrawTagName(pActor);
 			int friendly = 1;
 			if(alreadySelected)
 			{
@@ -576,7 +531,6 @@ void CHUDTagNames::Update()
 				IActor *pActor = g_pGame->GetIGameFramework()->GetIActorSystem()->GetActor(pEnemyTagName->uiEntityId);
 				if(pActor)
 				{
-					//DrawTagName(pActor);
 					int team = pGameRules->GetTeam(pActor->GetEntityId());
 					if(team!=iClientTeam || pGameRules->GetTeamCount()<=1)
 						SAFE_HUD_FUNC(UpdateMissionObjectiveIcon(pActor->GetEntityId(), (pActor->GetHealth() <= 0)?0:2, team==1?eOS_NKPlayer:eOS_USPlayer, false, Vec3(0,0,0), true));

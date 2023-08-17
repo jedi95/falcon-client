@@ -26,7 +26,7 @@
 #include "Hunter.h"
 #include "Trooper.h"
 #include "Shark.h"
-//
+
 #include "Item.h"
 #include "Weapon.h"
 #include "VehicleWeapon.h"

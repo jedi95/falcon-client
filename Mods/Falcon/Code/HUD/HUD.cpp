@@ -1407,26 +1407,6 @@ void CHUD::OnLoadingStart(ILevelInfo *pLevel)
 
 	m_pHUDCrosshair->GetFlashAnim()->Invoke("clearDamageDirection");
 	m_pHUDCrosshair->GetFlashAnim()->GetFlashPlayer()->Advance(0.1f);
-	/*m_pHUDScopes->ShowBinoculars(false);
-
-	ShowKillAreaWarning(false, 0);
-	BreakHUD(0);
-
-	GetMissionObjectiveSystem().DeactivateObjectives(false); //deactivate old objectives
-	m_animMessages.Invoke("reset");	//reset update texts
-
-	if(m_pHUDVehicleInterface && m_pHUDVehicleInterface->GetHUDType() != CHUDVehicleInterface::EHUD_NONE)
-		m_pHUDVehicleInterface->OnExitVehicle(NULL);
-
-	m_currentGoal.clear();
-	m_currentMainObjective.clear();
-
-	//disable alien fear effect
-	m_fSetAgressorIcon = 0.0f;
-	m_animTargetter.SetVisible(false);
-	m_bThirdPerson = false;
-
-	m_uiWeapondID = 0;*/
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -1705,11 +1685,6 @@ void CHUD::HandleFSCommand(const char *szCommand,const char *szArgs)
 	{
 		PlaySound(ESound_Malfunction);
 	}
-/*	else if(!stricmp(szCommand,"soundstop_malfunction"))
-	{
-		note: hud_malfunction has been changed to oneshot instead of looping sound
-		PlaySound(ESound_Malfunction,false);
-	}*/
 	else if(!stricmp(szCommand,"vehicle_init"))
 	{
 		PlaySound(ESound_VehicleIn);
@@ -1724,11 +1699,9 @@ void CHUD::HandleFSCommand(const char *szCommand,const char *szArgs)
 	}
 	else if(!stricmp(szCommand,"hud_download_loop"))
 	{
-		//PlaySound(ESound_DownloadLoop);
 	}
 	else if(!stricmp(szCommand,"hud_download_stop"))
 	{
-		//PlaySound(ESound_DownloadLoop,false);
 		PlaySound(ESound_DownloadStop);
 	}
 	else if(!stricmp(szCommand, "closeBinoculars"))
@@ -2247,8 +2220,6 @@ bool CHUD::OnAction(const ActionId& action, int activationMode, float value)
 				CPlayer *pPlayer = static_cast<CPlayer *>(pActor);
 				if (pPlayer && pPlayer->GetNanoSuit() && !pPlayer->GetNanoSuit()->IsActive())
 					return false;
-/*				if(!m_animQuickMenu.IsLoaded())
-					m_animQuickMenu.Reload();*/
 				m_animQuickMenu.Invoke("showQuickMenu");
 				m_animQuickMenu.SetVariable("_alpha",100);
 				
@@ -2829,7 +2800,6 @@ bool CHUD::ShowPDA(bool show, bool buyMenu)
 		}
 		else	
 		{
-			//m_animBuyZoneIcon.SetVisible(m_pHUDPowerStruggle->m_bInBuyZone&&m_pModalHUD!=&m_animBuyMenu);
 			m_buyMenuKeyLog.m_state = SBuyMenuKeyLog::eBMKL_Tab;
 		}
 
@@ -3486,7 +3456,7 @@ void CHUD::OnPostUpdate(float frameTime)
 		}
 
 		CGameRules *pGameRules=g_pGame->GetGameRules();
-		if(gEnv->bMultiplayer && pPlayer->GetSpectatorMode() /*|| (pGameRules && pGameRules->GetTeamCount() > 1 && pGameRules->GetTeam(pPlayer->GetEntityId()) == 0))*/) //SPECTATOR Mode
+		if(gEnv->bMultiplayer && pPlayer->GetSpectatorMode()) //SPECTATOR Mode
 		{
 			if(!m_animSpectate.IsLoaded())
 			{
@@ -4122,7 +4092,6 @@ bool CHUD::UpdateTimers(float frameTime)
 	// FIXME: this should be moved to ::EnergyChanged
 	if(m_fSuitEnergy > (NANOSUIT_ENERGY*0.25f) && m_pNanoSuit->GetSuitEnergy() < (NANOSUIT_ENERGY*0.25f))
 	{
-		//DisplayFlashMessage("@energy_critical", 3, ColorF(1.0,0,0));
 		if(now.GetMilliSeconds() - m_fLastSoundPlayedCritical > 30000)
 		{
 			m_fLastSoundPlayedCritical = now.GetMilliSeconds();

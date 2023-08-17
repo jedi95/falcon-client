@@ -126,7 +126,6 @@ void CHomingMissile::UpdateControlledMissile(float frameTime)
 						pTarget->GetWorldBounds(box);
 						Vec3 finalDes = box.GetCenter();
 						SetDestination(finalDes);
-						//SetDestination( box.GetCenter() );
 					}
 
 					m_lockedTimer+=0.05f;
@@ -169,7 +168,6 @@ void CHomingMissile::UpdateControlledMissile(float frameTime)
 
 						eyePos = viewParams.position;
 						eyeDir = viewParams.rotation * Vec3(0,1,0);
-						//eyeDir = (viewParams.targetPos - viewParams.position).GetNormalizedSafe();
 					}
 
 					int pierceability=7;
@@ -388,7 +386,7 @@ void CHomingMissile::UpdateCruiseMissile(float frameTime)
 
 		if (goalAngle > maxAngle+0.05f)    
 			dir = (Vec3::CreateSlerp(currentDir, goalDir, maxAngle/goalAngle)).normalize();
-		else //if (goalAngle < 0.005f)
+		else
 			dir = goalDir;
 	}
 

@@ -827,8 +827,6 @@ void CPlayerInput::SerializeSaveGame( TSerialize ser )
 			if(proning)
 				OnAction(g_pGame->Actions().prone, 1, 1.0f);
 		}
-
-		//ser.Value("Actions", m_actions); //don't serialize the actions - this will only lead to repeating movement (no key-release)
 	}
 }
 
@@ -1071,7 +1069,7 @@ bool CPlayerInput::OnActionCrouch(EntityId entityId, const ActionId& actionId, i
 			m_pPlayer->GetNanoSuit()->Tap(eNA_Crouch);
 		}
 
-		if (g_pGameCVars->cl_crouchToggle)
+		if (g_pGameCVars->fn_crouchToggle)
 		{
 			if (value > 0.0f)
 			{
@@ -1085,7 +1083,6 @@ bool CPlayerInput::OnActionCrouch(EntityId entityId, const ActionId& actionId, i
 		{
 			if (value > 0.0f)
 			{
-				//if (m_pPlayer->m_params.speedMultiplier > 0.99f)
 				m_actions |= ACTION_CROUCH;
 			}
 			else

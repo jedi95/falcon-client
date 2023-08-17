@@ -31,8 +31,8 @@ public:
 	virtual bool SetAspectProfile(EEntityAspects aspect, uint8 profile);
 	virtual void Select(bool select);
 	virtual void UpdateFPView(float frameTime);
-	virtual void PickUp(EntityId pickerId, bool sound, bool select/* =true */, bool keepHistory/* =true */);
-	virtual void Drop(float impulseScale, bool selectNext/* =true */, bool byDeath/* =false */);
+	virtual void PickUp(EntityId pickerId, bool sound, bool select, bool keepHistory);
+	virtual void Drop(float impulseScale, bool selectNext, bool byDeath);
 	virtual void ProcessEvent(SEntityEvent& event);
 
 	virtual void GetAttachmentsAtHelper(const char *helper, std::vector<string> &rAttachments);
@@ -53,7 +53,6 @@ private:
 	//Laser beam (TP) - It works more or less like LAM.cpp
 	void ActivateTPLaser(bool activate);
 	void UpdateTPLaser(float frameTime);
-	void AttachFakeLaserToOwner(bool attach);
 
 	int		m_dotEffectSlot;
 	bool	m_auxSlotUsed;

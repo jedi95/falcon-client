@@ -35,6 +35,7 @@ struct SCVars
 
 	// Falcon client options
 	int fn_constantMouseSensitivity;
+	int fn_crouchToggle;
 	int fn_disableShootZoom;
 	int fn_enableFpBody;
 	int fn_fixExplosivePlant;

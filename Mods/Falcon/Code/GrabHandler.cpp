@@ -576,7 +576,7 @@ bool CAnimatedGrabHandler::SetGrab(SmartScriptTable &rParams)
 	return true;
 }
 
-bool CAnimatedGrabHandler::StartGrab(/*EntityId objectId*/)
+bool CAnimatedGrabHandler::StartGrab()
 {
 	if (m_grabStats.grabAnimGraphSignal)
 	{

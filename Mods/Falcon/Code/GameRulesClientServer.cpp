@@ -368,12 +368,6 @@ void CGameRules::CullEntitiesInExplosion(const ExplosionInfo &explosionInfo)
 //------------------------------------------------------------------------
 void CGameRules::ClientExplosion(const ExplosionInfo &explosionInfo)
 {
-	// let 3D engine know about explosion (will create holes and remove vegetation)
-	//if (explosionInfo.hole_size > 0.0f)
-	//{
-		//gEnv->p3DEngine->OnExplosion(explosionInfo.pos, explosionInfo.hole_size, true);
-	//}
-
 	TExplosionAffectedEntities affectedEntities;
 
 	if (gEnv->bServer)
@@ -988,7 +982,6 @@ IMPLEMENT_RMI(CGameRules, ClTaggedEntity)
 	if (!params.entityId)
 		return true;
 
-	//SAFE_HUD_FUNC(GetRadar()->AddTaggedEntity(params.entityId)); //we have no tagging anymore, just temp and non-temp adding
 	SAFE_HUD_FUNC(GetRadar()->AddEntityToRadar(params.entityId));
 
 	SEntityEvent scriptEvent( ENTITY_EVENT_SCRIPT_EVENT );

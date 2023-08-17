@@ -289,7 +289,6 @@ public:
 	static void OnCrosshairCVarChanged(ICVar *pCVar);
 	static void OnSubtitleCVarChanged (ICVar* pCVar);
 	static void OnSubtitlePanoramicHeightCVarChanged (ICVar* pCVar);
-	// 
 
 	enum HUDSubtitleMode
 	{
@@ -790,8 +789,6 @@ private:
 	float m_fFlashTimer;
 	float m_fFlashTime;
 	float m_fBlindTime;
-//	float m_fSetAgressorIcon;
-//	EntityId  m_agressorIconID;
 	int		m_lastPlayerPPSet;
 
 	//entity classes for faster comparison

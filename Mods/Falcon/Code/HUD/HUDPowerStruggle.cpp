@@ -465,7 +465,6 @@ void CHUDPowerStruggle::Update(float fDeltaTime)
 			}
 
 		}
-		//gEnv->pRenderer->Set2DMode(false, 0, 0);
 	}
 }
 
@@ -1278,7 +1277,7 @@ void CHUDPowerStruggle::GetItemList(EBuyMenuPage itemType, std::vector<SItem> &i
 
 //-----------------------------------------------------------------------------------------------------
 
-void CHUDPowerStruggle::DetermineCurrentBuyZone(bool sendToFlash, bool force /* = false*/)
+void CHUDPowerStruggle::DetermineCurrentBuyZone(bool sendToFlash, bool force)
 {
 	IActor *pActor=g_pGame->GetIGameFramework()->GetClientActor();
 	if(!pActor) return;

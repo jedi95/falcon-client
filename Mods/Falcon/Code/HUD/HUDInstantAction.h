@@ -38,10 +38,6 @@ public:
 	void SetHUDColor();
 	void UpdateStats();
 
-//	virtual bool IsFactoryType(EntityId entity, EBuyMenuPage type);
-
-//	bool IsPlayerSpecial();
-
 	int m_ownScore;
 
 private:

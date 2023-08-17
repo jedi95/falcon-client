@@ -314,9 +314,6 @@ void CGunTurret::ReadProperties(IScriptTable *pProperties)
 //------------------------------------------------------------------------
 bool CGunTurret::ReadItemParams(const IItemParamsNode *root)
 {
-  //m_tpgeometry.position.Set(0.f, 0.f, 0.f);
-  //m_aux0geometry.position.Set(0.f, 0.f, 0.f);
-  
   if (!CWeapon::ReadItemParams(root))
 	return false;
 
@@ -330,16 +327,7 @@ bool CGunTurret::ReadItemParams(const IItemParamsNode *root)
 	reader.Read("barrel_helper", m_barrelHelper);
 	reader.Read("fire_helper", m_fireHelper);
 	reader.Read("rocket_helper", m_rocketHelper);
-	/*Matrix34 tm = GetEntity()->GetSlotLocalTM(eIGS_Aux0,false);
 
-	tm.SetTranslation(GetSlotHelperPos(eIGS_Aux0,m_radarHelper.c_str(),false));
-	GetEntity()->SetSlotLocalTM(eIGS_ThirdPerson,tm);
-
-	if (GetEntity()->IsSlotValid(eIGS_Aux1))
-	  {
-	  tm.SetTranslation(GetSlotHelperPos(eIGS_ThirdPerson,m_barrelHelper.c_str(),false));
-	  GetEntity()->SetSlotLocalTM(eIGS_Aux1,tm);
-	}*/   
 		m_radarHelperPos = GetSlotHelperPos(eIGS_Aux0, m_radarHelper.c_str(), false);
 		m_barrelHelperPos = GetSlotHelperPos(eIGS_ThirdPerson, m_barrelHelper.c_str(), false);
 		m_fireHelperPos = GetSlotHelperPos(eIGS_ThirdPerson, m_fireHelper.c_str(), false);
@@ -514,7 +502,6 @@ Vec3 CGunTurret::GetFiringPos(const Vec3 &probableHit) const
 //------------------------------------------------------------------------
 Vec3 CGunTurret::GetWeaponPos() const
 {
-	//return GetEntity()->GetWorldPos();
 	return GetEntity()->GetSlotWorldTM(eIGS_ThirdPerson).GetTranslation();  
 }
 
@@ -542,24 +529,6 @@ bool CGunTurret::IsTargetHostile(IActor *pTarget) const
 	bool sameTeam = (m_turretparams.team == 0) || (team == 0) || (m_turretparams.team == team);
 
 	return !sameSpecies || !sameTeam;
-
-	/*	IVehicle *pVehicle=g_pGame->GetIGameFramework()->GetIVehicleSystem()->GetVehicle(pTarget->GetId());
-	if (pVehicle)
-	{
-	int seatCount=pVehicle->GetSeatCount();
-	for (int i=0; i<seatCount; i++)
-	{
-	IVehicleSeat *pVehicleSeat=pVehicle->GetSeatById(i);
-	if (pVehicleSeat && pVehicleSeat->GetPassenger())
-	{
-	IEntity *pPassenger=gEnv->pEntitySystem->GetEntity(pVehicleSeat->GetPassenger());
-	if (pPassenger && IsTargetHostile(pPassenger))
-	return true;
-	}
-	}
-	}
-	return false;
-	*/
 }
 
 //------------------------------------------------------------------------
@@ -1141,7 +1110,6 @@ void CGunTurret::UpdateOrientation(float deltaTime)
 	{
 		weaponTM.SetRotationXYZ(weaponAngles);  
 		Vec3 w_trans = turretTM.TransformPoint(m_radarHelperPos);
-		//Vec3 w_trans = GetSlotHelperPos(eIGS_Aux0,m_radarHelper.c_str(),false);
 		weaponTM.SetTranslation(w_trans);
 
 	GetEntity()->SetSlotLocalTM(eIGS_ThirdPerson, weaponTM);
@@ -1149,7 +1117,6 @@ void CGunTurret::UpdateOrientation(float deltaTime)
 	if (GetEntity()->IsSlotValid(eIGS_Aux1))
 	{
 			Vec3 b_trans = weaponTM.TransformPoint(m_barrelHelperPos);
-			//Vec3 b_trans = GetSlotHelperPos(eIGS_ThirdPerson,m_barrelHelper.c_str(),false);
 	  weaponTM.SetTranslation(b_trans);
 			GetEntity()->SetSlotLocalTM(eIGS_Aux1, weaponTM*m_barrelRotation);
 	}

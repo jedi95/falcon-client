@@ -238,7 +238,6 @@ void CHUDTextChat::Flush(bool close)
 	{
 		m_isListening = false;
 		gEnv->pInput->SetExclusiveListener(NULL);
-		//((CHUD*)m_parent)->ShowTextField(false);
 		m_flashChat->Invoke("setVisibleChatBox", 0);
 		m_flashChat->Invoke("GamepadAvailable", false);
 		m_textInputActive = false;

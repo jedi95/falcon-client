@@ -56,13 +56,13 @@ static void BroadcastChangeSafeMode( ICVar * )
 void OnFOVUpdated(ICVar* cvar)
 {
 	float newValue = cvar->GetFVal();
-	if (newValue > 75.0f) {
-		CryLogAlways("Maximum FOV is 75");
-		cvar->Set(75);
+	if (newValue > 100.0f) {
+		CryLogAlways("Maximum FOV is 100");
+		cvar->Set(100);
 	}
-	else if (newValue < 50.0f) {
-		CryLogAlways("Maximum FOV is 50");
-		cvar->Set(50);
+	else if (newValue < 45.0f) {
+		CryLogAlways("Maximum FOV is 45");
+		cvar->Set(45);
 	}
 }
 
@@ -147,6 +147,7 @@ void SCVars::InitCVars(IConsole *pConsole)
 
 	// Falcon client options
 	pConsole->Register("fn_constantMouseSensitivity", &fn_constantMouseSensitivity, 0, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "0 = Sensitivity depends on set mass multiplier. 1 = Sensitivity ignores mass. 2 = Sensitivity follows default mass");
+	pConsole->Register("fn_crouchToggle", &fn_crouchToggle, 0, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "Makes the crouch key work as a toggle");
 	pConsole->Register("fn_disableShootZoom", &fn_disableShootZoom, 0, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "Disables the zoom in effect when shooting");
 	pConsole->Register("fn_enableFPBody", &fn_enableFpBody, 0, VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE, "Enable first person body on custom characters");
 	pConsole->Register("fn_fixExplosivePlant", &fn_fixExplosivePlant, 1, VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE, "Fix planting mines and claymores with high FPS");
@@ -595,6 +596,7 @@ void SCVars::ReleaseCVars()
 
 	// Falcon client options
 	pConsole->UnregisterVariable("fn_constantMouseSensitivity", true);
+	pConsole->UnregisterVariable("fn_crouchToggle", true);
 	pConsole->UnregisterVariable("fn_disableShootZoom", true);
 	pConsole->UnregisterVariable("fn_enableFPBody", true);
 	pConsole->UnregisterVariable("fn_fixExplosivePlant", true);

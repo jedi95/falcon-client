@@ -95,8 +95,6 @@ private:
 	bool					m_showVirtualKeyboard;
 
 	bool					m_anyCurrentText;
-	/*bool					m_showing;
-	float					m_lastUpdate;*/
 	float					m_repeatTimer;
 	SInputEvent		m_repeatEvent;
 };

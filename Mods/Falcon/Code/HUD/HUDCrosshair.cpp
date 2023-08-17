@@ -163,7 +163,7 @@ void CHUDCrosshair::Update(float fDeltaTime)
 	if(m_animCrossHair.GetVisible() && !g_pHUD->InSpectatorMode())
 	{
 		//also disables the damage indicator
-		if(/*g_pGameCVars->hud_crosshair>0 && m_iCrosshair > 0 &&*/ (g_pGameCVars->g_difficultyLevel<4 || gEnv->bMultiplayer))
+		if(g_pGameCVars->g_difficultyLevel<4 || gEnv->bMultiplayer)
 		{
 			m_animCrossHair.GetFlashPlayer()->Advance(fDeltaTime);
 			m_animCrossHair.GetFlashPlayer()->Render();
@@ -318,11 +318,6 @@ bool CHUDCrosshair::IsFriendlyEntity(IEntity *pEntity)
 		if(pVehicle && pGameRules->GetTeam(pVehicle->GetEntityId()) == iClientTeam && pVehicle->GetStatus().passengerCount)
 		{
 			IActor *pDriver = pVehicle->GetDriver();
-			/*if(pDriver && pGameRules->GetTeam(pDriver->GetEntityId()) == iClientTeam)
-				bFriendly = true;
-			else
-				bFriendly = false;*/
-
 			bFriendly = true;
 
 			//fix for bad raycast
@@ -404,7 +399,6 @@ void CHUDCrosshair::UpdateCrosshair()
 	if(iNewFriendly != m_iFriendlyTarget)
 	{
 		m_iFriendlyTarget = iNewFriendly;
-		//m_animCrossHair.Invoke("setFriendly", m_iFriendlyTarget);
 		if(iNewFriendly)
 			m_animFriendCross.SetVisible(true);
 		else

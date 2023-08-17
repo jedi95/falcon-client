@@ -123,7 +123,7 @@ private:
 	CWeapon *_pWeapon;
 };
 
-bool CGrenadeLaunch::Shoot(bool resetAnimation, bool autoreload/* =true */, bool noSound /* =false */)
+bool CGrenadeLaunch::Shoot(bool resetAnimation, bool autoreload, bool noSound)
 {
 	IEntityClass* spawn_ammo = m_grenadeLaunchParams.ammo_type_class;
 
@@ -141,13 +141,9 @@ bool CGrenadeLaunch::Shoot(bool resetAnimation, bool autoreload/* =true */, bool
 	}
 	
 	bool res = InternalShoot(spawn_ammo, resetAnimation, autoreload, noSound);
-	//bool res = CSingle::Shoot(resetAnimation, autoreload, noSound);
 
 	if (m_grenadeLaunchParams.remote_detonated && m_projectileId && m_projectileId != m_lastGrenadeId)
 	{
-		/*if (m_launchedGrenades.size() >= m_fireparams.clip_size)
-			StartSecondaryFire(0);*/
-
 		m_launchedGrenades.push_back(m_projectileId);
 		m_lastGrenadeId=m_projectileId;
 	}
@@ -166,13 +162,9 @@ void CGrenadeLaunch::NetShootEx(const Vec3 &pos, const Vec3 &dir, const Vec3 &ve
 	IEntityClass* spawn_ammo = m_grenadeLaunchParams.ammo_type_class;
 
 	InternalNetShootEx(spawn_ammo, pos, dir, vel, hit, extra, ph);
-	//CSingle::NetShootEx(pos, dir, vel, hit, extra, ph);
 
 	if (m_grenadeLaunchParams.remote_detonated && m_projectileId && m_projectileId != m_lastGrenadeId)
 	{
-		/*if (m_launchedGrenades.size() >= m_fireparams.clip_size)
-			StartSecondaryFire(0);*/
-
 		m_launchedGrenades.push_back(m_projectileId);
 		m_lastGrenadeId=m_projectileId;
 	}
@@ -191,8 +183,6 @@ void CGrenadeLaunch::NetStartSecondaryFire()
 	for(TLaunchedGrenades::const_iterator it=m_launchedGrenades.begin(); it != m_launchedGrenades.end(); ++it)
 	{
 		IEntity *pGrenade=gEnv->pEntitySystem->GetEntity(*it);
-		//IGameObject *pBomb=gEnv->pGame->GetIGameFramework()->GetGameObject(*it);
-
 		if (pGrenade)
 		{
 			// Trigger grenade explosion
@@ -320,8 +310,6 @@ void CGrenadeLaunch::Update(float frameTime, uint frameId)
 		QuatT tr=pMagazine->GetAttRelativeDefault();
 		Quat rot;
 
-		//gEnv->pLog->Log(">>> Rotate ratio: %f", ratio);
-
 		rot=Quat::CreateSlerp(tr.q, m_magazineRotation, min(ratio, 1.0f));
 		tr.q=rot;
 		pMagazine->SetAttRelativeDefault(tr);
@@ -355,7 +343,6 @@ void CGrenadeLaunch::ResetShells()
 	if (pCharacter) 
 	{
 		IAttachmentManager* pAttachMan = pCharacter->GetIAttachmentManager();
-		// gEnv->pLog->Log(">>> Resetting shells at shot count: %d", shot_count);
 
 		if (m_magazineDrum >= 0)
 		{

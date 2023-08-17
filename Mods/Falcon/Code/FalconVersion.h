@@ -6,7 +6,7 @@
 #include "gitparams.h"
 
 #define _Falcon_Version_Major 0
-#define _Falcon_Version_Minor 815
+#define _Falcon_Version_Minor 816
 
 #define _Falcon_Commit STR(GIT_CUR_COMMIT)
 #define _Falcon_ISA "SSE2"

@@ -121,22 +121,6 @@ namespace NSKeyTranslation
 		inString.insert(pos, wcharString.c_str());
 	}
 
-	/*
-	template<size_t S>
-	void InsertString(CryFixedStringT<S>& inString, size_t pos, const wchar_t* s)
-	{
-		CryFixedStringT<64> charString;
-		TruncateToChar(s, charString);
-		inString.insert(pos, charString.c_str());
-	}
-
-	template<size_t S>
-	void InsertString(CryFixedStringT<S>& inString, size_t pos, const char* s)
-	{
-		inString.insert(pos, s);
-	}
-	*/
-
 	// Replaces all occurrences of %[actionmap:actionid] with the current key binding
 	template<size_t S>
 	void ReplaceActions(ILocalizationManager* pLocMgr, CryFixedWStringT<S>& inString)
@@ -170,7 +154,6 @@ namespace NSKeyTranslation
 					*t2 = 0;
 					const typename T::value_type* actionMapName = inString.begin()+pos+actionPrefixLen;
 					const typename T::value_type* actionName = inString.begin()+pos1+1;
-					// CryLogAlways("Found: '%S' '%S'", actionMapName, actionName);
 					bool bFound = LookupBindInfo(actionMapName, actionName, bPreferXI, gBindInfo);
 					*t1 = actionDelim; // re-replace ':'
 					*t2 = actionDelimEnd; // re-replace ']'
@@ -271,7 +254,7 @@ CHUD::LocalizeWithParams(const char* label, bool bAdjustActions, const char* par
 }
 
 
-void CHUD::DisplayFlashMessage(const char* label, int pos /* = 1 */, const ColorF &col /* = Col_White */, bool formatWStringWithParams /* = false */, const char* paramLabel1 /* = 0 */, const char* paramLabel2 /* = 0 */, const char* paramLabel3 /* = 0 */, const char* paramLabel4 /* = 0 */)
+void CHUD::DisplayFlashMessage(const char* label, int pos, const ColorF &col, bool formatWStringWithParams, const char* paramLabel1, const char* paramLabel2, const char* paramLabel3, const char* paramLabel4)
 {
 	if(!label || m_quietMode)
 		return;
@@ -299,7 +282,7 @@ void CHUD::DisplayFlashMessage(const char* label, int pos /* = 1 */, const Color
 	}
 }
 
-void CHUD::DisplayOverlayFlashMessage(const char* label, const ColorF &col /* = Col_White */, bool formatWStringWithParams /* = false */, const char* paramLabel1 /* = 0 */, const char* paramLabel2 /* = 0 */, const char* paramLabel3 /* = 0 */, const char* paramLabel4 /* = 0 */)
+void CHUD::DisplayOverlayFlashMessage(const char* label, const ColorF &col, bool formatWStringWithParams, const char* paramLabel1, const char* paramLabel2, const char* paramLabel3, const char* paramLabel4)
 {
 	if(!label)
 		return;
@@ -385,8 +368,6 @@ void CHUD::DisplayKillMessage(const char* name, int times, bool teamkill, bool f
 
 	const wchar_t* localizedText = L"";
 	localizedText = LocalizeWithParams(message.c_str(), true);
-
-	//addKillLog("",true,"para"+Math.round(Math.random()*100), "#FFFF00", "para"+Math.round(Math.random()*100), "#CF3E12");
 
 	if(showname==false)
 	{
@@ -836,7 +817,6 @@ void CHUD::InternalShowSubtitle(const char* subtitleLabel, ISound* pSound, bool 
 				if (entry.nChunks == 0)
 				{
 					entry.timeRemaining = std::max(entry.timeRemaining, 0.8f); // minimum is 0.8 seconds
-					// entry.timeRemaining = std::min(entry.timeRemaining*1.3f, entry.timeRemaining+2.5f); // 30 percent longer, but max 2.5 seconds
 					SubtitleAssignCharacterName(entry);
 					entry.localized.append(localizedString.c_str(), localizedString.length());
 				}
@@ -859,7 +839,7 @@ void CHUD::InternalShowSubtitle(const char* subtitleLabel, ISound* pSound, bool 
 			}
 		}
 	}
-	else // if (bShow)
+	else
 	{
 		tSoundID soundId = pSound ? pSound->GetId() : INVALID_SOUNDID;
 		for (TSubtitleEntries::iterator iter = m_subtitleEntries.begin(); iter != m_subtitleEntries.end(); )
@@ -883,7 +863,7 @@ void CHUD::InternalShowSubtitle(const char* subtitleLabel, ISound* pSound, bool 
 	}
 }
 
-void CHUD::SetRadioButtons(bool active, int buttonNo /* = 0 */)
+void CHUD::SetRadioButtons(bool active, int buttonNo)
 {
 	if(active)
 	{
@@ -1129,7 +1109,7 @@ void CHUD::ShowWarningMessage(EWarningMessages message, const char* optionalText
 		pPlayer->GetPlayerInput()->DisableXI(true);
 }
 
-void CHUD::HandleWarningAnswer(const char* warning /* = NULL */)
+void CHUD::HandleWarningAnswer(const char* warning)
 {
 	m_animWarningMessages.SetVisible(false);
 	CPlayer *pPlayer = static_cast<CPlayer *>(g_pGame->GetIGameFramework()->GetClientActor());
@@ -1138,7 +1118,6 @@ void CHUD::HandleWarningAnswer(const char* warning /* = NULL */)
 	{
 		if(!strcmp(warning, "suicide"))
 		{
-			//SwitchToModalHUD(NULL,false);
 			gEnv->pConsole->ExecuteString("kill me");
 		}
 		else if(!strcmp(warning, "spectate"))
@@ -1203,7 +1182,6 @@ void CHUD::UpdateSubtitlesManualRender(float frameTime)
 					}
 				}
 			}
-			//
 
 			if (entry.bPersistant == false)
 			{
@@ -1281,7 +1259,6 @@ void CHUD::UpdateSubtitlesManualRender(float frameTime)
 		IRenderer* pRenderer = gEnv->pRenderer;
 		const float x = 0.0f;
 		const float maxWidth = 700.0f;
-		// float y = 600.0f - (g_pGameCVars->hud_panoramicHeight * 600.0f / 768.0f) + 2.0f;
 		float y = 600.0f - (g_pGameCVars->hud_subtitlesHeight * 6.0f) + 1.0f; // subtitles height is in percent of screen height (600.0)
 
 		pUIDraw->PreRender();
@@ -1316,7 +1293,6 @@ void CHUD::UpdateSubtitlesManualRender(float frameTime)
 				}
 				pUIDraw->GetWrappedTextDimW(m_pDefaultFont,&sizeX, &sizeY, maxWidth, textSize, textSize, szLocText);
 				pUIDraw->DrawWrappedTextW(m_pDefaultFont,x, y, maxWidth, textSize, textSize, szLocText, clr.a, clr.r, clr.g, clr.b, 
-					// UIDRAWHORIZONTAL_LEFT,UIDRAWVERTICAL_TOP,UIDRAWHORIZONTAL_LEFT,UIDRAWVERTICAL_TOP);
 					UIDRAWHORIZONTAL_CENTER,UIDRAWVERTICAL_TOP,UIDRAWHORIZONTAL_CENTER,UIDRAWVERTICAL_TOP);
 			}
 			else

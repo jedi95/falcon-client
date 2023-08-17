@@ -1043,8 +1043,6 @@ void CHUDRadar::UpdateCompassStealth(CActor *pActor, float fDeltaTime)
 	{
 		SAIDetectionLevels levels;
 		gEnv->pAISystem->GetDetectionLevels(0, levels);
-		//			float exposure = 0, threat = 0;
-		//			gEnv->pAISystem->GetExposureAndThreat(NULL, exposure, threat);
 
 		static int test = 0;
 		if (test == 0)
@@ -1072,8 +1070,6 @@ void CHUDRadar::UpdateCompassStealth(CActor *pActor, float fDeltaTime)
 	}		
 	if(m_fLastStealthValueStatic != fStealthValueStatic && !gEnv->bMultiplayer)
 	{
-		//m_flashRadar->CheckedInvoke("Root.RadarCompassStealth.StealthExposure.gotoAndStop", fStealthValueStatic);
-
 		g_pGame->GetHUD()->SetStealthExposure(fStealthValueStatic);
 		m_fLastStealthValueStatic = fStealthValueStatic;
 	}
@@ -1092,7 +1088,7 @@ void CHUDRadar::UpdateCompassStealth(CActor *pActor, float fDeltaTime)
 			originalDirection = 2.0f;
 		else if(originalDirection < -0.1f)
 			originalDirection = -2.0f;
-		fCompass = m_fLastCompassRot + (compassDir * m_jammingValue * 10.0f * fDeltaTime) /*+ fDeltaTime*((compassDir > 0)?3.0f:(-3.0f))*/ + originalDirection * fDeltaTime;
+		fCompass = m_fLastCompassRot + (compassDir * m_jammingValue * 10.0f * fDeltaTime) + originalDirection * fDeltaTime;
 		if(fCompass > gf_PI)
 			fCompass = -gf_PI + (fabsf(fCompass) - fabsf(int(fCompass / gf_PI) * gf_PI));
 		else if(fCompass < -gf_PI)

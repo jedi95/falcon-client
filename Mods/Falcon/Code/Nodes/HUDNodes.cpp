@@ -51,8 +51,6 @@ public:
 	{
 		if(eFE_Activate == event && IsPortActive(pActInfo,0))
 		{
-			//SGameObjectEvent evt(GetPortString(pActInfo,1).c_str(),eGOEF_ToAll);
-
 			const string& type = GetPortString(pActInfo,2);
 
 			if(type.empty())
@@ -1514,5 +1512,4 @@ REGISTER_FLOW_NODE("HUD:NightVision",									 CFlowNode_HUDNightVision);
 REGISTER_FLOW_NODE("HUD:Binoculars",									 CFlowNode_HUDBinoculars);
 REGISTER_FLOW_NODE_SINGLETON("HUD:ProgressBar",				 CFlowNode_HUDProgressBar);
 REGISTER_FLOW_NODE_SINGLETON("HUD:Objectives",				 CFlowNode_HUDObjectives);
-// REGISTER_FLOW_NODE_SINGLETON("HUD:TutorialMsg",        CFlowNode_HUDTutorial);
 REGISTER_FLOW_NODE_SINGLETON("HUD:OverlayMsg",         CFlowNode_HUDOverlayMessage);
