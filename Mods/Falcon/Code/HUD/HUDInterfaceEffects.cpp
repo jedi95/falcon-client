@@ -494,20 +494,6 @@ void CHUD::UpdateAllMissionObjectives()
 	m_onScreenIcons.clear();
 }
 
-
-int CHUD::FillUpMOArray(std::vector<double> *doubleArray, double a, double b, double c, double d, double e, double f, double g, double h)
-{
-	doubleArray->push_back(a);
-	doubleArray->push_back(b);
-	doubleArray->push_back(c);
-	doubleArray->push_back(d);
-	doubleArray->push_back(e);
-	doubleArray->push_back(f);
-	doubleArray->push_back(g);
-	doubleArray->push_back(h);
-	return 8;
-}
-
 void CHUD::TrackProjectiles(CPlayer* pPlayerActor)
 {
 
@@ -1362,179 +1348,16 @@ void CHUD::ShowTargettingAI(EntityId id)
 
 //-----------------------------------------------------------------------------------------------------
 
-void CHUD::FadeCinematicBars(int targetVal)
-{
-	m_animCinematicBar.Reload();
-
-	m_animCinematicBar.SetVisible(true);
-	m_animCinematicBar.Invoke("setBarPos", targetVal<<1); // *2, because in flash its percentage of half size!
-	m_cineState = eHCS_Fading;
-}
-
-//-----------------------------------------------------------------------------------------------------
-
-void CHUD::UpdateCinematicAnim(float frameTime)
-{
-	if (m_cineState == eHCS_None)
-		return;
-
-	if(m_animCinematicBar.IsLoaded())
-	{
-		IFlashPlayer* pFP = m_animCinematicBar.GetFlashPlayer();
-		pFP->Advance(frameTime);
-		pFP->Render();
-		if (pFP->GetVisible() == false)
-		{
-			m_cineState = eHCS_None;
-			m_animCinematicBar.Unload();
-		}
-	}
-}
-
-//-----------------------------------------------------------------------------------------------------
-
-void CHUD::UpdateSubtitlesAnim(float frameTime)
-{
-	UpdateSubtitlesManualRender(frameTime);
-}
-
-//-----------------------------------------------------------------------------------------------------
-
 bool CHUD::OnBeginCutScene(IAnimSequence* pSeq, bool bResetFX)
 {
-	if (pSeq == 0)
-		return false;
-
-	if(m_pModalHUD == &m_animPDA)
-	{
-		ShowPDA(false);
-	}
-	else if(m_pModalHUD == &m_animWeaponAccessories)
-	{
-		ShowWeaponAccessories(false);
-	}
-
-	if(m_bNightVisionActive)
-		OnAction(g_pGame->Actions().hud_night_vision, 1, 1.0f);	//turn off
-
-	int flags = pSeq->GetFlags();
-	if (IAnimSequence::IS_16TO9 & flags)
-	{
-		FadeCinematicBars(g_pGameCVars->hud_panoramicHeight);
-	}
-
-	if (IAnimSequence::NO_PLAYER & flags)
-		g_pGameActions->FilterCutsceneNoPlayer()->Enable(true);
-	else
-		g_pGameActions->FilterCutscene()->Enable(true);
-
-	g_pGameActions->FilterInVehicleSuitMenu()->Enable(true);
-	g_pGameActions->FilterNoGrenades()->Enable(true);
-
-	if(IAnimSequence::NO_HUD & flags)
-	{
-		m_cineHideHUD = true;
-	}
-
-	CActor *pPlayerActor = static_cast<CActor *>(gEnv->pGame->GetIGameFramework()->GetClientActor());
-
-	if (pPlayerActor)
-	{
-		if (CPlayer* pPlayer = static_cast<CPlayer*> (pPlayerActor))
-		{
-			if(m_pHUDScopes->m_animBinoculars.IsLoaded())
-			{
-				if(m_pHUDScopes->IsBinocularsShown())
-					pPlayer->SelectLastItem(false);
-				m_pHUDScopes->ShowBinoculars(false,false,true);
-			}
-
-			pPlayer->StopLoopingSounds();
-
-			if(IAnimSequence::NO_PLAYER & flags)
-			{
-				if (SPlayerStats* pActorStats = static_cast<SPlayerStats*> (pPlayer->GetActorStats()))
-					pActorStats->spectatorMode = CActor::eASM_Cutscene;	// moved up to avoid conflict with the MP spectator modes
-				pPlayer->Draw(false);
-				if (pPlayer->GetPlayerInput())
-					pPlayer->GetPlayerInput()->Reset();
-				if(IItem* pItem = pPlayer->GetCurrentItem())
-				{
-					if(IWeapon *pWeapon = pItem->GetIWeapon())
-					{
-						if(pWeapon->IsZoomed() || pWeapon->IsZooming())
-							pWeapon->ExitZoom();
-					}
-				}
-				if(COffHand* pOffHand = static_cast<COffHand*>(pPlayer->GetItemByClass(CItem::sOffHandClass)))
-					pOffHand->OnBeginCutScene();
-				
-				pPlayer->HolsterItem(true);
-			}
-		}
-	}
-
-	m_fCutsceneSkipTimer = g_pGameCVars->g_cutsceneSkipDelay;
-	m_bCutscenePlaying = true;
-	m_bCutsceneAbortPressed = false;
-
-	return true;
+	return false;
 }
 
 //-----------------------------------------------------------------------------------------------------
 
 bool CHUD::OnEndCutScene(IAnimSequence* pSeq)
 {
-	if (pSeq == 0)
-		return false;
-
-	m_pHUDCrosshair->Reset();
-
-	m_bCutscenePlaying = false;
-	if (m_bStopCutsceneNextUpdate)
-	{
-		m_bStopCutsceneNextUpdate = false; // just in case, the cutscene wasn't stopped in CHUD::OnPostUpdate, but due to some other stuff (like Serialize/Flowgraph)
-	}
-	g_pGameActions->FilterCutscene()->Enable(false);
-	g_pGameActions->FilterCutsceneNoPlayer()->Enable(false);
-	g_pGameActions->FilterInVehicleSuitMenu()->Enable(false);
-	g_pGameActions->FilterNoGrenades()->Enable(false);
-
-	int flags = pSeq->GetFlags();
-	if (IAnimSequence::IS_16TO9 & flags)
-	{
-		FadeCinematicBars(0);
-	}
-
-	if(IAnimSequence::NO_HUD & flags)
-		m_cineHideHUD = false;
-
-	if(IAnimSequence::NO_PLAYER & flags)
-	{
-		if (CActor *pPlayerActor = static_cast<CActor *>(gEnv->pGame->GetIGameFramework()->GetClientActor()))
-		{
-			if (CPlayer* pPlayer = static_cast<CPlayer*> (pPlayerActor))
-			{
-				if (SPlayerStats* pActorStats = static_cast<SPlayerStats*> (pPlayer->GetActorStats()))
-					pActorStats->spectatorMode = CActor::eASM_None;
-				pPlayer->Draw(true);
-				if(COffHand* pOffHand = static_cast<COffHand*>(pPlayer->GetItemByClass(CItem::sOffHandClass)))
-					pOffHand->OnEndCutScene();
-
-				// restore health and nanosuit, because time has passed during cutscene
-				// and player was not-enabled
-				// -> simulate health-regen
-				pPlayer->SetHealth(pPlayer->GetMaxHealth());
-				if (pPlayer->GetNanoSuit())
-				{
-					pPlayer->GetNanoSuit()->ResetEnergy();
-				}
-				pPlayer->HolsterItem(false);
-			}
-		}
-	}
-
-	return true;
+	return false;
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -1548,11 +1371,6 @@ bool CHUD::OnCameraChange(const SCameraParams& cameraParams)
 
 void CHUD::OnPlayCutSceneSound(IAnimSequence* pSeq, ISound* pSound)
 {
-	if (m_hudSubTitleMode == eHSM_CutSceneOnly)
-	{
-		if (pSound && pSound->GetFlags() & FLAG_SOUND_VOICE)
-			ShowSubtitle(pSound, true);
-	}
 }
 
 //-----------------------------------------------------------------------------------------------------

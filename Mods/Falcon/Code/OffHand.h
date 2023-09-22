@@ -128,9 +128,6 @@ public:
 
 	bool IsHoldingEntity();
 
-	void OnBeginCutScene();
-	void OnEndCutScene();
-
 	void GetAvailableGrenades(std::vector<string> &grenades);
 
 	ILINE void SetResetTimer(float t) { m_resetTimer = t;}
@@ -231,7 +228,6 @@ private:
 	int						m_usable;
 
 	int           m_checkForConstraintDelay;
-	bool          m_bCutscenePlaying;
 
 	float					m_fGrenadeToggleTimer;
 	float					m_fGrenadeThrowTimer;

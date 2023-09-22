@@ -3054,8 +3054,7 @@ void CHUDRadar::UpdateBinoculars(CActor *pActor, float fDeltaTime)
 			lookAtObjectID = RayCastBinoculars(pPlayer,&rayHit);
 		}
 
-		// When in a cinematic, pActor view doesn't move (it's faked), so let's not use the lookAtEntityId
-		if (lookAtObjectID && !g_pGame->GetHUD()->IsInCinematic())
+		if (lookAtObjectID)
 		{
 			IEntity *pEntity=gEnv->pEntitySystem->GetEntity(lookAtObjectID);
 			if (pEntity)

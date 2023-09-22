@@ -168,7 +168,6 @@ m_prevMainHandId(0),
 m_checkForConstraintDelay(2),
 m_startPickUp(false),
 m_pRockRN(NULL),
-m_bCutscenePlaying(false),
 m_restoreStateAfterLoading(false)
 {
 	m_useFPCamSpacePP = false; //Offhand doesn't need it
@@ -257,7 +256,6 @@ void COffHand::Reset()
 	m_prevMainHandId	= 0;
 	m_checkForConstraintDelay = 2;
 	m_pRockRN = NULL;
-	m_bCutscenePlaying = false;
 	m_forceThrow = false;
 	m_restoreStateAfterLoading = false;
 
@@ -1511,7 +1509,7 @@ void COffHand::FinishAction(EOffHandActions eOHA)
 																if(!m_mainHand)
 																{
 																	SActorStats *pStats = GetOwnerActor()->GetActorStats();
-																	if(!GetOwnerActor()->ShouldSwim() && !m_bCutscenePlaying && (pStats && !pStats->inFreefall))
+																	if(!GetOwnerActor()->ShouldSwim() && (pStats && !pStats->inFreefall))
 																		GetOwnerActor()->HolsterItem(false);
 																}
 																else if(!m_mainHandIsDualWield && !m_prevMainHandId)
@@ -2872,7 +2870,7 @@ void COffHand::ThrowNPC(bool kill /*= true*/)
 			//In strenght mode, always kill
 			if(pPlayer && pPlayer->GetNanoSuit() && pPlayer->GetNanoSuit()->GetMode()==NANOMODE_STRENGTH)
 				health = 0;
-			if(health<=0 || (m_grabbedNPCSpecies!=eGCT_HUMAN) || m_bCutscenePlaying)
+			if(health<=0 || (m_grabbedNPCSpecies!=eGCT_HUMAN))
 			{
 				pActor->SetHealth(0);
 				if(currentItem && m_grabbedNPCSpecies==eGCT_HUMAN)
@@ -3244,32 +3242,6 @@ EntityId COffHand::SpawnRockProjectile(IRenderNode* pRenderNode)
 	pEntity->Physicalize(params);
 
 	return pEntity->GetId();
-}
-
-//==============================================================
-//Handle entering cinematic (called from HUD)
-
-void COffHand::OnBeginCutScene()
-{
-	if(IsHoldingEntity())
-	{
-		if(m_currentState&(eOHS_THROWING_NPC|eOHS_THROWING_OBJECT))
-		{
-			OnAction(GetOwnerId(),"use",eAAM_OnRelease,0.0f);
-		}
-		else
-		{
-			OnAction(GetOwnerId(),"use",eAAM_OnPress,0.0f);
-			OnAction(GetOwnerId(),"use",eAAM_OnRelease,0.0f);
-		}
-	}
-
-	m_bCutscenePlaying = true;
-}
-
-void COffHand::OnEndCutScene()
-{
-	m_bCutscenePlaying = false;
 }
 
 //==============================================================

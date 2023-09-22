@@ -746,26 +746,20 @@ void CGame::CheckReloadLevel()
 		return;
 	}
 
-	// Restart interrupts cutscenes
-	gEnv->pMovieSystem->StopAllCutScenes();
-
 	GetISystem()->SerializingFile(1);
 
 	//load levelstart
 	ILevelSystem* pLevelSystem = m_pFramework->GetILevelSystem();
 	ILevel*			pLevel = pLevelSystem->GetCurrentLevel();
 	ILevelInfo* pLevelInfo = pLevelSystem->GetLevelInfo(m_pFramework->GetLevelName());
-	//**********
 	EntityId playerID = GetIGameFramework()->GetClientActorId();
 	pLevelSystem->OnLoadingStart(pLevelInfo);
 	PlayerIdSet(playerID);
 	string levelstart(GetIGameFramework()->GetLevelName());
 	if(const char* visibleName = GetMappedLevelName(levelstart))
 		levelstart = visibleName;
-	//levelstart.append("_levelstart.crysisjmsf"); //because of the french law we can't do this ...
 	levelstart.append("_crysis.crysisjmsf");
 	GetIGameFramework()->LoadGame(levelstart.c_str(), true, true);
-	//**********
 	pLevelSystem->OnLoadingComplete(pLevel);
 	GetMenu()->OnActionEvent(SActionEvent(eAE_inGame));	//reset the menu
 	m_bReload = false;	//if m_bReload is true - load at levelstart

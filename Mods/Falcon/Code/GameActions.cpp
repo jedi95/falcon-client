@@ -12,8 +12,6 @@ CGameActions::CGameActions()
 , m_pFilterFreezeTime(0)
 , m_pFilterNoVehicleExit(0)
 , m_pFilterMPRadio(0)
-, m_pFilterCutscene(0)
-, m_pFilterCutsceneNoPlayer(0)
 , m_pFilterNoMapOpen(0)
 , m_pFilterNoObjectivesOpen(0)
 , m_pFilterVehicleNoSeatChangeAndExit(0)
@@ -33,8 +31,6 @@ void CGameActions::Init()
 	CreateFilterFreezeTime();
 	CreateFilterNoVehicleExit();
 	CreateFilterMPRadio();
-	CreateFilterCutscene();
-	CreateFilterCutsceneNoPlayer();
 	CreateFilterNoMapOpen();
 	CreateFilterNoObjectivesOpen();
 	CreateFilterVehicleNoSeatChangeAndExit();
@@ -274,32 +270,6 @@ void CGameActions::CreateFilterMPRadio()
 	m_pFilterMPRadio->Filter(v_changeseat4);
 	m_pFilterMPRadio->Filter(v_changeseat5);
 	m_pFilterMPRadio->Filter(v_changeseat);
-}
-
-void CGameActions::CreateFilterCutscene()
-{
-	IActionMapManager* pActionMapMan = g_pGame->GetIGameFramework()->GetIActionMapManager();
-
-	m_pFilterCutscene = pActionMapMan->CreateActionFilter("cutscene", eAFT_ActionFail);	
-	m_pFilterCutscene->Filter(binoculars);
-	m_pFilterCutscene->Filter(hud_night_vision);
-	m_pFilterCutscene->Filter(hud_show_multiplayer_scoreboard);
-	m_pFilterCutscene->Filter(hud_hide_multiplayer_scoreboard);
-	m_pFilterCutscene->Filter(hud_suit_menu);
-	m_pFilterCutscene->Filter(hud_suit_mod);
-	m_pFilterCutscene->Filter(hud_weapon_mod);
-	m_pFilterCutscene->Filter(hud_show_pda_map);
-	m_pFilterCutscene->Filter(leanleft);
-	m_pFilterCutscene->Filter(leanright);
-}
-
-void CGameActions::CreateFilterCutsceneNoPlayer()
-{
-	IActionMapManager* pActionMapMan = g_pGame->GetIGameFramework()->GetIActionMapManager();
-
-	m_pFilterCutsceneNoPlayer = pActionMapMan->CreateActionFilter("cutscene_no_player", eAFT_ActionPass);
-	m_pFilterCutsceneNoPlayer->Filter(loadLastSave);
-	m_pFilterCutsceneNoPlayer->Filter(load);
 }
 
 void CGameActions::CreateFilterNoMapOpen()

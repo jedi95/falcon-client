@@ -365,7 +365,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("g_resetActionmapOnStart", &g_resetActionmapOnStart, 0, 0, "Resets Keyboard mapping on application start.");
 	pConsole->Register("g_useProfile", &g_useProfile, 1, 0, "Don't save anything to or load anything from profile.");
 	pConsole->Register("g_startFirstTime", &g_startFirstTime, 1, VF_DUMPTODISK, "1 before the game was started first time ever.");
-	pConsole->Register("g_cutsceneSkipDelay", &g_cutsceneSkipDelay, 0.0f, 0, "Skip Delay for Cutscenes.");
 	pConsole->Register("g_enableAutoSave", &g_enableAutoSave, 1, 0, "Switches all savegames created by Flowgraph (checkpoints). Does not affect user generated saves or levelstart savegames.");
 
 	pConsole->Register("g_detachCamera", &g_detachCamera, 0, VF_CHEAT, "Detach camera");
@@ -412,7 +411,6 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("hud_showRoundMessages", &hud_showRoundMessages, 0, 0, "Show round messages for player.");
 	pConsole->Register("hud_showTeamMessages", &hud_showTeamMessages, 0, 0, "Show team messages for player.");
 	pConsole->Register("hud_showKillMessages", &hud_showKillMessages, 0, 0, "Show team messages for player.");
-	pConsole->Register("hud_panoramicHeight", &hud_panoramicHeight, 10,0,"Set screen border for 'cinematic view' in percent.", CHUD::OnSubtitlePanoramicHeightCVarChanged);
 	pConsole->Register("hud_subtitles", &hud_subtitles, 0,0,"Subtitle mode. 0==Off, 1=All, 2=CutscenesOnly", CHUD::OnSubtitleCVarChanged);
 	pConsole->Register("hud_subtitlesRenderMode", &hud_subtitlesRenderMode, 0,0,"Subtitle RenderMode. 0==Flash, 1=3DEngine");
 	pConsole->Register("hud_subtitlesFontSize", &hud_subtitlesFontSize, 16, 0, "FontSize for Subtitles.");
@@ -796,7 +794,6 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("hud_crosshair_enable", true);
 	pConsole->UnregisterVariable("hud_attachBoughEquipment", true);
 	pConsole->UnregisterVariable("hud_subtitlesRenderMode", true);
-	pConsole->UnregisterVariable("hud_panoramicHeight", true);
 	pConsole->UnregisterVariable("hud_subtitles", true);
 	pConsole->UnregisterVariable("hud_subtitlesFontSize", true);
 	pConsole->UnregisterVariable("hud_subtitlesHeight", true);

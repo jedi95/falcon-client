@@ -239,7 +239,6 @@ struct SCVars
 	int		g_resetActionmapOnStart;
 	int		g_useProfile;
 	int		g_startFirstTime;
-	float g_cutsceneSkipDelay;
 	int		g_enableAutoSave;
 
 	int   g_enableTracers;
@@ -323,7 +322,6 @@ struct SCVars
 	int		hud_crosshair_enable;
 	int		hud_crosshair;
 	int		hud_chDamageIndicator;
-	int		hud_panoramicHeight;
 	int		hud_showAllObjectives;
 	int		hud_showObjectiveMessages;
 	int		hud_showTeamIcons;

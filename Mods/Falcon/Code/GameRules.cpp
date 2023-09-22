@@ -4035,22 +4035,12 @@ bool CGameRules::NetSerialize( TSerialize ser, EEntityAspects aspect, uint8 prof
 
 bool CGameRules::OnBeginCutScene(IAnimSequence* pSeq, bool bResetFX)
 {
-	if(!pSeq)
-		return false;
-
-	m_explosionScreenFX = false;
-	
-	return true;
+	return false;
 }
 
 bool CGameRules::OnEndCutScene(IAnimSequence* pSeq)
 {
-	if(!pSeq)
-		return false;
-
-	m_explosionScreenFX = true;
-
-	return true;
+	return false;
 }
 
 void CGameRules::CreateRestrictedItemList(const char* restrictedItems)

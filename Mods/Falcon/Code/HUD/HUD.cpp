@@ -99,17 +99,6 @@ void CHUD::OnCrosshairCVarChanged(ICVar *pCVar)
 }
 
 //-----------------------------------------------------------------------------------------------------
-void CHUD::OnSubtitlePanoramicHeightCVarChanged(ICVar *pCVar)
-{
-	CHUD* pHUD = g_pGame->GetHUD();
-	if (pHUD)
-	{
-		if (pHUD->m_cineState == eHCS_Fading)
-			SAFE_HUD_FUNC(FadeCinematicBars(pCVar->GetIVal()));
-	}
-}
-
-//-----------------------------------------------------------------------------------------------------
 
 CHUD::CHUD() 
 {
@@ -141,7 +130,6 @@ CHUD::CHUD()
 	m_deathFxId = InvalidEffectId;
 
 	m_pNanoSuit = NULL;
-	m_eNanoSlotMax = NANOSLOT_ARMOR;
 	m_bFirstFrame = true;
 	m_bAutosnap = false;
 	m_bHideCrosshair = false;
@@ -204,17 +192,8 @@ CHUD::CHUD()
 
 	ResetQuickMenu();
 
-	m_pSCAR			= gEnv->pEntitySystem->GetClassRegistry()->FindClass( "SCAR" );
-	m_pSCARTut	= gEnv->pEntitySystem->GetClassRegistry()->FindClass( "SCARTutorial" );
-	m_pFY71			= gEnv->pEntitySystem->GetClassRegistry()->FindClass( "FY71" );
-	m_pSMG			= gEnv->pEntitySystem->GetClassRegistry()->FindClass( "SMG" );
-	m_pDSG1			= gEnv->pEntitySystem->GetClassRegistry()->FindClass( "DSG1" );
-	m_pShotgun	= gEnv->pEntitySystem->GetClassRegistry()->FindClass( "Shotgun" );
-	m_pLAW			= gEnv->pEntitySystem->GetClassRegistry()->FindClass( "LAW" );
-	m_pGauss		= gEnv->pEntitySystem->GetClassRegistry()->FindClass( "GaussRifle" );
 	m_pClaymore = gEnv->pEntitySystem->GetClassRegistry()->FindClass( "claymoreexplosive" );
 	m_pAVMine		= gEnv->pEntitySystem->GetClassRegistry()->FindClass( "avexplosive" );
-
 
 	m_fDefenseTimer = m_fStrengthTimer = m_fSpeedTimer = 0;
 
@@ -261,13 +240,6 @@ CHUD::CHUD()
 
 	m_bSubtitlesNeedUpdate = false;
 	m_hudSubTitleMode = eHSM_Off;
-	m_cineState = eHCS_None;
-	m_cineHideHUD = false;
-	m_bCutscenePlaying = false;
-	m_bStopCutsceneNextUpdate = false;
-	m_bCutsceneAbortPressed = false;
-	m_bCutsceneCanBeAborted = true;
-	m_fCutsceneSkipTimer = 0.0f;
 	m_quietMode = false;
 
 	m_buyMenuKeyLog.Clear();
@@ -287,18 +259,7 @@ CHUD::CHUD()
 
 CHUD::~CHUD()
 {
-  ShowDeathFX(0);
-
-	if (m_bCutscenePlaying)
-	{
-		// we may not get the callback if moviesystem is reset after CHUD is destroyed
-		// also, I don't want to call gEnv->pMovieSystem->StopAllCutscenes here
-		// because it will call us back and call into our virtual function OnEndCutscene...
-		g_pGameActions->FilterCutscene()->Enable(false);
-		g_pGameActions->FilterCutsceneNoPlayer()->Enable(false);
-		g_pGameActions->FilterInVehicleSuitMenu()->Enable(false);
-	}
-
+	ShowDeathFX(0);
 	//stop looping sounds
 	for(int i = (int)ESound_Hud_First+1; i < (int)ESound_Hud_Last;++i)
 		PlaySound((ESound)i, false);
@@ -515,12 +476,10 @@ bool CHUD::Init()
 	m_animWeaponAccessories.Load("Libs/UI/HUD_WeaponAccessories.gfx", eFD_Center, eFAF_ThisHandler);
 	if(loadEverything)
 	{
-		m_animCinematicBar.Load("Libs/UI/HUD_CineBar.gfx", eFD_Center, eFAF_ThisHandler|eFAF_ManualRender|eFAF_Visible);
 		m_animSubtitles.Load("Libs/UI/HUD_Subtitle.gfx", eFD_Center, eFAF_ThisHandler|eFAF_ManualRender|eFAF_Visible);
 	}
 	else
 	{
-		m_animCinematicBar.Init("Libs/UI/HUD_CineBar.gfx", eFD_Center, eFAF_ThisHandler|eFAF_ManualRender|eFAF_Visible);
 		m_animSubtitles.Init("Libs/UI/HUD_Subtitle.gfx", eFD_Center, eFAF_ThisHandler|eFAF_ManualRender|eFAF_Visible);
 	}
 
@@ -862,7 +821,6 @@ void CHUD::Serialize(TSerialize ser)
 
 	ser.Value("hudShow", m_bShow);
 	ser.Value("hudBroken", m_iBreakHUD);
-	ser.EnumValue("hudCineState", m_cineState, eHCS_None, eHCS_Fading);
 	ser.Value("thirdPerson", m_bThirdPerson);
 	ser.Value("hudBattleStatus",m_fBattleStatus);
 	ser.Value("hudBattleStatusDelay",m_fBattleStatusDelay);
@@ -1097,8 +1055,6 @@ void CHUD::ResetPostSerElements()
 		m_fBigOverlayTextLineTimeout = 0.0f;
 	}
 	DisplayBigOverlayFlashMessage(m_bigOverlayText, duration, m_bigOverlayTextX, m_bigOverlayTextY, m_bigOverlayTextColor);
-	m_cineHideHUD = false;
-	m_cineState = eHCS_None;
 
 	SFlashVarValue args[2] = {"", true};
 	m_animMPMessages.Invoke("addKillLog", args, 2);
@@ -1895,33 +1851,6 @@ bool CHUD::OnInputEventUI( const SInputEvent &rInputEvent )
 
 bool CHUD::OnInputEvent(const SInputEvent &rInputEvent)
 {
-	if ((gEnv->bEditor || g_pGame->GetMenu()->IsActive() == false) && m_bCutscenePlaying && m_fCutsceneSkipTimer <= 0.0f)
-	{
-		//skip cut scene
-		if ((rInputEvent.keyId == eKI_Space && rInputEvent.deviceId == eDI_Keyboard) || (rInputEvent.keyId == eKI_XI_Start && rInputEvent.deviceId == eDI_XI))
-		{
-			if (m_bCutsceneAbortPressed == true && rInputEvent.state == eIS_Released)
-			{
-				m_bStopCutsceneNextUpdate = true;
-				m_bCutsceneAbortPressed = false;
-				return true;
-			}
-			else if (rInputEvent.state == eIS_Pressed)
-			{
-				m_bCutsceneAbortPressed = true;
-				return true;
-			}
-		}
-		if(rInputEvent.state == eIS_Pressed)
-		{
-			if((rInputEvent.keyId == eKI_Escape && rInputEvent.deviceId == eDI_Keyboard) || (rInputEvent.keyId == eKI_XI_Back && rInputEvent.deviceId == eDI_XI))
-			{
-				g_pGame->GetMenu()->ShowInGameMenu(true);
-				return true;
-			}
-		}
-	}
-
 	if(!g_pGame->GetMenu()->IsActive())
 	{
 		if(rInputEvent.state == eIS_Pressed)
@@ -2623,9 +2552,6 @@ bool CHUD::OnAction(const ActionId& action, int activationMode, float value)
 
 void CHUD::ShowObjectives(bool bShow)
 {
-	if (gEnv->pGame->GetIGameFramework()->GetIViewSystem()->IsPlayingCutScene())
-		return;
-
 	m_animObjectivesTab.SetVisible(bShow);
 	if(bShow)
 	{
@@ -2668,9 +2594,6 @@ void CHUD::ShowReviveCycle(bool show)
 bool CHUD::ShowPDA(bool show, bool buyMenu)
 {
 	if(show && !m_bShow) //don't display map if hud is disabled
-		return false;
-
-	if (show && gEnv->pGame->GetIGameFramework()->GetIViewSystem()->IsPlayingCutScene())
 		return false;
 
 	if(buyMenu && !m_pHUDPowerStruggle)
@@ -3045,27 +2968,6 @@ bool CHUD::WeaponHasAttachments()
 
 void CHUD::OnPostUpdate(float frameTime)
 {
-	if (m_bStopCutsceneNextUpdate)
-	{
-		if (gEnv->pMovieSystem)
-		{
-			ISequenceIt* pSeqIt = gEnv->pMovieSystem->GetSequences(true, true);
-			IAnimSequence *pSeq=pSeqIt->first();
-			while (pSeq)
-			{
-				gEnv->pMovieSystem->AbortSequence(pSeq, false);
-				pSeq=pSeqIt->next();
-			}
-			pSeqIt->Release();
-		}
-		m_bStopCutsceneNextUpdate = false;
-		m_fCutsceneSkipTimer = 0.0f;
-	}
-	if (m_bCutscenePlaying && m_fCutsceneSkipTimer > 0.0f)
-	{
-		m_fCutsceneSkipTimer -= frameTime;
-	}
-
 	int width = gEnv->pRenderer->GetWidth();
 	int height = gEnv->pRenderer->GetHeight();
 	if(width != m_width || height != m_height)
@@ -3087,18 +2989,10 @@ void CHUD::OnPostUpdate(float frameTime)
 
 	CPlayer *pPlayer = static_cast<CPlayer *>(gEnv->pGame->GetIGameFramework()->GetClientActor());
 
-	if (g_pGameCVars->cl_hud <= 0 || m_cineHideHUD)
+	if (g_pGameCVars->cl_hud <= 0)
 	{
-		// possibility to show the binoculars during cutscene
-		if(!m_bInMenu && m_cineHideHUD && m_pHUDScopes->IsBinocularsShown() && m_pHUDScopes->m_bShowBinocularsNoHUD && pPlayer && m_pHUDScopes->m_animBinoculars.GetVisible())
-		{
-			m_pHUDScopes->DisplayBinoculars(pPlayer);
-			m_pHUDScopes->m_animBinoculars.GetFlashPlayer()->Advance(frameTime);
-			m_pHUDScopes->m_animBinoculars.GetFlashPlayer()->Render();
-		}
-
 		// Even if HUD is off Fader must be able to function if cl_hud is 0.
-		if (!m_externalHUDObjectList.empty() && (g_pGameCVars->cl_hud == 0 || m_cineHideHUD))
+		if (!m_externalHUDObjectList.empty() && (g_pGameCVars->cl_hud == 0))
 		{
 			m_pUIDraw->PreRender();
 			for(THUDObjectsList::iterator iter=m_externalHUDObjectList.begin(); iter!=m_externalHUDObjectList.end(); ++iter)
@@ -3108,10 +3002,6 @@ void CHUD::OnPostUpdate(float frameTime)
 			m_pHUDRadar->Update(frameTime);
 			m_pUIDraw->PostRender();
 		}
-
-		UpdateCinematicAnim(frameTime);
-		if (g_pGame->GetIGameFramework()->IsGamePaused() == false)
-			UpdateSubtitlesAnim(frameTime);
 
 		if (m_delayedMessage.empty() == false)
 		{
@@ -3348,7 +3238,7 @@ void CHUD::OnPostUpdate(float frameTime)
 		}
 	}
 
-	if(m_bShow && (m_cineState == eHCS_None || gEnv->bMultiplayer) && pPlayer && !m_bInMenu)
+	if(m_bShow && pPlayer && !m_bInMenu)
 	{
 		CWeapon *pCurrentWeapon = GetCurrentWeapon();
 		if(pCurrentWeapon && pCurrentWeapon->IsModifying())
@@ -3461,7 +3351,6 @@ void CHUD::OnPostUpdate(float frameTime)
 			if(!m_animSpectate.IsLoaded())
 			{
 				m_animSpectate.Load("Libs/UI/HUD_Spectate.gfx", eFD_Center, eFAF_Visible|eFAF_ManualRender);
-				FadeCinematicBars(3);
 
 				// SNH: moved text setting to further down (with player name display)
 				//	as text changes based on current spectator mode.
@@ -3590,7 +3479,6 @@ void CHUD::OnPostUpdate(float frameTime)
 			if(m_animSpectate.IsLoaded())
 			{
 				m_animSpectate.Unload();
-				FadeCinematicBars(0);
 			}
 
 			if(GetModalHUD() == &m_animTeamSelection)
@@ -3715,12 +3603,6 @@ void CHUD::OnPostUpdate(float frameTime)
 			m_pHUDScopes->Update(frameTime);
 		}
 	}
-
-	// update cinematic bars
-	UpdateCinematicAnim(frameTime);
-
-	// update subtitles 
-	UpdateSubtitlesAnim(frameTime);
 
 	if(m_bFirstFrame)
 	{

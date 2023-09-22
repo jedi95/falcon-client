@@ -288,7 +288,6 @@ public:
 	// Console Variable Changed callbacks (registered in GameCVars)
 	static void OnCrosshairCVarChanged(ICVar *pCVar);
 	static void OnSubtitleCVarChanged (ICVar* pCVar);
-	static void OnSubtitlePanoramicHeightCVarChanged (ICVar* pCVar);
 
 	enum HUDSubtitleMode
 	{
@@ -428,8 +427,6 @@ public:
 	void RegisterHUDObject(CHUDObject* pObject);
 	void DeregisterHUDObject(CHUDObject* pObject);
 
-	void FadeCinematicBars(int targetVal);
-
 	//PowerStruggle
 	void OnPlayerVehicleBuilt(EntityId playerId, EntityId vehicleId);
 	void BuyViaFlash(int item);
@@ -459,7 +456,6 @@ public:
 	int GetBreakHud(){return m_iBreakHUD; };
 	void RebootHUD();
 
-	//bool ShowPDA(bool bShow, int iTab=-1);
 	ILINE bool ShowBuyMenu(bool show) { return ShowPDA(show, true); }
 	bool ShowPDA(bool show, bool buyMenu = false);
 	void ShowObjectives(bool bShow);
@@ -533,7 +529,6 @@ public:
 	void RecordExplosiveDestroyed(EntityId eid);
 	void HideInventoryOverview();
 
-	ILINE bool IsInCinematic() { return m_cineHideHUD; }
 	ILINE bool IsInitializing() { return m_animInitialize.IsLoaded(); }
 	ILINE bool InSpectatorMode() { return m_animSpectate.GetVisible(); }
 	void RefreshSpectatorHUDText() { m_prevSpectatorMode = -1; } // mark it as changed, so values are fetched again from the target actor
@@ -570,10 +565,6 @@ private:
 	void UpdateVoiceChat();
 	//~HUDInterfaceEffects
 
-	int FillUpMOArray(std::vector<double> *doubleArray, double a, double b, double c, double d, double e, double f, double g, double h);
-
-	void UpdateCinematicAnim(float frameTime);
-	void UpdateSubtitlesAnim(float frameTime);
 	void UpdateSubtitlesManualRender(float frameTime);
 	void InternalShowSubtitle(const char* subtitleLabel, ISound* pSound, bool bShow);
 	// returns pointer to static buffer! so NOT re-entrant!
@@ -632,7 +623,6 @@ private:
 	//NanoSuit-pointer for suit interaction
 	CNanoSuit    *m_pNanoSuit;
 	//NanoSuit
-	ENanoSlot m_eNanoSlotMax;
 	float		m_fHealth;
 	float		m_fSuitEnergy;
 	
@@ -730,7 +720,6 @@ private:
 	CGameFlashAnimation m_animVoiceChat;
 	CGameFlashAnimation m_animKillAreaWarning;
 	CGameFlashAnimation m_animDeathMessage;
-	CGameFlashAnimation m_animCinematicBar;
 	CGameFlashAnimation m_animObjectivesTab;
 	CGameFlashAnimation m_animBattleLog;
 	CGameFlashAnimation m_animSubtitles;
@@ -792,19 +781,13 @@ private:
 	int		m_lastPlayerPPSet;
 
 	//entity classes for faster comparison
-	IEntityClass *m_pSCAR, *m_pSCARTut, *m_pFY71, *m_pSMG, *m_pDSG1, *m_pShotgun, *m_pLAW, *m_pGauss, *m_pClaymore, *m_pAVMine;
+	IEntityClass *m_pClaymore, *m_pAVMine;
 
 	THUDObjectiveList m_hudObjectivesList;
 
 	//this is a list of sound ids to be able to stop them
 	tSoundID m_soundIDs[ESound_Hud_Last];
 
-	//cinematic bar
-	enum HUDCineState
-	{
-		eHCS_None = 0,
-		eHCS_Fading
-	};
 
 	struct SSubtitleEntry
 	{
@@ -850,13 +833,6 @@ private:
 	TSubtitleEntries m_subtitleEntries;
 	HUDSubtitleMode m_hudSubTitleMode; // not serialized, as set by cvar
 	bool m_bSubtitlesNeedUpdate; // need update (mainly for flash re-pumping)
-	HUDCineState m_cineState;
-	bool m_cineHideHUD;
-	bool m_bCutscenePlaying;
-	bool m_bStopCutsceneNextUpdate;
-	bool m_bCutsceneAbortPressed;
-	bool m_bCutsceneCanBeAborted;
-	float m_fCutsceneSkipTimer;
 	float m_fBackPressedTime;
 
 	SBuyMenuKeyLog m_buyMenuKeyLog;
