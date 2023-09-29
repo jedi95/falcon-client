@@ -1070,6 +1070,9 @@ void CIronSight::ApplyZoomMod(IFireMode* pFM)
 //--------------------------------------------------------------------------
 bool CIronSight::IsToggle()
 {
+	if (g_pGameCVars->fn_zoomToggle == 0) {
+		return false;
+	}
 	return !UseAlternativeIronSight();
 }
 

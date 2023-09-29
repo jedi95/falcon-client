@@ -41,6 +41,7 @@ struct SCVars
 	int fn_fixExplosivePlant;
 	int fn_fixHUD;
 	float fn_fov;
+	int fn_zoomToggle;
 	int sys_MaxFps;
 
 	// State only

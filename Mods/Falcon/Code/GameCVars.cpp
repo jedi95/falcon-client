@@ -153,6 +153,7 @@ void SCVars::InitCVars(IConsole *pConsole)
 	pConsole->Register("fn_fixExplosivePlant", &fn_fixExplosivePlant, 1, VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE, "Fix planting mines and claymores with high FPS");
 	pConsole->Register("fn_fixHUD", &fn_fixHUD, 0, VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE, "Removes unnessesary items from the HUD.");
 	pConsole->Register("fn_fov", &fn_fov, 60.0f, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "Client-controlled field of view");
+	pConsole->Register("fn_zoomToggle", &fn_zoomToggle, 1, VF_RESTRICTEDMODE | VF_NOT_NET_SYNCED, "Makes the zoom key work as a toggle");
 	pConsole->Register("sys_MaxFps", &sys_MaxFps, 0, VF_NOT_NET_SYNCED | VF_RESTRICTEDMODE, "Sets the maximum FPS limit");
 
 	//Callback for updates
@@ -600,6 +601,7 @@ void SCVars::ReleaseCVars()
 	pConsole->UnregisterVariable("fn_fixExplosivePlant", true);
 	pConsole->UnregisterVariable("fn_fixHUD", true);
 	pConsole->UnregisterVariable("fn_fov", true);
+	pConsole->UnregisterVariable("fn_zoomToggle", true);
 	pConsole->UnregisterVariable("sys_MaxFps", true);
 
 	// State only
