@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <map>
 #include <vector>
+#include <functional>
 
 #define USE_HASH_MAP
 
@@ -23,10 +24,6 @@
 #include <hash_map>
 #undef std__hash_map
 #define std__hash_map stdext::hash_map
-#elif defined(LINUX)
-#include "platform.h"
-#include <ext/hash_map>
-#define std__hash_map __gnu_cxx::hash_map
 #else
 #include <hash_map>
 #endif
@@ -34,28 +31,6 @@
 #ifndef std__hash_map
 #define std__hash_map std::hash_map
 #endif
-
-/*
-{
-	typename Map::const_iterator it = mapKeyToValue.find (key);
-	if (it == mapKeyToValue.end())
-		return valueDefault;
-	else
-		return it->second;
-}
-
-// searches the given entry in the map by key, and if there is none, returns the default value
-// The values are taken/returned in REFERENCEs rather than values
-template <typename Map>
-inline typename Map::mapped_type& find_in_map_ref(Map& mapKeyToValue, typename Map::key_type key, typename Map::mapped_type& valueDefault)
-{
-	typename Map::iterator it = mapKeyToValue.find (key);
-	if (it == mapKeyToValue.end())
-		return valueDefault;
-	else
-		return it->second;
-}
-*/
 
 // auto-cleaner: upon destruction, calls the clear() method
 template <class T>

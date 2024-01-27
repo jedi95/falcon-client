@@ -132,9 +132,6 @@ protected:
 	std::vector<SBattleEventParameter> m_bulletImpactPower;		// and for bullet impacts
 
 	IEntityClass* m_pBattleEventClass;
-
-	// for debugging: this is output to server's log file on exit.
-	int m_maxBattleEvents;
 };
 
 

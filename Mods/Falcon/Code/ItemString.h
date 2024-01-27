@@ -243,10 +243,6 @@ namespace SharedString
 		{
 			pBuf = GetNameTable()->GetEntry(s)->GetStr();
 		}
-		else if (s == 0)
-		{
-			; // debugging here
-		}
 		if (m_str != pBuf)
 		{
 			_release(m_str);

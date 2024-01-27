@@ -165,8 +165,6 @@ CBattleDust::CBattleDust()
 	m_maxParticleCount = 0;
 	m_distanceBetweenEvents = 0;
 
-	m_maxBattleEvents = 0;
-
 	// load xml file and process it
 
 	if(!gEnv->bServer)
@@ -464,7 +462,6 @@ void CBattleDust::Update()
 	float ypos = 60.0f;
 
 	// go through the list of areas, remove any which are too small
-	m_maxBattleEvents = MAX(m_maxBattleEvents, m_eventIdList.size());
 	std::list<EntityId>::iterator next;
 	std::list<EntityId>::iterator it = m_eventIdList.begin();
 	for(; it != m_eventIdList.end(); it = next)
