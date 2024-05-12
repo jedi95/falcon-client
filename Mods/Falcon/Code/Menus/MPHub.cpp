@@ -1391,7 +1391,6 @@ void CMPHub::OnDownloadFinished(int result, const char* fileName)
 
 		// special case - do nothing
 	case eFDE_RequestCancelled:
-		//ShowErrorText(L"Download cancelled"); // not necessary
 		break;
 
 		// retryable errors

@@ -63,8 +63,6 @@ private:
 	bool GetUserDataFolder(string& path);
 	bool CreateDestinationFolder(string& folder);
 
-	uint64 GetMD5FromString(const unsigned char* md5str);
-
 	EDownloadState m_downloadState;					// status of the current download task
 
 	std::list<SFileDownloadParameters> m_downloadList;		// download queue

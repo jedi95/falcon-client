@@ -157,7 +157,6 @@ protected:
 	void FirstPersonWeaponPostProcess(CPlayer &rPlayer,SViewParams &viewParams);
 	protected:
 	void ViewShakePostProcess(CPlayer &rPlayer,SViewParams &viewParams);
-	void HudPostProcess(CPlayer &rPlayer,SViewParams &viewParams);
 	void HandsPostProcess(CPlayer &rPlayer,SViewParams &viewParams);
 
 	void ViewProcess(SViewParams &viewParams);

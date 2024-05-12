@@ -198,28 +198,6 @@ void CDownloadTask::DownloadNextFile()
 	}
 }
 
-uint64 CDownloadTask::GetMD5FromString(const unsigned char* md5str)
-{
-	if(!md5str)
-		return 0;
-
-	uint64 md5Out = 0;
-
-	for(int i=0; i<16; ++i)
-	{
-		char thisbyte[3];
-		thisbyte[0] = md5str[2 * i];
-		thisbyte[1] = md5str[2 * i + 1];
-		thisbyte[2] = 0;
-
-		int result = 0;
-		sscanf(thisbyte, "%x", &result);
-		md5Out += (uint64(result) << (56 - 8*i));
-	}
-
-	return md5Out;
-}
-
 int CDownloadTask::ValidateDownload()
 {
 	int state = eDS_Done;
@@ -249,23 +227,6 @@ int CDownloadTask::ValidateDownload()
 		expectedSize = -1;
 	if(state == eDS_Done && !FileExists(fileName, expectedSize))
 		state = eDS_Error_FileNotFound;
-
-	// get the checksum from the downloader
-	const unsigned char* md5Checksum = NULL;
-	if(state == eDS_Done && pserv)
-	{
-		IFileDownloader* pfd = pserv->GetFileDownloader();
-		if(pfd && pfd->IsAvailable())
-		{
-			md5Checksum = pfd->GetFileMD5();
-		}
-	}
-	// NB if file already existed locally, it wasn't downloaded. Probably need to md5 at load-time.
-	if(state == eDS_Done && md5Checksum != 0 && m_currentDownload.md5 != 0)
-	{
-		if(m_currentDownload.md5 != GetMD5FromString(md5Checksum))
-			state = eDS_Error_Checksum;
-	}
 
 	if(state != eDS_Done)
 	{

@@ -28,8 +28,6 @@ History:
 #include "AmmoParams.h"
 
 
-#define MIN_DAMAGE								5
-
 class CProjectile :
 	public CGameObjectExtensionHelper<CProjectile, IGameObjectExtension>,
 	public IHitListener,	public IGameObjectProfileManager
